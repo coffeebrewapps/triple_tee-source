@@ -1,14 +1,19 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   padding: 2rem;
 
   font-weight: normal;
 }
 
-a,
+a {
+  text-decoration: none;
+  color: var(--color-text);
+  transition: 0.4s;
+}
+
 .green {
   text-decoration: none;
   color: hsla(160, 100%, 37%, 1);
@@ -17,19 +22,24 @@ a,
 
 @media (hover: hover) {
   a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
+    background-color: var(--color-border-hover);
+    color: var(--color-text);
   }
 }
 
 @media (min-width: 1024px) {
   body {
     display: flex;
-    place-items: center;
   }
 
   #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+  }
+
+  .content-container {
+    width: 85%;
+    padding: 2rem;
   }
 }
