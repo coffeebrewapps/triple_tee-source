@@ -3,10 +3,8 @@ import Users from '../components/Users.vue'
 </script>
 
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
-    <Users />
-  </div>
+  <h1>This is an about page</h1>
+  <Users />
 </template>
 
 <style>
