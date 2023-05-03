@@ -20,6 +20,46 @@ a {
   transition: 0.4s;
 }
 
+.tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  width: 150px;
+  height: 20px;
+  text-align: center;
+  margin: 4px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  background-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.tag.sm {
+  width: 50px;
+}
+
+.tag.md {
+  width: 150px;
+}
+
+.tag.lg {
+  width: 250px;
+}
+
+.hyperlink {
+  margin: 2px 0 8px 0;
+}
+
+.hyperlink a {
+  text-decoration: underline;
+}
+
+.hyperlink a:hover {
+  background-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
 @media (hover: hover) {
   a:hover {
     background-color: var(--color-border-hover);

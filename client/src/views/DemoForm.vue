@@ -41,6 +41,36 @@ function hello(text) {
   <h1>Demo Form Elements</h1>
   <div class="form-container">
     <div class="form">
+      <div class="tags">
+        <div class="tag">
+          <div class="category">tag</div>
+          <div class="divider">:</div>
+          <div class="name">default</div>
+        </div>
+
+        <div class="tag sm">
+          <div class="category">tag</div>
+          <div class="divider">:</div>
+          <div class="name">small</div>
+        </div>
+
+        <div class="tag md">
+          <div class="category">tag</div>
+          <div class="divider">:</div>
+          <div class="name">medium</div>
+        </div>
+
+        <div class="tag lg">
+          <div class="category">tag</div>
+          <div class="divider">:</div>
+          <div class="name">large</div>
+        </div>
+      </div>
+
+      <div class="hyperlink">
+        <a href="#">This is a Hyperlink</a>
+      </div>
+
       <TInput v-model="model.username" type="text" label="Username"/>
       <TInput v-model="model.name" type="text" size="md" label="Name"/>
       <TInput v-model="model.description" type="text" size="lg" label="Description"/>
@@ -101,5 +131,9 @@ function hello(text) {
   font-size: 0.8rem;
   top: -0.8rem;
   align-self: center;
+}
+
+.tags {
+  display: flex;
 }
 </style>
