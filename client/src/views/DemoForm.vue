@@ -88,11 +88,64 @@ const tableData = ref({
   ]
 })
 
+const serverData = ref({
+  headers: [
+    { key: 'startTime', label: 'Start Time' },
+    { key: 'endTime', label: 'End Time' },
+    { key: 'description', label: 'Description' }
+  ],
+  data: [
+    { startTime: '2023-01-23 12:42:14', endTime: '2023-01-23 18:34:29', description: 'Requirements' },
+    { startTime: '2023-01-24 08:23:57', endTime: '2023-01-24 16:27:18', description: 'Implementation' },
+    { startTime: '2023-01-25 10:32:19', endTime: '2023-01-25 12:23:53', description: 'Documentation' },
+    { startTime: '2023-01-25 13:32:58', endTime: '2023-01-25 19:28:43', description: 'Implementation' },
+    { startTime: '2023-01-26 17:28:47', endTime: '2023-01-26 22:13:02', description: 'Testing' },
+    { startTime: '2023-01-23 12:42:14', endTime: '2023-01-23 18:34:29', description: 'Requirements' },
+    { startTime: '2023-01-24 08:23:57', endTime: '2023-01-24 16:27:18', description: 'Implementation' },
+    { startTime: '2023-01-25 10:32:19', endTime: '2023-01-25 12:23:53', description: 'Documentation' },
+    { startTime: '2023-01-25 13:32:58', endTime: '2023-01-25 19:28:43', description: 'Implementation' },
+    { startTime: '2023-01-26 17:28:47', endTime: '2023-01-26 22:13:02', description: 'Testing' },
+    { startTime: '2023-01-23 12:42:14', endTime: '2023-01-23 18:34:29', description: 'Requirements' },
+    { startTime: '2023-01-24 08:23:57', endTime: '2023-01-24 16:27:18', description: 'Implementation' },
+    { startTime: '2023-01-25 10:32:19', endTime: '2023-01-25 12:23:53', description: 'Documentation' },
+    { startTime: '2023-01-25 13:32:58', endTime: '2023-01-25 19:28:43', description: 'Implementation' },
+    { startTime: '2023-01-26 17:28:47', endTime: '2023-01-26 22:13:02', description: 'Testing' },
+    { startTime: '2023-01-23 12:42:14', endTime: '2023-01-23 18:34:29', description: 'Requirements' },
+    { startTime: '2023-01-24 08:23:57', endTime: '2023-01-24 16:27:18', description: 'Implementation' },
+    { startTime: '2023-01-25 10:32:19', endTime: '2023-01-25 12:23:53', description: 'Documentation' },
+    { startTime: '2023-01-25 13:32:58', endTime: '2023-01-25 19:28:43', description: 'Implementation' },
+    { startTime: '2023-01-26 17:28:47', endTime: '2023-01-26 22:13:02', description: 'Testing' },
+    { startTime: '2023-01-23 12:42:14', endTime: '2023-01-23 18:34:29', description: 'Requirements' },
+    { startTime: '2023-01-24 08:23:57', endTime: '2023-01-24 16:27:18', description: 'Implementation' },
+    { startTime: '2023-01-25 10:32:19', endTime: '2023-01-25 12:23:53', description: 'Documentation' },
+    { startTime: '2023-01-25 13:32:58', endTime: '2023-01-25 19:28:43', description: 'Implementation' },
+    { startTime: '2023-01-26 17:28:47', endTime: '2023-01-26 22:13:02', description: 'Testing' },
+    { startTime: '2023-01-27 09:31:48', endTime: null, description: 'Implemention' },
+  ]
+})
+
+const FakeAPI = {
+  async fetch (offset, limit) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        const items = serverData.value.data.slice(offset, limit + offset)
+        resolve({ data: items, total: serverData.value.length })
+      }, 500)
+    })
+  }
+}
+
 const offset = ref(0)
 const limit = ref(3)
-const computedTableData = computed(() => {
-  return tableData.value.data.slice(offset.value, limit.value + offset.value)
-})
+const paginatedData = ref([])
+
+function fetchServerData() {
+  FakeAPI
+    .fetch(offset.value, limit.value)
+    .then(({ data, total }) => {
+      paginatedData.value = data
+    })
+}
 
 function hello(text) {
   alert(text)
@@ -100,6 +153,11 @@ function hello(text) {
 
 function offsetChange(val) {
   offset.value = val
+}
+
+function loadDataOnOffsetChange(val) {
+  offsetChange(val)
+  fetchServerData()
 }
 </script>
 
@@ -166,7 +224,7 @@ function offsetChange(val) {
       <TTable :headers="tableData.headers" :data="tableData.data" />
       <TTable name="Work Logs" :headers="tableData.headers" :data="tableData.data" :actions="tableData.actions" :table-actions="tableData.tableActions" @offset-change="offsetChange"/>
       <TTable name="Work Logs (out of bound)" :headers="tableData.headers" :data="tableData.data" :pagination="{ limit: 3, client: true }"/>
-      <TTable name="Work Logs (server pagination)" :headers="tableData.headers" :data="computedTableData" :pagination="{ limit: 3, client: false }" :total-data="tableData.data.length" @offset-change="offsetChange" />
+      <TTable name="Work Logs (server pagination)" :headers="serverData.headers" :data="paginatedData" :pagination="{ limit: 3, client: false }" :total-data="serverData.data.length" @offset-change="loadDataOnOffsetChange" />
 
       <TTable
         name="Work Logs (custom templates)"
