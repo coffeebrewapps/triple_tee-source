@@ -1,5 +1,11 @@
 module.exports = {
-  packagerConfig: {},
+  packagerConfig: {
+    ignore: [
+      'client',
+      '.tool-versions',
+      'yarn.lock'
+    ]
+  },
   rebuildConfig: {},
   makers: [
     {
