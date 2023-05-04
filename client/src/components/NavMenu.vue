@@ -26,6 +26,9 @@ const routes = reactive(router.getRoutes())
   flex-direction: column;
   border: 1px solid var(--color-border);
   width: 15%;
+  position: fixed;
+  height: 100vh;
+  overflow-y: scroll;
 }
 
 .nav-item {
