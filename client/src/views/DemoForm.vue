@@ -4,6 +4,7 @@ import { ref } from 'vue'
 import TInput from 'coffeebrew_vue_components/src/components/form/TInput.vue'
 import TButton from 'coffeebrew_vue_components/src/components/form/TButton.vue'
 import TSelect from 'coffeebrew_vue_components/src/components/form/TSelect.vue'
+import TCheckbox from 'coffeebrew_vue_components/src/components/form/TCheckbox.vue'
 
 const model = {
   username: ref(''),
@@ -12,7 +13,9 @@ const model = {
   password: ref(''),
   country1: ref(''),
   country2: ref(''),
-  country3: ref('')
+  country3: ref(''),
+  subscribe: ref(false),
+  agree: ref(false)
 }
 
 const countryOptions = ref([
@@ -44,6 +47,9 @@ function hello(text) {
       <TSelect v-model="model.country1.value" label="Country" name="country" id="country-1" :options="countryOptions"/>
       <TSelect v-model="model.country2.value" size="sm" label="Country" name="country" id="country-2" :options="countryOptions"/>
       <TSelect v-model="model.country3.value" size="lg" label="Country" name="country" id="country-3" :options="countryOptions" error-message="Min 8 characters"/>
+
+      <TCheckbox v-model="model.subscribe.value" label="Subscribe newsletter"/>
+      <TCheckbox v-model="model.agree.value" label="Agree T&C" error-message="Required!"/>
     </div>
 
     <div class="result">
