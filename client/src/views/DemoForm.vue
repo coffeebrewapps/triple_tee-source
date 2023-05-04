@@ -1,11 +1,12 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import TInput from 'coffeebrew_vue_components/src/components/form/TInput.vue'
 import TButton from 'coffeebrew_vue_components/src/components/form/TButton.vue'
 import TSelect from 'coffeebrew_vue_components/src/components/form/TSelect.vue'
 import TCheckbox from 'coffeebrew_vue_components/src/components/form/TCheckbox.vue'
 import TDatePicker from 'coffeebrew_vue_components/src/components/form/TDatePicker.vue'
+import TTable from 'coffeebrew_vue_components/src/components/table/TTable.vue'
 
 const model = ref({
   username: '',
@@ -32,8 +33,73 @@ const countryOptions = ref([
   { value: 'vn', label: 'Vietnam' }
 ])
 
+const tableData = ref({
+  headers: [
+    { key: 'startTime', label: 'Start Time' },
+    { key: 'endTime', label: 'End Time' },
+    { key: 'description', label: 'Description' }
+  ],
+  data: [
+    { startTime: '2023-01-23 12:42:14', endTime: '2023-01-23 18:34:29', description: 'Requirements' },
+    { startTime: '2023-01-24 08:23:57', endTime: '2023-01-24 16:27:18', description: 'Implementation' },
+    { startTime: '2023-01-25 10:32:19', endTime: '2023-01-25 12:23:53', description: 'Documentation' },
+    { startTime: '2023-01-25 13:32:58', endTime: '2023-01-25 19:28:43', description: 'Implementation' },
+    { startTime: '2023-01-26 17:28:47', endTime: '2023-01-26 22:13:02', description: 'Testing' },
+    { startTime: '2023-01-27 09:31:48', endTime: null, description: 'Implemention' },
+  ],
+  tableActions: [
+    {
+      name: 'Add',
+      icon: 'fa-solid fa-circle-plus fa-xl',
+      click: function(data) {
+        alert(`Adding data to count: ${data.length}`)
+      }
+    },
+    {
+      name: 'Export',
+      icon: 'fa-solid fa-file-arrow-down fa-xl',
+      click: function(data) {
+        alert(`Export data count: ${data.length}`)
+      }
+    }
+  ],
+  actions: [
+    {
+      name: 'View',
+      icon: 'fa-solid fa-magnifying-glass',
+      click: function(row, index) {
+        alert(`Row[${index}]: ${JSON.stringify(row)}`)
+      }
+    },
+    {
+      name: 'Edit',
+      icon: 'fa-solid fa-pen-to-square',
+      click: function(row, index) {
+        alert(`Row[${index}]: editing ${JSON.stringify(row)}`)
+      }
+    },
+    {
+      name: 'Delete',
+      icon: 'fa-solid fa-trash-can',
+      click: function(row, index) {
+        alert(`Row[${index}]: deleting ${JSON.stringify(row)}`)
+      }
+    }
+  ]
+})
+
+const offset = ref(0)
+const limit = ref(3)
+const computedTableData = computed(() => {
+  return tableData.value.data.slice(offset.value, limit.value + offset.value)
+})
+
 function hello(text) {
   alert(text)
+}
+
+function offsetChange(val) {
+  offset.value = val
 }
 </script>
 
@@ -96,6 +162,11 @@ function hello(text) {
         <div class="to">to</div>
         <TDatePicker v-model="model.dateRange.end" label="End Date" error-message="Cannot be earlier than start date!"/>
       </div>
+
+      <TTable :headers="tableData.headers" :data="tableData.data" />
+      <TTable name="Work Logs" :headers="tableData.headers" :data="tableData.data" :actions="tableData.actions" :table-actions="tableData.tableActions" @offset-change="offsetChange"/>
+      <TTable name="Work Logs (out of bound)" :headers="tableData.headers" :data="tableData.data" :pagination="{ limit: 3, client: true }"/>
+      <TTable name="Work Logs (server pagination)" :headers="tableData.headers" :data="computedTableData" :pagination="{ limit: 3, client: false }" :total-data="tableData.data.length" @offset-change="offsetChange" />
     </div>
 
     <div class="result">
