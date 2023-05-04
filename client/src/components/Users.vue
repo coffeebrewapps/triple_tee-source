@@ -5,9 +5,18 @@ import axios from 'axios'
 const el = ref()
 const users = reactive({})
 
+const env = import.meta.env
+const url = ref('url')
+
+if (env.MODE === 'development') {
+  url.value = `http://localhost:${env.VITE_SERVER_PORT}/api/users`
+} else {
+  url.value = `/api/users`
+}
+
 onMounted(async () => {
   await axios
-    .get('/api/users')
+    .get(url.value)
     .then((res) => {
       users.value = res.data.data
     })
