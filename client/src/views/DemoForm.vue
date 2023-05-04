@@ -8,6 +8,7 @@ import TCheckbox from 'coffeebrew_vue_components/src/components/form/TCheckbox.v
 import TDatePicker from 'coffeebrew_vue_components/src/components/form/TDatePicker.vue'
 import TTable from 'coffeebrew_vue_components/src/components/table/TTable.vue'
 import TProgressBar from 'coffeebrew_vue_components/src/components/TProgressBar.vue'
+import TConfirmDialog from 'coffeebrew_vue_components/src/components/dialog/TConfirmDialog.vue'
 
 const model = ref({
   username: '',
@@ -140,6 +141,7 @@ const offset = ref(0)
 const limit = ref(3)
 const paginatedData = ref([])
 const serverDataLoading = ref(true)
+const confirmDialog = ref(false)
 
 function fetchServerData() {
   serverDataLoading.value = true
@@ -162,6 +164,18 @@ function offsetChange(val) {
 function loadDataOnOffsetChange(val) {
   offsetChange(val)
   fetchServerData()
+}
+
+function openConfirmDialog() {
+  confirmDialog.value = true
+}
+
+function dialogOnConfirm(text) {
+  alert(`confirm ${text}`)
+}
+
+function dialogOnCancel(text) {
+  alert(`cancel ${text}`)
 }
 
 onMounted(() => {
@@ -207,7 +221,18 @@ onMounted(() => {
       </div>
 
       <div class="hyperlink">
-        <a href="#">This is a Hyperlink</a>
+        <a href="#" @click="openConfirmDialog()">This is a Hyperlink to open Confirm Dialog</a>
+
+        <TConfirmDialog
+          title="Delete Chart"
+          primary-text="Are you sure you want to delete this chart?"
+          secondary-text="Monthly working hours by company (2023)"
+          v-model="confirmDialog"
+          :height="300"
+          :width="500"
+          @confirm="dialogOnConfirm('delete chart')"
+          @cancel="dialogOnCancel('delete chart')"
+        />
       </div>
 
       <TInput v-model="model.username" type="text" label="Username"/>
