@@ -1,0 +1,2 @@
+#!/bin/bash
+yarn client-dev & yarn server-dev
