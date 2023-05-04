@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 
 import TInput from 'coffeebrew_vue_components/src/components/form/TInput.vue'
 import TButton from 'coffeebrew_vue_components/src/components/form/TButton.vue'
@@ -139,12 +139,15 @@ const FakeAPI = {
 const offset = ref(0)
 const limit = ref(3)
 const paginatedData = ref([])
+const serverDataLoading = ref(true)
 
 function fetchServerData() {
+  serverDataLoading.value = true
   FakeAPI
     .fetch(offset.value, limit.value)
     .then(({ data, total }) => {
       paginatedData.value = data
+      serverDataLoading.value = false
     })
 }
 
@@ -160,6 +163,10 @@ function loadDataOnOffsetChange(val) {
   offsetChange(val)
   fetchServerData()
 }
+
+onMounted(() => {
+  loadDataOnOffsetChange(0)
+})
 </script>
 
 <template>
@@ -232,7 +239,23 @@ function loadDataOnOffsetChange(val) {
       <TTable :headers="tableData.headers" :data="tableData.data" />
       <TTable name="Work Logs" :headers="tableData.headers" :data="tableData.data" :actions="tableData.actions" :table-actions="tableData.tableActions" @offset-change="offsetChange"/>
       <TTable name="Work Logs (out of bound)" :headers="tableData.headers" :data="tableData.data" :pagination="{ limit: 3, client: true }"/>
-      <TTable name="Work Logs (server pagination)" :headers="serverData.headers" :data="paginatedData" :pagination="{ limit: 3, client: false }" :total-data="serverData.data.length" @offset-change="loadDataOnOffsetChange" />
+      <TTable name="Work Logs (server pagination)" :loading="serverDataLoading" :headers="serverData.headers" :data="paginatedData" :pagination="{ limit: 3, client: false }" :total-data="serverData.data.length" @offset-change="loadDataOnOffsetChange" />
+
+      <TTable
+        name="Work Logs (server pagination custom loading bar)"
+        :loading="serverDataLoading"
+        :headers="serverData.headers"
+        :data="paginatedData"
+        :pagination="{ limit: 3, client: false }"
+        :total-data="serverData.data.length"
+        @offset-change="loadDataOnOffsetChange"
+      >
+        <template #progress-bar="{ headers, actions, span }">
+          <th :colspan="span">
+            <TProgressBar :speed="100" :bidrection="false" />
+          </th>
+        </template>
+      </TTable>
 
       <TTable
         name="Work Logs (custom templates)"
