@@ -1,6 +1,7 @@
 module.exports = {
   packagerConfig: {
     ignore: [
+      '^/bin$',
       '^/client$',
       '^/node_modules$',
       '^/public$',
