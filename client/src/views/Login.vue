@@ -1,8 +1,10 @@
 <script setup>
 import { ref } from 'vue'
 
-import TInput from 'coffeebrew_vue_components/src/components/form/TInput.vue'
-import TButton from 'coffeebrew_vue_components/src/components/form/TButton.vue'
+import {
+  TInput,
+  TButton
+} from 'coffeebrew-vue-components'
 
 const username = ref('')
 const password = ref('')

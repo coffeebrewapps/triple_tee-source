@@ -1,15 +1,17 @@
 <script setup>
 import { onMounted, computed, ref } from 'vue'
 
-import TInput from 'coffeebrew_vue_components/src/components/form/TInput.vue'
-import TButton from 'coffeebrew_vue_components/src/components/form/TButton.vue'
-import TSelect from 'coffeebrew_vue_components/src/components/form/TSelect.vue'
-import TCheckbox from 'coffeebrew_vue_components/src/components/form/TCheckbox.vue'
-import TDatePicker from 'coffeebrew_vue_components/src/components/form/TDatePicker.vue'
-import TTable from 'coffeebrew_vue_components/src/components/table/TTable.vue'
-import TProgressBar from 'coffeebrew_vue_components/src/components/TProgressBar.vue'
-import TConfirmDialog from 'coffeebrew_vue_components/src/components/dialog/TConfirmDialog.vue'
-import TDialog from 'coffeebrew_vue_components/src/components/dialog/TDialog.vue'
+import {
+  TInput,
+  TButton,
+  TSelect,
+  TCheckbox,
+  TDatePicker,
+  TTable,
+  TProgressBar,
+  TConfirmDialog,
+  TDialog
+} from 'coffeebrew-vue-components'
 
 const model = ref({
   username: '',
