@@ -167,6 +167,137 @@ function offsetChange(val) {
       <TTable name="Work Logs" :headers="tableData.headers" :data="tableData.data" :actions="tableData.actions" :table-actions="tableData.tableActions" @offset-change="offsetChange"/>
       <TTable name="Work Logs (out of bound)" :headers="tableData.headers" :data="tableData.data" :pagination="{ limit: 3, client: true }"/>
       <TTable name="Work Logs (server pagination)" :headers="tableData.headers" :data="computedTableData" :pagination="{ limit: 3, client: false }" :total-data="tableData.data.length" @offset-change="offsetChange" />
+
+      <TTable
+        name="Work Logs (custom templates)"
+        :headers="tableData.headers"
+        :data="tableData.data"
+        :actions="tableData.actions"
+        :table-actions="tableData.tableActions"
+        @offset-change="offsetChange"
+      >
+        <template #table-name="{ name }">
+          Table: {{ name }}
+        </template>
+
+        <template #table-action="{ action, data }">
+          {{ action.name }}
+        </template>
+
+        <template #header-row="{ headers, actions }">
+          <th
+            style="width: 30px;"
+            class="col"
+          >
+            #
+          </th>
+          <th
+            v-for="(header, i) in headers"
+            class="col"
+          >
+            {{ header.label }}
+          </th>
+
+          <th
+            class="col"
+          >
+            <span v-if="actions.length === 0">
+              No action
+            </span>
+          </th>
+        </template>
+
+        <template #data-row="{ headers, row, actions, i }">
+          <td
+            class="col"
+          >
+            {{ i + 1 }}
+          </td>
+
+          <td
+            v-for="header in headers"
+            class="col"
+          >
+            {{ row[header.key] }}
+          </td>
+
+          <td
+            v-if="actions.length > 0"
+            class="col"
+          >
+            <div
+              class="data-actions"
+            >
+              <div
+                v-for="action in actions"
+                class="data-action"
+                @click="action.click(row, i)"
+              >
+                {{ action.name }}
+              </div>
+            </div>
+          </td>
+        </template>
+
+        <template #pagination="{ pageLeft, pageRight, start, end, total }">
+          <div class="pager-left" @click="pageLeft()">
+            Left
+          </div>
+
+          <div class="page-number">
+            {{ start }} - {{ end }} of {{ total }}
+          </div>
+
+          <div class="pager-right" @click="pageRight()">
+            Right
+          </div>
+        </template>
+      </TTable>
+
+      <TTable
+        name="Work Logs (custom templates 2)"
+        :headers="tableData.headers"
+        :data="tableData.data"
+        :actions="tableData.actions"
+        :table-actions="tableData.tableActions"
+        @offset-change="offsetChange"
+      >
+        <template #table-name="{ name }">
+          Table: {{ name }}
+        </template>
+
+        <template #table-action="{ action, data }">
+          {{ action.name }}
+        </template>
+
+        <template #header-col="{ header, i }">
+          {{ i }} | {{ header.label }}
+        </template>
+
+        <template #header-actions="{ actions }">
+          No action
+        </template>
+
+        <template #data-col="{ header, row, i }">
+          {{ i }} | {{ row[header.key] }}
+        </template>
+
+        <template #data-action="{ row, action, i }">
+          <div class="data-action">{{ action.name }}</div>
+        </template>
+
+        <template #pager-left>
+          <i class="fa-solid fa-circle-arrow-left"></i>
+        </template>
+
+        <template #page-number="{ start, end, total }">
+          {{ start }} - {{ end }} of {{ total }}
+        </template>
+
+        <template #pager-right>
+          <i class="fa-solid fa-circle-arrow-right"></i>
+        </template>
+      </TTable>
     </div>
 
     <div class="result">
@@ -206,5 +337,35 @@ function offsetChange(val) {
 
 .tags {
   display: flex;
+}
+
+.col {
+  text-align: left;
+  padding: 1rem;
+  border: 1px solid var(--color-border);
+}
+
+.data-actions {
+  display: flex;
+  flex-direction: column;
+}
+
+.data-action:hover {
+  cursor: pointer;
+  color: var(--color-border-hover);
+}
+
+.pager-left {
+  margin-right: 1rem;
+}
+
+.pager-right {
+  margin-left: 1rem;
+}
+
+.pager-left:hover,
+.pager-right:hover {
+  cursor: pointer;
+  color: var(--color-border-hover);
 }
 </style>
