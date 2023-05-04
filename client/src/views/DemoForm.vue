@@ -9,6 +9,7 @@ import TDatePicker from 'coffeebrew_vue_components/src/components/form/TDatePick
 import TTable from 'coffeebrew_vue_components/src/components/table/TTable.vue'
 import TProgressBar from 'coffeebrew_vue_components/src/components/TProgressBar.vue'
 import TConfirmDialog from 'coffeebrew_vue_components/src/components/dialog/TConfirmDialog.vue'
+import TDialog from 'coffeebrew_vue_components/src/components/dialog/TDialog.vue'
 
 const model = ref({
   username: '',
@@ -70,7 +71,7 @@ const tableData = ref({
       name: 'View',
       icon: 'fa-solid fa-magnifying-glass',
       click: function(row, index) {
-        alert(`Row[${index}]: ${JSON.stringify(row)}`)
+        openDataDialog(row, index)
       }
     },
     {
@@ -142,6 +143,13 @@ const limit = ref(3)
 const paginatedData = ref([])
 const serverDataLoading = ref(true)
 const confirmDialog = ref(false)
+const dataDialog = ref(false)
+const currentRow = ref()
+const currentIndex = ref()
+
+const computedDataDialogTitle = computed(() => {
+  return `View row ${currentIndex.value + 1}`
+})
 
 function fetchServerData() {
   serverDataLoading.value = true
@@ -176,6 +184,12 @@ function dialogOnConfirm(text) {
 
 function dialogOnCancel(text) {
   alert(`cancel ${text}`)
+}
+
+function openDataDialog(row, index) {
+  dataDialog.value = true
+  currentRow.value = row
+  currentIndex.value = index
 }
 
 onMounted(() => {
@@ -233,6 +247,24 @@ onMounted(() => {
           @confirm="dialogOnConfirm('delete chart')"
           @cancel="dialogOnCancel('delete chart')"
         />
+      </div>
+
+      <div class="hyperlink">
+        <TDialog
+          v-model="dataDialog"
+          :title="computedDataDialogTitle"
+        >
+          <template #body>
+            <div class="data-row">
+              <div
+                class="data-col"
+                v-for="col in currentRow"
+              >
+                {{ col }}
+              </div>
+            </div>
+          </template>
+        </TDialog>
       </div>
 
       <TInput v-model="model.username" type="text" label="Username"/>
