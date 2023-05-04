@@ -7,6 +7,7 @@ import TSelect from 'coffeebrew_vue_components/src/components/form/TSelect.vue'
 import TCheckbox from 'coffeebrew_vue_components/src/components/form/TCheckbox.vue'
 import TDatePicker from 'coffeebrew_vue_components/src/components/form/TDatePicker.vue'
 import TTable from 'coffeebrew_vue_components/src/components/table/TTable.vue'
+import TProgressBar from 'coffeebrew_vue_components/src/components/TProgressBar.vue'
 
 const model = ref({
   username: '',
@@ -165,6 +166,13 @@ function loadDataOnOffsetChange(val) {
   <h1>Demo Form Elements</h1>
   <div class="form-container">
     <div class="form">
+
+      <div class="progress-bars">
+        <TProgressBar/>
+        <TProgressBar :speed="500" :bidirection="false"/>
+        <TProgressBar :speed="500" :bidirection="false" :indefinite="false"/>
+      </div>
+
       <div class="tags">
         <div class="tag">
           <div class="category">tag</div>
@@ -370,6 +378,10 @@ function loadDataOnOffsetChange(val) {
 </template>
 
 <style scoped>
+.spacer {
+  margin: 1rem 0;
+}
+
 .form-container {
   display: flex;
   flex-direction: row;
@@ -391,6 +403,13 @@ function loadDataOnOffsetChange(val) {
   font-size: 0.8rem;
   top: -0.8rem;
   align-self: center;
+}
+
+.progress-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1rem 0;
 }
 
 .tags {
