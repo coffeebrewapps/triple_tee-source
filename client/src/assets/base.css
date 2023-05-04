@@ -71,6 +71,27 @@
   font-weight: normal;
 }
 
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--color-background-soft); 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--color-text); 
+  border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover); 
+}
+
 body {
   min-height: 100vh;
   color: var(--color-text);
