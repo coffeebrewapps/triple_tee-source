@@ -5,6 +5,7 @@ import TInput from 'coffeebrew_vue_components/src/components/form/TInput.vue'
 import TButton from 'coffeebrew_vue_components/src/components/form/TButton.vue'
 import TSelect from 'coffeebrew_vue_components/src/components/form/TSelect.vue'
 import TCheckbox from 'coffeebrew_vue_components/src/components/form/TCheckbox.vue'
+import TDatePicker from 'coffeebrew_vue_components/src/components/form/TDatePicker.vue'
 
 const model = ref({
   username: '',
@@ -15,7 +16,13 @@ const model = ref({
   country2: '',
   country3: '',
   subscribe: false,
-  agree: false
+  agree: false,
+  startDate: null,
+  endDate: null,
+  dateRange: {
+    start: null,
+    end: null
+  }
 })
 
 const countryOptions = ref([
@@ -50,6 +57,15 @@ function hello(text) {
 
       <TCheckbox v-model="model.subscribe" label="Subscribe newsletter"/>
       <TCheckbox v-model="model.agree" label="Agree T&C" error-message="Required!"/>
+
+      <TDatePicker v-model="model.startDate" label="Start Date"/>
+      <TDatePicker v-model="model.endDate" label="End Date" error-message="Cannot be earlier than start date!"/>
+
+      <div class="date-range">
+        <TDatePicker v-model="model.dateRange.start" label="Start Date"/>
+        <div class="to">to</div>
+        <TDatePicker v-model="model.dateRange.end" label="End Date" error-message="Cannot be earlier than start date!"/>
+      </div>
     </div>
 
     <div class="result">
@@ -73,5 +89,17 @@ function hello(text) {
 
 .form {
   width: 60%;
+}
+
+.date-range {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.date-range .to {
+  font-size: 0.8rem;
+  top: -0.8rem;
+  align-self: center;
 }
 </style>
