@@ -1,9 +1,13 @@
 module.exports = {
   packagerConfig: {
     ignore: [
-      'client',
-      '.tool-versions',
-      'yarn.lock'
+      '^/client$',
+      '^/node_modules$',
+      '^/public$',
+      '^/server$',
+      '^/.tool-versions',
+      '^/server.js',
+      '^/yarn.lock'
     ]
   },
   rebuildConfig: {},
