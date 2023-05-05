@@ -8,5 +8,35 @@
     "id": 2,
     "name": "Tobi",
     "email": "tobi@vision-media.ca"
+  },
+  {
+    "id": 3,
+    "name": "Hannah",
+    "email": "hannah@vision-media.ca"
+  },
+  {
+    "id": 4,
+    "name": "Margarita",
+    "email": "margarita@vision-media.ca"
+  },
+  {
+    "id": 5,
+    "name": "Vilmos",
+    "email": "vilmos@vision-media.ca"
+  },
+  {
+    "id": 6,
+    "name": "Asteria",
+    "email": "asteria@vision-media.ca"
+  },
+  {
+    "id": 7,
+    "name": "Ji-Yu",
+    "email": "ji-yu@vision-media.ca"
+  },
+  {
+    "id": 8,
+    "name": "Antonio",
+    "email": "antonio@vision-media.ca"
   }
 ]
