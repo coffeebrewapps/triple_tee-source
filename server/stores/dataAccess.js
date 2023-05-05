@@ -1,34 +1,110 @@
 'use strict'
 
-function list(modelClass, filters) {
-  return []
+const config = require('../config');
+const fileAccess = require('./fileAccess');
+
+const dataStore = config.dataStore;
+
+let dataCache = {};
+
+async function initData(modelClass, force = false) {
+  if (dataStore === 'fs') {
+    if (!dataCache[modelClass] || force) {
+      await fileAccess.readFromFile(modelClass)
+        .then((result) => {
+          dataCache[modelClass] = JSON.parse(result);
+        })
+        .catch((error) => {
+          console.log(`Error reading file ${modelClass}: ${JSON.stringify(error)}`);
+          return [];
+        });
+    }
+  } else {
+    dataCache[modelClass] = [];
+  }
+}
+
+function writeData(modelClass, data) {
+  if (dataStore === 'fs') {
+    fileAccess.writeToFile(modelClass, data);
+  }
+}
+
+function cacheData(modelClass, data) {
+  dataCache[modelClass] = data;
+  writeData(modelClass, data);
+}
+
+function list(modelClass, filters = {}) {
+  return dataCache[modelClass] || [];
 }
 
 function view(modelClass, id) {
-  return { id: id }
+  const data = list(modelClass)
+  const index = data.findIndex(d => d.id === id);
+  if (index < 0) {
+    return {
+      index: null,
+      record: null
+    };
+  } else {
+    return {
+      index: index,
+      record: data[index]
+    };
+  }
 }
 
+// TODO: check exists
 function create(modelClass, params) {
-  return params
+  let data = list(modelClass);
+  const lastId = Array.from(data.map(d => d.id)).reverse()[0] || 0;
+  const newRow = Object.assign({ id: lastId + 1 }, params);
+  data.push(newRow);
+  cacheData(modelClass, data);
+  return newRow;
 }
 
+// TODO: check exists
 function createIfNotExists(modelClass, params) {
-  return params
+  let data = list(modelClass);
+  const lastId = Array.from(data.map(d => d.id)).reverse()[0] || 0;
+  const newRow = Object.assign({ id: lastId + 1 }, params);
+  data.push(newRow);
+  cacheData(modelClass, data);
+  return newRow;
 }
 
 function edit(modelClass, id, params) {
-  return params
+  let data = list(modelClass);
+  const existing = view(modelClass, id);
+  if (!existing.index) { return null; }
+
+  const updated = Object.assign({}, existing.record, params)
+  data[existing.index] = updated;
+  cacheData(modelClass, data);
+
+  return updated;
 }
 
 function remove(modelClass, id) {
-  return true
+  let data = list(modelClass);
+  const existing = view(modelClass, id);
+  if (!existing.index) { return false; }
+
+  data.splice(existing.index, 1);
+  cacheData(modelClass, data);
+
+  return true;
 }
 
+// TODO
 function isUsed(modelClass, id) {
   return false
 }
 
 module.exports = {
+  initData,
   list,
   view,
   create,
