@@ -1,9 +1,16 @@
 'use strict'
 
+const express = require('express');
+const router = express.Router();
+
 const shared = require('./shared');
 const usersStore = require('../stores/users');
 
-exports.list = shared.list(usersStore);
-exports.view = shared.view(usersStore);
-exports.update = shared.update(usersStore);
-exports.remove = shared.remove(usersStore);
+router.get('/', shared.list(usersStore));
+router.get('/:id', shared.view(usersStore));
+router.put('/:id', shared.update(usersStore));
+router.delete('/:id', shared.remove(usersStore));
+
+module.exports = {
+  router
+}

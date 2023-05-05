@@ -21,19 +21,19 @@ if (process.env.NODE_ENV === 'development') {
   }
 }
 
+/*** start:Middleware ***/
 app.use(express.json())
 app.use(cors(corsConfig));
 app.use(express.static(path.join(__dirname, 'public')));
+/*** end:Middleware ***/
 
+/*** start:Routes ***/
 app.get('/', function(req, res){
   res.send('Server is ready!');
 });
 
-// Users
-app.get('/api/users', users.list);
-app.get('/api/users/:id', users.view);
-app.put('/api/users/:id', users.update);
-app.delete('/api/users/:id', users.remove);
+app.use('/api/users', users.router);
+/*** end:Routes ***/
 
 (async () => {
   await dataAccess.initData('users');
