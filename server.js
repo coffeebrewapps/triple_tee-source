@@ -4,9 +4,10 @@ const path = require('path');
 const cors = require('cors');
 
 const common = require('./common');
-const users = require('./server/routes/users');
 
-const dataAccess = require('./server/stores/dataAccess');
+/*** start:Modules ***/
+const users = require('./server/modules/users');
+/*** end:Modules ***/
 
 const app = express();
 const port = process.env.PORT || common.DEFAULT_PORT;
@@ -36,7 +37,9 @@ app.use('/api/users', users.router);
 /*** end:Routes ***/
 
 (async () => {
-  await dataAccess.initData('users');
+  /*** start:InitData ***/
+  await users.store.initData();
+  /*** end:InitData ***/
 
   console.log(`Server starting at port ${port}`);
 
