@@ -21,6 +21,7 @@ if (process.env.NODE_ENV === 'development') {
   }
 }
 
+app.use(express.json())
 app.use(cors(corsConfig));
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -32,6 +33,7 @@ app.get('/', function(req, res){
 app.get('/api/users', users.list);
 app.get('/api/users/:id', users.view);
 app.put('/api/users/:id', users.update);
+app.delete('/api/users/:id', users.remove);
 
 (async () => {
   await dataAccess.initData('users');

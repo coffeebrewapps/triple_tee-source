@@ -14,7 +14,7 @@ function readFromFile(modelClass) {
 
 function writeToFile(modelClass, data) {
   try {
-    fs.promises.writeFile(data, pathName(modelClass));
+    fs.promises.writeFile(pathName(modelClass), JSON.stringify(data));
   } catch (error) {
     console.log(`Error writing to file ${modelClass}: ${JSON.stringify(error)}`);
   }

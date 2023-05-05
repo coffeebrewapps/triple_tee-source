@@ -53,11 +53,11 @@ function list(modelClass, filters = {}) {
 }
 
 function view(modelClass, id) {
-  const data = list(modelClass)
+  const data = list(modelClass).data
   const index = data.findIndex(d => d.id === id);
   if (index < 0) {
     return {
-      index: null,
+      index: -1,
       record: null
     };
   } else {
@@ -70,7 +70,7 @@ function view(modelClass, id) {
 
 // TODO: check exists
 function create(modelClass, params) {
-  let data = list(modelClass);
+  let data = list(modelClass).data;
   const lastId = Array.from(data.map(d => d.id)).reverse()[0] || 0;
   const newRow = Object.assign({ id: lastId + 1 }, params);
   data.push(newRow);
@@ -80,7 +80,7 @@ function create(modelClass, params) {
 
 // TODO: check exists
 function createIfNotExists(modelClass, params) {
-  let data = list(modelClass);
+  let data = list(modelClass).data;
   const lastId = Array.from(data.map(d => d.id)).reverse()[0] || 0;
   const newRow = Object.assign({ id: lastId + 1 }, params);
   data.push(newRow);
@@ -89,11 +89,11 @@ function createIfNotExists(modelClass, params) {
 }
 
 function edit(modelClass, id, params) {
-  let data = list(modelClass);
+  let data = list(modelClass).data;
   const existing = view(modelClass, id);
-  if (!existing.index) { return null; }
+  if (existing.index < -1) { return null; }
 
-  const updated = Object.assign({}, existing.record, params)
+  const updated = Object.assign(existing.record, params)
   data[existing.index] = updated;
   cacheData(modelClass, data);
 
@@ -101,9 +101,9 @@ function edit(modelClass, id, params) {
 }
 
 function remove(modelClass, id) {
-  let data = list(modelClass);
+  let data = list(modelClass).data;
   const existing = view(modelClass, id);
-  if (!existing.index) { return false; }
+  if (existing.index < -1) { return false; }
 
   data.splice(existing.index, 1);
   cacheData(modelClass, data);
