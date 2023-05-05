@@ -13,9 +13,7 @@ exports.view = function(req, res) {
   const id = parseInt(params.id);
   console.log(`Viewing user: ${id}`);
 
-  res.send({
-    record: usersStore.view(id)
-  });
+  res.send(usersStore.view(id));
 };
 
 exports.update = function(req, res) {
@@ -25,7 +23,7 @@ exports.update = function(req, res) {
 
   console.log(`Updating user[${id}]: ${JSON.stringify(params)}`)
   res.send({
-    record: usersStore.edit(id, params)
+    record: usersStore.update(id, params)
   });
 };
 

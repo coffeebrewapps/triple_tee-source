@@ -88,7 +88,7 @@ function createIfNotExists(modelClass, params) {
   return newRow;
 }
 
-function edit(modelClass, id, params) {
+function update(modelClass, id, params) {
   let data = list(modelClass).data;
   const existing = view(modelClass, id);
   if (existing.index < -1) { return null; }
@@ -122,7 +122,7 @@ module.exports = {
   view,
   create,
   createIfNotExists,
-  edit,
+  update,
   remove,
   isUsed
 }

@@ -9,16 +9,15 @@ function list(filters = {}) {
 }
 
 function view(id) {
-  const result = dataAccess.view(modelClass, id);
-  return result.record;
+  return dataAccess.view(modelClass, id);
 }
 
 function create(params) {
   return dataAccess.create(modelClass, params);
 }
 
-function edit(id, params) {
-  return dataAccess.edit(modelClass, id, params);
+function update(id, params) {
+  return dataAccess.update(modelClass, id, params);
 }
 
 function remove(id) {
@@ -29,6 +28,6 @@ module.exports = {
   list,
   view,
   create,
-  edit,
+  update,
   remove
 }
