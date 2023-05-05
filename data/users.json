@@ -2,41 +2,49 @@
   {
     "id": 1,
     "name": "TJ",
-    "email": "tj@vision-media.ca"
+    "email": "tj@vision-media.ca",
+    "division": "HR"
   },
   {
     "id": 2,
     "name": "Tobi",
-    "email": "tobi@vision-media.ca"
+    "email": "tobi@vision-media.ca",
+    "division": "Marketing"
   },
   {
     "id": 3,
     "name": "Hannah",
-    "email": "hannah@vision-media.ca"
+    "email": "hannah@vision-media.ca",
+    "division": "Marketing"
   },
   {
     "id": 4,
     "name": "Margarita",
-    "email": "margarita@vision-media.ca"
+    "email": "margarita@vision-media.ca",
+    "division": "Sales"
   },
   {
     "id": 5,
     "name": "Vilmos",
-    "email": "vilmos@vision-media.ca"
+    "email": "vilmos@vision-media.ca",
+    "division": "Sales"
   },
   {
     "id": 6,
     "name": "Asteria",
-    "email": "asteria@vision-media.ca"
+    "email": "asteria@vision-media.ca",
+    "division": "Sales"
   },
   {
     "id": 7,
     "name": "Ji-Yu",
-    "email": "ji-yu@vision-media.ca"
+    "email": "ji-yu@vision-media.ca",
+    "division": "Customer Support"
   },
   {
     "id": 8,
     "name": "Antonio",
-    "email": "antonio@vision-media.ca"
+    "email": "antonio@vision-media.ca",
+    "division": "Customer Support"
   }
 ]
