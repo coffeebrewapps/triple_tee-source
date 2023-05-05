@@ -36,7 +36,20 @@ function cacheData(modelClass, data) {
 }
 
 function list(modelClass, filters = {}) {
-  return dataCache[modelClass] || [];
+  const data = dataCache[modelClass] || [];
+  const total = data.length;
+
+  if (filters.offset && filters.limit && data.length > 0) {
+    return {
+      total: total,
+      data: Array.from(data).slice(filters.offset, filters.offset + filters.limit)
+    };
+  } else {
+    return {
+      total: total,
+      data: data
+    };
+  }
 }
 
 function view(modelClass, id) {

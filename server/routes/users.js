@@ -3,10 +3,9 @@
 const usersStore = require('../stores/users');
 
 exports.list = function(req, res){
-  console.log(`Requesting all users`);
-  res.send({
-    data: usersStore.list()
-  });
+  const params = req.query;
+  console.log(`Requesting all users: ${JSON.stringify(params)}`);
+  res.send(usersStore.list(params));
 };
 
 exports.view = function(req, res){
@@ -16,7 +15,7 @@ exports.view = function(req, res){
 };
 
 exports.update = function(req, res){
-  const params = req.body.user;
+  const params = req.params;
   const id = params.id;
 
   res.send({
