@@ -8,6 +8,17 @@ exports.list = function(store) {
   }
 };
 
+exports.create = function(store) {
+  return function(req, res) {
+    const params = req.body;
+
+    console.log(`Creating record: ${JSON.stringify(params)}`)
+    res.send({
+      record: store.create(params)
+    });
+  }
+};
+
 exports.view = function(store) {
   return function(req, res) {
     const params = req.params;

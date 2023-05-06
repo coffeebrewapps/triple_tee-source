@@ -8,6 +8,7 @@ const usersStore = require('../stores/users');
 
 router.get('/', shared.list(usersStore));
 router.get('/:id', shared.view(usersStore));
+router.post('/', shared.create(usersStore));
 router.put('/:id', shared.update(usersStore));
 router.delete('/:id', shared.remove(usersStore));
 

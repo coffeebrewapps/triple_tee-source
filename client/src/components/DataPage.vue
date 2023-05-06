@@ -28,6 +28,12 @@ const props = defineProps({
     type: Array,
     default: []
   },
+  createDialogTitle: {
+    type: Function,
+    default: function(dataType) {
+      return `Create ${dataType}`
+    }
+  },
   viewDialogTitle: {
     type: Function,
     default: function(row) {
@@ -63,6 +69,16 @@ const props = defineProps({
     }
   }
 })
+
+const tableActions = ref([
+  {
+    name: 'Create',
+    icon: 'fa-solid fa-circle-plus fa-xl',
+    click: async function(data) {
+      await openCreateDialog()
+    }
+  }
+])
 
 const actions = ref([
   {
@@ -102,6 +118,9 @@ const dataLoading = ref(false)
 const errorAlert = ref(false)
 const errorContent = ref('')
 
+const createDialog = ref(false)
+const newRow = ref()
+
 const viewDialog = ref(false)
 const currentRow = ref()
 
@@ -126,6 +145,40 @@ function inputType(field) {
 
 function inputLabel(field) {
   return props.updatableSchema.find(h => h.key === field).label
+}
+
+async function openCreateDialog(id) {
+  newRow.value = {}
+  props.updatableSchema.forEach(k => {
+    newRow.value[k.key] = null
+  })
+  createDialog.value = true
+}
+
+async function createDataAndCloseDialog() {
+  const params = newRow.value
+
+  await createData(params)
+          .then((result) => {
+            loadData()
+            openViewDialog(result.record.id)
+          })
+          .catch((error) => {
+            errorAlert.value = true
+            errorContent.value = JSON.stringify(error)
+          })
+          .finally(() => {
+            closeCreateDialog()
+          })
+}
+
+function closeCreateDialog() {
+  createDialog.value = false
+  resetNewRow()
+}
+
+function resetNewRow() {
+  newRow.value = null
 }
 
 async function openViewDialog(id) {
@@ -239,6 +292,23 @@ async function loadData() {
     })
 }
 
+async function createData(params) {
+  return new Promise((resolve, reject) => {
+    axios
+      .post(`${url.value}`, params)
+      .then((res) => {
+        if (res.data.record) {
+          resolve({ success: true, record: res.data.record })
+        } else {
+          reject({ success: false, error: `Create failure` })
+        }
+      })
+      .catch((err) => {
+        reject({ success: false, error: err })
+      })
+  })
+}
+
 async function viewData(id) {
   return new Promise((resolve, reject) => {
     axios
@@ -298,6 +368,7 @@ onMounted(async () => {
     :name="dataType"
     :headers="headers"
     :data="data"
+    :table-actions="tableActions"
     :actions="actions"
     :loading="dataLoading"
     :pagination="{ limit: limit, client: false }"
@@ -312,6 +383,28 @@ onMounted(async () => {
     :height="250"
     v-model="errorAlert"
   />
+
+  <TDialog
+    v-if="newRow"
+    v-model="createDialog"
+    :title="createDialogTitle(dataType)"
+  >
+    <template #body>
+      <div class="data-row">
+        <TInput
+          v-for="field in updatableKeys"
+          v-model="newRow[field]"
+          :type="inputType(field)"
+          :label="inputLabel(field)"
+        />
+      </div>
+    </template>
+
+    <template #actions>
+      <TButton class="confirm-button" button-type="text" value="Confirm" icon="fa-solid fa-check" @click="createDataAndCloseDialog()"/>
+      <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeCreateDialog()"/>
+    </template>
+  </TDialog>
 
   <TDialog
     v-model="viewDialog"

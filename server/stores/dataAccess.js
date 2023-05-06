@@ -60,22 +60,18 @@ function view(modelClass, id) {
 
 // TODO: check exists
 function create(modelClass, params) {
-  let data = list(modelClass).data;
-  const lastId = Array.from(data.map(d => d.id)).reverse()[0] || 0;
-  const newRow = Object.assign({ id: lastId + 1 }, params);
-  data.push(newRow);
+  let data = dataCache[modelClass];
+  const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
+  const newId = lastId + 1;
+  const newRow = Object.assign({ id: newId }, params);
+  data[newId] = newRow;
   cacheData(modelClass, data);
   return newRow;
 }
 
 // TODO: check exists
 function createIfNotExists(modelClass, params) {
-  let data = list(modelClass).data;
-  const lastId = Array.from(data.map(d => d.id)).reverse()[0] || 0;
-  const newRow = Object.assign({ id: lastId + 1 }, params);
-  data.push(newRow);
-  cacheData(modelClass, data);
-  return newRow;
+  return create(modelClass, params)
 }
 
 function update(modelClass, id, params) {
