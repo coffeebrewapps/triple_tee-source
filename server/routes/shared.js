@@ -53,3 +53,16 @@ exports.remove = function(store) {
     });
   }
 };
+
+exports.download = function(store) {
+  return function(req, res) {
+    const params = req.query;
+    console.log(`Downloading data: ${JSON.stringify(params)}`);
+    const data = store.list(params);
+    const filename = `${store.modelClass}.json`;
+    res.send({
+      filename: filename,
+      data: JSON.stringify(data)
+    });
+  }
+};

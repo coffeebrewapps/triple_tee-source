@@ -77,6 +77,13 @@ const tableActions = ref([
     click: async function(data) {
       await openCreateDialog()
     }
+  },
+  {
+    name: 'Export',
+    icon: 'fa-solid fa-file-export',
+    click: async function(data) {
+      await openDownloadDialog()
+    }
   }
 ])
 
@@ -129,6 +136,11 @@ const currentRowForUpdate = ref()
 
 const deleteDialog = ref(false)
 const currentRowForDelete = ref()
+
+const downloadDialog = ref(false)
+const downloadLink = ref()
+const downloadFile = ref()
+const downloadAnchor = ref('downloadAnchor')
 
 const env = import.meta.env
 const url = ref('url')
@@ -272,6 +284,31 @@ function resetCurrentRowForDelete() {
   currentRowForDelete.value = null
 }
 
+async function openDownloadDialog() {
+  await downloadData()
+          .then((result) => {
+            const url = window.URL.createObjectURL(new Blob([result.data]))
+            downloadLink.value = url
+            downloadFile.value = result.filename
+            downloadDialog.value = true
+          })
+          .catch((error) => {
+            errorAlert.value = true
+            errorContent.value = JSON.stringify(result.error)
+          })
+}
+
+function downloadDataAsFile() {
+  downloadAnchor.value.click()
+  closeDownloadDialog()
+}
+
+function closeDownloadDialog() {
+  downloadDialog.value = false
+  downloadLink.value = null
+  downloadFile.value = null
+}
+
 async function updateOffsetAndReload(updated) {
   offset.value = updated
   await loadData()
@@ -349,6 +386,19 @@ async function deleteData(id, params) {
         } else {
           reject({ success: false, error: `Delete failure` })
         }
+      })
+      .catch((err) => {
+        reject({ success: false, error: err })
+      })
+  })
+}
+
+async function downloadData() {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(`${url.value}/download`)
+      .then((res) => {
+        resolve({ success: true, filename: res.data.filename, data: res.data.data })
       })
       .catch((err) => {
         reject({ success: false, error: err })
@@ -456,4 +506,28 @@ onMounted(async () => {
     @cancel="closeDeleteDialog"
   >
   </TConfirmDialog>
+
+  <TDialog
+    v-if="downloadLink"
+    v-model="downloadDialog"
+    title="Download export file"
+    :width="400"
+    :height="250"
+  >
+    <template #body>
+      {{ downloadFile }}
+    </template>
+
+    <template #actions>
+      <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
+      <TButton button-type="text" value="Download" icon="fa-solid fa-file-arrow-down" @click="downloadDataAsFile()"/>
+      <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeDownloadDialog()"/>
+    </template>
+  </TDialog>
 </template>
+
+<style scoped>
+a.hidden {
+  display: none;
+}
+</style>

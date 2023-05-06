@@ -29,6 +29,7 @@ function remove(id) {
 }
 
 module.exports = {
+  modelClass,
   initData,
   list,
   view,
