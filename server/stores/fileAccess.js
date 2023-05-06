@@ -1,11 +1,12 @@
 'use strict'
 
-const path = require('path');
+const path = require('path')
+const mainDirname = path.dirname(require.main.filename)
 const fs = require('fs');
 const fsPromises = require('fs').promises;
 
 function pathName(modelClass) {
-  return path.join(__dirname, '../../data', `${modelClass}.json`);
+  return path.join(mainDirname, './data', `${modelClass}.json`);
 }
 
 function readFromFile(modelClass) {
