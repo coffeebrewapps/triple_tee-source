@@ -36,7 +36,7 @@ function cacheData(modelClass, data) {
 }
 
 function list(modelClass, filters = {}) {
-  const data = dataCache[modelClass] || [];
+  const data = Object.values(dataCache[modelClass] || {});
   const total = data.length;
 
   if (filters.offset && filters.limit && data.length > 0) {
@@ -53,19 +53,9 @@ function list(modelClass, filters = {}) {
 }
 
 function view(modelClass, id) {
-  const data = list(modelClass).data
-  const index = data.findIndex(d => d.id === id);
-  if (index < 0) {
-    return {
-      index: -1,
-      record: null
-    };
-  } else {
-    return {
-      index: index,
-      record: data[index]
-    };
-  }
+  const data = dataCache[modelClass] || {};
+  const record = data[id];
+  return { record };
 }
 
 // TODO: check exists
@@ -89,23 +79,23 @@ function createIfNotExists(modelClass, params) {
 }
 
 function update(modelClass, id, params) {
-  let data = list(modelClass).data;
+  let data = dataCache[modelClass];
   const existing = view(modelClass, id);
-  if (existing.index < -1) { return null; }
+  if (!existing.record) { return null; }
 
   const updated = Object.assign(existing.record, params)
-  data[existing.index] = updated;
+  data[id] = updated;
   cacheData(modelClass, data);
 
   return updated;
 }
 
 function remove(modelClass, id) {
-  let data = list(modelClass).data;
+  let data = dataCache[modelClass];
   const existing = view(modelClass, id);
-  if (existing.index < -1) { return false; }
+  if (!existing.record) { return false; }
 
-  data.splice(existing.index, 1);
+  delete data[id];
   cacheData(modelClass, data);
 
   return true;
