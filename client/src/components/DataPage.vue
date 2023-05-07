@@ -16,15 +16,19 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  updatableSchema: {
-    type: Array,
-    default: []
-  },
   urlBase: {
     type: String,
     default: ''
   },
+  schemasUrlBase: {
+    type: String,
+    default: ''
+  },
   headers: {
+    type: Array,
+    default: []
+  },
+  updatableFields: {
     type: Array,
     default: []
   },
@@ -111,9 +115,7 @@ const actions = ref([
   }
 ])
 
-const updatableKeys = computed(() => {
-  return props.updatableSchema.map(h => h.key)
-})
+const schemas = ref({})
 
 const data = ref([])
 const totalData = ref(0)
@@ -144,25 +146,28 @@ const downloadAnchor = ref('downloadAnchor')
 
 const env = import.meta.env
 const url = ref('url')
+const schemasUrl = ref()
 
 if (env.MODE === 'development') {
   url.value = `http://localhost:${env.VITE_SERVER_PORT}/${props.urlBase}`
+  schemasUrl.value = `http://localhost:${env.VITE_SERVER_PORT}/${props.schemasUrlBase}`
 } else {
   url.value = props.urlBase
+  schemasUrl.value = props.schemasUrlBase
 }
 
 function inputType(field) {
-  return props.updatableSchema.find(h => h.key === field).type
+  return schemas.value[field].type
 }
 
 function inputLabel(field) {
-  return props.updatableSchema.find(h => h.key === field).label
+  return field
 }
 
 async function openCreateDialog(id) {
   newRow.value = {}
-  props.updatableSchema.forEach(k => {
-    newRow.value[k.key] = null
+  Object.keys(schemas.value).forEach(k => {
+    newRow.value[k] = null
   })
   createDialog.value = true
 }
@@ -226,6 +231,7 @@ async function updateDataAndCloseDialog() {
   await updateData(id, params)
           .then((result) => {
             loadData()
+            openViewDialog(id)
           })
           .catch((error) => {
             errorAlert.value = true
@@ -312,6 +318,18 @@ function closeDownloadDialog() {
 async function updateOffsetAndReload(updated) {
   offset.value = updated
   await loadData()
+}
+
+async function loadSchemas() {
+  await axios
+    .get(schemasUrl.value)
+    .then((res) => {
+      schemas.value = res.data.fields
+    })
+    .catch((err) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(err)
+    })
 }
 
 async function loadData() {
@@ -407,6 +425,7 @@ async function downloadData() {
 }
 
 onMounted(async () => {
+  await loadSchemas()
   await loadData()
 })
 </script>
@@ -442,7 +461,7 @@ onMounted(async () => {
     <template #body>
       <div class="data-row">
         <TInput
-          v-for="field in updatableKeys"
+          v-for="field in updatableFields"
           v-model="newRow[field]"
           :type="inputType(field)"
           :label="inputLabel(field)"
@@ -457,6 +476,7 @@ onMounted(async () => {
   </TDialog>
 
   <TDialog
+    v-if="currentRow"
     v-model="viewDialog"
     :title="viewDialogTitle(currentRow)"
   >
@@ -464,9 +484,9 @@ onMounted(async () => {
       <div class="data-row">
         <div
           class="data-col"
-          v-for="col in currentRow"
+          v-for="key in Object.keys(currentRow)"
         >
-          {{ col }}
+          {{ key }}: {{ currentRow[key] }}
         </div>
       </div>
     </template>
@@ -480,7 +500,7 @@ onMounted(async () => {
     <template #body>
       <div class="data-row">
         <TInput
-          v-for="field in updatableKeys"
+          v-for="field in updatableFields"
           v-model="currentRowForUpdate[field]"
           :type="inputType(field)"
           :label="inputLabel(field)"
@@ -529,5 +549,9 @@ onMounted(async () => {
 <style scoped>
 a.hidden {
   display: none;
+}
+
+.dialog .container .body {
+  overflow-x: scroll;
 }
 </style>
