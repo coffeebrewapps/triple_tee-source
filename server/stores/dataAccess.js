@@ -49,6 +49,10 @@ function cacheData(modelClass, data) {
   writeData(modelClass, data);
 }
 
+function viewSchemas(modelClass) {
+  return schemaCache[modelClass];
+}
+
 function list(modelClass, filters = {}) {
   const data = Object.values(dataCache[modelClass] || {});
   const total = data.length;
@@ -118,6 +122,7 @@ function isUsed(modelClass, id) {
 
 module.exports = {
   initData,
+  viewSchemas,
   list,
   view,
   create,

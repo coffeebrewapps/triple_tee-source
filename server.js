@@ -34,6 +34,11 @@ app.get('/', function(req, res){
   res.send('Server is ready!');
 });
 
+app.get('/api/schemas/:schema', function(req, res){
+  const modelClass = req.params.schema;
+  res.send(store.viewSchemas(modelClass));
+});
+
 app.use('/api/users', users.router);
 /*** end:Routes ***/
 

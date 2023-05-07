@@ -5,19 +5,19 @@
         "type": "number"
       },
       "name": {
-        "type": "string"
+        "type": "text"
       },
       "email": {
-        "type": "string"
+        "type": "text"
       },
       "division": {
-        "type": "string"
+        "type": "number"
       },
       "joinDate": {
         "type": "date"
       },
       "phone": {
-        "type": "string"
+        "type": "text"
       }
     },
     "constraints": {
@@ -40,7 +40,7 @@
         "type": "number"
       },
       "name": {
-        "type": "string"
+        "type": "text"
       }
     },
     "constraints": {
