@@ -80,7 +80,7 @@ function view(modelClass, id) {
 function create(modelClass, params) {
   let data = dataCache[modelClass];
   const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
-  const newId = lastId + 1;
+  const newId = (lastId + 1).toString();
   const newRow = Object.assign({ id: newId }, params);
   data[newId] = newRow;
   cacheData(modelClass, data);

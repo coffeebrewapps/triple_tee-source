@@ -8,6 +8,7 @@ const store = require('./server/stores/dataAccess');
 
 /*** start:Modules ***/
 const users = require('./server/modules/users');
+const divisions = require('./server/modules/divisions');
 /*** end:Modules ***/
 
 const app = express();
@@ -40,6 +41,7 @@ app.get('/api/schemas/:schema', function(req, res){
 });
 
 app.use('/api/users', users.router);
+app.use('/api/divisions', divisions.router);
 /*** end:Routes ***/
 
 (async () => {

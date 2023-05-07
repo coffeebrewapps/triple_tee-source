@@ -2,7 +2,7 @@
   "users": {
     "fields": {
       "id": {
-        "type": "number"
+        "type": "text"
       },
       "name": {
         "type": "text"
@@ -11,7 +11,7 @@
         "type": "text"
       },
       "division": {
-        "type": "number"
+        "type": "text"
       },
       "joinDate": {
         "type": "date"
@@ -37,7 +37,7 @@
   "divisions": {
     "fields": {
       "id": {
-        "type": "number"
+        "type": "text"
       },
       "name": {
         "type": "text"
