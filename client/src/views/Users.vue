@@ -7,7 +7,8 @@ import DataPage from '../components/DataPage.vue'
 
 import {
   TAlert,
-  TSelect
+  TSelect,
+  TDatePicker
 } from 'coffeebrew-vue-components'
 
 const config = useConfig()
@@ -104,6 +105,10 @@ onMounted(async () => {
     <template #update-col.division="{ row, field, type, label }">
       <TSelect v-model="row[field]" :label="label" :name="field" :id="field" :options="divisions"/>
     </template>
+
+    <template #update-col.joinDate="{ row, field, type, label }">
+      <TDatePicker id="joinDate" v-model="row[field]" :label="label"/>
+    </template>
   </DataPage>
 
   <TAlert
@@ -116,7 +121,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-#division {
+#division,
+#joinDate {
   margin: 0 auto;
 }
 </style>
