@@ -1,0 +1,53 @@
+{
+  "users": {
+    "fields": {
+      "id": {
+        "type": "number"
+      },
+      "name": {
+        "type": "string"
+      },
+      "email": {
+        "type": "string"
+      },
+      "division": {
+        "type": "string"
+      },
+      "joinDate": {
+        "type": "date"
+      },
+      "phone": {
+        "type": "string"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": [
+        {
+          "division": {
+            "reference": "divisions",
+            "primary": "id"
+          }
+        }
+      ],
+      "unique": ["email"],
+      "required": ["id", "name", "email", "division", "joinDate"]
+    }
+  },
+  "divisions": {
+    "fields": {
+      "id": {
+        "type": "number"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": [],
+      "unique": ["name"],
+      "required": ["id", "name"]
+    }
+  }
+}

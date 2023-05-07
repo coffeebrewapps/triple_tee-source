@@ -1,3 +1,4 @@
 module.exports = {
-  dataStore: 'fs'
+  dataStore: 'fs',
+  schemas: '_schemas'
 }

@@ -4,10 +4,6 @@ const dataAccess = require('./dataAccess');
 
 const modelClass = 'users';
 
-async function initData() {
-  await dataAccess.initData(modelClass);
-}
-
 function list(filters = {}) {
   return dataAccess.list(modelClass, filters);
 }
@@ -30,7 +26,6 @@ function remove(id) {
 
 module.exports = {
   modelClass,
-  initData,
   list,
   view,
   create,

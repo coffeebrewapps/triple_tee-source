@@ -1,26 +1,40 @@
 'use strict'
 
+const logger = require('../logger');
 const config = require('../config');
 const fileAccess = require('./fileAccess');
 
 const dataStore = config.dataStore;
+const schemas = config.schemas;
 
+let init = false;
+let schemaCache = {};
 let dataCache = {};
 
-async function initData(modelClass, force = false) {
+async function initData(force = false) {
   if (dataStore === 'fs') {
-    if (!dataCache[modelClass] || force) {
-      await fileAccess.readFromFile(modelClass)
+    logger.log(`Init data start`);
+    if (!init || force) {
+      fileAccess.initData(schemas)
         .then((result) => {
-          dataCache[modelClass] = JSON.parse(result);
+          schemaCache = result.schemas;
+          logger.log(`Init schema from file complete`);
+          result.data.forEach((dataResult) => {
+            dataCache[dataResult.modelClass] = dataResult.data;
+            logger.log(`Init data from file complete`, { modelClass: dataResult.modelClass });
+          });
+          init = true;
+          logger.log(`Init data complete`);
         })
         .catch((error) => {
-          console.log(`Error reading file ${modelClass}: ${JSON.stringify(error)}`);
-          return [];
+          logger.error(`Error initializing data`, { error });
         });
     }
   } else {
-    dataCache[modelClass] = [];
+    schemaCache = {};
+    dataCache = {};
+    init = true;
+    logger.log(`Init data complete`);
   }
 }
 

@@ -4,6 +4,7 @@ const path = require('path');
 const cors = require('cors');
 
 const common = require('./common');
+const store = require('./server/stores/dataAccess');
 
 /*** start:Modules ***/
 const users = require('./server/modules/users');
@@ -37,9 +38,7 @@ app.use('/api/users', users.router);
 /*** end:Routes ***/
 
 (async () => {
-  /*** start:InitData ***/
-  await users.store.initData();
-  /*** end:InitData ***/
+  await store.initData();
 
   console.log(`Server starting at port ${port}`);
 
