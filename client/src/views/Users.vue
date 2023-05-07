@@ -28,13 +28,13 @@ const headers = ref([
   { key: 'email', type: 'text', label: 'Email' }
 ])
 
-const updatableFields = ref([
-  'name',
-  'email',
-  'division',
-  'joinDate',
-  'phone'
-])
+const updatableFields = ref({
+  name: 'Name',
+  email: 'Email',
+  division: 'Division',
+  joinDate: 'Join Date',
+  phone: 'Phone'
+})
 
 function viewDialogTitle(row) {
   if (row) {
@@ -104,10 +104,6 @@ onMounted(async () => {
 
     <template #update-col.division="{ row, field, type, label }">
       <TSelect v-model="row[field]" :label="label" :name="field" :id="field" :options="divisions"/>
-    </template>
-
-    <template #update-col.joinDate="{ row, field, type, label }">
-      <TDatePicker id="joinDate" v-model="row[field]" :label="label"/>
     </template>
   </DataPage>
 

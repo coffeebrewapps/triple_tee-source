@@ -9,6 +9,7 @@ import {
   TAlert,
   TConfirmDialog,
   TDialog,
+  TDatePicker,
   TInput,
   TButton
 } from 'coffeebrew-vue-components'
@@ -33,8 +34,8 @@ const props = defineProps({
     default: []
   },
   updatableFields: {
-    type: Array,
-    default: []
+    type: Object,
+    default: {}
   },
   createDialogTitle: {
     type: Function,
@@ -156,12 +157,16 @@ const schemasUrl = computed(() => {
   return `${config.baseUrl}/${props.schemasUrlBase}`
 })
 
+const updatableKeys = computed(() => {
+  return Object.keys(props.updatableFields)
+})
+
 function inputType(field) {
   return schemas.value[field].type
 }
 
 function inputLabel(field) {
-  return field
+  return props.updatableFields[field]
 }
 
 async function openCreateDialog(id) {
@@ -214,7 +219,7 @@ async function openViewDialog(id) {
 async function openUpdateDialog(id) {
   await viewData(id)
           .then((result) => {
-            currentRowForUpdate.value = result.record
+            formatCurrentRowForUpdate(result.record)
             updateDialog.value = true
           })
           .catch((error) => {
@@ -245,6 +250,18 @@ async function updateDataAndCloseDialog() {
 function closeUpdateDialog() {
   updateDialog.value = false
   resetCurrentRowForUpdate()
+}
+
+function formatCurrentRowForUpdate(record) {
+  currentRowForUpdate.value = {}
+
+  Object.keys(record).forEach((key) => {
+    if (inputType(key) === 'date' && !!record[key]) {
+      currentRowForUpdate.value[key] = new Date(record[key])
+    } else {
+      currentRowForUpdate.value[key] = record[key]
+    }
+  })
 }
 
 function resetCurrentRowForUpdate() {
@@ -461,7 +478,7 @@ onMounted(async () => {
     <template #body>
       <div class="data-row">
         <TInput
-          v-for="field in updatableFields"
+          v-for="field in updatableKeys"
           v-model="newRow[field]"
           :type="inputType(field)"
           :label="inputLabel(field)"
@@ -505,13 +522,21 @@ onMounted(async () => {
     <template #body>
       <div class="data-row">
         <slot
-          v-for="field in updatableFields"
+          v-for="field in updatableKeys"
           :name="`update-col.${field}`"
           v-bind="{ row: currentRowForUpdate, field: field, type: inputType(field), label: inputLabel(field) }"
         >
+
           <TInput
+            v-if="inputType(field) === 'text'"
             v-model="currentRowForUpdate[field]"
             :type="inputType(field)"
+            :label="inputLabel(field)"
+          />
+
+          <TDatePicker
+            v-if="inputType(field) === 'date'"
+            v-model="currentRowForUpdate[field]"
             :label="inputLabel(field)"
           />
         </slot>
@@ -563,5 +588,9 @@ a.hidden {
 
 .dialog .container .body {
   overflow-x: scroll;
+}
+
+.input-control {
+  margin: 0 auto;
 }
 </style>

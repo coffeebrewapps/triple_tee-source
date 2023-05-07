@@ -23,7 +23,7 @@ const model = ref({
   country3: '',
   subscribe: false,
   agree: false,
-  startDate: null,
+  startDate: new Date("2023-04-01T16:00:00.000Z"),
   endDate: null,
   dateRange: {
     start: null,
