@@ -2,6 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
+import useConfig from '../config'
+
 import {
   TTable,
   TAlert,
@@ -10,6 +12,8 @@ import {
   TInput,
   TButton
 } from 'coffeebrew-vue-components'
+
+const config = useConfig()
 
 const props = defineProps({
   dataType: {
@@ -144,17 +148,13 @@ const downloadLink = ref()
 const downloadFile = ref()
 const downloadAnchor = ref('downloadAnchor')
 
-const env = import.meta.env
-const url = ref('url')
-const schemasUrl = ref()
+const url = computed(() => {
+  return `${config.baseUrl}/${props.urlBase}`
+})
 
-if (env.MODE === 'development') {
-  url.value = `http://localhost:${env.VITE_SERVER_PORT}/${props.urlBase}`
-  schemasUrl.value = `http://localhost:${env.VITE_SERVER_PORT}/${props.schemasUrlBase}`
-} else {
-  url.value = props.urlBase
-  schemasUrl.value = props.schemasUrlBase
-}
+const schemasUrl = computed(() => {
+  return `${config.baseUrl}/${props.schemasUrlBase}`
+})
 
 function inputType(field) {
   return schemas.value[field].type
@@ -486,7 +486,12 @@ onMounted(async () => {
           class="data-col"
           v-for="key in Object.keys(currentRow)"
         >
-          {{ key }}: {{ currentRow[key] }}
+          <slot
+            :name="`view-col.${key}`"
+            v-bind="{ key, value: currentRow[key] }"
+          >
+            {{ key }}: {{ currentRow[key] }}
+          </slot>
         </div>
       </div>
     </template>
@@ -499,12 +504,17 @@ onMounted(async () => {
   >
     <template #body>
       <div class="data-row">
-        <TInput
+        <slot
           v-for="field in updatableFields"
-          v-model="currentRowForUpdate[field]"
-          :type="inputType(field)"
-          :label="inputLabel(field)"
-        />
+          :name="`update-col.${field}`"
+          v-bind="{ row: currentRowForUpdate, field: field, type: inputType(field), label: inputLabel(field) }"
+        >
+          <TInput
+            v-model="currentRowForUpdate[field]"
+            :type="inputType(field)"
+            :label="inputLabel(field)"
+          />
+        </slot>
       </div>
     </template>
 
