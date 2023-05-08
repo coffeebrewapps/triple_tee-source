@@ -23,7 +23,7 @@ function module {
 
 const name = '$model';
 const store = require('../stores/$model');
-const router = require('../routes/$model').router;
+const router = require('../routes/$model');
 
 module.exports = {
   name,
@@ -36,21 +36,19 @@ module.exports = {
   if [[ ! -f $route_file ]]; then
     echo "'use strict'
 
-const express = require('express');
-const router = express.Router();
-
 const shared = require('./shared');
 const ${model}Store = require('../stores/$model');
 
-router.get('/download', shared.download(${model}Store));
-router.get('/', shared.list(${model}Store));
-router.get('/:id', shared.view(${model}Store));
-router.post('/', shared.create(${model}Store));
-router.put('/:id', shared.update(${model}Store));
-router.delete('/:id', shared.remove(${model}Store));
-
 module.exports = {
-  router
+  prefix: '/api/${model}',
+  routes: [
+    { method: 'get', path: '/download', handler: shared.download(${model}Store) },
+    { method: 'get', path: '/', handler: shared.list(${model}Store) },
+    { method: 'get', path: '/:id', handler: shared.view(${model}Store) },
+    { method: 'post', path: '/', handler: shared.create(${model}Store) },
+    { method: 'put', path: '/:id', handler: shared.update(${model}Store) },
+    { method: 'delete', path: '/:id', handler: shared.remove(${model}Store) }
+  ]
 }" >> $route_file
   fi
 
@@ -91,11 +89,6 @@ module.exports = {
   remove
 }" >> $store_file
   fi
-
-  module_require="const $model = require('./server/modules/$model');"
-  route_use="app.use('/api/$model', $model.router);"
-  echo $module_require
-  echo $route_use
 }
 
 function client {
