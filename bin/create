@@ -29,8 +29,7 @@ module.exports = {
   name,
   store,
   router
-}
-    " >> $module_file
+}" >> $module_file
   fi
 
   route_file="./server/routes/$model.js"
@@ -52,8 +51,7 @@ router.delete('/:id', shared.remove(${model}Store));
 
 module.exports = {
   router
-}
-    " >> $route_file
+}" >> $route_file
   fi
 
   store_file="./server/stores/$model.js"
@@ -91,8 +89,7 @@ module.exports = {
   create,
   update,
   remove
-}
-    " >> $store_file
+}" >> $store_file
   fi
 
   module_require="const $model = require('./server/modules/$model');"
@@ -101,8 +98,46 @@ module.exports = {
   echo $route_use
 }
 
+function client {
+  model=$1
+  lower_model=$(echo "$model" | tr '[:upper:]' '[:lower:]')
+
+  view_file="./client/src/views/$model.vue"
+  if [[ ! -f $view_file ]]; then
+    touch $view_file
+    echo "<script setup>
+import { onMounted, computed, ref } from 'vue'
+import axios from 'axios'
+
+import useConfig from '../config'
+import DataPage from '../components/DataPage.vue'
+
+const config = useConfig()
+
+const dataFields = computed(() => {
+  return [
+  ]
+})
+
+onMounted(async () => {
+})
+</script>
+
+<template>
+  <DataPage
+    data-type=\"${model}\"
+    url-base=\"api/${lower_model}\"
+    schemas-url-base=\"api/schemas/${lower_model}\"
+    :data-fields=\"dataFields\"
+  />
+</template>" >> $view_file
+  fi
+}
+
 if [[ $action == 'model' ]]; then
   model $model
 elif [[ $action == 'module' ]]; then
   module $model
+elif [[ $action == 'client' ]]; then
+  client $model
 fi
