@@ -129,6 +129,29 @@ const dataLoading = ref(false)
 const errorAlert = ref(false)
 const errorContent = ref('')
 
+const errorAlertFitContent = computed(() => {
+  if (!!errorContent.value && errorContent.value.length > 0) {
+    return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n')
+  } else {
+    return ``
+  }
+})
+
+const errorAlertSize = computed(() => {
+  if (!!errorContent.value && errorContent.value.length > 100) {
+    const lines = Math.ceil(errorContent.value.length / 100) * 50
+    return {
+      width: 800,
+      height: lines
+    }
+  } else {
+    return {
+      width: 400,
+      height: 200
+    }
+  }
+})
+
 const listedHeaders = computed(() => {
   return props.dataFields.filter(h => h.listable)
 })
@@ -526,10 +549,12 @@ onMounted(async () => {
   />
 
   <TAlert
+    v-if="errorContent.length > 0"
     title="Error"
-    :content="errorContent"
-    :width="400"
-    :height="250"
+    class="error-alert"
+    :content="errorAlertFitContent"
+    :width="errorAlertSize.width"
+    :height="errorAlertSize.height"
     v-model="errorAlert"
   />
 
@@ -687,10 +712,6 @@ onMounted(async () => {
 <style scoped>
 a.hidden {
   display: none;
-}
-
-.dialog .container .body {
-  overflow-x: scroll;
 }
 
 .input-control {
