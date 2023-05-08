@@ -220,6 +220,15 @@ const updatableKeys = computed(() => {
   return Object.keys(updatableFields.value)
 })
 
+const createDialogClass = computed(() => {
+  const fieldsLength = Object.keys(updatableFields.value).length
+  if (fieldsLength > 4) {
+    return `create-dialog split-col`
+  } else {
+    return `create-dialog single-col`
+  }
+})
+
 const combinedSchemas = computed(() => {
   if (!!schemas.value) {
     return Object.keys(schemas.value).reduce((o, field) => {
@@ -269,6 +278,10 @@ function inputOptions(field) {
   } else {
     return []
   }
+}
+
+function inputableField(field) {
+  return inputType(field) === 'text' || inputType(field) === 'number'
 }
 
 function selectableField(field) {
@@ -582,6 +595,7 @@ onMounted(async () => {
     v-if="newRow"
     v-model="createDialog"
     :title="createDialogTitle(dataType)"
+    :class="createDialogClass"
   >
     <template #body>
       <div class="data-row">
@@ -592,7 +606,7 @@ onMounted(async () => {
           v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
         >
           <TInput
-            v-if="inputType(field) === 'text'"
+            v-if="inputableField(field)"
             v-model="newRow[field]"
             :type="inputType(field)"
             :label="inputLabel(field)"
@@ -667,7 +681,7 @@ onMounted(async () => {
         >
 
           <TInput
-            v-if="inputType(field) === 'text'"
+            v-if="inputableField(field)"
             v-model="currentRowForUpdate[field]"
             :type="inputType(field)"
             :label="inputLabel(field)"
@@ -736,6 +750,16 @@ a.hidden {
 
 .input-control {
   margin: 0 auto;
+}
+
+.create-dialog.single-col .data-row {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.create-dialog.split-col .data-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
 .view-dialog .data-row {
