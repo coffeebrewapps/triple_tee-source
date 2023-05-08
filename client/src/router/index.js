@@ -16,6 +16,11 @@ const routes = [
     path: '/form',
     name: 'form',
     component: () => import('../views/DemoForm.vue')
+  },
+  {
+    path: '/:catchAll(.*)',
+    redirect: '/',
+    meta: { hidden: true }
   }
 ]
 

@@ -1,16 +1,22 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, computed } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 
 const router = useRouter()
 const routes = reactive(router.getRoutes())
+
+const renderedRoutes = computed(() => {
+  return routes.filter((route) => {
+    return !route.meta.hidden
+  })
+})
 </script>
 
 <template>
   <div class="nav">
     <RouterLink
       class="nav-item"
-      v-for="route in routes"
+      v-for="route in renderedRoutes"
       :key="route.name"
       :to="route.path"
       active-class="active"

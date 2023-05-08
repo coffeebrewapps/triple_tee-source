@@ -42,6 +42,10 @@ app.get('/api/schemas/:schema', function(req, res){
 
 app.use('/api/users', users.router);
 app.use('/api/divisions', divisions.router);
+
+app.get('*', function(req, res){
+  res.redirect('/');
+});
 /*** end:Routes ***/
 
 (async () => {
