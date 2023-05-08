@@ -15,7 +15,7 @@ exports.create = function(store) {
     const params = req.body;
 
     logger.log(`Creating record`, params)
-    res.send({
+    res.status(201).send({
       record: store.create(params)
     });
   }
