@@ -49,5 +49,71 @@
       "unique": ["name"],
       "required": ["id", "name"]
     }
+  },
+  "transactions": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "type": {
+        "type": "enum",
+        "enums": {
+          "income": "Income",
+          "expense": "Expense",
+          "incomeReversal": "Income Reversal",
+          "expenseReversal": "Expense Reversal"
+        }
+      },
+      "transactionDate": {
+        "type": "date"
+      },
+      "description": {
+        "type": "text"
+      },
+      "amount": {
+        "type": "number"
+      },
+      "homeCurrencyAmount": {
+        "type": "number"
+      },
+      "tags": {
+        "type": "array",
+        "default": []
+      },
+      "currencyId": {
+        "type": "text"
+      },
+      "associatedTransactionId": {
+        "type": "text"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": [
+        {
+          "currencyId": {
+            "reference": "currencies",
+            "primary": "id"
+          }
+        },
+        {
+          "associatedTransactionId": {
+            "reference": "transactions",
+            "primary": "id"
+          }
+        }
+      ],
+      "unique": [],
+      "required": [
+        "id",
+        "type",
+        "transactionDate",
+        "description",
+        "amount",
+        "homeCurrencyAmount",
+        "tags",
+        "currencyId"
+      ]
+    }
   }
 }
