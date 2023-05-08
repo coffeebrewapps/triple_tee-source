@@ -11,6 +11,7 @@ import {
   TDialog,
   TDatePicker,
   TInput,
+  TSelect,
   TButton
 } from 'coffeebrew-vue-components'
 
@@ -29,13 +30,9 @@ const props = defineProps({
     type: String,
     default: ''
   },
-  headers: {
+  dataFields: {
     type: Array,
     default: []
-  },
-  updatableFields: {
-    type: Object,
-    default: {}
   },
   createDialogTitle: {
     type: Function,
@@ -132,6 +129,29 @@ const dataLoading = ref(false)
 const errorAlert = ref(false)
 const errorContent = ref('')
 
+const listedHeaders = computed(() => {
+  return props.dataFields.filter(h => h.listable)
+})
+
+const listedData = computed(() => {
+  return data.value.map(d => {
+    return Object.keys(d).reduce((v, k) => {
+      const type = inputType(k)
+      if (type === 'select') {
+        const options = inputOptions(k)
+        const option = options.find(o => o.value === d[k])
+        if (!!option) {
+          return Object.assign(v, { [k]: option.label })
+        } else {
+          return Object.assign(v, { [k]: d[k] })
+        }
+      } else {
+        return Object.assign(v, { [k]: d[k] })
+      }
+    }, {})
+  })
+})
+
 const createDialog = ref(false)
 const newRow = ref()
 
@@ -157,16 +177,55 @@ const schemasUrl = computed(() => {
   return `${config.baseUrl}/${props.schemasUrlBase}`
 })
 
+const viewableFields = computed(() => {
+  return props.dataFields.filter(h => h.viewable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
+const updatableFields = computed(() => {
+  return props.dataFields.filter(h => h.updatable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
 const updatableKeys = computed(() => {
-  return Object.keys(props.updatableFields)
+  return Object.keys(updatableFields.value)
 })
 
 function inputType(field) {
-  return schemas.value[field].type
+  if (!!updatableFields.value[field] && !!updatableFields.value[field].type) {
+    return updatableFields.value[field].type
+  } else {
+    return schemas.value[field].type
+  }
 }
 
 function inputLabel(field) {
-  return props.updatableFields[field]
+  if (!!viewableFields.value[field]) {
+    return viewableFields.value[field].label
+  } else {
+    return ''
+  }
+}
+
+function inputValue(field, value) {
+  const header = props.dataFields.find(h => h.key === field)
+  if (header.type === 'select') {
+    return header.options.find(o => o.value === value).label
+  } else {
+    return value
+  }
+}
+
+function inputOptions(field) {
+  if(!!updatableFields.value[field] && updatableFields.value[field].type === 'select') {
+    return updatableFields.value[field].options
+  } else {
+    return []
+  }
 }
 
 async function openCreateDialog(id) {
@@ -452,8 +511,8 @@ onMounted(async () => {
 
   <TTable
     :name="dataType"
-    :headers="headers"
-    :data="data"
+    :headers="listedHeaders"
+    :data="listedData"
     :table-actions="tableActions"
     :actions="actions"
     :loading="dataLoading"
@@ -477,12 +536,34 @@ onMounted(async () => {
   >
     <template #body>
       <div class="data-row">
-        <TInput
+
+        <slot
           v-for="field in updatableKeys"
-          v-model="newRow[field]"
-          :type="inputType(field)"
-          :label="inputLabel(field)"
-        />
+          :name="`create-col.${field}`"
+          v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
+        >
+          <TInput
+            v-if="inputType(field) === 'text'"
+            v-model="newRow[field]"
+            :type="inputType(field)"
+            :label="inputLabel(field)"
+          />
+
+          <TDatePicker
+            v-if="inputType(field) === 'date'"
+            v-model="newRow[field]"
+            :label="inputLabel(field)"
+          />
+
+          <TSelect
+            v-if="inputType(field) === 'select'"
+            v-model="newRow[field]"
+            :label="inputLabel(field)"
+            :name="field"
+            :id="field"
+            :options="inputOptions(field)"
+          />
+        </slot>
       </div>
     </template>
 
@@ -496,20 +577,29 @@ onMounted(async () => {
     v-if="currentRow"
     v-model="viewDialog"
     :title="viewDialogTitle(currentRow)"
+    class="view-dialog"
   >
     <template #body>
       <div class="data-row">
-        <div
-          class="data-col"
-          v-for="key in Object.keys(currentRow)"
+        <slot
+          name="view-content"
+          v-bind="{ row: currentRow }"
         >
-          <slot
-            :name="`view-col.${key}`"
-            v-bind="{ key, value: currentRow[key] }"
+          <div
+            class="data-col"
+            v-for="field in Object.keys(currentRow)"
           >
-            {{ key }}: {{ currentRow[key] }}
-          </slot>
-        </div>
+            <slot
+              :name="`view-col.${field}`"
+              v-bind="{ field, value: currentRow[field] }"
+            >
+              <div class="data-label">{{ inputLabel(field) }}</div>
+              <div class="data-value">
+                {{ inputValue(field, currentRow[field]) }}
+              </div>
+            </slot>
+          </div>
+        </slot>
       </div>
     </template>
   </TDialog>
@@ -538,6 +628,15 @@ onMounted(async () => {
             v-if="inputType(field) === 'date'"
             v-model="currentRowForUpdate[field]"
             :label="inputLabel(field)"
+          />
+
+          <TSelect
+            v-if="inputType(field) === 'select'"
+            v-model="currentRowForUpdate[field]"
+            :label="inputLabel(field)"
+            :name="field"
+            :id="field"
+            :options="inputOptions(field)"
           />
         </slot>
       </div>
@@ -592,5 +691,21 @@ a.hidden {
 
 .input-control {
   margin: 0 auto;
+}
+
+.view-dialog .data-row {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.view-dialog .data-col {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  padding: 1rem;
+}
+
+.view-dialog .data-label {
+  font-weight: 600;
 }
 </style>

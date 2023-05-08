@@ -22,18 +22,15 @@ const divisionsUrl = computed(() => {
 
 const divisions = ref([])
 
-const headers = ref([
-  { key: 'id', type: 'number', label: 'ID' },
-  { key: 'name', type: 'text', label: 'Name' },
-  { key: 'email', type: 'text', label: 'Email' }
-])
-
-const updatableFields = ref({
-  name: 'Name',
-  email: 'Email',
-  division: 'Division',
-  joinDate: 'Join Date',
-  phone: 'Phone'
+const dataFields = computed(() => {
+  return [
+    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, updatable: false },
+    { key: 'name', type: 'text', label: 'Name', listable: true, viewable: true, updatable: true },
+    { key: 'email', type: 'text', label: 'Email', listable: true, viewable: true, updatable: true },
+    { key: 'division', type: 'select', label: 'Division', listable: false, viewable: true, updatable: true, options: divisions.value },
+    { key: 'joinDate', type: 'date', label: 'Join Date', listable: false, viewable: true, updatable: true },
+    { key: 'phone', type: 'text', label: 'Phone', listable: false, viewable: true, updatable: true }
+  ]
 })
 
 function viewDialogTitle(row) {
@@ -61,7 +58,11 @@ function deleteDialogTitle(row) {
 }
 
 function divisionValue(value) {
-  return divisions.value.find(d => d.value === value).label
+  if (divisions.value.length > 0) {
+    return divisions.value.find(d => d.value === value).label
+  } else {
+    return ''
+  }
 }
 
 async function loadDivisions() {
@@ -91,21 +92,11 @@ onMounted(async () => {
     data-type="User"
     url-base="api/users"
     schemas-url-base="api/schemas/users"
-    :headers="headers"
-    :updatable-fields="updatableFields"
+    :data-fields="dataFields"
     :view-dialog-title="viewDialogTitle"
     :update-dialog-title="updateDialogTitle"
     :delete-dialog-title="deleteDialogTitle"
-  >
-
-    <template #view-col.division="{ key, value }">
-      {{ key }} : {{ divisionValue(value) }}
-    </template>
-
-    <template #update-col.division="{ row, field, type, label }">
-      <TSelect v-model="row[field]" :label="label" :name="field" :id="field" :options="divisions"/>
-    </template>
-  </DataPage>
+  />
 
   <TAlert
     title="Error"
