@@ -1,0 +1,108 @@
+#!/bin/bash
+action=$1
+model=$2
+
+function model {
+  model=$1
+  file="./data/$model.json"
+  if [[ ! -f $file ]]; then
+    touch $file
+    echo "Created new model: $model"
+  else
+    echo "Model already exists: $model"
+  fi
+}
+
+function module {
+  model=$1
+
+  module_file="./server/modules/$model.js"
+  if [[ ! -f $module_file ]]; then
+    touch $module_file
+    echo "'use strict'
+
+const name = '$model';
+const store = require('../stores/$model');
+const router = require('../routes/$model').router;
+
+module.exports = {
+  name,
+  store,
+  router
+}
+    " >> $module_file
+  fi
+
+  route_file="./server/routes/$model.js"
+  if [[ ! -f $route_file ]]; then
+    echo "'use strict'
+
+const express = require('express');
+const router = express.Router();
+
+const shared = require('./shared');
+const ${model}Store = require('../stores/$model');
+
+router.get('/download', shared.download(${model}Store));
+router.get('/', shared.list(${model}Store));
+router.get('/:id', shared.view(${model}Store));
+router.post('/', shared.create(${model}Store));
+router.put('/:id', shared.update(${model}Store));
+router.delete('/:id', shared.remove(${model}Store));
+
+module.exports = {
+  router
+}
+    " >> $route_file
+  fi
+
+  store_file="./server/stores/$model.js"
+  if [[ ! -f $store_file ]]; then
+    echo "'use strict'
+
+const dataAccess = require('./dataAccess');
+
+const modelClass = '$model';
+
+function list(filters = {}) {
+  return dataAccess.list(modelClass, filters);
+}
+
+function view(id) {
+  return dataAccess.view(modelClass, id);
+}
+
+function create(params) {
+  return dataAccess.create(modelClass, params);
+}
+
+function update(id, params) {
+  return dataAccess.update(modelClass, id, params);
+}
+
+function remove(id) {
+  return dataAccess.remove(modelClass, id);
+}
+
+module.exports = {
+  modelClass,
+  list,
+  view,
+  create,
+  update,
+  remove
+}
+    " >> $store_file
+  fi
+
+  module_require="const $model = require('./server/modules/$model');"
+  route_use="app.use('/api/$model', $model.router);"
+  echo $module_require
+  echo $route_use
+}
+
+if [[ $action == 'model' ]]; then
+  model $model
+elif [[ $action == 'module' ]]; then
+  module $model
+fi
