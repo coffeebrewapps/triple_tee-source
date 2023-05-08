@@ -134,6 +134,8 @@ const listedHeaders = computed(() => {
 })
 
 const listedData = computed(() => {
+  if (!data.value) { return [] }
+
   return data.value.map(d => {
     return Object.keys(d).reduce((v, k) => {
       const type = inputType(k)
@@ -198,8 +200,10 @@ const updatableKeys = computed(() => {
 function inputType(field) {
   if (!!updatableFields.value[field] && !!updatableFields.value[field].type) {
     return updatableFields.value[field].type
+  } else if (schemas.value.length > 0) {
+      return schemas.value[field].type
   } else {
-    return schemas.value[field].type
+    return 'text'
   }
 }
 
