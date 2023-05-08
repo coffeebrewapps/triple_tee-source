@@ -1,15 +1,12 @@
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const fsPromises = require('fs').promises;
 
 const cors = require('cors');
 
 const common = require('./common');
 const store = require('./server/stores/dataAccess');
-
-/*** start:Modules ***/
-const users = require('./server/modules/users');
-const divisions = require('./server/modules/divisions');
-/*** end:Modules ***/
 
 const app = express();
 const port = process.env.PORT || common.DEFAULT_PORT;
@@ -24,6 +21,23 @@ if (process.env.NODE_ENV === 'development') {
   }
 }
 
+async function loadPlugins(app) {
+  await fsPromises.readdir(path.join(__dirname, 'server/modules'))
+    .then((files) => {
+      for (const file of files) {
+        const plugin = require(path.join(__dirname, 'server/modules', file));
+        const pluginRouter = plugin.router;
+        pluginRouter.routes.forEach((route) => {
+          app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
+        });
+        console.log(`Loaded plugin: ${plugin.name}`);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+    })
+}
+
 /*** start:Middleware ***/
 app.use(express.json())
 app.use(cors(corsConfig));
@@ -35,7 +49,6 @@ app.get('/', function(req, res){
   (async () => {
     await store.initData();
     console.log(`Refreshed data`);
-    res.send('Server is ready!');
   })();
 });
 
@@ -43,17 +56,12 @@ app.get('/api/schemas/:schema', function(req, res){
   const modelClass = req.params.schema;
   res.send(store.viewSchemas(modelClass));
 });
-
-app.use('/api/users', users.router);
-app.use('/api/divisions', divisions.router);
-
-app.get('*', function(req, res){
-  res.redirect('/');
-});
 /*** end:Routes ***/
 
 (async () => {
   await store.initData();
+
+  await loadPlugins(app);
 
   console.log(`Server starting at port ${port}`);
 

@@ -1,18 +1,16 @@
 'use strict'
 
-const express = require('express');
-const router = express.Router();
-
 const shared = require('./shared');
 const divisionsStore = require('../stores/divisions');
 
-router.get('/download', shared.download(divisionsStore));
-router.get('/', shared.list(divisionsStore));
-router.get('/:id', shared.view(divisionsStore));
-router.post('/', shared.create(divisionsStore));
-router.put('/:id', shared.update(divisionsStore));
-router.delete('/:id', shared.remove(divisionsStore));
-
 module.exports = {
-  router
+  prefix: '/api/divisions',
+  routes: [
+    { method: 'get', path: '/download', handler: shared.download(divisionsStore) },
+    { method: 'get', path: '/', handler: shared.list(divisionsStore) },
+    { method: 'get', path: '/:id', handler: shared.view(divisionsStore) },
+    { method: 'post', path: '/', handler: shared.create(divisionsStore) },
+    { method: 'put', path: '/:id', handler: shared.update(divisionsStore) },
+    { method: 'delete', path: '/:id', handler: shared.remove(divisionsStore) }
+  ]
 }
