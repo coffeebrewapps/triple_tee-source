@@ -220,14 +220,23 @@ const updatableKeys = computed(() => {
   return Object.keys(updatableFields.value)
 })
 
-function inputType(field) {
-  if (!!updatableFields.value[field] && !!updatableFields.value[field].type) {
-    return updatableFields.value[field].type
-  } else if (schemas.value.length > 0) {
-      return schemas.value[field].type
+const combinedSchemas = computed(() => {
+  if (!!schemas.value) {
+    return Object.keys(schemas.value).reduce((o, field) => {
+      const prop = props.dataFields.find(f => f.key === field)
+      const combined = Object.assign({}, schemas.value[field], prop)
+      o[field] = combined
+      return o
+    }, {})
+  } else if (!!updatableFields.value) {
+    return updatableFields.value
   } else {
-    return 'text'
+    return {}
   }
+})
+
+function inputType(field) {
+  return combinedSchemas.value[field].type
 }
 
 function inputLabel(field) {
@@ -242,17 +251,28 @@ function inputValue(field, value) {
   const header = props.dataFields.find(h => h.key === field)
   if (header.type === 'select') {
     return header.options.find(o => o.value === value).label
+  } else if (header.type === 'enum') {
+    return schemas.value[field].enums[value]
   } else {
     return value
   }
 }
 
 function inputOptions(field) {
-  if(!!updatableFields.value[field] && updatableFields.value[field].type === 'select') {
+  if(inputType(field) === 'select') {
     return updatableFields.value[field].options
+  } else if (inputType(field) === 'enum') {
+    const enums = schemas.value[field].enums
+    return Object.keys(enums).map((key) => {
+      return { value: key, label: enums[key] }
+    })
   } else {
     return []
   }
+}
+
+function selectableField(field) {
+  return inputType(field) === 'select' || inputType(field) === 'enum'
 }
 
 async function openCreateDialog(id) {
@@ -585,7 +605,7 @@ onMounted(async () => {
           />
 
           <TSelect
-            v-if="inputType(field) === 'select'"
+            v-if="selectableField(field)"
             v-model="newRow[field]"
             :label="inputLabel(field)"
             :name="field"
@@ -660,7 +680,7 @@ onMounted(async () => {
           />
 
           <TSelect
-            v-if="inputType(field) === 'select'"
+            v-if="selectableField(field)"
             v-model="currentRowForUpdate[field]"
             :label="inputLabel(field)"
             :name="field"
