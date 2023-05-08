@@ -49,7 +49,11 @@ async function loadData(modelClass) {
   return new Promise((resolve, reject) => {
     readFromFile(modelClass)
       .then((result) => {
-        resolve({ modelClass: modelClass, data: JSON.parse(result) });
+        if (result) {
+          resolve({ modelClass: modelClass, data: JSON.parse(result) });
+        } else {
+          resolve({ modelClass: modelClass, data: {} });
+        }
       })
       .catch((error) => {
         logger.error(`Error reading file`, { modelClass, error });
