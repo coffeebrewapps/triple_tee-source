@@ -12,7 +12,7 @@
     "client-build": "vite build --emptyOutDir client",
     "client-preview": "vite preview client",
     "client-test:unit": "vitest client",
-    "server-dev": "node server.js",
+    "server-dev": "DEBUG=express:* node server.js",
     "server-build": "esbuild server.js --platform=node --bundle --minify --outfile=dist/server.js",
     "build": "bin/build",
     "package": "electron-forge package",
