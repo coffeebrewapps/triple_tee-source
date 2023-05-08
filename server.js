@@ -32,7 +32,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 /*** start:Routes ***/
 app.get('/', function(req, res){
-  res.send('Server is ready!');
+  (async () => {
+    await store.initData();
+    console.log(`Refreshed data`);
+    res.send('Server is ready!');
+  })();
 });
 
 app.get('/api/schemas/:schema', function(req, res){
