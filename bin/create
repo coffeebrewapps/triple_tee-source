@@ -131,6 +131,9 @@ import DataPage from '@/components/DataPage.vue'
 
 const config = useConfig()
 
+const fieldsLayout = ref([
+])
+
 const dataFields = computed(() => {
   return [
   ]
@@ -145,6 +148,7 @@ onMounted(async () => {
     data-type=\"${model}\"
     url-base=\"api/${lower_model}\"
     schemas-url-base=\"api/schemas/${lower_model}\"
+    :fields-layout=\"fieldsLayout\"
     :data-fields=\"dataFields\"
   />
 </template>" >> $view_file
