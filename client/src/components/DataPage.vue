@@ -171,18 +171,7 @@ const listedData = computed(() => {
 
   return data.value.map(d => {
     return Object.keys(d).reduce((v, k) => {
-      const type = inputType(k)
-      if (type === 'select') {
-        const options = inputOptions(k)
-        const option = options.find(o => o.value === d[k])
-        if (!!option) {
-          return Object.assign(v, { [k]: option.label })
-        } else {
-          return Object.assign(v, { [k]: d[k] })
-        }
-      } else {
-        return Object.assign(v, { [k]: d[k] })
-      }
+      return Object.assign(v, { [k]: inputValue(k, d[k]) })
     }, {})
   })
 })
@@ -263,7 +252,14 @@ const combinedSchemas = computed(() => {
   if (!!schemas.value) {
     return Object.keys(schemas.value).reduce((o, field) => {
       const prop = props.dataFields.find(f => f.key === field)
-      const combined = Object.assign({}, schemas.value[field], prop)
+      let enums = {}
+      if (!!schemas.value[field].enums) {
+        enums = schemas.value[field].enums
+      }
+      const options = Object.keys(enums).map((e) => {
+        return { value: e, label: enums[e] }
+      })
+      const combined = Object.assign({}, schemas.value[field], { options: options }, prop)
       o[field] = combined
       return o
     }, {})
@@ -285,23 +281,17 @@ function inputLabel(field) {
 }
 
 function inputValue(field, value) {
-  if (inputType(field) === 'select') {
-    return combinedSchemas.value[field].options.find(o => o.value === value).label
-  } else if (inputType(field) === 'enum') {
-    return combinedSchemas.value[field].enums[value]
+  if (selectableField(field)) {
+    const option = inputOptions(field).find(o => o.value === value) || {}
+    return option.label
   } else {
     return value
   }
 }
 
 function inputOptions(field) {
-  if (inputType(field) === 'select') {
+  if (selectableField(field)) {
     return combinedSchemas.value[field].options
-  } else if (inputType(field) === 'enum') {
-    const enums = combinedSchemas.value[field].enums
-    return Object.keys(enums).map((k) => {
-      return { value: k, label: enums[k] }
-    })
   } else {
     return []
   }
@@ -312,7 +302,7 @@ function inputableField(field) {
 }
 
 function selectableField(field) {
-  return inputType(field) === 'select' || inputType(field) === 'enum'
+  return inputType(field) === 'select' || inputType(field) === 'multiSelect' || inputType(field) === 'enum'
 }
 
 async function openCreateDialog(id) {

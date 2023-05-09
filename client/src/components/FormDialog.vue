@@ -87,23 +87,18 @@ function inputLabel(field) {
 }
 
 function inputValue(field, value) {
-  if (inputType(field) === 'select') {
-    return props.schemas[field].options.find(o => o.value === value).label
-  } else if (inputType(field) === 'enum') {
-    return props.schemas[field].enums[value]
+  if (selectableField(field)) {
+    const option = inputOptions(field).find(o => o.value === value) || {}
+    return option.label
   } else {
     return value
   }
 }
 
 function inputOptions(field) {
-  if (inputType(field) === 'select') {
+  if (field === 'tags') { console.log(props.schemas[field]) }
+  if (selectableField(field)) {
     return props.schemas[field].options
-  } else if (inputType(field) === 'enum') {
-    const enums = props.schemas[field].enums
-    return Object.keys(enums).map((k) => {
-      return { value: k, label: enums[k] }
-    })
   } else {
     return []
   }
@@ -114,7 +109,7 @@ function inputableField(field) {
 }
 
 function selectableField(field) {
-  return inputType(field) === 'select' || inputType(field) === 'enum'
+  return inputType(field) === 'select' || inputType(field) === 'multiSelect' || inputType(field) === 'enum'
 }
 
 function submitDataAndCloseDialog() {
