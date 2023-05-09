@@ -5,10 +5,10 @@ import axios from 'axios'
 
 import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
+
 import {
   TAlert
 } from 'coffeebrew-vue-components'
-
 
 const config = useConfig()
 

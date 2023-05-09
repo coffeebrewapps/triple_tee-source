@@ -143,5 +143,34 @@
         "currencyId"
       ]
     }
+  },
+  "work_logs": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "startTime": {
+        "type": "datetime"
+      },
+      "endTime": {
+        "type": "datetime"
+      },
+      "description": {
+        "type": "text"
+      },
+      "content": {
+        "type": "text"
+      },
+      "tags": {
+        "type": "array",
+        "default": []
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": [],
+      "unique": [],
+      "required": ["id"]
+    }
   }
 }
