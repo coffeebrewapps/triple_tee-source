@@ -208,6 +208,10 @@ const viewableFields = computed(() => {
   }, {})
 })
 
+const viewableKeys = computed(() => {
+  return Object.keys(viewableFields.value)
+})
+
 const creatableFields = computed(() => {
   return props.dataFields.filter(h => h.creatable).reduce((o, h) => {
     o[h.key] = h
@@ -281,7 +285,12 @@ function inputLabel(field) {
 }
 
 function inputValue(field, value) {
-  if (selectableField(field)) {
+  if (inputType(field) === 'multiSelect') {
+    return value.map((v) => {
+      const option = inputOptions(field).find(o => o.value === v) || {}
+      return option.label
+    }).join(', ')
+  } else if (selectableField(field)) {
     const option = inputOptions(field).find(o => o.value === value) || {}
     return option.label
   } else {
@@ -647,7 +656,7 @@ onMounted(async () => {
         >
           <div
             class="data-col"
-            v-for="field in Object.keys(currentRow)"
+            v-for="field in viewableKeys"
           >
             <slot
               :name="`view-col.${field}`"
@@ -721,6 +730,7 @@ a.hidden {
   display: flex;
   flex-direction: column;
   text-align: left;
+  overflow: scroll;
 }
 
 .view-dialog .data-col {
