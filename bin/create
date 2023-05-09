@@ -16,14 +16,19 @@ function model {
 function module {
   model=$1
 
-  module_file="./server/modules/$model.js"
+  module_dir="./server/modules/$model"
+  if [[ ! -f $module_dir ]]; then
+    mkdir $module_dir
+  fi
+
+  module_file="$module_dir/index.js"
   if [[ ! -f $module_file ]]; then
     touch $module_file
     echo "'use strict'
 
 const name = '$model';
-const store = require('../stores/$model');
-const router = require('../routes/$model');
+const store = require('./stores');
+const router = require('./routes');
 
 module.exports = {
   name,
@@ -32,31 +37,31 @@ module.exports = {
 }" >> $module_file
   fi
 
-  route_file="./server/routes/$model.js"
+  route_file="$module_dir/routes.js"
   if [[ ! -f $route_file ]]; then
     echo "'use strict'
 
-const shared = require('./shared');
-const ${model}Store = require('../stores/$model');
+const routes = require('../../routes/shared');
+const stores = require('./stores');
 
 module.exports = {
   prefix: '/api/${model}',
   routes: [
-    { method: 'get', path: '/download', handler: shared.download(${model}Store) },
-    { method: 'get', path: '/', handler: shared.list(${model}Store) },
-    { method: 'get', path: '/:id', handler: shared.view(${model}Store) },
-    { method: 'post', path: '/', handler: shared.create(${model}Store) },
-    { method: 'put', path: '/:id', handler: shared.update(${model}Store) },
-    { method: 'delete', path: '/:id', handler: shared.remove(${model}Store) }
+    { method: 'get', path: '/download', handler: routes.download(stores) },
+    { method: 'get', path: '/', handler: routes.list(stores) },
+    { method: 'get', path: '/:id', handler: routes.view(stores) },
+    { method: 'post', path: '/', handler: routes.create(stores) },
+    { method: 'put', path: '/:id', handler: routes.update(stores) },
+    { method: 'delete', path: '/:id', handler: routes.remove(stores) }
   ]
 }" >> $route_file
   fi
 
-  store_file="./server/stores/$model.js"
+  store_file="$module_dir/stores.js"
   if [[ ! -f $store_file ]]; then
     echo "'use strict'
 
-const dataAccess = require('./dataAccess');
+const dataAccess = require('../../stores/dataAccess');
 
 const modelClass = '$model';
 
