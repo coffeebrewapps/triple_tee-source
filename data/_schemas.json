@@ -1,4 +1,32 @@
 {
+  "tags": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "category": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "textColor": {
+        "type": "text"
+      },
+      "backgroundColor": {
+        "type": "text"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": [],
+      "unique": [],
+      "required": ["category", "name"]
+    }
+  },
   "users": {
     "fields": {
       "id": {
