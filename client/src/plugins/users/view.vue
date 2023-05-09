@@ -22,12 +22,12 @@ const divisions = ref([])
 
 const dataFields = computed(() => {
   return [
-    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, updatable: false },
-    { key: 'name', type: 'text', label: 'Name', listable: true, viewable: true, updatable: true },
-    { key: 'email', type: 'text', label: 'Email', listable: true, viewable: true, updatable: true },
-    { key: 'division', type: 'select', label: 'Division', listable: false, viewable: true, updatable: true, options: divisions.value },
-    { key: 'joinDate', type: 'date', label: 'Join Date', listable: false, viewable: true, updatable: true },
-    { key: 'phone', type: 'text', label: 'Phone', listable: false, viewable: true, updatable: true }
+    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false },
+    { key: 'name', type: 'text', label: 'Name', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'email', type: 'text', label: 'Email', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'division', type: 'select', label: 'Division', listable: false, viewable: true, creatable: true, updatable: true, options: divisions.value },
+    { key: 'joinDate', type: 'date', label: 'Join Date', listable: false, viewable: true, creatable: true, updatable: true },
+    { key: 'phone', type: 'text', label: 'Phone', listable: false, viewable: true, creatable: true, updatable: true }
   ]
 })
 

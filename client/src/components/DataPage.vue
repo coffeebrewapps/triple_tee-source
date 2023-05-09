@@ -15,6 +15,8 @@ import {
   TButton
 } from 'coffeebrew-vue-components'
 
+import FormDialog from './FormDialog.vue'
+
 const config = useConfig()
 
 const props = defineProps({
@@ -317,9 +319,7 @@ async function openCreateDialog(id) {
   createDialog.value = true
 }
 
-async function createDataAndCloseDialog() {
-  const params = newRow.value
-
+async function createDataAndCloseDialog(params) {
   await createData(params)
           .then((result) => {
             loadData()
@@ -369,8 +369,7 @@ async function openUpdateDialog(id) {
           })
 }
 
-async function updateDataAndCloseDialog() {
-  const params = currentRowForUpdate.value
+async function updateDataAndCloseDialog(params) {
   const id = params.id
 
   await updateData(id, params)
@@ -612,50 +611,25 @@ onMounted(async () => {
     v-model="errorAlert"
   />
 
-  <TDialog
+  <FormDialog
     v-if="newRow"
     v-model="createDialog"
-    :title="createDialogTitle(dataType)"
-    :class="createDialogClass"
-  >
-    <template #body>
-      <div class="data-row">
+    :schemas="combinedSchemas"
+    :data-fields="creatableKeys"
+    :data="newRow"
+    :dialog-title="createDialogTitle(dataType)"
+    @submit="createDataAndCloseDialog"
+  />
 
-        <slot
-          v-for="field in creatableKeys"
-          :name="`create-col.${field}`"
-          v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
-        >
-          <TInput
-            v-if="inputableField(field)"
-            v-model="newRow[field]"
-            :type="inputType(field)"
-            :label="inputLabel(field)"
-          />
-
-          <TDatePicker
-            v-if="inputType(field) === 'date'"
-            v-model="newRow[field]"
-            :label="inputLabel(field)"
-          />
-
-          <TSelect
-            v-if="selectableField(field)"
-            v-model="newRow[field]"
-            :label="inputLabel(field)"
-            :name="field"
-            :id="field"
-            :options="inputOptions(field)"
-          />
-        </slot>
-      </div>
-    </template>
-
-    <template #actions>
-      <TButton class="confirm-button" button-type="text" value="Confirm" icon="fa-solid fa-check" @click="createDataAndCloseDialog()"/>
-      <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeCreateDialog()"/>
-    </template>
-  </TDialog>
+  <FormDialog
+    v-if="currentRowForUpdate"
+    v-model="updateDialog"
+    :schemas="combinedSchemas"
+    :data-fields="updatableKeys"
+    :data="currentRowForUpdate"
+    :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
+    @submit="updateDataAndCloseDialog"
+  />
 
   <TDialog
     v-if="currentRow"
@@ -685,51 +659,6 @@ onMounted(async () => {
           </div>
         </slot>
       </div>
-    </template>
-  </TDialog>
-
-  <TDialog
-    v-if="currentRowForUpdate"
-    v-model="updateDialog"
-    :title="updateDialogTitle(dataType, currentRowForUpdate)"
-    :class="updateDialogClass"
-  >
-    <template #body>
-      <div class="data-row">
-        <slot
-          v-for="field in updatableKeys"
-          :name="`update-col.${field}`"
-          v-bind="{ row: currentRowForUpdate, field: field, type: inputType(field), label: inputLabel(field) }"
-        >
-
-          <TInput
-            v-if="inputableField(field)"
-            v-model="currentRowForUpdate[field]"
-            :type="inputType(field)"
-            :label="inputLabel(field)"
-          />
-
-          <TDatePicker
-            v-if="inputType(field) === 'date'"
-            v-model="currentRowForUpdate[field]"
-            :label="inputLabel(field)"
-          />
-
-          <TSelect
-            v-if="selectableField(field)"
-            v-model="currentRowForUpdate[field]"
-            :label="inputLabel(field)"
-            :name="field"
-            :id="field"
-            :options="inputOptions(field)"
-          />
-        </slot>
-      </div>
-    </template>
-
-    <template #actions>
-      <TButton class="confirm-button" button-type="text" value="Confirm" icon="fa-solid fa-check" @click="updateDataAndCloseDialog()"/>
-      <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeUpdateDialog()"/>
     </template>
   </TDialog>
 

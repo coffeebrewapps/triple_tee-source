@@ -1,0 +1,169 @@
+<script setup>
+import { ref, computed } from 'vue'
+
+import useConfig from '../config'
+
+import {
+  TDialog,
+  TDatePicker,
+  TInput,
+  TSelect,
+  TButton
+} from 'coffeebrew-vue-components'
+
+const config = useConfig()
+
+const props = defineProps({
+  modelValue: {
+    type: Boolean,
+    default: false
+  },
+  dataFields: {
+    type: Array,
+    default: []
+  },
+  data: {
+    type: Object,
+    default: {}
+  },
+  schemas: {
+    type: Object,
+    default: {}
+  },
+  dialogTitle: {
+    type: String,
+    default: ``
+  }
+})
+
+const emit = defineEmits(['update:modelValue', 'submit'])
+
+const dialog = computed({
+  get: () => {
+    return props.modelValue
+  },
+  set: (val) => {
+    emit('update:modelValue', val)
+  }
+})
+
+const dialogClass = computed(() => {
+  const fieldsLength = Object.keys(props.dataFields).length
+  if (fieldsLength > 4) {
+    return `split-col`
+  } else {
+    return `single-col`
+  }
+})
+
+function inputType(field) {
+  return props.schemas[field].type
+}
+
+function inputLabel(field) {
+  return props.schemas[field].label
+}
+
+function inputValue(field, value) {
+  if (inputType(field) === 'select') {
+    return props.schemas[field].options.find(o => o.value === value).label
+  } else if (inputType(field) === 'enum') {
+    return props.schemas[field].enums[value]
+  } else {
+    return value
+  }
+}
+
+function inputOptions(field) {
+  if (inputType(field) === 'select') {
+    return props.schemas[field].options
+  } else if (inputType(field) === 'enum') {
+    const enums = props.schemas[field].enums
+    return Object.keys(enums).map((k) => {
+      return { value: k, label: enums[k] }
+    })
+  } else {
+    return []
+  }
+}
+
+function inputableField(field) {
+  return inputType(field) === 'text' || inputType(field) === 'number'
+}
+
+function selectableField(field) {
+  return inputType(field) === 'select' || inputType(field) === 'enum'
+}
+
+function submitDataAndCloseDialog() {
+  emit('submit', props.data)
+  closeDialog()
+}
+
+function closeDialog() {
+  dialog.value = false
+  emit('update:modelValue', false)
+}
+</script>
+
+<template>
+  <TDialog
+    v-model="dialog"
+    :title="dialogTitle"
+    :class="dialogClass"
+  >
+    <template #body>
+      <div class="data-row">
+
+        <slot
+          v-for="field in dataFields"
+          :name="`form-col.${field}`"
+          v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
+        >
+          <TInput
+            v-if="inputableField(field)"
+            v-model="data[field]"
+            :type="inputType(field)"
+            :label="inputLabel(field)"
+          />
+
+          <TDatePicker
+            v-if="inputType(field) === 'date'"
+            v-model="data[field]"
+            :label="inputLabel(field)"
+          />
+
+          <TSelect
+            v-if="selectableField(field)"
+            v-model="data[field]"
+            :label="inputLabel(field)"
+            :name="field"
+            :id="field"
+            :options="inputOptions(field)"
+          />
+        </slot>
+      </div>
+    </template>
+
+    <template #actions>
+      <TButton class="confirm-button" button-type="text" value="Confirm" icon="fa-solid fa-check" @click="submitDataAndCloseDialog()"/>
+      <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeDialog()"/>
+    </template>
+  </TDialog>
+</template>
+
+<style scoped>
+.input-control {
+  margin: 0 auto;
+}
+
+.single-col .data-row {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.split-col .data-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+</style>
