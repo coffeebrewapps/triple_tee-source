@@ -18,6 +18,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  fieldsLayout: {
+    type: Array,
+    default: []
+  },
   dataFields: {
     type: Array,
     default: []
@@ -113,10 +117,13 @@ function closeDialog() {
     :class="dialogClass"
   >
     <template #body>
-      <div class="data-row">
+      <div
+        v-for="row in fieldsLayout"
+        class="data-row"
+      >
 
         <slot
-          v-for="field in dataFields"
+          v-for="field in Object.keys(row)"
           :name="`form-col.${field}`"
           v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
         >
@@ -125,6 +132,7 @@ function closeDialog() {
             v-model="data[field]"
             :type="inputType(field)"
             :label="inputLabel(field)"
+            :size="row[field]"
           />
 
           <TDatePicker
@@ -140,8 +148,10 @@ function closeDialog() {
             :name="field"
             :id="field"
             :options="inputOptions(field)"
+            :size="row[field]"
           />
         </slot>
+
       </div>
     </template>
 
@@ -153,17 +163,17 @@ function closeDialog() {
 </template>
 
 <style scoped>
+.data-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: left;
+  align-items: flex-start;
+  text-align: left;
+}
+
 .input-control {
-  margin: 0 auto;
-}
-
-.single-col .data-row {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.split-col .data-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  padding: 0.5rem;
 }
 </style>

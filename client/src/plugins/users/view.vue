@@ -20,6 +20,12 @@ const divisionsUrl = computed(() => {
 
 const divisions = ref([])
 
+const fieldsLayout = ref([
+  { name: 'lg', joinDate: 'md' },
+  { division: 'lg' },
+  { email: 'lg', phone: 'md' }
+])
+
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false },
@@ -90,6 +96,7 @@ onMounted(async () => {
     data-type="User"
     url-base="api/users"
     schemas-url-base="api/schemas/users"
+    :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :view-dialog-title="viewDialogTitle"
     :update-dialog-title="updateDialogTitle"
@@ -104,10 +111,3 @@ onMounted(async () => {
     v-model="errorAlert"
   />
 </template>
-
-<style scoped>
-#division,
-#joinDate {
-  margin: 0 auto;
-}
-</style>

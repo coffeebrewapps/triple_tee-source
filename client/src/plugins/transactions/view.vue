@@ -8,6 +8,14 @@ import DataPage from '@/components/DataPage.vue'
 
 const config = useConfig()
 
+const fieldsLayout = ref([
+  { type: 'lg', transactionDate: 'md' },
+  { description: 'lg' },
+  { currencyId: 'md', amount: 'md', homeCurrencyAmount: 'md' },
+  { tags: 'lg' },
+  { associatedTransactionId: 'md' }
+])
+
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false },
@@ -31,6 +39,7 @@ onMounted(async () => {
     data-type="Transaction"
     url-base="api/transactions"
     schemas-url-base="api/schemas/transactions"
+    :fields-layout="fieldsLayout"
     :data-fields="dataFields"
   />
 </template>

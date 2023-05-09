@@ -36,6 +36,10 @@ const props = defineProps({
     type: Array,
     default: []
   },
+  fieldsLayout: {
+    type: Array,
+    default: []
+  },
   createDialogTitle: {
     type: Function,
     default: function(dataType) {
@@ -615,6 +619,7 @@ onMounted(async () => {
     v-if="newRow"
     v-model="createDialog"
     :schemas="combinedSchemas"
+    :fields-layout="fieldsLayout"
     :data-fields="creatableKeys"
     :data="newRow"
     :dialog-title="createDialogTitle(dataType)"
@@ -625,6 +630,7 @@ onMounted(async () => {
     v-if="currentRowForUpdate"
     v-model="updateDialog"
     :schemas="combinedSchemas"
+    :fields-layout="fieldsLayout"
     :data-fields="updatableKeys"
     :data="currentRowForUpdate"
     :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
