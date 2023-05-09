@@ -660,7 +660,7 @@ onMounted(async () => {
           >
             <slot
               :name="`view-col.${field}`"
-              v-bind="{ field, value: currentRow[field] }"
+              v-bind="{ field, value: currentRow[field], formattedValue: inputValue(field, currentRow[field]) }"
             >
               <div class="data-label">{{ inputLabel(field) }}</div>
               <div class="data-value">
@@ -730,7 +730,7 @@ a.hidden {
   display: flex;
   flex-direction: column;
   text-align: left;
-  overflow: scroll;
+  overflow-y: scroll;
 }
 
 .view-dialog .data-col {

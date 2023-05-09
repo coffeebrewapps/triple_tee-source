@@ -48,6 +48,10 @@ const dataFields = computed(() => {
   ]
 })
 
+function formatTags(value) {
+  return value.split(', ')
+}
+
 async function loadTags() {
   await axios
     .get(tagsUrl.value)
@@ -96,7 +100,19 @@ onMounted(async () => {
     :form-dialog-full-screen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
-  />
+  >
+    <template #view-col.tags="{ field, value, formattedValue }">
+      <div class="data-label">Tags</div>
+      <div class="data-value tags">
+        <div
+          class="tag"
+          v-for="tag in formatTags(formattedValue)"
+        >
+          {{ tag }}
+        </div>
+      </div>
+    </template>
+  </DataPage>
 
   <TAlert
     title="Error"
@@ -106,3 +122,10 @@ onMounted(async () => {
     v-model="errorAlert"
   />
 </template>
+
+<style scoped>
+.data-value.tags {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+</style>
