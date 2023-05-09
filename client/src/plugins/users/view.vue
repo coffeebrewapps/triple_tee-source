@@ -98,6 +98,7 @@ onMounted(async () => {
     schemas-url-base="api/schemas/users"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
+    :form-dialog-full-screen="false"
     :view-dialog-title="viewDialogTitle"
     :update-dialog-title="updateDialogTitle"
     :delete-dialog-title="deleteDialogTitle"

@@ -39,6 +39,7 @@ onMounted(async () => {
     data-type="Transaction"
     url-base="api/transactions"
     schemas-url-base="api/schemas/transactions"
+    :form-dialog-full-screen="false"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
   />

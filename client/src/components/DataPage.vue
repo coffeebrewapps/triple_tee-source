@@ -40,6 +40,10 @@ const props = defineProps({
     type: Array,
     default: []
   },
+  formDialogFullScreen: {
+    type: Boolean,
+    default: false
+  },
   createDialogTitle: {
     type: Function,
     default: function(dataType) {
@@ -623,6 +627,7 @@ onMounted(async () => {
     :data-fields="creatableKeys"
     :data="newRow"
     :dialog-title="createDialogTitle(dataType)"
+    :full-screen="formDialogFullScreen"
     @submit="createDataAndCloseDialog"
   />
 
@@ -634,6 +639,7 @@ onMounted(async () => {
     :data-fields="updatableKeys"
     :data="currentRowForUpdate"
     :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
+    :full-screen="formDialogFullScreen"
     @submit="updateDataAndCloseDialog"
   />
 

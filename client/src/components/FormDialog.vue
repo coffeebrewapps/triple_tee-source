@@ -37,6 +37,10 @@ const props = defineProps({
   dialogTitle: {
     type: String,
     default: ``
+  },
+  fullScreen: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -57,6 +61,20 @@ const dialogClass = computed(() => {
     return `split-col`
   } else {
     return `single-col`
+  }
+})
+
+const dialogSize = computed(() => {
+  if (props.fullScreen) {
+    return {
+      width: window.screen.width - 100,
+      height: window.screen.height - 150
+    }
+  } else {
+    return {
+      width: 800,
+      height: 600
+    }
   }
 })
 
@@ -115,6 +133,8 @@ function closeDialog() {
     v-model="dialog"
     :title="dialogTitle"
     :class="dialogClass"
+    :width="dialogSize.width"
+    :height="dialogSize.height"
   >
     <template #body>
       <div
