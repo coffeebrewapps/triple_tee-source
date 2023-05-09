@@ -19,7 +19,12 @@ const tagsUrl = computed(() => {
   return `${config.baseUrl}/api/tags`
 })
 
+const transactionsUrl = computed(() => {
+  return `${config.baseUrl}/api/transactions`
+})
+
 const tags = ref([])
+const transactions = ref([])
 
 const fieldsLayout = ref([
   { type: 'lg', transactionDate: 'md' },
@@ -39,7 +44,7 @@ const dataFields = computed(() => {
     { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
     { key: 'tags', type: 'multiSelect', label: 'Tags', listable: true, viewable: true, creatable: true, updatable: true, options: tags.value },
     { key: 'currencyId', type: 'text', label: 'Currency ID', listable: false, viewable: true, creatable: true, updatable: true },
-    { key: 'associatedTransactionId', type: 'text', label: 'Associated Transaction ID', listable: false, viewable: true, creatable: true, updatable: true }
+    { key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction ID', listable: false, viewable: true, creatable: true, updatable: true, options: transactions.value }
   ]
 })
 
@@ -60,8 +65,26 @@ async function loadTags() {
     })
 }
 
+async function loadTransactions() {
+  await axios
+    .get(transactionsUrl.value)
+    .then((res) => {
+      transactions.value = res.data.data.map(record => {
+        return {
+          value: record.id,
+          label: record.description
+        }
+      })
+    })
+    .catch((err) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(err)
+    })
+}
+
 onMounted(async () => {
   await loadTags()
+  await loadTransactions()
 })
 </script>
 

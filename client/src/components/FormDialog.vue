@@ -11,6 +11,8 @@ import {
   TButton
 } from 'coffeebrew-vue-components'
 
+import SelectTable from './SelectTable.vue'
+
 const config = useConfig()
 
 const props = defineProps({
@@ -96,7 +98,6 @@ function inputValue(field, value) {
 }
 
 function inputOptions(field) {
-  if (field === 'tags') { console.log(props.schemas[field]) }
   if (selectableField(field)) {
     return props.schemas[field].options
   } else {
@@ -157,11 +158,20 @@ function closeDialog() {
           />
 
           <TSelect
-            v-if="selectableField(field)"
+            v-if="inputType(field) === 'select' || inputType(field) === 'enum'"
             v-model="data[field]"
             :label="inputLabel(field)"
             :name="field"
             :id="field"
+            :options="inputOptions(field)"
+            :size="row[field]"
+          />
+
+          <SelectTable
+            v-if="inputType(field) === 'multiSelect'"
+            v-model="data[field]"
+            :label="inputLabel(field)"
+            :name="field"
             :options="inputOptions(field)"
             :size="row[field]"
           />
@@ -189,6 +199,6 @@ function closeDialog() {
 }
 
 .input-control {
-  margin: 0.5rem;
+  margin: 0.5rem !important;
 }
 </style>
