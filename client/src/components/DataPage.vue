@@ -307,7 +307,11 @@ function selectableField(field) {
 
 async function openCreateDialog(id) {
   newRow.value = Object.keys(creatableFields.value).reduce((o, k) => {
-    o[k] = null
+    if (inputType(k) === 'date') {
+      o[k] = new Date()
+    } else {
+      o[k] = null
+    }
     return o
   }, {})
   createDialog.value = true
