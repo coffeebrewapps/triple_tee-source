@@ -10,15 +10,15 @@ const config = useConfig()
 
 const dataFields = computed(() => {
   return [
-    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, updatable: false },
-    { key: 'type', type: 'enum', label: 'Type', listable: true, viewable: true, updatable: true, options: [] },
-    { key: 'transactionDate', type: 'date', label: 'Transaction Date', listable: true, viewable: true, updatable: true },
-    { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, updatable: true },
-    { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, updatable: true },
-    { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, updatable: true },
-    { key: 'tags', type: 'array', label: 'Tags', listable: true, viewable: true, updatable: true },
-    { key: 'currencyId', type: 'text', label: 'Currency ID', listable: false, viewable: true, updatable: true },
-    { key: 'associatedTransactionId', type: 'text', label: 'Associated Transaction ID', listable: false, viewable: true, updatable: true }
+    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false },
+    { key: 'type', type: 'enum', label: 'Type', listable: true, viewable: true, creatable: true, updatable: false, options: [] },
+    { key: 'transactionDate', type: 'date', label: 'Transaction Date', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
+    { key: 'tags', type: 'array', label: 'Tags', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'currencyId', type: 'text', label: 'Currency ID', listable: false, viewable: true, creatable: true, updatable: true },
+    { key: 'associatedTransactionId', type: 'text', label: 'Associated Transaction ID', listable: false, viewable: true, creatable: true, updatable: true }
   ]
 })
 
@@ -28,7 +28,7 @@ onMounted(async () => {
 
 <template>
   <DataPage
-    data-type="Transactions"
+    data-type="Transaction"
     url-base="api/transactions"
     schemas-url-base="api/schemas/transactions"
     :data-fields="dataFields"

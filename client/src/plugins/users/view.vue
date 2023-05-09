@@ -31,25 +31,25 @@ const dataFields = computed(() => {
   ]
 })
 
-function viewDialogTitle(row) {
+function viewDialogTitle(dataType, row) {
   if (row) {
-    return `User ${row.id}`
+    return `${dataType} ${row.id}`
   } else {
     return ``
   }
 }
 
-function updateDialogTitle(row)  {
+function updateDialogTitle(dataType, row)  {
   if (row) {
-    return `User ${row.id}`
+    return `${dataType} ${row.id}`
   } else {
     return ``
   }
 }
 
-function deleteDialogTitle(row) {
+function deleteDialogTitle(dataType, row) {
   if (row) {
-    return `User ${row.id}`
+    return `${dataType} ${row.id}`
   } else {
     return ``
   }

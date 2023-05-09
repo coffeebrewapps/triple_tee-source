@@ -42,36 +42,36 @@ const props = defineProps({
   },
   viewDialogTitle: {
     type: Function,
-    default: function(row) {
-      return `View ${row.id}`
+    default: function(dataType, row) {
+      return `View ${dataType} ${row.id}`
     }
   },
   updateDialogTitle: {
     type: Function,
-    default: function(row) {
+    default: function(dataType, row) {
       if (!row) { return `` }
-      return `Update ${row.id}`
+      return `Update ${dataType} ${row.id}`
     }
   },
   deleteDialogTitle: {
     type: Function,
-    default: function(row) {
+    default: function(dataType, row) {
       if (!row) { return `` }
-      return `Delete ${row.id}`
+      return `Delete ${dataType} ${row.id}`
     }
   },
   deleteDialogPrimaryText: {
     type: Function,
-    default: function(row) {
+    default: function(dataType, row) {
       if (!row) { return `` }
-      return `Are you sure you want to delete ${row.id}?`
+      return `Are you sure you want to delete ${dataType} ${row.id}?`
     }
   },
   deleteDialogSecondaryText: {
     type: Function,
-    default: function(row) {
+    default: function(dataType, row) {
       if (!row) { return `` }
-      return JSON.stringify(row)
+      return JSON.stringify(row, false, 2)
     }
   }
 })
@@ -209,6 +209,17 @@ const viewableFields = computed(() => {
   }, {})
 })
 
+const creatableFields = computed(() => {
+  return props.dataFields.filter(h => h.creatable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
+const creatableKeys = computed(() => {
+  return Object.keys(creatableFields.value)
+})
+
 const updatableFields = computed(() => {
   return props.dataFields.filter(h => h.updatable).reduce((o, h) => {
     o[h.key] = h
@@ -221,11 +232,20 @@ const updatableKeys = computed(() => {
 })
 
 const createDialogClass = computed(() => {
-  const fieldsLength = Object.keys(updatableFields.value).length
+  const fieldsLength = Object.keys(creatableFields.value).length
   if (fieldsLength > 4) {
     return `create-dialog split-col`
   } else {
     return `create-dialog single-col`
+  }
+})
+
+const updateDialogClass = computed(() => {
+  const fieldsLength = Object.keys(updatableFields.value).length
+  if (fieldsLength > 4) {
+    return `update-dialog split-col`
+  } else {
+    return `update-dialog single-col`
   }
 })
 
@@ -237,10 +257,12 @@ const combinedSchemas = computed(() => {
       o[field] = combined
       return o
     }, {})
-  } else if (!!updatableFields.value) {
-    return updatableFields.value
   } else {
-    return {}
+    return props.dataFields.reduce((o, field) => {
+      const prop = props.dataFields.find(f => f.key === field)
+      o[field] = prop
+      return o
+    }, {})
   }
 })
 
@@ -249,31 +271,26 @@ function inputType(field) {
 }
 
 function inputLabel(field) {
-  if (!!viewableFields.value[field]) {
-    return viewableFields.value[field].label
-  } else {
-    return ''
-  }
+  return combinedSchemas.value[field].label
 }
 
 function inputValue(field, value) {
-  const header = props.dataFields.find(h => h.key === field)
-  if (header.type === 'select') {
-    return header.options.find(o => o.value === value).label
-  } else if (header.type === 'enum') {
-    return schemas.value[field].enums[value]
+  if (inputType(field) === 'select') {
+    return combinedSchemas.value[field].options.find(o => o.value === value).label
+  } else if (inputType(field) === 'enum') {
+    return combinedSchemas.value[field].enums[value]
   } else {
     return value
   }
 }
 
 function inputOptions(field) {
-  if(inputType(field) === 'select') {
-    return updatableFields.value[field].options
+  if (inputType(field) === 'select') {
+    return combinedSchemas.value[field].options
   } else if (inputType(field) === 'enum') {
-    const enums = schemas.value[field].enums
-    return Object.keys(enums).map((key) => {
-      return { value: key, label: enums[key] }
+    const enums = combinedSchemas.value[field].enums
+    return Object.keys(enums).map((k) => {
+      return { value: k, label: enums[k] }
     })
   } else {
     return []
@@ -289,10 +306,10 @@ function selectableField(field) {
 }
 
 async function openCreateDialog(id) {
-  newRow.value = {}
-  Object.keys(schemas.value).forEach(k => {
-    newRow.value[k] = null
-  })
+  newRow.value = Object.keys(creatableFields.value).reduce((o, k) => {
+    o[k] = null
+    return o
+  }, {})
   createDialog.value = true
 }
 
@@ -601,7 +618,7 @@ onMounted(async () => {
       <div class="data-row">
 
         <slot
-          v-for="field in updatableKeys"
+          v-for="field in creatableKeys"
           :name="`create-col.${field}`"
           v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
         >
@@ -639,7 +656,7 @@ onMounted(async () => {
   <TDialog
     v-if="currentRow"
     v-model="viewDialog"
-    :title="viewDialogTitle(currentRow)"
+    :title="viewDialogTitle(dataType, currentRow)"
     class="view-dialog"
   >
     <template #body>
@@ -670,7 +687,8 @@ onMounted(async () => {
   <TDialog
     v-if="currentRowForUpdate"
     v-model="updateDialog"
-    :title="updateDialogTitle(currentRowForUpdate)"
+    :title="updateDialogTitle(dataType, currentRowForUpdate)"
+    :class="updateDialogClass"
   >
     <template #body>
       <div class="data-row">
@@ -714,15 +732,15 @@ onMounted(async () => {
   <TConfirmDialog
     v-if="currentRowForDelete"
     v-model="deleteDialog"
-    :title="deleteDialogTitle(currentRowForDelete)"
-    :primary-text="deleteDialogPrimaryText(currentRowForDelete)"
-    :secondary-text="deleteDialogSecondaryText(currentRowForDelete)"
+    :title="deleteDialogTitle(dataType, currentRowForDelete)"
+    :primary-text="deleteDialogPrimaryText(dataType, currentRowForDelete)"
+    :secondary-text="deleteDialogSecondaryText(dataType, currentRowForDelete)"
     :width="500"
-    :height="300"
+    :height="350"
     @confirm="deleteDataAndCloseDialog"
     @cancel="closeDeleteDialog"
-  >
-  </TConfirmDialog>
+    class="delete-dialog"
+  />
 
   <TDialog
     v-if="downloadLink"
@@ -752,12 +770,14 @@ a.hidden {
   margin: 0 auto;
 }
 
-.create-dialog.single-col .data-row {
+.create-dialog.single-col .data-row,
+.update-dialog.single-col .data-row {
   display: grid;
   grid-template-columns: 1fr;
 }
 
-.create-dialog.split-col .data-row {
+.create-dialog.split-col .data-row,
+.update-dialog.split-col .data-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
@@ -776,5 +796,9 @@ a.hidden {
 
 .view-dialog .data-label {
   font-weight: 600;
+}
+
+.delete-dialog .container .body {
+  overflow: scroll !important;
 }
 </style>
