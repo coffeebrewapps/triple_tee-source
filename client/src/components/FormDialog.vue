@@ -8,10 +8,9 @@ import {
   TDatePicker,
   TInput,
   TSelect,
+  TSelectTable,
   TButton
 } from 'coffeebrew-vue-components'
-
-import SelectTable from './SelectTable.vue'
 
 const config = useConfig()
 
@@ -167,14 +166,16 @@ function closeDialog() {
             :size="row[field]"
           />
 
-          <SelectTable
-            v-if="inputType(field) === 'multiSelect'"
-            v-model="data[field]"
-            :label="inputLabel(field)"
-            :name="field"
-            :options="inputOptions(field)"
-            :size="row[field]"
-          />
+          <div class="select-table">
+            <TSelectTable
+              v-if="inputType(field) === 'multiSelect'"
+              v-model="data[field]"
+              :label="inputLabel(field)"
+              :name="field"
+              :options="inputOptions(field)"
+              :size="row[field]"
+            />
+          </div>
         </slot>
 
       </div>
@@ -198,7 +199,8 @@ function closeDialog() {
   text-align: left;
 }
 
-.input-control {
+.input-control,
+.select-table {
   margin: 0.5rem !important;
 }
 </style>
