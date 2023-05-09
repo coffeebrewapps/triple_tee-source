@@ -189,6 +189,6 @@ function closeDialog() {
 }
 
 .input-control {
-  padding: 0.5rem;
+  margin: 0.5rem;
 }
 </style>
