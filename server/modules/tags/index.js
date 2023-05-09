@@ -1,8 +1,8 @@
 'use strict'
 
 const name = 'tags';
-const store = require('../stores/tags');
-const router = require('../routes/tags');
+const store = require('./stores');
+const router = require('./routes');
 
 module.exports = {
   name,

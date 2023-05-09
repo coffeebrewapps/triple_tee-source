@@ -1,6 +1,6 @@
 'use strict'
 
-const dataAccess = require('./dataAccess');
+const dataAccess = require('../../stores/dataAccess');
 
 const modelClass = 'divisions';
 

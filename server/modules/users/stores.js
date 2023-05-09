@@ -1,8 +1,8 @@
 'use strict'
 
-const dataAccess = require('./dataAccess');
+const dataAccess = require('../../stores/dataAccess');
 
-const modelClass = 'tags';
+const modelClass = 'users';
 
 function list(filters = {}) {
   return dataAccess.list(modelClass, filters);
