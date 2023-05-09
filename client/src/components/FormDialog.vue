@@ -1,9 +1,10 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 
 import useConfig from '../config'
 
 import {
+  TAlert,
   TDialog,
   TDatePicker,
   TInput,
@@ -47,6 +48,9 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'submit'])
 
+const errorAlert = ref(false)
+const errorContent = ref('')
+
 const dialog = computed({
   get: () => {
     return props.modelValue
@@ -79,6 +83,8 @@ const dialogSize = computed(() => {
   }
 })
 
+const inputOptionsData = ref({})
+
 function inputType(field) {
   return props.schemas[field].type
 }
@@ -89,7 +95,7 @@ function inputLabel(field) {
 
 function inputValue(field, value) {
   if (selectableField(field)) {
-    const option = inputOptions(field).find(o => o.value === value) || {}
+    const option = inputOptions(field).data.find(o => o.value === value) || {}
     return option.label
   } else {
     return value
@@ -98,10 +104,56 @@ function inputValue(field, value) {
 
 function inputOptions(field) {
   if (selectableField(field)) {
-    return props.schemas[field].options
+    return inputOptionsData.value[field] || {}
   } else {
-    return []
+    return {}
   }
+}
+
+async function fetchOptions(field, offset) {
+  const options = props.schemas[field].options
+  if (options instanceof Function) {
+    const limit = props.schemas[field].limit || 5
+    return new Promise((resolve, reject) => {
+      options(offset, limit)
+        .then((result) => {
+          resolve(formatInputOptionsData(field, offset, limit, result))
+        })
+    })
+  } else {
+    return new Promise((resolve, reject) => {
+      resolve(Object.assign(
+        {},
+        {
+          data: options,
+          total: options.length,
+          loading: false,
+          pagination: { limit: 5, client: true },
+          offsetChange: (offset) => {}
+        }
+      ))
+    })
+  }
+}
+
+function formatInputOptionsData(field, offset, limit, dataFromServer) {
+  return Object.assign(
+    {},
+    {
+      loading: false,
+      pagination: { limit: limit, client: false },
+      offsetChange: (offset) => { optionsOffsetChange(field, offset) }
+    },
+    dataFromServer
+  )
+}
+
+async function optionsOffsetChange(field, newOffset) {
+  const limit = props.schemas[field].limit || 5
+  await fetchOptions(field, newOffset)
+    .then((result) => {
+      inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
+    })
 }
 
 function inputableField(field) {
@@ -121,6 +173,29 @@ function closeDialog() {
   dialog.value = false
   emit('update:modelValue', false)
 }
+
+async function initOptionsData() {
+  const fields = Object.keys(props.schemas).filter(f => selectableField(f))
+
+  await Promise.all(fields.map((field) => {
+    const offset = props.schemas[field].offset || 0
+    return fetchOptions(field, offset)
+  }))
+  .then((values) => {
+    values.forEach((value, i) => {
+      const field = fields[i]
+      inputOptionsData.value[field] = value
+    })
+  })
+  .catch((error) => {
+    errorAlert.value = true
+    errorContent.value = JSON.stringify(error)
+  })
+}
+
+onMounted(async () => {
+  await initOptionsData()
+})
 </script>
 
 <template>
@@ -162,18 +237,22 @@ function closeDialog() {
             :label="inputLabel(field)"
             :name="field"
             :id="field"
-            :options="inputOptions(field)"
+            :options="inputOptions(field).data"
             :size="row[field]"
           />
 
           <div class="select-table">
             <TSelectTable
-              v-if="inputType(field) === 'multiSelect'"
+              v-if="inputType(field) === 'multiSelect' && !!inputOptions(field)"
               v-model="data[field]"
               :label="inputLabel(field)"
               :name="field"
-              :options="inputOptions(field)"
+              :options="inputOptions(field).data"
+              :options-length="inputOptions(field).total"
+              :options-loading="inputOptions(field).loading"
+              :pagination="inputOptions(field).pagination"
               :size="row[field]"
+              @offset-change="inputOptions(field).offsetChange"
             />
           </div>
         </slot>
@@ -186,6 +265,14 @@ function closeDialog() {
       <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeDialog()"/>
     </template>
   </TDialog>
+
+  <TAlert
+    title="Error"
+    :content="errorContent"
+    :width="400"
+    :height="250"
+    v-model="errorAlert"
+  />
 </template>
 
 <style scoped>

@@ -23,9 +23,6 @@ const transactionsUrl = computed(() => {
   return `${config.baseUrl}/api/transactions`
 })
 
-const tags = ref([])
-const transactions = ref([])
-
 const fieldsLayout = ref([
   { type: 'lg', transactionDate: 'md' },
   { description: 'lg' },
@@ -42,9 +39,9 @@ const dataFields = computed(() => {
     { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
-    { key: 'tags', type: 'multiSelect', label: 'Tags', listable: true, viewable: true, creatable: true, updatable: true, options: tags.value },
+    { key: 'tags', type: 'multiSelect', label: 'Tags', listable: true, viewable: true, creatable: true, updatable: true, options: loadTags },
     { key: 'currencyId', type: 'text', label: 'Currency', listable: false, viewable: true, creatable: true, updatable: true },
-    { key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction', listable: false, viewable: true, creatable: true, updatable: true, options: transactions.value }
+    { key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction', listable: false, viewable: true, creatable: true, updatable: true, options: loadTransactions }
   ]
 })
 
@@ -52,43 +49,51 @@ function formatTags(value) {
   return value.split(', ')
 }
 
-async function loadTags() {
-  await axios
-    .get(tagsUrl.value)
-    .then((res) => {
-      tags.value = res.data.data.map(record => {
-        return {
-          value: record.id,
-          label: `${record.category}:${record.name}`
-        }
+async function loadTags(offset = 0 , limit = 5) {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(tagsUrl.value, { params: { offset, limit } })
+      .then((res) => {
+        const data = res.data.data.map((record) => {
+          return {
+            value: record.id,
+            label: `${record.category}:${record.name}`
+          }
+        })
+        resolve({
+          total: res.data.total,
+          data: data
+        })
       })
-    })
-    .catch((err) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(err)
-    })
+      .catch((err) => {
+        reject(err)
+      })
+  })
 }
 
-async function loadTransactions() {
-  await axios
-    .get(transactionsUrl.value)
-    .then((res) => {
-      transactions.value = res.data.data.map(record => {
-        return {
-          value: record.id,
-          label: record.description
-        }
+async function loadTransactions(offset = 0 , limit = 5) {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(transactionsUrl.value, { params: { offset, limit } })
+      .then((res) => {
+        const data = res.data.data.map(record => {
+          return {
+            value: record.id,
+            label: record.description
+          }
+        })
+        resolve({
+          total: res.data.total,
+          data: data
+        })
       })
-    })
-    .catch((err) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(err)
-    })
+      .catch((err) => {
+        reject(err)
+      })
+  })
 }
 
 onMounted(async () => {
-  await loadTags()
-  await loadTransactions()
 })
 </script>
 

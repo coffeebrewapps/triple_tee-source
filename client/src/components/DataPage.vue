@@ -132,6 +132,8 @@ const schemas = ref({})
 const data = ref([])
 const totalData = ref(0)
 
+const inputOptionsData = ref({})
+
 const offset = ref(0)
 const limit = ref(5)
 
@@ -285,13 +287,14 @@ function inputLabel(field) {
 }
 
 function inputValue(field, value) {
+  const options = inputOptions(field).data || []
   if (inputType(field) === 'multiSelect') {
     return value.map((v) => {
-      const option = inputOptions(field).find(o => o.value === v) || {}
+      const option = options.find(o => o.value === v) || {}
       return option.label
     }).join(', ')
   } else if (selectableField(field)) {
-    const option = inputOptions(field).find(o => o.value === value) || {}
+    const option = options.find(o => o.value === value) || {}
     return option.label
   } else {
     return value
@@ -300,9 +303,9 @@ function inputValue(field, value) {
 
 function inputOptions(field) {
   if (selectableField(field)) {
-    return combinedSchemas.value[field].options
+    return inputOptionsData.value[field] || {}
   } else {
-    return []
+    return {}
   }
 }
 
@@ -587,9 +590,75 @@ async function downloadData() {
   })
 }
 
+async function fetchOptions(field, offset) {
+  const options = combinedSchemas.value[field].options
+  if (options instanceof Function) {
+    const limit = combinedSchemas.value[field].limit || 5
+    return new Promise((resolve, reject) => {
+      options(offset, limit)
+        .then((result) => {
+          resolve(formatInputOptionsData(field, offset, limit, result))
+        })
+    })
+  } else {
+    return new Promise((resolve, reject) => {
+      resolve(Object.assign(
+        {},
+        {
+          data: options,
+          total: options.length,
+          loading: false,
+          pagination: { limit: 5, client: true },
+          offsetChange: (offset) => {}
+        }
+      ))
+    })
+  }
+}
+
+function formatInputOptionsData(field, offset, limit, dataFromServer) {
+  return Object.assign(
+    {},
+    {
+      loading: false,
+      pagination: { limit: limit, client: false },
+      offsetChange: (offset) => { optionsOffsetChange(field, offset) }
+    },
+    dataFromServer
+  )
+}
+
+async function optionsOffsetChange(field, newOffset) {
+  const limit = combinedSchemas.value[field].limit || 5
+  await fetchOptions(field, newOffset)
+    .then((result) => {
+      inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
+    })
+}
+
+async function initOptionsData() {
+  const fields = Object.keys(combinedSchemas.value).filter(f => selectableField(f))
+
+  await Promise.all(fields.map((field) => {
+    const offset = combinedSchemas.value[field].offset || 0
+    return fetchOptions(field, offset)
+  }))
+  .then((values) => {
+    values.forEach((value, i) => {
+      const field = fields[i]
+      inputOptionsData.value[field] = value
+    })
+  })
+  .catch((error) => {
+    errorAlert.value = true
+    errorContent.value = JSON.stringify(error)
+  })
+}
+
 onMounted(async () => {
   await loadSchemas()
   await loadData()
+  await initOptionsData()
 })
 </script>
 
