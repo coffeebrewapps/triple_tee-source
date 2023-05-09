@@ -2,7 +2,7 @@ import { useRouter } from 'vue-router'
 
 const route = {
   path: '/users',
-  name: 'users',
+  name: 'Users',
   component: () => import('./view.vue')
 }
 

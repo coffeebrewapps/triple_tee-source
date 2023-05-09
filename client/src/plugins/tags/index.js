@@ -2,7 +2,7 @@ import { useRouter } from 'vue-router'
 
 const route = {
   path: '/tags',
-  name: 'tags',
+  name: 'Tags',
   component: () => import('./view.vue')
 }
 

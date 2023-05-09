@@ -2,7 +2,7 @@ import { useRouter } from 'vue-router'
 
 const route = {
   path: '/transactions',
-  name: 'transactions',
+  name: 'Transactions',
   component: () => import('./view.vue')
 }
 
