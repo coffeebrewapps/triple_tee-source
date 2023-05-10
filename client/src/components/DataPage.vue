@@ -169,13 +169,7 @@ const listedHeaders = computed(() => {
 })
 
 const listedData = computed(() => {
-  if (!data.value) { return [] }
-
-  return data.value.map(d => {
-    return Object.keys(d).reduce((v, k) => {
-      return Object.assign(v, { [k]: inputValue(k, d) })
-    }, {})
-  })
+  return data.value || []
 })
 
 const include = computed(() => {
@@ -288,6 +282,35 @@ function inputValue(field, record) {
     })
   } else {
     return record[field]
+  }
+}
+
+function formatTag(record, tag) {
+  const includes = (record.includes || {}).tags
+  if (includes[tag]) {
+    const value = includes[tag] || {}
+    return `${value.category}:${value.name}`
+  } else {
+    return tag
+  }
+}
+
+function tagStyle(record, tag) {
+  const includes = (record.includes || {}).tags
+  if (includes[tag]) {
+    const color = includes[tag].textColor
+    const background = includes[tag].backgroundColor
+    const styles = []
+    if (color) {
+      styles.push(`color: ${color} !important;`)
+    }
+    if (background) {
+      styles.push(`background-color: ${background} !important;`)
+    }
+
+    return styles.join('')
+  } else {
+    return ``
   }
 }
 
@@ -679,7 +702,35 @@ onMounted(async () => {
     :pagination="{ limit: limit, client: false }"
     :total-data="totalData"
     @offset-change="updateOffsetAndReload"
-  />
+  >
+    <template #data-content="{ headers, row, i }">
+      <td
+        v-for="header in headers"
+        class="col"
+      >
+        <slot
+          :name="`data-col.${header.key}`"
+          v-bind="{ header, row, i }"
+        >
+          <div
+            v-if="header.key !== 'tags'"
+          >
+            {{ row[header.key] }}
+          </div>
+
+          <!-- hardcode format for tags because it is standard through the app --->
+          <div
+            v-if="header.key === 'tags'"
+            v-for="tag in row.tags"
+            class="tag"
+            :style="tagStyle(row, tag)"
+          >
+            {{ formatTag(row, tag) }}
+          </div>
+        </slot>
+      </td>
+    </template>
+  </TTable>
 
   <TAlert
     v-if="errorContent.length > 0"
@@ -736,8 +787,23 @@ onMounted(async () => {
               v-bind="{ field, value: currentRow[field], formattedValue: inputValue(field, currentRow) }"
             >
               <div class="data-label">{{ inputLabel(field) }}</div>
-              <div class="data-value">
+              <div
+                v-if="field !== 'tags'"
+                class="data-value"
+              >
                 {{ inputValue(field, currentRow) }}
+              </div>
+
+              <!-- hardcode format for tags because it is standard through the app --->
+              <div class="data-value">
+                <div
+                  v-if="field === 'tags'"
+                  v-for="tag in currentRow.tags"
+                  class="tag"
+                  :style="tagStyle(currentRow, tag)"
+                >
+                  {{ formatTag(currentRow, tag) }}
+                </div>
               </div>
             </slot>
           </div>
@@ -806,5 +872,11 @@ a.hidden {
 
 .delete-dialog .container .body {
   overflow: scroll !important;
+}
+
+td.col {
+  text-align: left;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
 }
 </style>

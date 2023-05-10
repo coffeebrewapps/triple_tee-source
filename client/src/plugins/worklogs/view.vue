@@ -58,19 +58,7 @@ onMounted(async () => {
     :form-dialog-full-screen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
-  >
-    <template #view-col.tags="{ field, value, formattedValue }">
-      <div class="data-label">Tags</div>
-      <div class="data-value tags">
-        <div
-          class="tag"
-          v-for="tag in formattedValue"
-        >
-          {{ tag }}
-        </div>
-      </div>
-    </template>
-  </DataPage>
+  />
 </template>
 
 <style scoped>
