@@ -178,6 +178,10 @@ const listedData = computed(() => {
   })
 })
 
+const include = computed(() => {
+  return props.dataFields.filter(h => h.reference).map(h => h.key)
+})
+
 const createDialog = ref(false)
 const newRow = ref()
 
@@ -533,7 +537,7 @@ async function createData(params) {
 async function viewData(id) {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${url.value}/${id}`)
+      .get(`${url.value}/${id}`, { params: { include: include.value } })
       .then((res) => {
         resolve({ success: true, record: res.data.record })
       })

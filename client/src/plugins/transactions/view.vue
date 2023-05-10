@@ -40,7 +40,7 @@ const dataFields = computed(() => {
     { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
     {
-      key: 'tags', type: 'multiSelect', label: 'Tags',
+      key: 'tags', type: 'multiSelect', label: 'Tags', reference: true,
       listable: true, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
@@ -51,7 +51,7 @@ const dataFields = computed(() => {
     },
     { key: 'currencyId', type: 'text', label: 'Currency', listable: false, viewable: true, creatable: true, updatable: true },
     {
-      key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction',
+      key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction', reference: true,
       listable: false, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
