@@ -56,25 +56,30 @@ function viewSchemas(modelClass) {
 function list(modelClass, filters = {}) {
   const data = Object.values(dataCache[modelClass] || {});
   const total = data.length;
+  const include = filters.include || [];
+
+  let filteredData = data;
 
   if (filters.offset && filters.limit && data.length > 0) {
-    return {
-      total: total,
-      data: Array.from(data).slice(filters.offset, filters.offset + filters.limit)
-    };
-  } else {
-    return {
-      total: total,
-      data: data
-    };
+    filteredData = Array.from(data).slice(filters.offset, filters.offset + filters.limit);
   }
+
+  filteredData = filteredData.map((record) => {
+    const combined = Object.assign({}, record, { includes: fetchIncludes(modelClass, record, include) })
+    return combined
+  });
+
+  return {
+    total: total,
+    data: filteredData
+  };
 }
 
 function view(modelClass, id, params = {}) {
   const data = dataCache[modelClass] || {};
   const record = data[id] || {};
-  const include = params.include || []
-  const foreignRecords = fetchIncludes(modelClass, record, include)
+  const include = params.include || [];
+  const foreignRecords = fetchIncludes(modelClass, record, include);
 
   return {
     record: Object.assign({}, record, { includes: foreignRecords })
@@ -126,28 +131,28 @@ function isUsed(modelClass, id) {
 }
 
 function fetchIncludes(modelClass, record, include) {
-  const schema = schemaCache[modelClass]
-  const foreignConstraints = schema.constraints.foreign
+  const schema = schemaCache[modelClass];
+  const foreignConstraints = schema.constraints.foreign;
 
   return include.reduce((records, foreignKey) => {
-    const foreignKeyType = schema.fields[foreignKey].type
-    const referenceValue = [record[foreignKey]].flat().filter(v => !!v)
+    const foreignKeyType = schema.fields[foreignKey].type;
+    const referenceValue = [record[foreignKey]].flat().filter(v => !!v);
 
-    const constraint = foreignConstraints[foreignKey] || {}
-    const foreignClass = constraint.reference
+    const constraint = foreignConstraints[foreignKey] || {};
+    const foreignClass = constraint.reference;
 
     records[foreignKey] = referenceValue.reduce((references, value) => {
       if (dataCache[foreignClass]) {
-        references[value] = dataCache[foreignClass][value]
+        references[value] = dataCache[foreignClass][value];
       } else {
-        references[value] = null
+        references[value] = null;
       }
 
-      return references
-    }, {})
+      return references;
+    }, {});
 
-    return records
-  }, {})
+    return records;
+  }, {});
 }
 
 module.exports = {
