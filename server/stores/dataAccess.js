@@ -70,10 +70,15 @@ function list(modelClass, filters = {}) {
   }
 }
 
-function view(modelClass, id) {
+function view(modelClass, id, params = {}) {
   const data = dataCache[modelClass] || {};
-  const record = data[id];
-  return { record };
+  const record = data[id] || {};
+  const include = params.include || []
+  const foreignRecords = fetchIncludes(modelClass, record, include)
+
+  return {
+    record: Object.assign({}, record, { includes: foreignRecords })
+  };
 }
 
 // TODO: check exists
@@ -118,6 +123,31 @@ function remove(modelClass, id) {
 // TODO
 function isUsed(modelClass, id) {
   return false
+}
+
+function fetchIncludes(modelClass, record, include) {
+  const schema = schemaCache[modelClass]
+  const foreignConstraints = schema.constraints.foreign
+
+  return include.reduce((records, foreignKey) => {
+    const foreignKeyType = schema.fields[foreignKey].type
+    const referenceValue = [record[foreignKey]].flat().filter(v => !!v)
+
+    const constraint = foreignConstraints[foreignKey] || {}
+    const foreignClass = constraint.reference
+
+    records[foreignKey] = referenceValue.reduce((references, value) => {
+      if (dataCache[foreignClass]) {
+        references[value] = dataCache[foreignClass][value]
+      } else {
+        references[value] = null
+      }
+
+      return references
+    }, {})
+
+    return records
+  }, {})
 }
 
 module.exports = {

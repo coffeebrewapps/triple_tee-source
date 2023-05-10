@@ -22,7 +22,7 @@
     },
     "constraints": {
       "primary": ["id"],
-      "foreign": [],
+      "foreign": {},
       "unique": [],
       "required": ["category", "name"]
     }
@@ -50,14 +50,12 @@
     },
     "constraints": {
       "primary": ["id"],
-      "foreign": [
-        {
-          "division": {
-            "reference": "divisions",
-            "primary": "id"
-          }
+      "foreign": {
+        "division": {
+          "reference": "divisions",
+          "primary": "id"
         }
-      ],
+      },
       "unique": ["email"],
       "required": ["id", "name", "email", "division", "joinDate"]
     }
@@ -73,7 +71,7 @@
     },
     "constraints": {
       "primary": ["id"],
-      "foreign": [],
+      "foreign": {},
       "unique": ["name"],
       "required": ["id", "name"]
     }
@@ -117,20 +115,20 @@
     },
     "constraints": {
       "primary": ["id"],
-      "foreign": [
-        {
-          "currencyId": {
-            "reference": "currencies",
-            "primary": "id"
-          }
+      "foreign":{
+        "tags": {
+          "reference": "tags",
+          "primary": "id"
         },
-        {
-          "associatedTransactionId": {
-            "reference": "transactions",
-            "primary": "id"
-          }
+        "currencyId": {
+          "reference": "currencies",
+          "primary": "id"
+        },
+        "associatedTransactionId": {
+          "reference": "transactions",
+          "primary": "id"
         }
-      ],
+      },
       "unique": [],
       "required": [
         "id",
@@ -168,7 +166,12 @@
     },
     "constraints": {
       "primary": ["id"],
-      "foreign": [],
+      "foreign": {
+        "tags": {
+          "reference": "tags",
+          "primary": "id"
+        }
+      },
       "unique": [],
       "required": ["id"]
     }

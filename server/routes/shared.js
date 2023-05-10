@@ -23,11 +23,11 @@ exports.create = function(store) {
 
 exports.view = function(store) {
   return function(req, res) {
-    const params = req.params;
-    const id = parseInt(params.id);
-    logger.log(`Viewing record`, { id });
+    const params = req.query;
+    const id = parseInt(req.params.id);
+    logger.log(`Viewing record`, { id, params });
 
-    res.send(store.view(id));
+    res.send(store.view(id, params));
   }
 };
 
