@@ -270,18 +270,35 @@ function inputLabel(field) {
   return combinedSchemas.value[field].label
 }
 
+function formatDate(rawValue) {
+  const formatOptions = Intl.DateTimeFormat().resolvedOptions()
+  const locale = formatOptions.locale
+  const year = formatOptions.year
+  const month = formatOptions.month
+  const day = formatOptions.day
+  const timeZone = formatOptions.timeZone
+  return (new Date(rawValue)).toLocaleDateString(locale)
+}
+
 function inputValue(field, record) {
   const referenceField = includeKeys.value.find(v => v === field)
+  const fieldValue = record[field]
+  if (!fieldValue) { return }
+
   if (referenceField) {
     const includes = record.includes || {}
-    const rawValue = [record[field]].flat().filter(v => !!v)
+    const rawValue = [fieldValue].flat().filter(v => !!v)
 
     return rawValue.map((value) => {
       const foreignValue = includes[field][value]
       return combinedSchemas.value[field].reference.label(foreignValue)
     })
+  } else if (inputType(field) === 'enum') {
+    return schemas.value[field].enums[fieldValue]
+  } else if (inputType(field) === 'date') {
+    return formatDate(fieldValue)
   } else {
-    return record[field]
+    return fieldValue
   }
 }
 
@@ -721,7 +738,7 @@ onMounted(async () => {
           <div
             v-if="header.key !== 'tags'"
           >
-            {{ row[header.key] }}
+            {{ inputValue(header.key, row) }}
           </div>
 
           <!-- hardcode format for tags because it is standard through the app --->
