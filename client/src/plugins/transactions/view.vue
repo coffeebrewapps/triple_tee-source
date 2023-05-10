@@ -1,19 +1,11 @@
 <script setup>
 
 import { onMounted, computed, ref } from 'vue'
-import axios from 'axios'
 
 import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
 
-import {
-  TAlert
-} from 'coffeebrew-vue-components'
-
 const config = useConfig()
-
-const errorAlert = ref(false)
-const errorContent = ref('')
 
 const tagsUrl = computed(() => {
   return `${config.baseUrl}/api/tags`
@@ -31,6 +23,18 @@ const fieldsLayout = ref([
   { associatedTransactionId: 'md' }
 ])
 
+function recordValue(record) {
+  return record.id
+}
+
+function tagLabel(record) {
+  return `${record.category}:${record.name}`
+}
+
+function transactionLabel(record) {
+  return record.description
+}
+
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false },
@@ -40,76 +44,30 @@ const dataFields = computed(() => {
     { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
     {
-      key: 'tags', type: 'multiSelect', label: 'Tags', reference: true,
+      key: 'tags', type: 'multiSelect', label: 'Tags',
+      reference: { label: tagLabel },
       listable: true, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
         sourceUrl: tagsUrl.value,
-        value: (record) => { return record.id },
-        label: (record) => { return `${record.category}:${record.name}` }
+        value: recordValue,
+        label: tagLabel
       }
     },
     { key: 'currencyId', type: 'text', label: 'Currency', listable: false, viewable: true, creatable: true, updatable: true },
     {
-      key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction', reference: true,
+      key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction',
+      reference: { label: transactionLabel },
       listable: false, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
         sourceUrl: transactionsUrl.value,
-        value: (record) => { return record.id },
-        label: (record) => { return record.description }
+        value: recordValue,
+        label: transactionLabel
       }
     }
   ]
 })
-
-function formatTags(value) {
-  return value.split(', ')
-}
-
-async function loadTags(offset = 0 , limit = 5) {
-  return new Promise((resolve, reject) => {
-    axios
-      .get(tagsUrl.value, { params: { offset, limit } })
-      .then((res) => {
-        const data = res.data.data.map((record) => {
-          return {
-            value: record.id,
-            label: `${record.category}:${record.name}`
-          }
-        })
-        resolve({
-          total: res.data.total,
-          data: data
-        })
-      })
-      .catch((err) => {
-        reject(err)
-      })
-  })
-}
-
-async function loadTransactions(offset = 0 , limit = 5) {
-  return new Promise((resolve, reject) => {
-    axios
-      .get(transactionsUrl.value, { params: { offset, limit } })
-      .then((res) => {
-        const data = res.data.data.map(record => {
-          return {
-            value: record.id,
-            label: record.description
-          }
-        })
-        resolve({
-          total: res.data.total,
-          data: data
-        })
-      })
-      .catch((err) => {
-        reject(err)
-      })
-  })
-}
 
 onMounted(async () => {
 })
@@ -129,21 +87,13 @@ onMounted(async () => {
       <div class="data-value tags">
         <div
           class="tag"
-          v-for="tag in formatTags(formattedValue)"
+          v-for="tag in formattedValue"
         >
           {{ tag }}
         </div>
       </div>
     </template>
   </DataPage>
-
-  <TAlert
-    title="Error"
-    :content="errorContent"
-    :width="400"
-    :height="250"
-    v-model="errorAlert"
-  />
 </template>
 
 <style scoped>

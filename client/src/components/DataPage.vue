@@ -173,13 +173,17 @@ const listedData = computed(() => {
 
   return data.value.map(d => {
     return Object.keys(d).reduce((v, k) => {
-      return Object.assign(v, { [k]: inputValue(k, d[k]) })
+      return Object.assign(v, { [k]: inputValue(k, d) })
     }, {})
   })
 })
 
 const include = computed(() => {
-  return props.dataFields.filter(h => h.reference).map(h => h.key)
+  return props.dataFields.filter(h => h.reference)
+})
+
+const includeKeys = computed(() => {
+  return include.value.map(h => h.key)
 })
 
 const createDialog = ref(false)
@@ -240,24 +244,6 @@ const updatableKeys = computed(() => {
   return Object.keys(updatableFields.value)
 })
 
-const createDialogClass = computed(() => {
-  const fieldsLength = Object.keys(creatableFields.value).length
-  if (fieldsLength > 4) {
-    return `create-dialog split-col`
-  } else {
-    return `create-dialog single-col`
-  }
-})
-
-const updateDialogClass = computed(() => {
-  const fieldsLength = Object.keys(updatableFields.value).length
-  if (fieldsLength > 4) {
-    return `update-dialog split-col`
-  } else {
-    return `update-dialog single-col`
-  }
-})
-
 const combinedSchemas = computed(() => {
   if (!!schemas.value) {
     return Object.keys(schemas.value).reduce((o, field) => {
@@ -290,18 +276,18 @@ function inputLabel(field) {
   return combinedSchemas.value[field].label
 }
 
-function inputValue(field, value) {
-  const options = inputOptions(field).data || []
-  if (inputType(field) === 'multiSelect') {
-    return value.map((v) => {
-      const option = options.find(o => o.value === v) || {}
-      return option.label
-    }).join(', ')
-  } else if (selectableField(field)) {
-    const option = options.find(o => o.value === value) || {}
-    return option.label
+function inputValue(field, record) {
+  const referenceField = includeKeys.value.find(v => v === field)
+  if (referenceField) {
+    const includes = record.includes || {}
+    const rawValue = [record[field]].flat().filter(v => !!v)
+
+    return rawValue.map((value) => {
+      const foreignValue = includes[field][value]
+      return combinedSchemas.value[field].reference.label(foreignValue)
+    })
   } else {
-    return value
+    return record[field]
   }
 }
 
@@ -322,12 +308,8 @@ function selectableField(field) {
 }
 
 async function openCreateDialog(id) {
-  newRow.value = Object.keys(creatableFields.value).reduce((o, k) => {
-    if (inputType(k) === 'date') {
-      o[k] = new Date()
-    } else {
-      o[k] = null
-    }
+  newRow.value = creatableKeys.value.reduce((o, key) => {
+    o[key] = formatRowField(key, {})
     return o
   }, {})
   createDialog.value = true
@@ -366,7 +348,7 @@ async function openViewDialog(id) {
           .catch((error) => {
             currentRow.value = null
             errorAlert.value = true
-            errorContent.value = JSON.stringify(result.error)
+            errorContent.value = JSON.stringify(error)
           })
 }
 
@@ -379,7 +361,7 @@ async function openUpdateDialog(id) {
           .catch((error) => {
             resetCurrentRowForUpdate()
             errorAlert.value = true
-            errorContent.value = JSON.stringify(result.error)
+            errorContent.value = JSON.stringify(error)
           })
 }
 
@@ -408,13 +390,19 @@ function closeUpdateDialog() {
 function formatCurrentRowForUpdate(record) {
   currentRowForUpdate.value = {}
 
-  Object.keys(record).forEach((key) => {
-    if (inputType(key) === 'date' && !!record[key]) {
-      currentRowForUpdate.value[key] = new Date(record[key])
-    } else {
-      currentRowForUpdate.value[key] = record[key]
-    }
+  updatableKeys.value.forEach((key) => {
+    currentRowForUpdate.value[key] = formatRowField(key, record)
   })
+}
+
+function formatRowField(field, record) {
+  if (inputType(field) === 'date' && !!record[field]) {
+    return new Date(record[field])
+  } else if (inputType(field) === 'multiSelect') {
+    return [record[field]].flat().filter(v => !!v)
+  } else {
+    return record[field]
+  }
 }
 
 function resetCurrentRowForUpdate() {
@@ -504,7 +492,7 @@ async function loadSchemas() {
 
 async function loadData() {
   await axios
-    .get(url.value, { params: { offset: offset.value, limit: limit.value } })
+    .get(url.value, { params: { include: includeKeys.value, offset: offset.value, limit: limit.value } })
     .then((res) => {
       data.value = res.data.data
       totalData.value = res.data.total
@@ -537,7 +525,7 @@ async function createData(params) {
 async function viewData(id) {
   return new Promise((resolve, reject) => {
     axios
-      .get(`${url.value}/${id}`, { params: { include: include.value } })
+      .get(`${url.value}/${id}`, { params: { include: includeKeys.value } })
       .then((res) => {
         resolve({ success: true, record: res.data.record })
       })
@@ -745,11 +733,11 @@ onMounted(async () => {
           >
             <slot
               :name="`view-col.${field}`"
-              v-bind="{ field, value: currentRow[field], formattedValue: inputValue(field, currentRow[field]) }"
+              v-bind="{ field, value: currentRow[field], formattedValue: inputValue(field, currentRow) }"
             >
               <div class="data-label">{{ inputLabel(field) }}</div>
               <div class="data-value">
-                {{ inputValue(field, currentRow[field]) }}
+                {{ inputValue(field, currentRow) }}
               </div>
             </slot>
           </div>
@@ -797,18 +785,6 @@ a.hidden {
 
 .input-control {
   margin: 0 auto;
-}
-
-.create-dialog.single-col .data-row,
-.update-dialog.single-col .data-row {
-  display: grid;
-  grid-template-columns: 1fr;
-}
-
-.create-dialog.split-col .data-row,
-.update-dialog.split-col .data-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
 }
 
 .view-dialog .data-row {
