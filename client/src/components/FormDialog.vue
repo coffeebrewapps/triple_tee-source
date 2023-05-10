@@ -291,8 +291,7 @@ onMounted(async () => {
   text-align: left;
 }
 
-.input-control,
-.select-table {
+.input-control {
   margin: 0.5rem !important;
 }
 </style>

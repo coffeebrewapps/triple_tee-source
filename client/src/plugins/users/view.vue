@@ -6,6 +6,8 @@ import DataPage from '@/components/DataPage.vue'
 
 const config = useConfig()
 
+const divisions = ref([])
+
 const divisionsUrl = computed(() => {
   return `${config.baseUrl}/api/divisions`
 })
@@ -43,6 +45,7 @@ const dataFields = computed(() => {
       listable: false, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
+        pagination: false,
         sourceUrl: divisionsUrl.value,
         value: recordValue,
         label: divisionLabel

@@ -609,10 +609,15 @@ async function downloadData() {
 async function fetchOptions(field, offset) {
   const options = combinedSchemas.value[field].options
   if (options.server) {
-    const limit = combinedSchemas.value[field].limit || 5
+    let params = {}
+    if (options.pagination) {
+      const limit = combinedSchemas.value[field].limit || 5
+      params = { offset, limit }
+    }
+
     return new Promise((resolve, reject) => {
       axios
-        .get(options.sourceUrl, { params: { offset, limit } })
+        .get(options.sourceUrl, { params })
         .then((result) => {
           const data = result.data.data
           const total = result.data.total

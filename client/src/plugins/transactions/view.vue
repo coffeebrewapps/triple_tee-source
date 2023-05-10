@@ -20,7 +20,7 @@ const fieldsLayout = ref([
   { description: 'lg' },
   { currencyId: 'md', amount: 'md', homeCurrencyAmount: 'md' },
   { tags: 'lg' },
-  { associatedTransactionId: 'md' }
+  { associatedTransactionId: 'lg' }
 ])
 
 function recordValue(record) {
@@ -49,6 +49,7 @@ const dataFields = computed(() => {
       listable: true, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
+        pagination: true,
         sourceUrl: tagsUrl.value,
         value: recordValue,
         label: tagLabel
@@ -61,6 +62,7 @@ const dataFields = computed(() => {
       listable: false, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
+        pagination: true,
         sourceUrl: transactionsUrl.value,
         value: recordValue,
         label: transactionLabel

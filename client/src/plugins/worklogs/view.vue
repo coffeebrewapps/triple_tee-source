@@ -38,6 +38,7 @@ const dataFields = computed(() => {
       listable: true, viewable: true, creatable: true, updatable: true,
       options: {
         server: true,
+        pagination: true,
         sourceUrl: tagsUrl.value,
         value: recordValue,
         label: tagLabel
