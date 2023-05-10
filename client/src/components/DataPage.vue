@@ -303,7 +303,7 @@ function inputValue(field, value) {
 
 function inputOptions(field) {
   if (selectableField(field)) {
-    return inputOptionsData.value[field] || {}
+    return inputOptionsData.value[field] || formatInputOptionsData(field, 0, 5, { data: [], total: 0 })
   } else {
     return {}
   }
@@ -592,12 +592,24 @@ async function downloadData() {
 
 async function fetchOptions(field, offset) {
   const options = combinedSchemas.value[field].options
-  if (options instanceof Function) {
+  if (options.server) {
     const limit = combinedSchemas.value[field].limit || 5
     return new Promise((resolve, reject) => {
-      options(offset, limit)
+      axios
+        .get(options.sourceUrl, { params: { offset, limit } })
         .then((result) => {
-          resolve(formatInputOptionsData(field, offset, limit, result))
+          const data = result.data.data
+          const total = result.data.total
+          const dataFromServer = {
+            total,
+            data: data.map((row) => {
+              return {
+                value: options.value(row),
+                label: options.label(row)
+              }
+            })
+          }
+          resolve(formatInputOptionsData(field, offset, limit, dataFromServer))
         })
     })
   } else {

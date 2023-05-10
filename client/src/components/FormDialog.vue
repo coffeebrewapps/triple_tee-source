@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
+import axios from 'axios'
 
 import useConfig from '../config'
 
@@ -83,7 +84,7 @@ const dialogSize = computed(() => {
   }
 })
 
-const inputOptionsData = ref({})
+const inputOptionsData = ref(initInputOptions())
 
 function inputType(field) {
   return props.schemas[field].type
@@ -93,31 +94,26 @@ function inputLabel(field) {
   return props.schemas[field].label
 }
 
-function inputValue(field, value) {
-  if (selectableField(field)) {
-    const option = inputOptions(field).data.find(o => o.value === value) || {}
-    return option.label
-  } else {
-    return value
-  }
-}
-
-function inputOptions(field) {
-  if (selectableField(field)) {
-    return inputOptionsData.value[field] || {}
-  } else {
-    return {}
-  }
-}
-
 async function fetchOptions(field, offset) {
   const options = props.schemas[field].options
-  if (options instanceof Function) {
+  if (options.server) {
     const limit = props.schemas[field].limit || 5
     return new Promise((resolve, reject) => {
-      options(offset, limit)
+      axios
+        .get(options.sourceUrl, { params: { offset, limit } })
         .then((result) => {
-          resolve(formatInputOptionsData(field, offset, limit, result))
+          const data = result.data.data
+          const total = result.data.total
+          const dataFromServer = {
+            total,
+            data: data.map((row) => {
+              return {
+                value: options.value(row),
+                label: options.label(row)
+              }
+            })
+          }
+          resolve(formatInputOptionsData(field, offset, limit, dataFromServer))
         })
     })
   } else {
@@ -193,6 +189,15 @@ async function initOptionsData() {
   })
 }
 
+function initInputOptions() {
+  const fields = Object.keys(props.schemas).filter(f => selectableField(f))
+
+  return fields.reduce((o, field) => {
+    o[field] = formatInputOptionsData(field, 0, 5, { data: [], total: 0 })
+    return o
+  }, {})
+}
+
 onMounted(async () => {
   await initOptionsData()
 })
@@ -237,22 +242,22 @@ onMounted(async () => {
             :label="inputLabel(field)"
             :name="field"
             :id="field"
-            :options="inputOptions(field).data"
+            :options="inputOptionsData[field].data"
             :size="row[field]"
           />
 
           <div class="select-table">
             <TSelectTable
-              v-if="inputType(field) === 'multiSelect' && !!inputOptions(field)"
+              v-if="inputType(field) === 'multiSelect'"
               v-model="data[field]"
               :label="inputLabel(field)"
               :name="field"
-              :options="inputOptions(field).data"
-              :options-length="inputOptions(field).total"
-              :options-loading="inputOptions(field).loading"
-              :pagination="inputOptions(field).pagination"
+              :options="inputOptionsData[field].data"
+              :options-length="inputOptionsData[field].total"
+              :options-loading="inputOptionsData[field].loading"
+              :pagination="inputOptionsData[field].pagination"
               :size="row[field]"
-              @offset-change="inputOptions(field).offsetChange"
+              @offset-change="inputOptionsData[field].offsetChange"
             />
           </div>
         </slot>

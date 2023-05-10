@@ -39,9 +39,27 @@ const dataFields = computed(() => {
     { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
-    { key: 'tags', type: 'multiSelect', label: 'Tags', listable: true, viewable: true, creatable: true, updatable: true, options: loadTags },
+    {
+      key: 'tags', type: 'multiSelect', label: 'Tags',
+      listable: true, viewable: true, creatable: true, updatable: true,
+      options: {
+        server: true,
+        sourceUrl: tagsUrl.value,
+        value: (record) => { return record.id },
+        label: (record) => { return `${record.category}:${record.name}` }
+      }
+    },
     { key: 'currencyId', type: 'text', label: 'Currency', listable: false, viewable: true, creatable: true, updatable: true },
-    { key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction', listable: false, viewable: true, creatable: true, updatable: true, options: loadTransactions }
+    {
+      key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction',
+      listable: false, viewable: true, creatable: true, updatable: true,
+      options: {
+        server: true,
+        sourceUrl: transactionsUrl.value,
+        value: (record) => { return record.id },
+        label: (record) => { return record.description }
+      }
+    }
   ]
 })
 
