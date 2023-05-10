@@ -69,8 +69,8 @@ function list(filters = {}) {
   return dataAccess.list(modelClass, filters);
 }
 
-function view(id) {
-  return dataAccess.view(modelClass, id);
+function view(id, params) {
+  return dataAccess.view(modelClass, id, params);
 }
 
 function create(params) {
