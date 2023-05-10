@@ -413,7 +413,8 @@ function closeUpdateDialog() {
 function formatCurrentRowForUpdate(record) {
   currentRowForUpdate.value = {}
 
-  updatableKeys.value.forEach((key) => {
+  props.dataFields.forEach((field) => {
+    const key = field.key
     currentRowForUpdate.value[key] = formatRowField(key, record)
   })
 }
