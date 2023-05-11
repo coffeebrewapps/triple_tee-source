@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import axios from 'axios'
 
 import useConfig from '../config'
+import { useInputHelper } from '../utils/input'
 
 import {
   TAlert,
@@ -15,6 +16,20 @@ import {
 } from 'coffeebrew-vue-components'
 
 const config = useConfig()
+const {
+  schemasMap,
+  serverOptionsFields,
+  serverOptionsField,
+  selectableKeys,
+  inputType,
+  inputLabel,
+  inputableField,
+  selectableField,
+  formatInputOptionsData,
+  formatDate,
+  fetchOptions,
+  initOptionsData
+} = useInputHelper(props.schemas)
 
 const props = defineProps({
   modelValue: {
@@ -61,15 +76,6 @@ const dialog = computed({
   }
 })
 
-const dialogClass = computed(() => {
-  const fieldsLength = Object.keys(props.dataFields).length
-  if (fieldsLength > 4) {
-    return `split-col`
-  } else {
-    return `single-col`
-  }
-})
-
 const dialogSize = computed(() => {
   if (props.fullScreen) {
     return {
@@ -84,80 +90,25 @@ const dialogSize = computed(() => {
   }
 })
 
-const inputOptionsData = ref(initInputOptions())
+const inputOptionsData = ref({})
 
-function inputType(field) {
-  return props.schemas[field].type
+function inputOptions(field) {
+  return inputOptionsData.value[field]
 }
 
-function inputLabel(field) {
-  return props.schemas[field].label
-}
+const fieldOffsetChange = computed(() => {
+  return serverOptionsFields.value.reduce((o, k) => {
+    o[k] = (offset) => { offsetChange(k, offset) }
+    return o
+  }, {})
+})
 
-async function fetchOptions(field, offset) {
-  const options = props.schemas[field].options
-  if (options.server) {
-    const limit = props.schemas[field].limit || 5
-    return new Promise((resolve, reject) => {
-      axios
-        .get(options.sourceUrl, { params: { offset, limit } })
-        .then((result) => {
-          const data = result.data.data
-          const total = result.data.total
-          const dataFromServer = {
-            total,
-            data: data.map((row) => {
-              return {
-                value: options.value(row),
-                label: options.label(row)
-              }
-            })
-          }
-          resolve(formatInputOptionsData(field, offset, limit, dataFromServer))
-        })
-    })
-  } else {
-    return new Promise((resolve, reject) => {
-      resolve(Object.assign(
-        {},
-        {
-          data: options,
-          total: options.length,
-          loading: false,
-          pagination: { limit: 5, client: true },
-          offsetChange: (offset) => {}
-        }
-      ))
-    })
-  }
-}
-
-function formatInputOptionsData(field, offset, limit, dataFromServer) {
-  return Object.assign(
-    {},
-    {
-      loading: false,
-      pagination: { limit: limit, client: false },
-      offsetChange: (offset) => { optionsOffsetChange(field, offset) }
-    },
-    dataFromServer
-  )
-}
-
-async function optionsOffsetChange(field, newOffset) {
-  const limit = props.schemas[field].limit || 5
+async function offsetChange(field, newOffset) {
+  const limit = schemasMap.value[field].limit || 5
   await fetchOptions(field, newOffset)
     .then((result) => {
       inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
     })
-}
-
-function inputableField(field) {
-  return inputType(field) === 'text' || inputType(field) === 'number'
-}
-
-function selectableField(field) {
-  return inputType(field) === 'select' || inputType(field) === 'multiSelect' || inputType(field) === 'enum'
 }
 
 function submitDataAndCloseDialog() {
@@ -170,36 +121,15 @@ function closeDialog() {
   emit('update:modelValue', false)
 }
 
-async function initOptionsData() {
-  const fields = Object.keys(props.schemas).filter(f => selectableField(f))
-
-  await Promise.all(fields.map((field) => {
-    const offset = props.schemas[field].offset || 0
-    return fetchOptions(field, offset)
-  }))
-  .then((values) => {
-    values.forEach((value, i) => {
-      const field = fields[i]
-      inputOptionsData.value[field] = value
-    })
-  })
-  .catch((error) => {
-    errorAlert.value = true
-    errorContent.value = JSON.stringify(error)
-  })
-}
-
-function initInputOptions() {
-  const fields = Object.keys(props.schemas).filter(f => selectableField(f))
-
-  return fields.reduce((o, field) => {
-    o[field] = formatInputOptionsData(field, 0, 5, { data: [], total: 0 })
-    return o
-  }, {})
-}
-
 onMounted(async () => {
   await initOptionsData()
+    .then((result) => {
+      inputOptionsData.value = result
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error)
+    })
 })
 </script>
 
@@ -207,7 +137,6 @@ onMounted(async () => {
   <TDialog
     v-model="dialog"
     :title="dialogTitle"
-    :class="dialogClass"
     :width="dialogSize.width"
     :height="dialogSize.height"
   >
@@ -237,27 +166,27 @@ onMounted(async () => {
           />
 
           <TSelect
-            v-if="inputType(field) === 'select' || inputType(field) === 'enum'"
+            v-if="inputType(field) === 'enum' || inputType(field) === 'select'"
             v-model="data[field]"
             :label="inputLabel(field)"
             :name="field"
             :id="field"
-            :options="inputOptionsData[field].data"
+            :options="schemasMap[field].options"
             :size="row[field]"
           />
 
           <div class="select-table">
             <TSelectTable
-              v-if="inputType(field) === 'multiSelect'"
+              v-if="inputType(field) === 'multiSelect' && !!inputOptions(field)"
               v-model="data[field]"
               :label="inputLabel(field)"
               :name="field"
-              :options="inputOptionsData[field].data"
-              :options-length="inputOptionsData[field].total"
-              :options-loading="inputOptionsData[field].loading"
-              :pagination="inputOptionsData[field].pagination"
+              :options="inputOptions(field).data"
+              :options-length="inputOptions(field).total"
+              :options-loading="inputOptions(field).loading"
+              :pagination="inputOptions(field).pagination"
               :size="row[field]"
-              @offset-change="inputOptionsData[field].offsetChange"
+              @offset-change="fieldOffsetChange[field]"
             />
           </div>
         </slot>

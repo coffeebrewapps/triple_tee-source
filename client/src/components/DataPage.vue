@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
 import useConfig from '../config'
+import { useInputHelper } from '../utils/input'
 
 import {
   TTable,
@@ -18,6 +19,21 @@ import {
 import FormDialog from './FormDialog.vue'
 
 const config = useConfig()
+
+const {
+  schemasMap,
+  serverOptionsFields,
+  serverOptionsField,
+  selectableKeys,
+  inputType,
+  inputLabel,
+  inputableField,
+  selectableField,
+  formatInputOptionsData,
+  formatDate,
+  fetchOptions,
+  initOptionsData
+} = useInputHelper(props.dataFields)
 
 const props = defineProps({
   dataType: {
@@ -126,8 +142,6 @@ const actions = ref([
     }
   }
 ])
-
-const schemas = ref({})
 
 const data = ref([])
 const totalData = ref(0)
@@ -238,48 +252,6 @@ const updatableKeys = computed(() => {
   return Object.keys(updatableFields.value)
 })
 
-const combinedSchemas = computed(() => {
-  if (!!schemas.value) {
-    return Object.keys(schemas.value).reduce((o, field) => {
-      const prop = props.dataFields.find(f => f.key === field)
-      let enums = {}
-      if (!!schemas.value[field].enums) {
-        enums = schemas.value[field].enums
-      }
-      const options = Object.keys(enums).map((e) => {
-        return { value: e, label: enums[e] }
-      })
-      const combined = Object.assign({}, schemas.value[field], { options: options }, prop)
-      o[field] = combined
-      return o
-    }, {})
-  } else {
-    return props.dataFields.reduce((o, field) => {
-      const prop = props.dataFields.find(f => f.key === field)
-      o[field] = prop
-      return o
-    }, {})
-  }
-})
-
-function inputType(field) {
-  return combinedSchemas.value[field].type
-}
-
-function inputLabel(field) {
-  return combinedSchemas.value[field].label
-}
-
-function formatDate(rawValue) {
-  const formatOptions = Intl.DateTimeFormat().resolvedOptions()
-  const locale = formatOptions.locale
-  const year = formatOptions.year
-  const month = formatOptions.month
-  const day = formatOptions.day
-  const timeZone = formatOptions.timeZone
-  return (new Date(rawValue)).toLocaleDateString(locale)
-}
-
 function inputValue(field, record) {
   const referenceField = includeKeys.value.find(v => v === field)
   const fieldValue = record[field]
@@ -291,10 +263,12 @@ function inputValue(field, record) {
 
     return rawValue.map((value) => {
       const foreignValue = includes[field][value]
-      return combinedSchemas.value[field].reference.label(foreignValue)
+      return schemasMap.value[field].reference.label(foreignValue)
     })
-  } else if (inputType(field) === 'enum') {
-    return schemas.value[field].enums[fieldValue]
+  } else if (inputType(field) === 'enum' || inputType(field) === 'select') {
+    const found = combinedDataFields.value.find(f => f.key === field)
+    const options = found.options
+    return options.find(o => o.value === fieldValue).label
   } else if (inputType(field) === 'date') {
     return formatDate(fieldValue)
   } else {
@@ -339,23 +313,17 @@ function inputOptions(field) {
   }
 }
 
-function inputableField(field) {
-  return inputType(field) === 'text' || inputType(field) === 'number'
-}
-
-function selectableField(field) {
-  return inputType(field) === 'select' || inputType(field) === 'multiSelect' || inputType(field) === 'enum'
-}
-
 async function openCreateDialog(id) {
   newRow.value = creatableKeys.value.reduce((o, key) => {
-    o[key] = formatRowField(key, {})
+    o[key] = formatDataForShow(key, {})
     return o
   }, {})
   createDialog.value = true
 }
 
 async function createDataAndCloseDialog(params) {
+  formatDataForSave(params)
+
   await createData(params)
           .then((result) => {
             loadData()
@@ -407,6 +375,7 @@ async function openUpdateDialog(id) {
 
 async function updateDataAndCloseDialog(params) {
   const id = params.id
+  formatDataForSave(params)
 
   await updateData(id, params)
           .then((result) => {
@@ -432,18 +401,38 @@ function formatCurrentRowForUpdate(record) {
 
   props.dataFields.forEach((field) => {
     const key = field.key
-    currentRowForUpdate.value[key] = formatRowField(key, record)
+    currentRowForUpdate.value[key] = formatDataForShow(key, record)
   })
 }
 
-function formatRowField(field, record) {
+function formatDataForShow(field, record) {
   if (inputType(field) === 'date' && !!record[field]) {
     return new Date(record[field])
-  } else if (inputType(field) === 'multiSelect') {
-    return [record[field]].flat().filter(v => !!v)
+  } else if (serverOptionsField(field) && !!record.includes) {
+    const includes = record.includes[field]
+    const fieldValue = record[field]
+    if (!!includes && Object.keys(includes).length > 0) {
+      return fieldValue.map((v) => {
+        const include = includes[v]
+        const options = schemasMap.value[field].options
+        const value = options.value(include)
+        const label = options.label(include)
+        return { value, label }
+      })
+    } else {
+      return record[field]
+    }
   } else {
     return record[field]
   }
+}
+
+function formatDataForSave(params) {
+  serverOptionsFields.value.forEach((field) => {
+    const values = (params[field] || [])
+    params[field] = values.map(v => v.value)
+  })
+  return params
 }
 
 function resetCurrentRowForUpdate() {
@@ -519,11 +508,25 @@ async function updateOffsetAndReload(updated) {
   await loadData()
 }
 
+const combinedDataFields = ref(props.dataFields)
+
 async function loadSchemas() {
   await axios
     .get(schemasUrl.value)
     .then((res) => {
-      schemas.value = res.data.fields
+      const fields = res.data.fields
+      combinedDataFields.value = combinedDataFields.value.map((field) => {
+        if (field.type === 'enum') {
+          const enums = fields[field.key].enums
+          const options = Object.keys(enums).map((e) => {
+            return { value: e, label: enums[e] }
+          })
+          const combined = Object.assign({}, field, { options })
+          return combined
+        } else {
+          return field
+        }
+      })
     })
     .catch((err) => {
       errorAlert.value = true
@@ -623,92 +626,25 @@ async function downloadData() {
   })
 }
 
-async function fetchOptions(field, offset) {
-  const options = combinedSchemas.value[field].options
-  if (options.server) {
-    let params = {}
-    if (options.pagination) {
-      const limit = combinedSchemas.value[field].limit || 5
-      params = { offset, limit }
-    }
-
-    return new Promise((resolve, reject) => {
-      axios
-        .get(options.sourceUrl, { params })
-        .then((result) => {
-          const data = result.data.data
-          const total = result.data.total
-          const dataFromServer = {
-            total,
-            data: data.map((row) => {
-              return {
-                value: options.value(row),
-                label: options.label(row)
-              }
-            })
-          }
-          resolve(formatInputOptionsData(field, offset, limit, dataFromServer))
-        })
-    })
-  } else {
-    return new Promise((resolve, reject) => {
-      resolve(Object.assign(
-        {},
-        {
-          data: options,
-          total: options.length,
-          loading: false,
-          pagination: { limit: 5, client: true },
-          offsetChange: (offset) => {}
-        }
-      ))
-    })
-  }
-}
-
-function formatInputOptionsData(field, offset, limit, dataFromServer) {
-  return Object.assign(
-    {},
-    {
-      loading: false,
-      pagination: { limit: limit, client: false },
-      offsetChange: (offset) => { optionsOffsetChange(field, offset) }
-    },
-    dataFromServer
-  )
-}
-
 async function optionsOffsetChange(field, newOffset) {
-  const limit = combinedSchemas.value[field].limit || 5
+  const limit = schemasMap.value[field].limit || 5
   await fetchOptions(field, newOffset)
     .then((result) => {
       inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
     })
 }
 
-async function initOptionsData() {
-  const fields = Object.keys(combinedSchemas.value).filter(f => selectableField(f))
-
-  await Promise.all(fields.map((field) => {
-    const offset = combinedSchemas.value[field].offset || 0
-    return fetchOptions(field, offset)
-  }))
-  .then((values) => {
-    values.forEach((value, i) => {
-      const field = fields[i]
-      inputOptionsData.value[field] = value
-    })
-  })
-  .catch((error) => {
-    errorAlert.value = true
-    errorContent.value = JSON.stringify(error)
-  })
-}
-
 onMounted(async () => {
   await loadSchemas()
   await loadData()
   await initOptionsData()
+    .then((result) => {
+      inputOptionsData.value = result
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error)
+    })
 })
 </script>
 
@@ -768,7 +704,7 @@ onMounted(async () => {
   <FormDialog
     v-if="newRow"
     v-model="createDialog"
-    :schemas="combinedSchemas"
+    :schemas="combinedDataFields"
     :fields-layout="fieldsLayout"
     :data-fields="creatableKeys"
     :data="newRow"
@@ -780,7 +716,7 @@ onMounted(async () => {
   <FormDialog
     v-if="currentRowForUpdate"
     v-model="updateDialog"
-    :schemas="combinedSchemas"
+    :schemas="combinedDataFields"
     :fields-layout="fieldsLayout"
     :data-fields="updatableKeys"
     :data="currentRowForUpdate"

@@ -1092,11 +1092,7 @@ clone@^1.0.2:
 
 "coffeebrew-vue-components@https://github.com/coffeebrewapps/coffeebrew_vue_components.git#feature/v0.1.0":
   version "0.1.0"
-  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#c7d891e8537195729389ebc5bf28c7abde9fe182"
-  dependencies:
-    "@vitejs/plugin-vue" "^4.0.0"
-    axios "^1.4.0"
-    vite "^4.1.4"
+  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#e13ee5b5f28f4c6c8155f860d3419c346a615e9a"
 
 color-convert@^2.0.1:
   version "2.0.1"

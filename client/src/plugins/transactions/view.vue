@@ -57,7 +57,7 @@ const dataFields = computed(() => {
     },
     { key: 'currencyId', type: 'text', label: 'Currency', listable: false, viewable: true, creatable: true, updatable: true },
     {
-      key: 'associatedTransactionId', type: 'select', label: 'Associated Transaction',
+      key: 'associatedTransactionId', type: 'multiSelect', label: 'Associated Transaction',
       reference: { label: transactionLabel },
       listable: false, viewable: true, creatable: true, updatable: true,
       options: {
