@@ -20,6 +20,18 @@ import {
 import FormDialog from './FormDialog.vue'
 import ViewDialog from './ViewDialog.vue'
 
+import { useBannerStore } from '../stores/banner'
+
+const banner = useBannerStore()
+
+function showBanner(message) {
+  banner.show(message)
+}
+
+function hideBanner() {
+  banner.hide()
+}
+
 const config = useConfig()
 
 const {
@@ -545,6 +557,8 @@ async function loadData() {
       data.value = res.data.data
       totalData.value = res.data.total
       dataLoading.value = false
+      showBanner(`Data loaded successfully!`)
+      setTimeout(hideBanner, 5000)
     })
     .catch((err) => {
       dataLoading.value = false
