@@ -78,5 +78,7 @@ a {
 }
 
 .content-container {
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
 }

@@ -322,6 +322,8 @@ async function createDataAndCloseDialog(rawParams) {
 
   await createData(params)
           .then((result) => {
+            showBanner(`Data created successfully!`)
+            setTimeout(hideBanner, 5000)
             loadData()
             openViewDialog(result.record.id)
           })
@@ -375,6 +377,8 @@ async function updateDataAndCloseDialog(rawParams) {
 
   await updateData(id, params)
           .then((result) => {
+            showBanner(`Data updated successfully!`)
+            setTimeout(hideBanner, 5000)
             loadData()
             openViewDialog(id)
           })
@@ -557,8 +561,6 @@ async function loadData() {
       data.value = res.data.data
       totalData.value = res.data.total
       dataLoading.value = false
-      showBanner(`Data loaded successfully!`)
-      setTimeout(hideBanner, 5000)
     })
     .catch((err) => {
       dataLoading.value = false

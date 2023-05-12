@@ -2,11 +2,13 @@ export function useFormatter() {
   function formatDate(rawValue) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
-    const year = formatOptions.year
-    const month = formatOptions.month
-    const day = formatOptions.day
-    const timeZone = formatOptions.timeZone
     return (new Date(rawValue)).toLocaleDateString(locale)
+  }
+
+  function formatTimestamp(rawValue) {
+    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
+    const locale = formatOptions.locale
+    return (new Date(rawValue)).toLocaleString(locale)
   }
 
   function formatTag(record, tag) {
@@ -40,6 +42,7 @@ export function useFormatter() {
 
   return {
     formatDate,
+    formatTimestamp,
     formatTag,
     tagStyle
   }
