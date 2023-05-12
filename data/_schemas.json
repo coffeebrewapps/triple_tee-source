@@ -57,7 +57,7 @@
         }
       },
       "unique": ["email"],
-      "required": ["id", "name", "email", "division", "joinDate"]
+      "required": ["name", "email", "division", "joinDate"]
     }
   },
   "divisions": {
@@ -73,7 +73,7 @@
       "primary": ["id"],
       "foreign": {},
       "unique": ["name"],
-      "required": ["id", "name"]
+      "required": ["name"]
     }
   },
   "transactions": {
@@ -131,7 +131,6 @@
       },
       "unique": [],
       "required": [
-        "id",
         "type",
         "transactionDate",
         "description",
@@ -173,7 +172,7 @@
         }
       },
       "unique": [],
-      "required": ["id"]
+      "required": []
     }
   }
 }
