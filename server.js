@@ -6,7 +6,8 @@ const fsPromises = require('fs').promises;
 const cors = require('cors');
 
 const common = require('./common');
-const store = require('./server/stores/dataAccess');
+const dataAccess = require('./server/stores/dataAccess');
+const routes = require('./server/routes/shared');
 
 const app = express();
 const port = process.env.PORT || common.DEFAULT_PORT;
@@ -25,7 +26,7 @@ async function loadPlugins(app) {
   await fsPromises.readdir(path.join(__dirname, 'server/modules'))
     .then((files) => {
       for (const file of files) {
-        const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'));
+        const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'))(dataAccess, routes);
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {
           app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
@@ -47,19 +48,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 /*** start:Routes ***/
 app.get('/', function(req, res){
   (async () => {
-    await store.initData();
+    await dataAccess.initData();
     console.log(`Refreshed data`);
   })();
 });
 
 app.get('/api/schemas/:schema', function(req, res){
   const modelClass = req.params.schema;
-  res.send(store.viewSchemas(modelClass));
+  res.send(dataAccess.viewSchemas(modelClass));
 });
 /*** end:Routes ***/
 
 (async () => {
-  await store.initData();
+  await dataAccess.initData();
 
   await loadPlugins(app);
 

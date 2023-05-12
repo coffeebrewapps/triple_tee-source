@@ -1,11 +1,14 @@
 'use strict'
 
 const name = 'divisions';
-const store = require('./stores');
-const router = require('./routes');
 
-module.exports = {
-  name,
-  store,
-  router
+module.exports = (dataAccess, routes) => {
+  const stores = require('./stores')(dataAccess);
+  const router = require('./routes')(routes, stores);
+
+  return {
+    name,
+    stores,
+    router
+  }
 }
