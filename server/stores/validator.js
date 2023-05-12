@@ -53,10 +53,11 @@ function validateRequired(modelClass, record, constraint, data) {
 function validateForeign(modelClass, record, constraint, data) {
   const errorFields = Object.keys(constraint).filter((foreignKey) => {
     const foreignValue = record[foreignKey]
+    if (!foreignValue) { return true; }
+
     const referenceModel = constraint[foreignKey].reference
-    const foreignPrimaryKey = constraint[foreignKey].primary
     const referenceData = Object.values(data[referenceModel] || {})
-    return !referenceData.find(f => f[foreignPrimaryKey])
+    return !referenceData[foreignValue]
   })
 
   if (errorFields.length > 0) {
