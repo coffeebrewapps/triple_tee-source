@@ -60,6 +60,16 @@ a {
   color: var(--color-text);
 }
 
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
 @media (hover: hover) {
   a:hover {
     background-color: var(--color-border-hover);
@@ -67,20 +77,6 @@ a {
   }
 }
 
-@media (min-width: 1024px) {
-  body {
-    display: flex;
-  }
-
-  #app {
-    display: flex;
-    flex-direction: row;
-    padding: 0;
-  }
-
-  .content-container {
-    margin-left: 15%;
-    width: 85%;
-    padding: 2rem;
-  }
+.content-container {
+  padding: 2rem;
 }

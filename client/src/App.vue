@@ -3,12 +3,16 @@ import { ref, watch } from 'vue'
 import { useRouter, RouterView } from 'vue-router'
 import NavMenu from './components/NavMenu.vue'
 
+import { useNavStore } from './stores/nav'
+
 const router = useRouter()
 const transitionName = ref('default')
 
+const navigator = useNavStore()
+
 watch(router.currentRoute, (to, from) => {
   transitionName.value = 'fade'
-  console.log(transitionName.value)
+  navigator.toggle()
 })
 </script>
 
@@ -25,13 +29,4 @@ watch(router.currentRoute, (to, from) => {
 </template>
 
 <style scoped>
-.v-enter-active,
-.v-leave-active {
-  transition: opacity 0.1s ease;
-}
-
-.v-enter-from,
-.v-leave-to {
-  opacity: 0;
-}
 </style>

@@ -1092,7 +1092,7 @@ clone@^1.0.2:
 
 "coffeebrew-vue-components@https://github.com/coffeebrewapps/coffeebrew_vue_components.git#feature/v0.1.0":
   version "0.1.0"
-  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#a4ffa3663155e2b12f0fb33aaa07cad534fe5f98"
+  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#d7a3d3a0e06c1c20ae2991e097cbffa326c664ea"
 
 color-convert@^2.0.1:
   version "2.0.1"
