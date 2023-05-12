@@ -88,6 +88,26 @@ const dialogSize = computed(() => {
   }
 })
 
+function showInput(field) {
+  return inputableField(field)
+}
+
+function showDatePicker(field) {
+  return inputType(field) === 'date'
+}
+
+function showSelect(field) {
+  return inputType(field) === 'enum' || inputType(field) === 'select'
+}
+
+function showSingleSelect(field) {
+  return singleSelectableField(field) && !!inputOptions(field)
+}
+
+function showMultiSelect(field) {
+  return multiSelectableField(field) && !!inputOptions(field)
+}
+
 const inputOptionsData = ref({})
 
 function inputOptions(field) {
@@ -150,7 +170,7 @@ onMounted(async () => {
           v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
         >
           <TInput
-            v-if="inputableField(field)"
+            v-if="showInput(field)"
             v-model="data[field]"
             :type="inputType(field)"
             :label="inputLabel(field)"
@@ -158,13 +178,13 @@ onMounted(async () => {
           />
 
           <TDatePicker
-            v-if="inputType(field) === 'date'"
+            v-if="showDatePicker(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
           />
 
           <TSelect
-            v-if="inputType(field) === 'enum' || inputType(field) === 'select'"
+            v-if="showSelect(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
             :name="field"
@@ -174,7 +194,7 @@ onMounted(async () => {
           />
 
           <TSelectTable
-            v-if="singleSelectableField(field) && !!inputOptions(field)"
+            v-if="showSingleSelect(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
             :name="inputLabel(field)"
@@ -188,7 +208,7 @@ onMounted(async () => {
           />
 
           <TSelectTable
-            v-if="multiSelectableField(field) && !!inputOptions(field)"
+            v-if="showMultiSelect(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
             :name="inputLabel(field)"
