@@ -18,11 +18,6 @@ Object.keys(plugins).forEach((plugin) => {
 
 routes.push(
   {
-    path: '/form',
-    name: 'form',
-    component: () => import('../views/DemoForm.vue')
-  },
-  {
     path: '/:catchAll(.*)',
     redirect: '/',
     meta: { hidden: true }
