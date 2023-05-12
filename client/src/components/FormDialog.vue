@@ -19,18 +19,12 @@ const config = useConfig()
 const {
   schemasMap,
   serverOptionsFields,
-  serverOptionsField,
-  selectableKeys,
-  multiSelectableFields,
-  singleSelectableFields,
   inputType,
   inputLabel,
   inputableField,
   multiSelectableField,
   singleSelectableField,
-  selectableField,
   formatInputOptionsData,
-  formatDate,
   fetchOptions,
   initOptionsData
 } = useInputHelper(props.schemas)
@@ -180,7 +174,7 @@ onMounted(async () => {
           />
 
           <TSelectTable
-            v-if="inputType(field) === 'singleSelect' && !!inputOptions(field)"
+            v-if="singleSelectableField(field) && !!inputOptions(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
             :name="inputLabel(field)"
@@ -194,7 +188,7 @@ onMounted(async () => {
           />
 
           <TSelectTable
-            v-if="inputType(field) === 'multiSelect' && !!inputOptions(field)"
+            v-if="multiSelectableField(field) && !!inputOptions(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
             :name="inputLabel(field)"

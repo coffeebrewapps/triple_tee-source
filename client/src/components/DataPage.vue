@@ -4,6 +4,7 @@ import axios from 'axios'
 
 import useConfig from '../config'
 import { useInputHelper } from '../utils/input'
+import { useFormatter } from '../utils/formatter'
 
 import {
   TTable,
@@ -17,27 +18,29 @@ import {
 } from 'coffeebrew-vue-components'
 
 import FormDialog from './FormDialog.vue'
+import ViewDialog from './ViewDialog.vue'
 
 const config = useConfig()
 
 const {
   schemasMap,
-  serverOptionsFields,
-  serverOptionsField,
-  selectableKeys,
   multiSelectableFields,
   singleSelectableFields,
   inputType,
   inputLabel,
-  inputableField,
   multiSelectableField,
   singleSelectableField,
   selectableField,
   formatInputOptionsData,
-  formatDate,
   fetchOptions,
   initOptionsData
 } = useInputHelper(props.dataFields)
+
+const {
+  formatDate,
+  formatTag,
+  tagStyle
+} = useFormatter()
 
 const props = defineProps({
   dataType: {
@@ -283,35 +286,6 @@ function inputValue(field, record) {
     return formatDate(fieldValue)
   } else {
     return fieldValue
-  }
-}
-
-function formatTag(record, tag) {
-  const includes = (record.includes || {}).tags
-  if (includes[tag]) {
-    const value = includes[tag] || {}
-    return `${value.category}:${value.name}`
-  } else {
-    return tag
-  }
-}
-
-function tagStyle(record, tag) {
-  const includes = (record.includes || {}).tags
-  if (includes[tag]) {
-    const color = includes[tag].textColor
-    const background = includes[tag].backgroundColor
-    const styles = []
-    if (color) {
-      styles.push(`color: ${color} !important;`)
-    }
-    if (background) {
-      styles.push(`background-color: ${background} !important;`)
-    }
-
-    return styles.join('')
-  } else {
-    return ``
   }
 }
 
@@ -756,51 +730,18 @@ onMounted(async () => {
       @submit="updateDataAndCloseDialog"
     />
 
-    <TDialog
+    <ViewDialog
       v-if="currentRow"
       v-model="viewDialog"
+      :keys="viewableKeys"
+      :include-keys="includeKeys"
+      :data-fields="combinedDataFields"
+      :record="currentRow"
       :title="viewDialogTitle(dataType, currentRow)"
+      :input-label="inputLabel"
+      :input-value="inputValue"
       class="view-dialog"
-    >
-      <template #body>
-        <div class="data-row">
-          <slot
-            name="view-content"
-            v-bind="{ row: currentRow }"
-          >
-            <div
-              class="data-col"
-              v-for="field in viewableKeys"
-            >
-              <slot
-                :name="`view-col.${field}`"
-                v-bind="{ field, value: currentRow[field], formattedValue: inputValue(field, currentRow) }"
-              >
-                <div class="data-label">{{ inputLabel(field) }}</div>
-                <div
-                  v-if="field !== 'tags'"
-                  class="data-value"
-                >
-                  {{ inputValue(field, currentRow) }}
-                </div>
-
-                <!-- hardcode format for tags because it is standard through the app --->
-                <div class="data-value">
-                  <div
-                    v-if="field === 'tags'"
-                    v-for="tag in currentRow.tags"
-                    class="tag"
-                    :style="tagStyle(currentRow, tag)"
-                  >
-                    {{ formatTag(currentRow, tag) }}
-                  </div>
-                </div>
-              </slot>
-            </div>
-          </slot>
-        </div>
-      </template>
-    </TDialog>
+    />
 
     <TConfirmDialog
       v-if="currentRowForDelete"
@@ -842,23 +783,6 @@ a.hidden {
 
 .input-control {
   margin: 0 auto;
-}
-
-.view-dialog .data-row {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  overflow-y: scroll;
-}
-
-.view-dialog .data-col {
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  padding: 1rem;
-}
-
-.view-dialog .data-label {
-  font-weight: 600;
 }
 
 .delete-dialog .container .body {

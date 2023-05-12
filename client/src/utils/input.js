@@ -70,16 +70,6 @@ export function useInputHelper(schemas) {
     )
   }
 
-  function formatDate(rawValue) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
-    const locale = formatOptions.locale
-    const year = formatOptions.year
-    const month = formatOptions.month
-    const day = formatOptions.day
-    const timeZone = formatOptions.timeZone
-    return (new Date(rawValue)).toLocaleDateString(locale)
-  }
-
   async function fetchOptions(field, offset) {
     const options = schemasMap.value[field].options || {}
     if (options.server) {
@@ -151,7 +141,6 @@ export function useInputHelper(schemas) {
     singleSelectableField,
     selectableField,
     formatInputOptionsData,
-    formatDate,
     fetchOptions,
     initOptionsData
   }
