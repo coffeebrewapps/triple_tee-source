@@ -331,8 +331,8 @@ async function openCreateDialog(id) {
   createDialog.value = true
 }
 
-async function createDataAndCloseDialog(params) {
-  formatDataForSave(params)
+async function createDataAndCloseDialog(rawParams) {
+  const params = formatDataForSave(rawParams)
 
   await createData(params)
           .then((result) => {
@@ -383,9 +383,9 @@ async function openUpdateDialog(id) {
           })
 }
 
-async function updateDataAndCloseDialog(params) {
+async function updateDataAndCloseDialog(rawParams) {
   const id = params.id
-  formatDataForSave(params)
+  const params = formatDataForSave(rawParams)
 
   await updateData(id, params)
           .then((result) => {
@@ -450,17 +450,19 @@ function formatDataForShow(field, record) {
 }
 
 function formatDataForSave(params) {
+  const data = Object.assign({}, params)
+
   multiSelectableFields.value.forEach((field) => {
-    const values = (params[field] || [])
-    params[field] = values.map(v => v.value)
+    const values = (data[field] || [])
+    data[field] = values.map(v => v.value)
   })
 
   singleSelectableFields.value.forEach((field) => {
-    const values = (params[field] || [])
-    params[field] = (values[0] || {}).value
+    const values = (data[field] || [])
+    data[field] = (values[0] || {}).value
   })
 
-  return params
+  return data
 }
 
 function resetCurrentRowForUpdate() {
