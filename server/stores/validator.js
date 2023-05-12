@@ -1,3 +1,5 @@
+const logger = require('../logger')
+
 function validate(modelClass, record, schemas, data) {
   const constraints = schemas[modelClass].constraints;
 
@@ -18,9 +20,9 @@ function validate(modelClass, record, schemas, data) {
 }
 
 function validateUnique(modelClass, record, constraint, data) {
-  const sameModelData = Object.entries(data[modelClass] || {})
+  const sameModelData = Object.values(data[modelClass] || {})
   const errorFields = constraint.filter((field) => {
-    sameModelData.find(m => m[field] === record[field])
+    return sameModelData.find(m => m[field] === record[field])
   })
 
   if (errorFields.length > 0) {
@@ -53,8 +55,8 @@ function validateForeign(modelClass, record, constraint, data) {
     const foreignValue = record[foreignKey]
     const referenceModel = constraint[foreignKey].reference
     const foreignPrimaryKey = constraint[foreignKey].primary
-    const referenceData = Object.entries(data[referenceModel] || {})
-    !referenceData.find(f => f[foreignPrimaryKey])
+    const referenceData = Object.values(data[referenceModel] || {})
+    return !referenceData.find(f => f[foreignPrimaryKey])
   })
 
   if (errorFields.length > 0) {
