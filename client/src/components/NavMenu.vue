@@ -23,19 +23,20 @@ function toggleNav() {
   navigator.toggle()
 }
 
-const containerClass = computed(() => {
+const navContainerClass = computed(() => {
   if (showNav.value) {
-    return `nav-container shown`
+    return `nav-container show`
   } else {
-    return `nav-container hidden`
+    return `nav-container hide`
   }
 })
 </script>
 
 <template>
-  <div :class="containerClass">
+  <div
+    :class="navContainerClass"
+  >
     <div
-      v-if="showNav"
       class="nav"
     >
       <RouterLink
@@ -66,23 +67,24 @@ const containerClass = computed(() => {
   align-items: center;
   left: 0;
   top: 0;
+  width: 300px;
   height: 100vh;
   z-index: 999;
-  transition: width 0.5s ease;
+  transition: all 0.5s linear;
 }
 
-.nav-container.shown {
-  width: 200px;
+.nav-container.show {
+  transform: translate(0px, 0);
 }
 
-.nav-container.hidden {
-  width: 20px;
+.nav-container.hide {
+  transform: translate(-230px, 0);
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  width: 180px;
+  width: 230px;
   height: 100%;
   border: 1px solid var(--color-border);
   overflow-y: scroll;
@@ -115,19 +117,19 @@ const containerClass = computed(() => {
   background-color: var(--color-border-hover);
 }
 
-.nav-container.shown .nav-toggle i.fa-caret-left {
+.nav-container.show .nav-toggle i.fa-caret-left {
   display: inline-block;
 }
 
-.nav-container.hidden .nav-toggle i.fa-caret-left {
+.nav-container.hide .nav-toggle i.fa-caret-left {
   display: none;
 }
 
-.nav-container.shown .nav-toggle i.fa-caret-right {
+.nav-container.show .nav-toggle i.fa-caret-right {
   display: none;
 }
 
-.nav-container.hidden .nav-toggle i.fa-caret-right {
+.nav-container.hide .nav-toggle i.fa-caret-right {
   display: inline-block;
 }
 </style>
