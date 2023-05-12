@@ -7,18 +7,23 @@ const validator = require('./validator');
 
 const dataStore = config.dataStore;
 const schemas = config.schemas;
+const indexes = config.indexes;
 
 let init = false;
 let schemaCache = {};
 let dataCache = {};
+let indexCache = {};
+let indexTypes = [];
 
 async function initData(force = false) {
   if (dataStore === 'fs') {
     logger.log(`Init data start`);
     if (!init || force) {
-      fileAccess.initData(schemas)
+      fileAccess.initData(schemas, indexes)
         .then((result) => {
           schemaCache = result.schemas;
+          indexCache = result.indexes;
+          indexTypes = Object.keys(indexCache);
           logger.log(`Init schema from file complete`);
           result.data.forEach((dataResult) => {
             dataCache[dataResult.modelClass] = dataResult.data;
@@ -33,6 +38,7 @@ async function initData(force = false) {
     }
   } else {
     schemaCache = {};
+    indexCache = {};
     dataCache = {};
     init = true;
     logger.log(`Init data complete`);
@@ -89,7 +95,7 @@ function view(modelClass, id, params = {}) {
 
 // TODO: check exists
 function create(modelClass, params) {
-  const result = validator.validate(modelClass, params, schemaCache, dataCache);
+  const result = validator.validate(modelClass, params, schemaCache, indexCache, dataCache);
 
   if (result.valid) {
     let data = dataCache[modelClass];
@@ -98,6 +104,8 @@ function create(modelClass, params) {
     const newRow = Object.assign(params, { id: newId });
     data[newId] = newRow;
     cacheData(modelClass, data);
+    cacheIndexes(modelClass, newRow);
+
     return {
       success: true,
       record: newRow
@@ -108,6 +116,32 @@ function create(modelClass, params) {
       errors: result.errors
     };
   }
+}
+
+function cacheIndexes(modelClass, record) {
+  indexTypes.forEach((indexType) => {
+    if (indexType === 'unique') {
+      cacheUniqueIndexes(modelClass, record);
+    }
+  })
+  writeData(indexes, indexCache);
+}
+
+function cacheUniqueIndexes(modelClass, record) {
+  const uniqueIndexes = indexCache.unique;
+  if (!uniqueIndexes[modelClass]) {
+    uniqueIndexes[modelClass] = {};
+  }
+
+  const uniqueConstraints = schemaCache[modelClass].constraints.unique || [];
+  const newIndexes = uniqueConstraints.reduce((o, field) => {
+    const existingIndexes = uniqueIndexes[modelClass][field] || [];
+    existingIndexes.push(record[field]);
+    o[field] = existingIndexes;
+    return o;
+  }, {})
+
+  uniqueIndexes[modelClass] = newIndexes;
 }
 
 // TODO: check exists

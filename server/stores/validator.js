@@ -1,6 +1,6 @@
 const logger = require('../logger')
 
-function validate(modelClass, record, schemas, data) {
+function validate(modelClass, record, schemas, indexes, data) {
   const constraints = schemas[modelClass].constraints;
 
   const uniqueConstraint = constraints.unique;
@@ -9,7 +9,7 @@ function validate(modelClass, record, schemas, data) {
 
   let errors = [];
 
-  errors = errors.concat(validateUnique(modelClass, record, uniqueConstraint, data));
+  errors = errors.concat(validateUnique(modelClass, indexes.unique, record, uniqueConstraint, data));
   errors = errors.concat(validateRequired(modelClass, record, requiredConstraint, data));
   errors = errors.concat(validateForeign(modelClass, record, foreignConstraint, data));
 
@@ -19,10 +19,10 @@ function validate(modelClass, record, schemas, data) {
   };
 }
 
-function validateUnique(modelClass, record, constraint, data) {
-  const sameModelData = Object.values(data[modelClass] || {})
+function validateUnique(modelClass, indexes, record, constraint, data) {
+  const uniqueIndexes = indexes[modelClass];
   const errorFields = constraint.filter((field) => {
-    return sameModelData.find(m => m[field] === record[field])
+    return uniqueIndexes[field].find(v => v === record[field])
   })
 
   if (errorFields.length > 0) {

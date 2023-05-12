@@ -10,7 +10,22 @@ function pathName(modelClass) {
   return path.join(mainDirname, './data', `${modelClass}.json`);
 }
 
-async function initData(schemas) {
+async function initData(schemas, indexes) {
+  return new Promise((resolve, reject) => {
+    Promise.all([loadSchemasAndData(schemas), loadIndexes(indexes)])
+    .then((result) => {
+      const allResults = result.reduce((o, r) => {
+        return Object.assign({}, o, r)
+      });
+      resolve(allResults);
+    })
+    .catch((error) => {
+      reject(error);
+    })
+  });
+}
+
+async function loadSchemasAndData(schemas) {
   return new Promise((resolve, reject) => {
     loadSchemas(schemas)
       .then((schemaResult) => {
@@ -29,7 +44,7 @@ async function initData(schemas) {
       .catch((error) => {
         reject(error);
       });
-  });
+  })
 }
 
 async function loadSchemas(schemas) {
@@ -40,6 +55,19 @@ async function loadSchemas(schemas) {
       })
       .catch((error) => {
         logger.error(`Error schema file`, { schemas, error });
+        reject(error);
+      });
+  });
+}
+
+async function loadIndexes(indexes) {
+  return new Promise((resolve, reject) => {
+    readFromFile(indexes)
+      .then((result) => {
+        resolve({ indexes: JSON.parse(result) });
+      })
+      .catch((error) => {
+        logger.error(`Error index file`, { indexes, error });
         reject(error);
       });
   });
