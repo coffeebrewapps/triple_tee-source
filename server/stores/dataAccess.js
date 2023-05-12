@@ -3,6 +3,7 @@
 const logger = require('../logger');
 const config = require('../config');
 const fileAccess = require('./fileAccess');
+const validator = require('./validator');
 
 const dataStore = config.dataStore;
 const schemas = config.schemas;
@@ -88,13 +89,25 @@ function view(modelClass, id, params = {}) {
 
 // TODO: check exists
 function create(modelClass, params) {
-  let data = dataCache[modelClass];
-  const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
-  const newId = (lastId + 1).toString();
-  const newRow = Object.assign(params, { id: newId });
-  data[newId] = newRow;
-  cacheData(modelClass, data);
-  return newRow;
+  const result = validator.validate(modelClass, params, schemaCache, dataCache);
+
+  if (result.valid) {
+    let data = dataCache[modelClass];
+    const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
+    const newId = (lastId + 1).toString();
+    const newRow = Object.assign(params, { id: newId });
+    data[newId] = newRow;
+    cacheData(modelClass, data);
+    return {
+      success: true,
+      record: newRow
+    };
+  } else {
+    return {
+      success: false,
+      errors: result.errors
+    };
+  }
 }
 
 // TODO: check exists

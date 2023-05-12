@@ -172,7 +172,7 @@ const errorAlertSize = computed(() => {
     const lines = Math.ceil(errorContent.value.length / 100) * 50
     return {
       width: 800,
-      height: lines
+      height: lines <= 100 ? 200 : lines
     }
   } else {
     return {
@@ -341,7 +341,7 @@ async function createDataAndCloseDialog(params) {
           })
           .catch((error) => {
             errorAlert.value = true
-            errorContent.value = JSON.stringify(error)
+            errorContent.value = JSON.stringify(error, false, 4)
           })
           .finally(() => {
             closeCreateDialog()
@@ -366,7 +366,7 @@ async function openViewDialog(id) {
           .catch((error) => {
             currentRow.value = null
             errorAlert.value = true
-            errorContent.value = JSON.stringify(error)
+            errorContent.value = JSON.stringify(error, false, 4)
           })
 }
 
@@ -379,7 +379,7 @@ async function openUpdateDialog(id) {
           .catch((error) => {
             resetCurrentRowForUpdate()
             errorAlert.value = true
-            errorContent.value = JSON.stringify(error)
+            errorContent.value = JSON.stringify(error, false, 4)
           })
 }
 
@@ -394,7 +394,7 @@ async function updateDataAndCloseDialog(params) {
           })
           .catch((error) => {
             errorAlert.value = true
-            errorContent.value = JSON.stringify(error)
+            errorContent.value = JSON.stringify(error, false, 4)
           })
           .finally(() => {
             closeUpdateDialog()
@@ -457,7 +457,7 @@ function formatDataForSave(params) {
 
   singleSelectableFields.value.forEach((field) => {
     const values = (params[field] || [])
-    params[field] = values[0].value
+    params[field] = (values[0] || {}).value
   })
 
   return params
@@ -476,7 +476,7 @@ async function openDeleteDialog(id) {
           .catch((error) => {
             resetCurrentRowForDelete()
             errorAlert.value = true
-            errorContent.value = JSON.stringify(result.error)
+            errorContent.value = JSON.stringify(result.error, false, 4)
           })
 }
 
@@ -490,7 +490,7 @@ async function deleteDataAndCloseDialog() {
           })
           .catch((error) => {
             errorAlert.value = true
-            errorContent.value = JSON.stringify(error)
+            errorContent.value = JSON.stringify(error, false, 4)
           })
           .finally(() => {
             closeDeleteDialog()
@@ -516,7 +516,7 @@ async function openDownloadDialog() {
           })
           .catch((error) => {
             errorAlert.value = true
-            errorContent.value = JSON.stringify(result.error)
+            errorContent.value = JSON.stringify(result.error, false, 4)
           })
 }
 
@@ -558,7 +558,7 @@ async function loadSchemas() {
     })
     .catch((err) => {
       errorAlert.value = true
-      errorContent.value = JSON.stringify(err)
+      errorContent.value = JSON.stringify(err, false, 4)
     })
 }
 
@@ -573,7 +573,7 @@ async function loadData() {
     .catch((err) => {
       dataLoading.value = false
       errorAlert.value = true
-      errorContent.value = JSON.stringify(err)
+      errorContent.value = JSON.stringify(err, false, 4)
     })
 }
 
@@ -582,10 +582,10 @@ async function createData(params) {
     axios
       .post(`${url.value}`, params)
       .then((res) => {
-        if (res.data.record) {
+        if (res.data.success) {
           resolve({ success: true, record: res.data.record })
         } else {
-          reject({ success: false, error: `Create failure` })
+          reject({ success: false, error: res.data.errors })
         }
       })
       .catch((err) => {
@@ -671,7 +671,7 @@ onMounted(async () => {
     })
     .catch((error) => {
       errorAlert.value = true
-      errorContent.value = JSON.stringify(error)
+      errorContent.value = JSON.stringify(error, false, 4)
     })
 })
 </script>
@@ -865,5 +865,9 @@ td.col {
   text-align: left;
   padding: 0.5rem;
   border: 1px solid var(--color-border);
+}
+
+.error-alert .container {
+  overflow-y: scroll !important;
 }
 </style>
