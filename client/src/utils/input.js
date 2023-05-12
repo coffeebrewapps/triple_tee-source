@@ -18,6 +18,14 @@ export function useInputHelper(schemas) {
     return Object.keys(schemasMap.value).filter(f => selectableField(f))
   })
 
+  const multiSelectableFields = computed(() => {
+    return Object.keys(schemasMap.value).filter(f => multiSelectableField(f))
+  })
+
+  const singleSelectableFields = computed(() => {
+    return Object.keys(schemasMap.value).filter(f => singleSelectableField(f))
+  })
+
   function inputType(field) {
     return (schemasMap.value[field] || {}).type
   }
@@ -30,8 +38,21 @@ export function useInputHelper(schemas) {
     return inputType(field) === 'text' || inputType(field) === 'number'
   }
 
+  function multiSelectableField(field) {
+    return inputType(field) === 'multiSelect'
+  }
+
+  function singleSelectableField(field) {
+    return inputType(field) === 'singleSelect'
+  }
+
   function selectableField(field) {
-    return inputType(field) === 'select' || inputType(field) === 'multiSelect' || inputType(field) === 'enum'
+    return (
+      inputType(field) === 'select' ||
+      inputType(field) === 'multiSelect' ||
+      inputType(field) === 'singleSelect' ||
+      inputType(field) === 'enum'
+    )
   }
 
   function serverOptionsField(field) {
@@ -121,9 +142,13 @@ export function useInputHelper(schemas) {
     serverOptionsFields,
     serverOptionsField,
     selectableKeys,
+    multiSelectableFields,
+    singleSelectableFields,
     inputType,
     inputLabel,
     inputableField,
+    multiSelectableField,
+    singleSelectableField,
     selectableField,
     formatInputOptionsData,
     formatDate,

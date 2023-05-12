@@ -25,9 +25,13 @@ const {
   serverOptionsFields,
   serverOptionsField,
   selectableKeys,
+  multiSelectableFields,
+  singleSelectableFields,
   inputType,
   inputLabel,
   inputableField,
+  multiSelectableField,
+  singleSelectableField,
   selectableField,
   formatInputOptionsData,
   formatDate,
@@ -261,10 +265,16 @@ function inputValue(field, record) {
     const includes = record.includes || {}
     const rawValue = [fieldValue].flat().filter(v => !!v)
 
-    return rawValue.map((value) => {
+    const mapped = rawValue.map((value) => {
       const foreignValue = includes[field][value]
       return schemasMap.value[field].reference.label(foreignValue)
     })
+
+    if (multiSelectableField(field)) {
+      return mapped
+    } else {
+      return mapped[0]
+    }
   } else if (inputType(field) === 'enum' || inputType(field) === 'select') {
     const found = combinedDataFields.value.find(f => f.key === field)
     const options = found.options
@@ -408,7 +418,7 @@ function formatCurrentRowForUpdate(record) {
 function formatDataForShow(field, record) {
   if (inputType(field) === 'date' && !!record[field]) {
     return new Date(record[field])
-  } else if (serverOptionsField(field) && !!record.includes) {
+  } else if (multiSelectableField(field) && !!record.includes) {
     const includes = record.includes[field]
     const fieldValue = record[field]
     if (!!includes && Object.keys(includes).length > 0) {
@@ -422,16 +432,34 @@ function formatDataForShow(field, record) {
     } else {
       return record[field]
     }
+  } else if (singleSelectableField(field) && !!record.includes) {
+    const includes = record.includes[field]
+    const fieldValue = record[field]
+    if (!!fieldValue && !!includes && Object.keys(includes).length > 0) {
+      const include = includes[fieldValue]
+      const options = schemasMap.value[field].options
+      const value = options.value(include)
+      const label = options.label(include)
+      return [{ value, label }]
+    } else {
+      return record[field]
+    }
   } else {
     return record[field]
   }
 }
 
 function formatDataForSave(params) {
-  serverOptionsFields.value.forEach((field) => {
+  multiSelectableFields.value.forEach((field) => {
     const values = (params[field] || [])
     params[field] = values.map(v => v.value)
   })
+
+  singleSelectableFields.value.forEach((field) => {
+    const values = (params[field] || [])
+    params[field] = values[0].value
+  })
+
   return params
 }
 

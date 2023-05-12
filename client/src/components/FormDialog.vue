@@ -21,9 +21,13 @@ const {
   serverOptionsFields,
   serverOptionsField,
   selectableKeys,
+  multiSelectableFields,
+  singleSelectableFields,
   inputType,
   inputLabel,
   inputableField,
+  multiSelectableField,
+  singleSelectableField,
   selectableField,
   formatInputOptionsData,
   formatDate,
@@ -175,20 +179,32 @@ onMounted(async () => {
             :size="row[field]"
           />
 
-          <div class="select-table">
-            <TSelectTable
-              v-if="inputType(field) === 'multiSelect' && !!inputOptions(field)"
-              v-model="data[field]"
-              :label="inputLabel(field)"
-              :name="field"
-              :options="inputOptions(field).data"
-              :options-length="inputOptions(field).total"
-              :options-loading="inputOptions(field).loading"
-              :pagination="inputOptions(field).pagination"
-              :size="row[field]"
-              @offset-change="fieldOffsetChange[field]"
-            />
-          </div>
+          <TSelectTable
+            v-if="inputType(field) === 'singleSelect' && !!inputOptions(field)"
+            v-model="data[field]"
+            :label="inputLabel(field)"
+            :name="inputLabel(field)"
+            :multiple="false"
+            :options="inputOptions(field).data"
+            :options-length="inputOptions(field).total"
+            :options-loading="inputOptions(field).loading"
+            :pagination="inputOptions(field).pagination"
+            :size="row[field]"
+            @offset-change="fieldOffsetChange[field]"
+          />
+
+          <TSelectTable
+            v-if="inputType(field) === 'multiSelect' && !!inputOptions(field)"
+            v-model="data[field]"
+            :label="inputLabel(field)"
+            :name="inputLabel(field)"
+            :options="inputOptions(field).data"
+            :options-length="inputOptions(field).total"
+            :options-loading="inputOptions(field).loading"
+            :pagination="inputOptions(field).pagination"
+            :size="row[field]"
+            @offset-change="fieldOffsetChange[field]"
+          />
         </slot>
 
       </div>
