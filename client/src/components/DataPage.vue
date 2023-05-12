@@ -679,158 +679,160 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h2>{{ dataType }}</h2>
+  <div>
+    <h2>{{ dataType }}</h2>
 
-  <TTable
-    :name="dataType"
-    :headers="listedHeaders"
-    :data="listedData"
-    :table-actions="tableActions"
-    :actions="actions"
-    :loading="dataLoading"
-    :pagination="{ limit: limit, client: false }"
-    :total-data="totalData"
-    @offset-change="updateOffsetAndReload"
-  >
-    <template #data-content="{ headers, row, i }">
-      <td
-        v-for="header in headers"
-        class="col"
-      >
-        <slot
-          :name="`data-col.${header.key}`"
-          v-bind="{ header, row, i }"
+    <TTable
+      :name="dataType"
+      :headers="listedHeaders"
+      :data="listedData"
+      :table-actions="tableActions"
+      :actions="actions"
+      :loading="dataLoading"
+      :pagination="{ limit: limit, client: false }"
+      :total-data="totalData"
+      @offset-change="updateOffsetAndReload"
+    >
+      <template #data-content="{ headers, row, i }">
+        <td
+          v-for="header in headers"
+          class="col"
         >
-          <div
-            v-if="header.key !== 'tags'"
+          <slot
+            :name="`data-col.${header.key}`"
+            v-bind="{ header, row, i }"
           >
-            {{ inputValue(header.key, row) }}
-          </div>
-
-          <!-- hardcode format for tags because it is standard through the app --->
-          <div
-            v-if="header.key === 'tags'"
-            v-for="tag in row.tags"
-            class="tag"
-            :style="tagStyle(row, tag)"
-          >
-            {{ formatTag(row, tag) }}
-          </div>
-        </slot>
-      </td>
-    </template>
-  </TTable>
-
-  <TAlert
-    v-if="errorContent.length > 0"
-    title="Error"
-    class="error-alert"
-    :content="errorAlertFitContent"
-    :width="errorAlertSize.width"
-    :height="errorAlertSize.height"
-    v-model="errorAlert"
-  />
-
-  <FormDialog
-    v-if="newRow"
-    v-model="createDialog"
-    :schemas="combinedDataFields"
-    :fields-layout="fieldsLayout"
-    :data-fields="creatableKeys"
-    :data="newRow"
-    :dialog-title="createDialogTitle(dataType)"
-    :full-screen="formDialogFullScreen"
-    @submit="createDataAndCloseDialog"
-  />
-
-  <FormDialog
-    v-if="currentRowForUpdate"
-    v-model="updateDialog"
-    :schemas="combinedDataFields"
-    :fields-layout="fieldsLayout"
-    :data-fields="updatableKeys"
-    :data="currentRowForUpdate"
-    :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
-    :full-screen="formDialogFullScreen"
-    @submit="updateDataAndCloseDialog"
-  />
-
-  <TDialog
-    v-if="currentRow"
-    v-model="viewDialog"
-    :title="viewDialogTitle(dataType, currentRow)"
-    class="view-dialog"
-  >
-    <template #body>
-      <div class="data-row">
-        <slot
-          name="view-content"
-          v-bind="{ row: currentRow }"
-        >
-          <div
-            class="data-col"
-            v-for="field in viewableKeys"
-          >
-            <slot
-              :name="`view-col.${field}`"
-              v-bind="{ field, value: currentRow[field], formattedValue: inputValue(field, currentRow) }"
+            <div
+              v-if="header.key !== 'tags'"
             >
-              <div class="data-label">{{ inputLabel(field) }}</div>
-              <div
-                v-if="field !== 'tags'"
-                class="data-value"
+              {{ inputValue(header.key, row) }}
+            </div>
+
+            <!-- hardcode format for tags because it is standard through the app --->
+            <div
+              v-if="header.key === 'tags'"
+              v-for="tag in row.tags"
+              class="tag"
+              :style="tagStyle(row, tag)"
+            >
+              {{ formatTag(row, tag) }}
+            </div>
+          </slot>
+        </td>
+      </template>
+    </TTable>
+
+    <TAlert
+      v-if="errorContent.length > 0"
+      title="Error"
+      class="error-alert"
+      :content="errorAlertFitContent"
+      :width="errorAlertSize.width"
+      :height="errorAlertSize.height"
+      v-model="errorAlert"
+    />
+
+    <FormDialog
+      v-if="newRow"
+      v-model="createDialog"
+      :schemas="combinedDataFields"
+      :fields-layout="fieldsLayout"
+      :data-fields="creatableKeys"
+      :data="newRow"
+      :dialog-title="createDialogTitle(dataType)"
+      :full-screen="formDialogFullScreen"
+      @submit="createDataAndCloseDialog"
+    />
+
+    <FormDialog
+      v-if="currentRowForUpdate"
+      v-model="updateDialog"
+      :schemas="combinedDataFields"
+      :fields-layout="fieldsLayout"
+      :data-fields="updatableKeys"
+      :data="currentRowForUpdate"
+      :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
+      :full-screen="formDialogFullScreen"
+      @submit="updateDataAndCloseDialog"
+    />
+
+    <TDialog
+      v-if="currentRow"
+      v-model="viewDialog"
+      :title="viewDialogTitle(dataType, currentRow)"
+      class="view-dialog"
+    >
+      <template #body>
+        <div class="data-row">
+          <slot
+            name="view-content"
+            v-bind="{ row: currentRow }"
+          >
+            <div
+              class="data-col"
+              v-for="field in viewableKeys"
+            >
+              <slot
+                :name="`view-col.${field}`"
+                v-bind="{ field, value: currentRow[field], formattedValue: inputValue(field, currentRow) }"
               >
-                {{ inputValue(field, currentRow) }}
-              </div>
-
-              <!-- hardcode format for tags because it is standard through the app --->
-              <div class="data-value">
+                <div class="data-label">{{ inputLabel(field) }}</div>
                 <div
-                  v-if="field === 'tags'"
-                  v-for="tag in currentRow.tags"
-                  class="tag"
-                  :style="tagStyle(currentRow, tag)"
+                  v-if="field !== 'tags'"
+                  class="data-value"
                 >
-                  {{ formatTag(currentRow, tag) }}
+                  {{ inputValue(field, currentRow) }}
                 </div>
-              </div>
-            </slot>
-          </div>
-        </slot>
-      </div>
-    </template>
-  </TDialog>
 
-  <TConfirmDialog
-    v-if="currentRowForDelete"
-    v-model="deleteDialog"
-    :title="deleteDialogTitle(dataType, currentRowForDelete)"
-    :primary-text="deleteDialogPrimaryText(dataType, currentRowForDelete)"
-    :secondary-text="deleteDialogSecondaryText(dataType, currentRowForDelete)"
-    :width="500"
-    :height="350"
-    @confirm="deleteDataAndCloseDialog"
-    @cancel="closeDeleteDialog"
-    class="delete-dialog"
-  />
+                <!-- hardcode format for tags because it is standard through the app --->
+                <div class="data-value">
+                  <div
+                    v-if="field === 'tags'"
+                    v-for="tag in currentRow.tags"
+                    class="tag"
+                    :style="tagStyle(currentRow, tag)"
+                  >
+                    {{ formatTag(currentRow, tag) }}
+                  </div>
+                </div>
+              </slot>
+            </div>
+          </slot>
+        </div>
+      </template>
+    </TDialog>
 
-  <TDialog
-    v-if="downloadLink"
-    v-model="downloadDialog"
-    title="Download export file"
-    :width="400"
-    :height="250"
-  >
-    <template #body>
-      {{ downloadFile }}
-    </template>
+    <TConfirmDialog
+      v-if="currentRowForDelete"
+      v-model="deleteDialog"
+      :title="deleteDialogTitle(dataType, currentRowForDelete)"
+      :primary-text="deleteDialogPrimaryText(dataType, currentRowForDelete)"
+      :secondary-text="deleteDialogSecondaryText(dataType, currentRowForDelete)"
+      :width="500"
+      :height="350"
+      @confirm="deleteDataAndCloseDialog"
+      @cancel="closeDeleteDialog"
+      class="delete-dialog"
+    />
 
-    <template #actions>
-      <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
-      <TButton button-type="text" value="Download" icon="fa-solid fa-file-arrow-down" @click="downloadDataAsFile()"/>
-      <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeDownloadDialog()"/>
-    </template>
-  </TDialog>
+    <TDialog
+      v-if="downloadLink"
+      v-model="downloadDialog"
+      title="Download export file"
+      :width="400"
+      :height="250"
+    >
+      <template #body>
+        {{ downloadFile }}
+      </template>
+
+      <template #actions>
+        <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
+        <TButton button-type="text" value="Download" icon="fa-solid fa-file-arrow-down" @click="downloadDataAsFile()"/>
+        <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeDownloadDialog()"/>
+      </template>
+    </TDialog>
+  </div>
 </template>
 
 <style scoped>
