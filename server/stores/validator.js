@@ -60,12 +60,14 @@ function validateRequired(modelClass, record, constraint, data) {
 
 function validateForeign(modelClass, record, constraint, data) {
   const errorFields = Object.keys(constraint).filter((foreignKey) => {
-    const foreignValue = record[foreignKey];
-    if (!foreignValue) { return true; }
+    const foreignValue = [record[foreignKey]].flat().filter(v => !!v);
+    if (foreignValue.length === 0) { return false; }
 
     const referenceModel = constraint[foreignKey].reference;
-    const referenceData = Object.values(data[referenceModel] || {});
-    return !referenceData[foreignValue];
+    const referenceData = data[referenceModel] || {};
+    return !foreignValue.reduce((check, value) => {
+      return check && !!referenceData[value];
+    }, true)
   });
 
   if (errorFields.length > 0) {
