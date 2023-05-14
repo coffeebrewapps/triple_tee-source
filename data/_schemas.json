@@ -202,5 +202,28 @@
       "unique": ["code"],
       "required": ["code", "symbol", "exchangeRate", "effectiveStart", "effectiveEnd"]
     }
+  },
+  "alerts": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "content": {
+        "type": "text"
+      },
+      "isRead": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": [],
+      "required": ["title", "content"]
+    }
   }
 }
