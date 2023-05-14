@@ -64,6 +64,11 @@ app.get('/api/schemas/:schema', function(req, res){
 
   await loadPlugins(app);
 
+  // fallback
+  app.get('/*', function(req, res){
+    res.redirect('/');
+  });
+
   console.log(`Server starting at port ${port}`);
 
   server = app.listen(port);
