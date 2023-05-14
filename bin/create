@@ -27,13 +27,16 @@ function module {
     echo "'use strict'
 
 const name = '$model';
-const store = require('./stores');
-const router = require('./routes');
 
-module.exports = {
-  name,
-  store,
-  router
+module.exports = (dataAccess, routes) => {
+  const stores = require('./stores')(dataAccess);
+  const router = require('./routes')(routes, stores);
+
+  return {
+    name,
+    stores,
+    router
+  }
 }" >> $module_file
   fi
 
@@ -41,19 +44,18 @@ module.exports = {
   if [[ ! -f $route_file ]]; then
     echo "'use strict'
 
-const routes = require('../../routes/shared');
-const stores = require('./stores');
-
-module.exports = {
-  prefix: '/api/${model}',
-  routes: [
-    { method: 'get', path: '/download', handler: routes.download(stores) },
-    { method: 'get', path: '/', handler: routes.list(stores) },
-    { method: 'get', path: '/:id', handler: routes.view(stores) },
-    { method: 'post', path: '/', handler: routes.create(stores) },
-    { method: 'put', path: '/:id', handler: routes.update(stores) },
-    { method: 'delete', path: '/:id', handler: routes.remove(stores) }
-  ]
+module.exports = (routes, stores) => {
+  return {
+    prefix: '/api/${model}',
+    routes: [
+      { method: 'get', path: '/download', handler: routes.download(stores) },
+      { method: 'get', path: '/', handler: routes.list(stores) },
+      { method: 'get', path: '/:id', handler: routes.view(stores) },
+      { method: 'post', path: '/', handler: routes.create(stores) },
+      { method: 'put', path: '/:id', handler: routes.update(stores) },
+      { method: 'delete', path: '/:id', handler: routes.remove(stores) }
+    ]
+  }
 }" >> $route_file
   fi
 
@@ -61,37 +63,37 @@ module.exports = {
   if [[ ! -f $store_file ]]; then
     echo "'use strict'
 
-const dataAccess = require('../../stores/dataAccess');
-
 const modelClass = '$model';
 
-function list(filters = {}) {
-  return dataAccess.list(modelClass, filters);
-}
+module.exports = (dataAccess) => {
+  function list(filters = {}) {
+    return dataAccess.list(modelClass, filters);
+  }
 
-function view(id, params) {
-  return dataAccess.view(modelClass, id, params);
-}
+  function view(id, params) {
+    return dataAccess.view(modelClass, id, params);
+  }
 
-function create(params) {
-  return dataAccess.create(modelClass, params);
-}
+  function create(params) {
+    return dataAccess.create(modelClass, params);
+  }
 
-function update(id, params) {
-  return dataAccess.update(modelClass, id, params);
-}
+  function update(id, params) {
+    return dataAccess.update(modelClass, id, params);
+  }
 
-function remove(id) {
-  return dataAccess.remove(modelClass, id);
-}
+  function remove(id) {
+    return dataAccess.remove(modelClass, id);
+  }
 
-module.exports = {
-  modelClass,
-  list,
-  view,
-  create,
-  update,
-  remove
+  return {
+    modelClass,
+    list,
+    view,
+    create,
+    update,
+    remove
+  }
 }" >> $store_file
   fi
 }
