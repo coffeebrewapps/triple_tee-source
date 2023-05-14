@@ -23,7 +23,7 @@
     "constraints": {
       "primary": ["id"],
       "foreign": {},
-      "unique": [],
+      "unique": ["category|name"],
       "required": ["category", "name"]
     }
   },
@@ -199,7 +199,7 @@
     "constraints": {
       "primary": ["id"],
       "foreign": {},
-      "unique": ["code"],
+      "unique": ["code|symbol|effectiveStart"],
       "required": ["code", "symbol", "exchangeRate", "effectiveStart", "effectiveEnd"]
     }
   },

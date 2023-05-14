@@ -134,10 +134,12 @@ function cacheUniqueIndexes(modelClass, record) {
   }
 
   const uniqueConstraints = schemaCache[modelClass].constraints.unique || [];
-  const newIndexes = uniqueConstraints.reduce((o, field) => {
-    const existingIndexes = uniqueIndexes[modelClass][field] || [];
-    existingIndexes.push(record[field]);
-    o[field] = existingIndexes;
+  const newIndexes = uniqueConstraints.reduce((o, key) => {
+    const existingIndexes = uniqueIndexes[modelClass][key] || [];
+    const keys = key.split('|');
+    const values = keys.map(k => record[k]).join('|');
+    existingIndexes.push(values);
+    o[key] = existingIndexes;
     return o;
   }, {})
 
