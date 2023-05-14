@@ -28,6 +28,9 @@ watch(router.currentRoute, (to, from) => {
 
       <RouterView v-slot="{ Component }">
         <TopNav />
+
+        <div class="divider"></div>
+
         <Transition mode="out-in">
           <component :is="Component" />
         </Transition>

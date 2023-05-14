@@ -4,7 +4,8 @@ import { computed } from 'vue'
 import { useFormatter } from '../utils/formatter'
 
 import {
-  TDialog
+  TDialog,
+  TButton
 } from 'coffeebrew-vue-components'
 
 const {
@@ -57,6 +58,10 @@ const dialog = computed({
     emit('update:modelValue', val)
   }
 })
+
+function closeDialog() {
+  emit('update:modelValue', false)
+}
 </script>
 
 <template>
@@ -92,6 +97,10 @@ const dialog = computed({
           </div>
         </div>
       </div>
+    </template>
+
+    <template #actions>
+      <TButton button-type="text" value="Close" icon="fa-solid fa-xmark" @click="closeDialog()"/>
     </template>
   </TDialog>
 </template>

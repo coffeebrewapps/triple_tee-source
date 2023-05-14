@@ -669,11 +669,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <h2>{{ dataType }}</h2>
+  <div class="page-container">
+    <h2 class="heading">{{ dataType }}</h2>
 
     <TTable
-      :name="dataType"
+      name=""
       :headers="listedHeaders"
       :data="listedData"
       :table-actions="tableActions"
@@ -793,6 +793,14 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.page-container {
+  margin: 1rem 0;
+}
+
+.heading {
+  font-weight: 900;
+}
+
 a.hidden {
   display: none;
 }
@@ -808,7 +816,7 @@ a.hidden {
 td.col {
   text-align: left;
   padding: 0.5rem;
-  border: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .error-alert .container {

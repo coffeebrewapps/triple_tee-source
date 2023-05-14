@@ -3,15 +3,25 @@
 #app {
   width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem 2rem;
 
   font-weight: normal;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
 }
 
 a {
   text-decoration: none;
   color: var(--color-text);
   transition: 0.4s;
+}
+
+.divider {
+  border-bottom: 1px solid var(--color-border);
 }
 
 .green {
@@ -70,15 +80,19 @@ a {
   opacity: 0;
 }
 
+.dialog-enter-active,
+.dialog-leave-active {
+  transition: opacity 0.3s linear;
+}
+
+.dialog-enter-from,
+.dialog-leave-to {
+  opacity: 0;
+}
+
 @media (hover: hover) {
   a:hover {
     background-color: var(--color-border-hover);
     color: var(--color-text);
   }
-}
-
-.content-container {
-  display: flex;
-  flex-direction: column;
-  padding: 1rem;
 }
