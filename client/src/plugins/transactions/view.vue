@@ -11,6 +11,10 @@ const tagsUrl = computed(() => {
   return `${config.baseUrl}/api/tags`
 })
 
+const currenciesUrl = computed(() => {
+  return `${config.baseUrl}/api/currencies`
+})
+
 const transactionsUrl = computed(() => {
   return `${config.baseUrl}/api/transactions`
 })
@@ -29,6 +33,10 @@ function recordValue(record) {
 
 function tagLabel(record) {
   return `${record.category}:${record.name}`
+}
+
+function currencyLabel(record) {
+  return `${record.symbol} (${record.code})`
 }
 
 function transactionLabel(record) {
@@ -55,7 +63,18 @@ const dataFields = computed(() => {
         label: tagLabel
       }
     },
-    { key: 'currencyId', type: 'text', label: 'Currency', listable: false, viewable: true, creatable: true, updatable: true },
+    {
+      key: 'currencyId', type: 'singleSelect', label: 'Currencies',
+      reference: { label: currencyLabel },
+      listable: true, viewable: true, creatable: true, updatable: true,
+      options: {
+        server: true,
+        pagination: true,
+        sourceUrl: currenciesUrl.value,
+        value: recordValue,
+        label: currencyLabel
+      }
+    },
     {
       key: 'associatedTransactionId', type: 'singleSelect', label: 'Associated Transaction',
       reference: { label: transactionLabel },
@@ -77,7 +96,7 @@ onMounted(async () => {
 
 <template>
   <DataPage
-    data-type="Transaction"
+    data-type="Transactions"
     url-base="api/transactions"
     schemas-url-base="api/schemas/transactions"
     :form-dialog-full-screen="true"

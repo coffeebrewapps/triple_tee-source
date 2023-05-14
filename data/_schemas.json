@@ -174,5 +174,33 @@
       "unique": [],
       "required": []
     }
+  },
+  "currencies": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "code": {
+        "type": "text"
+      },
+      "symbol": {
+        "type": "text"
+      },
+      "exchangeRate": {
+        "type": "number"
+      },
+      "effectiveStart": {
+        "type": "date"
+      },
+      "effectiveEnd": {
+        "type": "date"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": ["code"],
+      "required": ["code", "symbol", "exchangeRate", "effectiveStart", "effectiveEnd"]
+    }
   }
 }

@@ -54,7 +54,7 @@ onMounted(async () => {
 
 <template>
   <DataPage
-    data-type="User"
+    data-type="Users"
     url-base="api/users"
     schemas-url-base="api/schemas/users"
     :fields-layout="fieldsLayout"
