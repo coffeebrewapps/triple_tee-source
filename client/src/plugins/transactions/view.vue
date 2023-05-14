@@ -64,7 +64,7 @@ const dataFields = computed(() => {
       }
     },
     {
-      key: 'currencyId', type: 'singleSelect', label: 'Currencies',
+      key: 'currencyId', type: 'singleSelect', label: 'Currency',
       reference: { label: currencyLabel },
       listable: true, viewable: true, creatable: true, updatable: true,
       options: {
