@@ -1,4 +1,55 @@
 {
+  "alerts": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "title": {
+        "type": "text"
+      },
+      "content": {
+        "type": "text"
+      },
+      "isRead": {
+        "type": "boolean",
+        "default": false
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": [],
+      "required": ["title", "content"]
+    }
+  },
+  "currencies": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "code": {
+        "type": "text"
+      },
+      "symbol": {
+        "type": "text"
+      },
+      "exchangeRate": {
+        "type": "number"
+      },
+      "effectiveStart": {
+        "type": "date"
+      },
+      "effectiveEnd": {
+        "type": "date"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": ["code|symbol|effectiveStart"],
+      "required": ["code", "symbol", "exchangeRate", "effectiveStart", "effectiveEnd"]
+    }
+  },
   "tags": {
     "fields": {
       "id": {
@@ -25,55 +76,6 @@
       "foreign": {},
       "unique": ["category|name"],
       "required": ["category", "name"]
-    }
-  },
-  "users": {
-    "fields": {
-      "id": {
-        "type": "text"
-      },
-      "name": {
-        "type": "text"
-      },
-      "email": {
-        "type": "text"
-      },
-      "division": {
-        "type": "text"
-      },
-      "joinDate": {
-        "type": "date"
-      },
-      "phone": {
-        "type": "text"
-      }
-    },
-    "constraints": {
-      "primary": ["id"],
-      "foreign": {
-        "division": {
-          "reference": "divisions",
-          "primary": "id"
-        }
-      },
-      "unique": ["email"],
-      "required": ["name", "email", "division", "joinDate"]
-    }
-  },
-  "divisions": {
-    "fields": {
-      "id": {
-        "type": "text"
-      },
-      "name": {
-        "type": "text"
-      }
-    },
-    "constraints": {
-      "primary": ["id"],
-      "foreign": {},
-      "unique": ["name"],
-      "required": ["name"]
     }
   },
   "transactions": {
@@ -173,57 +175,6 @@
       },
       "unique": [],
       "required": []
-    }
-  },
-  "currencies": {
-    "fields": {
-      "id": {
-        "type": "text"
-      },
-      "code": {
-        "type": "text"
-      },
-      "symbol": {
-        "type": "text"
-      },
-      "exchangeRate": {
-        "type": "number"
-      },
-      "effectiveStart": {
-        "type": "date"
-      },
-      "effectiveEnd": {
-        "type": "date"
-      }
-    },
-    "constraints": {
-      "primary": ["id"],
-      "foreign": {},
-      "unique": ["code|symbol|effectiveStart"],
-      "required": ["code", "symbol", "exchangeRate", "effectiveStart", "effectiveEnd"]
-    }
-  },
-  "alerts": {
-    "fields": {
-      "id": {
-        "type": "text"
-      },
-      "title": {
-        "type": "text"
-      },
-      "content": {
-        "type": "text"
-      },
-      "isRead": {
-        "type": "boolean",
-        "default": false
-      }
-    },
-    "constraints": {
-      "primary": ["id"],
-      "foreign": {},
-      "unique": [],
-      "required": ["title", "content"]
     }
   }
 }
