@@ -21,7 +21,11 @@ function validate(modelClass, record, schemas, indexes, data) {
 
 function validateUnique(modelClass, indexes, record, constraint, data) {
   const uniqueIndexes = indexes[modelClass];
+  if (!uniqueIndexes) { return []; }
+
   const errorFields = constraint.filter((field) => {
+    if (!uniqueIndexes[field]) { return false; }
+
     return uniqueIndexes[field].find(v => v === record[field])
   })
 
