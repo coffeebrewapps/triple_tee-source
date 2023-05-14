@@ -116,7 +116,7 @@ function client {
 
 const route = {
   path: '/${lower_model}',
-  name: '${lower_model}',
+  name: '${model}',
   component: () => import('./view.vue')
 }
 
