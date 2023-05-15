@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 
 import useConfig from '../config'
@@ -175,9 +175,6 @@ const dataLoading = ref(false)
 const errorAlert = ref(false)
 const errorContent = ref('')
 
-const createErrors = ref({})
-const updateErrors = ref({})
-
 const errorAlertFitContent = computed(() => {
   if (!!errorContent.value && errorContent.value.length > 0) {
     return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n')
@@ -219,12 +216,22 @@ const includeKeys = computed(() => {
 
 const createDialog = ref(false)
 const newRow = ref()
+const createErrors = ref({})
+
+watch(createDialog, (newVal, oldVal) => {
+  if (!newVal) { createErrors.value = {} }
+})
 
 const viewDialog = ref(false)
 const currentRow = ref()
 
 const updateDialog = ref(false)
 const currentRowForUpdate = ref()
+const updateErrors = ref({})
+
+watch(updateDialog, (newVal, oldVal) => {
+  if (!newVal) { updateErrors.value = {} }
+})
 
 const deleteDialog = ref(false)
 const currentRowForDelete = ref()
