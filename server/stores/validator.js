@@ -32,10 +32,13 @@ function validateUnique(modelClass, indexes, record, constraint, data, errors) {
     return uniqueValues.find(v => v === values);
   });
 
-  errorFields.forEach((field) => {
-    const fieldErrors = errors[field] || [];
-    fieldErrors.push('unique');
-    errors[field] = fieldErrors;
+  errorFields.forEach((compositeField) => {
+    const fields = compositeField.split('|');
+    fields.forEach((field) => {
+      const fieldErrors = errors[field] || [];
+      fieldErrors.push('unique');
+      errors[field] = fieldErrors;
+    });
   });
 }
 
