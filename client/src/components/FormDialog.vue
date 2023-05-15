@@ -4,6 +4,7 @@ import axios from 'axios'
 
 import useConfig from '../config'
 import { useInputHelper } from '../utils/input'
+import { useErrors } from '../utils/errors'
 
 import {
   TAlert,
@@ -28,6 +29,8 @@ const {
   fetchOptions,
   initOptionsData
 } = useInputHelper(props.schemas)
+
+const errorsMap = useErrors()
 
 const props = defineProps({
   modelValue: {
@@ -57,6 +60,12 @@ const props = defineProps({
   fullScreen: {
     type: Boolean,
     default: false
+  },
+  errorMessages: {
+    type: Object,
+    default() {
+      return {}
+    }
   }
 })
 
@@ -129,14 +138,22 @@ async function offsetChange(field, newOffset) {
     })
 }
 
-function submitDataAndCloseDialog() {
+function submitData() {
   emit('submit', props.data)
-  closeDialog()
 }
 
 function closeDialog() {
   dialog.value = false
   emit('update:modelValue', false)
+}
+
+function fieldErrorMessage(field) {
+  if (!props.errorMessages) { return `` }
+  if (!props.errorMessages[field]) { return `` }
+
+  return props.errorMessages[field].map((error) => {
+    return errorsMap[error]
+  }).join(', ')
 }
 
 onMounted(async () => {
@@ -157,6 +174,7 @@ onMounted(async () => {
     :title="dialogTitle"
     :width="dialogSize.width"
     :height="dialogSize.height"
+    class="form-dialog"
   >
     <template #body>
       <div
@@ -175,12 +193,14 @@ onMounted(async () => {
             :type="inputType(field)"
             :label="inputLabel(field)"
             :size="row[field]"
+            :error-message="fieldErrorMessage(field)"
           />
 
           <TDatePicker
             v-if="showDatePicker(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
+            :error-message="fieldErrorMessage(field)"
           />
 
           <TSelect
@@ -191,6 +211,7 @@ onMounted(async () => {
             :id="field"
             :options="schemasMap[field].options"
             :size="row[field]"
+            :error-message="fieldErrorMessage(field)"
           />
 
           <TSelectTable
@@ -225,7 +246,7 @@ onMounted(async () => {
     </template>
 
     <template #actions>
-      <TButton class="confirm-button" button-type="text" value="Confirm" icon="fa-solid fa-check" @click="submitDataAndCloseDialog()"/>
+      <TButton class="confirm-button" button-type="text" value="Confirm" icon="fa-solid fa-check" @click="submitData()"/>
       <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeDialog()"/>
     </template>
   </TDialog>

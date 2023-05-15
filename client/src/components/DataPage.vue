@@ -174,6 +174,9 @@ const dataLoading = ref(false)
 const errorAlert = ref(false)
 const errorContent = ref('')
 
+const createErrors = ref({})
+const updateErrors = ref({})
+
 const errorAlertFitContent = computed(() => {
   if (!!errorContent.value && errorContent.value.length > 0) {
     return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n')
@@ -325,14 +328,10 @@ async function createDataAndCloseDialog(rawParams) {
             showBanner(`Data created successfully!`)
             setTimeout(hideBanner, 5000)
             loadData()
-            openViewDialog(result.record.id)
+            closeCreateDialog()
           })
           .catch((error) => {
-            errorAlert.value = true
-            errorContent.value = JSON.stringify(error, false, 4)
-          })
-          .finally(() => {
-            closeCreateDialog()
+            createErrors.value = error.error
           })
 }
 
@@ -380,14 +379,10 @@ async function updateDataAndCloseDialog(rawParams) {
             showBanner(`Data updated successfully!`)
             setTimeout(hideBanner, 5000)
             loadData()
-            openViewDialog(id)
+            closeUpdateDialog()
           })
           .catch((error) => {
-            errorAlert.value = true
-            errorContent.value = JSON.stringify(error, false, 4)
-          })
-          .finally(() => {
-            closeUpdateDialog()
+            updateErrors.value = error.error
           })
 }
 
@@ -731,6 +726,7 @@ onMounted(async () => {
       :data="newRow"
       :dialog-title="createDialogTitle(dataType)"
       :full-screen="formDialogFullScreen"
+      :error-messages="createErrors"
       @submit="createDataAndCloseDialog"
     />
 
@@ -743,6 +739,7 @@ onMounted(async () => {
       :data="currentRowForUpdate"
       :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
       :full-screen="formDialogFullScreen"
+      :error-messages="updateErrors"
       @submit="updateDataAndCloseDialog"
     />
 
