@@ -29,7 +29,8 @@ function validateUnique(modelClass, indexes, record, constraint, data, errors) {
     const keys = key.split('|');
     const values = keys.map(c => record[c]).join('|');
 
-    return uniqueValues.find(v => v === values);
+    const foundIndex = uniqueValues[values];
+    return foundIndex && foundIndex !== record.id;
   });
 
   errorFields.forEach((compositeField) => {

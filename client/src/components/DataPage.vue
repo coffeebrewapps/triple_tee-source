@@ -607,10 +607,10 @@ async function updateData(id, params) {
     axios
       .put(`${url.value}/${id}`, params)
       .then((res) => {
-        if (res.data.record) {
+        if (res.data.success) {
           resolve({ success: true, record: res.data.record })
         } else {
-          reject({ success: false, error: `Update failure` })
+          reject({ success: false, error: res.data.errors })
         }
       })
       .catch((err) => {

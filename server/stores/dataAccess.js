@@ -118,34 +118,6 @@ function create(modelClass, params) {
   }
 }
 
-function cacheIndexes(modelClass, record) {
-  indexTypes.forEach((indexType) => {
-    if (indexType === 'unique') {
-      cacheUniqueIndexes(modelClass, record);
-    }
-  })
-  writeData(indexes, indexCache);
-}
-
-function cacheUniqueIndexes(modelClass, record) {
-  const uniqueIndexes = indexCache.unique;
-  if (!uniqueIndexes[modelClass]) {
-    uniqueIndexes[modelClass] = {};
-  }
-
-  const uniqueConstraints = schemaCache[modelClass].constraints.unique || [];
-  const newIndexes = uniqueConstraints.reduce((o, key) => {
-    const existingIndexes = uniqueIndexes[modelClass][key] || [];
-    const keys = key.split('|');
-    const values = keys.map(k => record[k]).join('|');
-    existingIndexes.push(values);
-    o[key] = existingIndexes;
-    return o;
-  }, {})
-
-  uniqueIndexes[modelClass] = newIndexes;
-}
-
 // TODO: check exists
 function createIfNotExists(modelClass, params) {
   return create(modelClass, params)
@@ -154,13 +126,32 @@ function createIfNotExists(modelClass, params) {
 function update(modelClass, id, params) {
   let data = dataCache[modelClass];
   const existing = view(modelClass, id);
-  if (!existing.record) { return null; }
+  if (!existing.record) {
+    return {
+      success: false,
+      errors: ['not exists']
+    };
+  }
 
-  const updated = Object.assign(existing.record, params)
-  data[id] = updated;
-  cacheData(modelClass, data);
+  const paramsWithId = Object.assign({}, params, { id: id.toString() })
+  const result = validator.validate(modelClass, paramsWithId, schemaCache, indexCache, dataCache);
 
-  return updated;
+  if (result.valid) {
+    const updated = Object.assign(existing.record, params)
+    data[id] = updated;
+    cacheData(modelClass, data);
+    cacheIndexes(modelClass, updated);
+
+    return {
+      success: true,
+      record: updated
+    };
+  } else {
+    return {
+      success: false,
+      errors: result.errors
+    };
+  }
 }
 
 function remove(modelClass, id) {
@@ -202,6 +193,34 @@ function fetchIncludes(modelClass, record, include) {
 
     return records;
   }, {});
+}
+
+function cacheIndexes(modelClass, record) {
+  indexTypes.forEach((indexType) => {
+    if (indexType === 'unique') {
+      cacheUniqueIndexes(modelClass, record);
+    }
+  })
+  writeData(indexes, indexCache);
+}
+
+function cacheUniqueIndexes(modelClass, record) {
+  const uniqueIndexes = indexCache.unique;
+  if (!uniqueIndexes[modelClass]) {
+    uniqueIndexes[modelClass] = {};
+  }
+
+  const uniqueConstraints = schemaCache[modelClass].constraints.unique || [];
+  const newIndexes = uniqueConstraints.reduce((o, key) => {
+    const existingIndexes = uniqueIndexes[modelClass][key] || {};
+    const keys = key.split('|');
+    const values = keys.map(k => record[k]).join('|');
+    existingIndexes[values] = record.id;
+    o[key] = existingIndexes;
+    return o;
+  }, {})
+
+  uniqueIndexes[modelClass] = newIndexes;
 }
 
 module.exports = {
