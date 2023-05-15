@@ -87,7 +87,7 @@ const navContainerClass = computed(() => {
   width: 230px;
   height: 100%;
   border: 1px solid var(--color-border);
-  overflow-y: scroll;
+  overflow-y: auto;
   background-color: var(--color-background);
 }
 

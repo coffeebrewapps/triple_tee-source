@@ -110,7 +110,6 @@ function closeDialog() {
   display: flex;
   flex-direction: column;
   text-align: left;
-  overflow-y: scroll;
 }
 
 .data-col {
@@ -122,4 +121,5 @@ function closeDialog() {
 .data-label {
   font-weight: 600;
 }
+
 </style>

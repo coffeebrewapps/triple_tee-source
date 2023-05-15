@@ -814,17 +814,9 @@ a.hidden {
   margin: 0 auto;
 }
 
-.delete-dialog .container .body {
-  overflow: scroll !important;
-}
-
 td.col {
   text-align: left;
   padding: 0.5rem;
   border-bottom: 1px solid var(--color-border);
-}
-
-.error-alert .container {
-  overflow-y: scroll !important;
 }
 </style>
