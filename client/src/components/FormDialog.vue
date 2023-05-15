@@ -258,6 +258,7 @@ onMounted(async () => {
                 v-model="data[field]"
                 :label="inputLabel(field)"
                 :disabled="!fieldUpdatable(field)"
+                align-pickers="top"
                 :error-message="fieldErrorMessage(field)"
               />
 
