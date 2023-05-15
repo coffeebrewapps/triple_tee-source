@@ -8,6 +8,7 @@ import { useErrors } from '../utils/errors'
 
 import {
   TAlert,
+  TCheckbox,
   TDialog,
   TDatePicker,
   TInput,
@@ -27,6 +28,8 @@ const {
   multiInputableField,
   multiSelectableField,
   singleSelectableField,
+  nullToggleableField,
+  nullToggleableFields,
   formatInputOptionsData,
   fetchOptions,
   initOptionsData
@@ -100,27 +103,27 @@ const dialogSize = computed(() => {
 })
 
 function showInput(field) {
-  return inputableField(field)
+  return showField(field) && inputableField(field)
 }
 
 function showTextarea(field) {
-  return multiInputableField(field)
+  return showField(field) && multiInputableField(field)
 }
 
 function showDatePicker(field) {
-  return inputType(field) === 'date'
+  return showField(field) && inputType(field) === 'date'
 }
 
 function showSelect(field) {
-  return inputType(field) === 'enum' || inputType(field) === 'select'
+  return showField(field) && (inputType(field) === 'enum' || inputType(field) === 'select')
 }
 
 function showSingleSelect(field) {
-  return singleSelectableField(field) && !!inputOptions(field)
+  return showField(field) && singleSelectableField(field) && !!inputOptions(field)
 }
 
 function showMultiSelect(field) {
-  return multiSelectableField(field) && !!inputOptions(field)
+  return showField(field) && multiSelectableField(field) && !!inputOptions(field)
 }
 
 const inputOptionsData = ref({})
@@ -145,7 +148,15 @@ async function offsetChange(field, newOffset) {
 }
 
 function submitData() {
-  emit('submit', props.data)
+  const clonedData = Object.assign({}, props.data)
+
+  Object.keys(fieldToggles.value).forEach((field) => {
+    if (!fieldToggles.value[field]) {
+      clonedData[field] = null
+    }
+  })
+
+  emit('submit', clonedData)
 }
 
 function closeDialog() {
@@ -164,6 +175,27 @@ function fieldErrorMessage(field) {
   return props.errorMessages[field].map((error) => {
     return errorsMap[error]
   }).join(', ')
+}
+
+function dataFieldClass(field) {
+  if (nullToggleableField(field)) {
+    return `data-field toggleable`
+  } else {
+    return `data-field`
+  }
+}
+
+const fieldToggles = ref(nullToggleableFields.value.reduce((o, f) => {
+  o[f] = false
+  return o
+}, {}))
+
+function showField(field) {
+  return !nullToggleableField(field) || fieldToggles.value[field]
+}
+
+function fieldToggleLabel(field) {
+  return `Has ${inputLabel(field)}`
 }
 
 onMounted(async () => {
@@ -197,72 +229,88 @@ onMounted(async () => {
           :name="`form-col.${field}`"
           v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
         >
-          <TInput
-            v-if="showInput(field)"
-            v-model="data[field]"
-            :type="inputType(field)"
-            :label="inputLabel(field)"
-            :size="row[field]"
-            :disabled="!fieldUpdatable(field)"
-            :error-message="fieldErrorMessage(field)"
-          />
+          <div
+            :class="dataFieldClass(field)"
+          >
+            <div
+              class="field-input"
+            >
+              <TInput
+                v-if="showInput(field)"
+                v-model="data[field]"
+                :type="inputType(field)"
+                :label="inputLabel(field)"
+                :size="row[field]"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+              />
 
-          <TTextarea
-            v-if="showTextarea(field)"
-            v-model="data[field]"
-            :label="inputLabel(field)"
-            :disabled="!fieldUpdatable(field)"
-            :error-message="fieldErrorMessage(field)"
-          />
+              <TTextarea
+                v-if="showTextarea(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+              />
 
-          <TDatePicker
-            v-if="showDatePicker(field)"
-            v-model="data[field]"
-            :label="inputLabel(field)"
-            :disabled="!fieldUpdatable(field)"
-            :error-message="fieldErrorMessage(field)"
-          />
+              <TDatePicker
+                v-if="showDatePicker(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+              />
 
-          <TSelect
-            v-if="showSelect(field)"
-            v-model="data[field]"
-            :label="inputLabel(field)"
-            :name="field"
-            :id="field"
-            :options="schemasMap[field].options"
-            :size="row[field]"
-            :disabled="!fieldUpdatable(field)"
-            :error-message="fieldErrorMessage(field)"
-          />
+              <TSelect
+                v-if="showSelect(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
+                :name="field"
+                :id="field"
+                :options="schemasMap[field].options"
+                :size="row[field]"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+              />
 
-          <TSelectTable
-            v-if="showSingleSelect(field)"
-            v-model="data[field]"
-            :label="inputLabel(field)"
-            :name="inputLabel(field)"
-            :multiple="false"
-            :options="inputOptions(field).data"
-            :options-length="inputOptions(field).total"
-            :options-loading="inputOptions(field).loading"
-            :pagination="inputOptions(field).pagination"
-            :size="row[field]"
-            :disabled="!fieldUpdatable(field)"
-            @offset-change="fieldOffsetChange[field]"
-          />
+              <TSelectTable
+                v-if="showSingleSelect(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
+                :name="inputLabel(field)"
+                :multiple="false"
+                :options="inputOptions(field).data"
+                :options-length="inputOptions(field).total"
+                :options-loading="inputOptions(field).loading"
+                :pagination="inputOptions(field).pagination"
+                :size="row[field]"
+                :disabled="!fieldUpdatable(field)"
+                @offset-change="fieldOffsetChange[field]"
+              />
 
-          <TSelectTable
-            v-if="showMultiSelect(field)"
-            v-model="data[field]"
-            :label="inputLabel(field)"
-            :name="inputLabel(field)"
-            :options="inputOptions(field).data"
-            :options-length="inputOptions(field).total"
-            :options-loading="inputOptions(field).loading"
-            :pagination="inputOptions(field).pagination"
-            :size="row[field]"
-            :disabled="!fieldUpdatable(field)"
-            @offset-change="fieldOffsetChange[field]"
-          />
+              <TSelectTable
+                v-if="showMultiSelect(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
+                :name="inputLabel(field)"
+                :options="inputOptions(field).data"
+                :options-length="inputOptions(field).total"
+                :options-loading="inputOptions(field).loading"
+                :pagination="inputOptions(field).pagination"
+                :size="row[field]"
+                :disabled="!fieldUpdatable(field)"
+                @offset-change="fieldOffsetChange[field]"
+              />
+            </div> <!-- field-input -->
+
+            <div
+              v-if="nullToggleableField(field)"
+              class="field-toggle"
+            >
+              <TCheckbox v-model="fieldToggles[field]" :label="fieldToggleLabel(field)"/>
+            </div>
+
+          </div> <!-- data-field -->
         </slot>
 
       </div>
@@ -296,5 +344,10 @@ onMounted(async () => {
 
 .input-control {
   margin: 0.5rem !important;
+}
+
+.data-field {
+  display: flex;
+  flex-direction: column;
 }
 </style>

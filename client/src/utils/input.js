@@ -26,6 +26,10 @@ export function useInputHelper(schemas) {
     return Object.keys(schemasMap.value).filter(f => singleSelectableField(f))
   })
 
+  const nullToggleableFields = computed(() => {
+    return Object.keys(schemasMap.value).filter(f => nullToggleableField(f))
+  })
+
   function inputType(field) {
     return (schemasMap.value[field] || {}).type
   }
@@ -61,6 +65,10 @@ export function useInputHelper(schemas) {
 
   function serverOptionsField(field) {
     return selectableField(field) && schemasMap.value[field].options && schemasMap.value[field].options.server
+  }
+
+  function nullToggleableField(field) {
+    return schemasMap.value[field].nullToggleable
   }
 
   function formatInputOptionsData(field, offset, limit, dataFromServer) {
@@ -145,6 +153,8 @@ export function useInputHelper(schemas) {
     multiSelectableField,
     singleSelectableField,
     selectableField,
+    nullToggleableField,
+    nullToggleableFields,
     formatInputOptionsData,
     fetchOptions,
     initOptionsData
