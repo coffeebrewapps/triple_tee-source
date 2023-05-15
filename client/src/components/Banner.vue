@@ -45,6 +45,7 @@ const bannerContainerClass = computed(() => {
   background-color: var(--color-border);
   border-radius: 4px;
   transition: all 0.5s linear;
+  z-index: 9999;
 }
 
 .banner-container.show {

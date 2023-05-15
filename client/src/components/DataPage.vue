@@ -26,6 +26,7 @@ const banner = useBannerStore()
 
 function showBanner(message) {
   banner.show(message)
+  setTimeout(hideBanner, 5000)
 }
 
 function hideBanner() {
@@ -326,12 +327,12 @@ async function createDataAndCloseDialog(rawParams) {
   await createData(params)
           .then((result) => {
             showBanner(`Data created successfully!`)
-            setTimeout(hideBanner, 5000)
             loadData()
             closeCreateDialog()
           })
           .catch((error) => {
             createErrors.value = error.error
+            showBanner(`Error creating data!`)
           })
 }
 
@@ -377,12 +378,12 @@ async function updateDataAndCloseDialog(rawParams) {
   await updateData(id, params)
           .then((result) => {
             showBanner(`Data updated successfully!`)
-            setTimeout(hideBanner, 5000)
             loadData()
             closeUpdateDialog()
           })
           .catch((error) => {
             updateErrors.value = error.error
+            showBanner(`Error updating data!`)
           })
 }
 
