@@ -147,6 +147,10 @@ function closeDialog() {
   emit('update:modelValue', false)
 }
 
+function fieldUpdatable(field) {
+  return props.dataFields.find(f => f === field)
+}
+
 function fieldErrorMessage(field) {
   if (!props.errorMessages) { return `` }
   if (!props.errorMessages[field]) { return `` }
@@ -193,6 +197,7 @@ onMounted(async () => {
             :type="inputType(field)"
             :label="inputLabel(field)"
             :size="row[field]"
+            :disabled="!fieldUpdatable(field)"
             :error-message="fieldErrorMessage(field)"
           />
 
@@ -200,6 +205,7 @@ onMounted(async () => {
             v-if="showDatePicker(field)"
             v-model="data[field]"
             :label="inputLabel(field)"
+            :disabled="!fieldUpdatable(field)"
             :error-message="fieldErrorMessage(field)"
           />
 
@@ -211,6 +217,7 @@ onMounted(async () => {
             :id="field"
             :options="schemasMap[field].options"
             :size="row[field]"
+            :disabled="!fieldUpdatable(field)"
             :error-message="fieldErrorMessage(field)"
           />
 
@@ -225,6 +232,7 @@ onMounted(async () => {
             :options-loading="inputOptions(field).loading"
             :pagination="inputOptions(field).pagination"
             :size="row[field]"
+            :disabled="!fieldUpdatable(field)"
             @offset-change="fieldOffsetChange[field]"
           />
 
@@ -238,6 +246,7 @@ onMounted(async () => {
             :options-loading="inputOptions(field).loading"
             :pagination="inputOptions(field).pagination"
             :size="row[field]"
+            :disabled="!fieldUpdatable(field)"
             @offset-change="fieldOffsetChange[field]"
           />
         </slot>

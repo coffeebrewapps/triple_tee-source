@@ -379,7 +379,7 @@ async function openUpdateDialog(id) {
 }
 
 async function updateDataAndCloseDialog(rawParams) {
-  const id = params.id
+  const id = rawParams.id
   const params = formatDataForSave(rawParams)
 
   await updateData(id, params)
