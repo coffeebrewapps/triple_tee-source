@@ -7,19 +7,18 @@ function validate(modelClass, record, schemas, indexes, data) {
   const requiredConstraint = constraints.required;
   const foreignConstraint = constraints.foreign;
 
-  let errors = [];
-
-  errors = errors.concat(validateUnique(modelClass, indexes.unique, record, uniqueConstraint, data));
-  errors = errors.concat(validateRequired(modelClass, record, requiredConstraint, data));
-  errors = errors.concat(validateForeign(modelClass, record, foreignConstraint, data));
+  const errors = {};
+  validateUnique(modelClass, indexes.unique, record, uniqueConstraint, data, errors);
+  validateRequired(modelClass, record, requiredConstraint, data, errors);
+  validateForeign(modelClass, record, foreignConstraint, data, errors);
 
   return {
-    valid: errors.length === 0,
+    valid: Object.keys(errors).length === 0,
     errors: errors
   };
 }
 
-function validateUnique(modelClass, indexes, record, constraint, data) {
+function validateUnique(modelClass, indexes, record, constraint, data, errors) {
   const uniqueIndexes = indexes[modelClass];
   if (!uniqueIndexes) { return []; }
 
@@ -31,34 +30,28 @@ function validateUnique(modelClass, indexes, record, constraint, data) {
     const values = keys.map(c => record[c]).join('|');
 
     return uniqueValues.find(v => v === values);
-  })
+  });
 
-  if (errorFields.length > 0) {
-    return [{
-      error: 'Violates unique constraint',
-      fields: errorFields
-    }];
-  } else {
-    return [];
-  }
+  errorFields.forEach((field) => {
+    const fieldErrors = errors[field] || [];
+    fieldErrors.push('unique');
+    errors[field] = fieldErrors;
+  });
 }
 
-function validateRequired(modelClass, record, constraint, data) {
+function validateRequired(modelClass, record, constraint, data, errors) {
   const errorFields = constraint.filter((field) => {
     return !record[field];
   });
 
-  if (errorFields.length > 0) {
-    return [{
-      error: 'Violates required constraint',
-      fields: errorFields
-    }];
-  } else {
-    return [];
-  }
+  errorFields.forEach((field) => {
+    const fieldErrors = errors[field] || [];
+    fieldErrors.push('required');
+    errors[field] = fieldErrors;
+  });
 }
 
-function validateForeign(modelClass, record, constraint, data) {
+function validateForeign(modelClass, record, constraint, data, errors) {
   const errorFields = Object.keys(constraint).filter((foreignKey) => {
     const foreignValue = [record[foreignKey]].flat().filter(v => !!v);
     if (foreignValue.length === 0) { return false; }
@@ -70,14 +63,11 @@ function validateForeign(modelClass, record, constraint, data) {
     }, true)
   });
 
-  if (errorFields.length > 0) {
-    return [{
-      error: 'Violates foreign key constraint',
-      fields: errorFields
-    }];
-  } else {
-    return [];
-  }
+  errorFields.forEach((field) => {
+    const fieldErrors = errors[field] || [];
+    fieldErrors.push('foreign');
+    errors[field] = fieldErrors;
+  });
 }
 
 module.exports = {
