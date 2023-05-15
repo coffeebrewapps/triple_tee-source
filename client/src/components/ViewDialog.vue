@@ -122,4 +122,7 @@ function closeDialog() {
   font-weight: 600;
 }
 
+.data-value {
+  white-space: pre-wrap;
+}
 </style>

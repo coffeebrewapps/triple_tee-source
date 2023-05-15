@@ -13,6 +13,7 @@ import {
   TInput,
   TSelect,
   TSelectTable,
+  TTextarea,
   TButton
 } from 'coffeebrew-vue-components'
 
@@ -23,6 +24,7 @@ const {
   inputType,
   inputLabel,
   inputableField,
+  multiInputableField,
   multiSelectableField,
   singleSelectableField,
   formatInputOptionsData,
@@ -99,6 +101,10 @@ const dialogSize = computed(() => {
 
 function showInput(field) {
   return inputableField(field)
+}
+
+function showTextarea(field) {
+  return multiInputableField(field)
 }
 
 function showDatePicker(field) {
@@ -197,6 +203,14 @@ onMounted(async () => {
             :type="inputType(field)"
             :label="inputLabel(field)"
             :size="row[field]"
+            :disabled="!fieldUpdatable(field)"
+            :error-message="fieldErrorMessage(field)"
+          />
+
+          <TTextarea
+            v-if="showTextarea(field)"
+            v-model="data[field]"
+            :label="inputLabel(field)"
             :disabled="!fieldUpdatable(field)"
             :error-message="fieldErrorMessage(field)"
           />

@@ -38,6 +38,10 @@ export function useInputHelper(schemas) {
     return inputType(field) === 'text' || inputType(field) === 'number'
   }
 
+  function multiInputableField(field) {
+    return inputType(field) === 'textarea'
+  }
+
   function multiSelectableField(field) {
     return inputType(field) === 'multiSelect'
   }
@@ -137,6 +141,7 @@ export function useInputHelper(schemas) {
     inputType,
     inputLabel,
     inputableField,
+    multiInputableField,
     multiSelectableField,
     singleSelectableField,
     selectableField,
