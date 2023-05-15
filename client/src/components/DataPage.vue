@@ -51,6 +51,7 @@ const {
 
 const {
   formatDate,
+  formatTimestamp,
   formatTag,
   tagStyle
 } = useFormatter()
@@ -305,6 +306,8 @@ function inputValue(field, record) {
     const found = combinedDataFields.value.find(f => f.key === field)
     const options = found.options
     return options.find(o => o.value === fieldValue).label
+  } else if (inputType(field) === 'datetime') {
+    return formatTimestamp(fieldValue)
   } else if (inputType(field) === 'date') {
     return formatDate(fieldValue)
   } else {
@@ -409,7 +412,7 @@ function formatCurrentRowForUpdate(record) {
 }
 
 function formatDataForShow(field, record) {
-  if (inputType(field) === 'date' && !!record[field]) {
+  if ((inputType(field) === 'date' || inputType(field) === 'datetime') && !!record[field]) {
     return new Date(record[field])
   } else if (multiSelectableField(field) && !!record.includes) {
     const includes = record.includes[field]

@@ -28,8 +28,8 @@ function tagLabel(record) {
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false },
-    { key: 'startTime', type: 'date', label: 'Start Time', listable: true, viewable: true, creatable: true, updatable: true },
-    { key: 'endTime', type: 'date', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'startTime', type: 'datetime', label: 'Start Time', listable: true, viewable: true, creatable: true, updatable: true },
+    { key: 'endTime', type: 'datetime', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'content', type: 'textarea', label: 'Content', listable: false, viewable: true, creatable: true, updatable: true },
     {

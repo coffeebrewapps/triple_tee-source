@@ -11,6 +11,7 @@ import {
   TCheckbox,
   TDialog,
   TDatePicker,
+  TDateTimePicker,
   TInput,
   TSelect,
   TSelectTable,
@@ -112,6 +113,10 @@ function showTextarea(field) {
 
 function showDatePicker(field) {
   return showField(field) && inputType(field) === 'date'
+}
+
+function showDateTimePicker(field) {
+  return showField(field) && inputType(field) === 'datetime'
 }
 
 function showSelect(field) {
@@ -258,6 +263,16 @@ onMounted(async () => {
                 v-model="data[field]"
                 :label="inputLabel(field)"
                 :disabled="!fieldUpdatable(field)"
+                align-pickers="top"
+                :error-message="fieldErrorMessage(field)"
+              />
+
+              <TDateTimePicker
+                v-if="showDateTimePicker(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
+                :disabled="!fieldUpdatable(field)"
+                :display-time="true"
                 align-pickers="top"
                 :error-message="fieldErrorMessage(field)"
               />
