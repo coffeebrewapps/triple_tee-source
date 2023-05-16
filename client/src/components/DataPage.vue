@@ -1,40 +1,15 @@
 <script setup>
+/*** import:global ***/
 import { ref, computed, watch, onMounted } from 'vue'
+/*** import:global ***/
 
-import useConfig from '../config'
-import { useInputHelper } from '../utils/input'
-import { useFormatter } from '../utils/formatter'
-import { useErrors } from '../utils/errors'
-import { useDataAccess } from '../utils/dataAccess'
-
-import {
-  TTable,
-  TAlert,
-  TConfirmDialog,
-  TDialog,
-  TDatePicker,
-  TInput,
-  TSelect,
-  TButton
-} from 'coffeebrew-vue-components'
-
-import FormDialog from './FormDialog.vue'
-import ViewDialog from './ViewDialog.vue'
-
-import { useBannerStore } from '../stores/banner'
-
-const banner = useBannerStore()
-
-function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
-}
-
-function hideBanner() {
-  banner.hide()
-}
-
+/*** import:config ***/
+import useConfig from '@/config'
 const config = useConfig()
+/*** import:config ***/
+
+/*** import:utils ***/
+import { useInputHelper } from '@/utils/input'
 
 const {
   schemasMap,
@@ -50,6 +25,8 @@ const {
   initOptionsData
 } = useInputHelper(props.dataFields)
 
+import { useFormatter } from '@/utils/formatter'
+
 const {
   formatDate,
   formatTimestamp,
@@ -57,10 +34,35 @@ const {
   tagStyle
 } = useFormatter()
 
+import { useErrors } from '@/utils/errors'
 const errorsMap = useErrors()
 
+import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
+/*** import:utils ***/
 
+/*** import:stores ***/
+import { useBannerStore } from '@/stores/banner'
+const banner = useBannerStore()
+/*** import:stores ***/
+
+/*** import:components ***/
+import {
+  TTable,
+  TAlert,
+  TConfirmDialog,
+  TDialog,
+  TDatePicker,
+  TInput,
+  TSelect,
+  TButton
+} from 'coffeebrew-vue-components'
+
+import FormDialog from '@/components/FormDialog.vue'
+import ViewDialog from '@/components/ViewDialog.vue'
+/*** import:components ***/
+
+/*** section:props ***/
 const props = defineProps({
   dataType: {
     type: String,
@@ -127,7 +129,29 @@ const props = defineProps({
     }
   }
 })
+/*** section:props ***/
 
+/*** section:global ***/
+const url = computed(() => {
+  return `${config.baseUrl}/${props.urlBase}`
+})
+
+const schemasUrl = computed(() => {
+  return `${config.baseUrl}/${props.schemasUrlBase}`
+})
+
+const include = computed(() => {
+  return props.dataFields.filter(h => h.reference)
+})
+
+const includeKeys = computed(() => {
+  return include.value.map(h => h.key)
+})
+
+const combinedDataFields = ref(props.dataFields)
+/*** section:global ***/
+
+/*** section:table ***/
 const tableActions = ref([
   {
     name: 'Create',
@@ -172,37 +196,10 @@ const actions = ref([
 const data = ref([])
 const totalData = ref(0)
 
-const inputOptionsData = ref({})
-
 const offset = ref(0)
 const limit = ref(5)
 
 const dataLoading = ref(false)
-const errorAlert = ref(false)
-const errorContent = ref('')
-
-const errorAlertFitContent = computed(() => {
-  if (!!errorContent.value && errorContent.value.length > 0) {
-    return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n')
-  } else {
-    return ``
-  }
-})
-
-const errorAlertSize = computed(() => {
-  if (!!errorContent.value && errorContent.value.length > 100) {
-    const lines = Math.ceil(errorContent.value.length / 100) * 50
-    return {
-      width: 800,
-      height: lines <= 100 ? 200 : lines
-    }
-  } else {
-    return {
-      width: 400,
-      height: 200
-    }
-  }
-})
 
 const listedHeaders = computed(() => {
   return props.dataFields.filter(h => h.listable)
@@ -212,125 +209,50 @@ const listedData = computed(() => {
   return data.value || []
 })
 
-const include = computed(() => {
-  return props.dataFields.filter(h => h.reference)
-})
-
-const includeKeys = computed(() => {
-  return include.value.map(h => h.key)
-})
-
-const createDialog = ref(false)
-const newRow = ref()
-const createErrors = ref({})
-
-watch(createDialog, (newVal, oldVal) => {
-  if (!newVal) { createErrors.value = {} }
-})
-
-const viewDialog = ref(false)
-const currentRow = ref()
-
-const updateDialog = ref(false)
-const currentRowForUpdate = ref()
-const updateErrors = ref({})
-
-watch(updateDialog, (newVal, oldVal) => {
-  if (!newVal) { updateErrors.value = {} }
-})
-
-const deleteDialog = ref(false)
-const currentRowForDelete = ref()
-const deleteErrors = ref({})
-
-watch(deleteDialog, (newVal, oldVal) => {
-  if (!newVal) { deleteErrors.value = {} }
-})
-
-const downloadDialog = ref(false)
-const downloadLink = ref()
-const downloadFile = ref()
-const downloadAnchor = ref('downloadAnchor')
-
-const url = computed(() => {
-  return `${config.baseUrl}/${props.urlBase}`
-})
-
-const schemasUrl = computed(() => {
-  return `${config.baseUrl}/${props.schemasUrlBase}`
-})
-
-const viewableFields = computed(() => {
-  return props.dataFields.filter(h => h.viewable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
-
-const viewableKeys = computed(() => {
-  return Object.keys(viewableFields.value)
-})
-
-const creatableFields = computed(() => {
-  return props.dataFields.filter(h => h.creatable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
-
-const creatableKeys = computed(() => {
-  return Object.keys(creatableFields.value)
-})
-
-const updatableFields = computed(() => {
-  return props.dataFields.filter(h => h.updatable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
-
-const updatableKeys = computed(() => {
-  return Object.keys(updatableFields.value)
-})
-
-function inputValue(field, record) {
-  const referenceField = includeKeys.value.find(v => v === field)
-  const fieldValue = record[field]
-  if (!fieldValue) { return }
-
-  if (referenceField) {
-    const includes = record.includes || {}
-    const rawValue = [fieldValue].flat().filter(v => !!v)
-
-    const mapped = rawValue.map((value) => {
-      const foreignValue = includes[field][value]
-      return schemasMap.value[field].reference.label(foreignValue)
-    })
-
-    if (multiSelectableField(field)) {
-      return mapped
-    } else {
-      return mapped[0]
-    }
-  } else if (inputType(field) === 'enum' || inputType(field) === 'select') {
-    const found = combinedDataFields.value.find(f => f.key === field)
-    const options = found.options
-    return options.find(o => o.value === fieldValue).label
-  } else if (inputType(field) === 'datetime') {
-    return formatTimestamp(fieldValue)
-  } else if (inputType(field) === 'date') {
-    return formatDate(fieldValue)
-  } else {
-    return fieldValue
-  }
+async function updateOffsetAndReload(updated) {
+  offset.value = updated
+  await loadData()
 }
+/*** section:table ***/
 
-function inputOptions(field) {
-  if (selectableField(field)) {
-    return inputOptionsData.value[field] || formatInputOptionsData(field, 0, 5, { data: [], total: 0 })
-  } else {
-    return {}
-  }
+/*** section:inputOptions ***/
+const inputOptionsData = ref({})
+
+async function optionsOffsetChange(field, newOffset) {
+  const limit = schemasMap.value[field].limit || 5
+  await fetchOptions(field, newOffset)
+    .then((result) => {
+      inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
+    })
+}
+/*** section:inputOptions ***/
+
+/*** vars:computed ***/
+/*** vars:computed ***/
+
+/*** section:dataAccess ***/
+async function loadSchemas() {
+  await dataAccess
+    .schemas(schemasUrl.value)
+    .then((result) => {
+      const fields = result.fields
+      combinedDataFields.value = combinedDataFields.value.map((field) => {
+        if (field.type === 'enum') {
+          const enums = fields[field.key].enums
+          const options = Object.keys(enums).map((e) => {
+            return { value: e, label: enums[e] }
+          })
+          const combined = Object.assign({}, field, { options })
+          return combined
+        } else {
+          return field
+        }
+      })
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+    })
 }
 
 async function loadData() {
@@ -366,6 +288,97 @@ async function viewData(id, resolve, reject) {
       reject(error)
     })
 }
+/*** section:dataAccess ***/
+
+/*** section:banner ***/
+function showBanner(message) {
+  banner.show(message)
+  setTimeout(hideBanner, 5000)
+}
+
+function hideBanner() {
+  banner.hide()
+}
+/*** section:banner ***/
+
+/*** section:error ***/
+const errorAlert = ref(false)
+const errorContent = ref('')
+
+const errorAlertFitContent = computed(() => {
+  if (!!errorContent.value && errorContent.value.length > 0) {
+    return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n')
+  } else {
+    return ``
+  }
+})
+
+const errorAlertSize = computed(() => {
+  if (!!errorContent.value && errorContent.value.length > 100) {
+    const lines = Math.ceil(errorContent.value.length / 100) * 50
+    return {
+      width: 800,
+      height: lines <= 100 ? 200 : lines
+    }
+  } else {
+    return {
+      width: 400,
+      height: 200
+    }
+  }
+})
+/*** section:error ***/
+
+/*** section:view ***/
+const viewDialog = ref(false)
+const currentRow = ref()
+
+const viewableFields = computed(() => {
+  return props.dataFields.filter(h => h.viewable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
+const viewableKeys = computed(() => {
+  return Object.keys(viewableFields.value)
+})
+
+async function openViewDialog(id) {
+  viewData(
+    id,
+    (record) => {
+      currentRow.value = record
+      viewDialog.value = true
+    },
+    (error) => {
+      currentRow.value = null
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+    }
+  )
+}
+/*** section:view ***/
+
+/*** section:create ***/
+const createDialog = ref(false)
+const newRow = ref()
+const createErrors = ref({})
+
+const creatableFields = computed(() => {
+  return props.dataFields.filter(h => h.creatable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
+const creatableKeys = computed(() => {
+  return Object.keys(creatableFields.value)
+})
+
+watch(createDialog, (newVal, oldVal) => {
+  if (!newVal) { createErrors.value = {} }
+})
 
 async function openCreateDialog(id) {
   newRow.value = creatableKeys.value.reduce((o, key) => {
@@ -400,20 +413,27 @@ function resetNewRow() {
   newRow.value = null
 }
 
-async function openViewDialog(id) {
-  viewData(
-    id,
-    (record) => {
-      currentRow.value = record
-      viewDialog.value = true
-    },
-    (error) => {
-      currentRow.value = null
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
-    }
-  )
-}
+/*** section:create ***/
+
+/*** section:update ***/
+const updateDialog = ref(false)
+const currentRowForUpdate = ref()
+const updateErrors = ref({})
+
+const updatableFields = computed(() => {
+  return props.dataFields.filter(h => h.updatable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
+const updatableKeys = computed(() => {
+  return Object.keys(updatableFields.value)
+})
+
+watch(updateDialog, (newVal, oldVal) => {
+  if (!newVal) { updateErrors.value = {} }
+})
 
 async function openUpdateDialog(id) {
   viewData(
@@ -459,6 +479,130 @@ function formatCurrentRowForUpdate(record) {
     const key = field.key
     currentRowForUpdate.value[key] = formatDataForShow(key, record)
   })
+}
+
+function resetCurrentRowForUpdate() {
+  currentRowForUpdate.value = null
+}
+/*** section:update ***/
+
+/*** section:delete ***/
+const deleteDialog = ref(false)
+const currentRowForDelete = ref()
+const deleteErrors = ref({})
+
+watch(deleteDialog, (newVal, oldVal) => {
+  if (!newVal) { deleteErrors.value = {} }
+})
+
+async function openDeleteDialog(id) {
+  viewData(
+    id,
+    (record) => {
+      currentRowForDelete.value = record
+      deleteDialog.value = true
+    },
+    (error) => {
+      resetCurrentRowForDelete()
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+    }
+  )
+}
+
+async function deleteDataAndCloseDialog() {
+  const params = currentRowForDelete.value
+  const id = params.id
+
+  await dataAccess
+    .remove(`${url.value}/${id}`)
+    .then((record) => {
+      showBanner(`Data deleted successfully!`)
+      loadData()
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = error.map(type => errorsMap[type]).join(', ')
+    })
+    .finally(() => {
+      closeDeleteDialog()
+    })
+}
+
+function closeDeleteDialog() {
+  deleteDialog.value = false
+  resetCurrentRowForDelete()
+}
+
+function resetCurrentRowForDelete() {
+  currentRowForDelete.value = null
+}
+/*** section:delete ***/
+
+/*** section:download ***/
+const downloadDialog = ref(false)
+const downloadLink = ref()
+const downloadFile = ref()
+const downloadAnchor = ref('downloadAnchor')
+
+async function openDownloadDialog() {
+  await dataAccess
+    .download(`${url.value}/download`)
+    .then((result) => {
+      const url = window.URL.createObjectURL(new Blob([result.data]))
+      downloadLink.value = url
+      downloadFile.value = result.filename
+      downloadDialog.value = true
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(result.error, false, 4)
+    })
+}
+
+function downloadDataAsFile() {
+  downloadAnchor.value.click()
+  closeDownloadDialog()
+}
+
+function closeDownloadDialog() {
+  downloadDialog.value = false
+  downloadLink.value = null
+  downloadFile.value = null
+}
+/*** section:download ***/
+
+/*** section:formatting ***/
+function inputValue(field, record) {
+  const referenceField = includeKeys.value.find(v => v === field)
+  const fieldValue = record[field]
+  if (!fieldValue) { return }
+
+  if (referenceField) {
+    const includes = record.includes || {}
+    const rawValue = [fieldValue].flat().filter(v => !!v)
+
+    const mapped = rawValue.map((value) => {
+      const foreignValue = includes[field][value]
+      return schemasMap.value[field].reference.label(foreignValue)
+    })
+
+    if (multiSelectableField(field)) {
+      return mapped
+    } else {
+      return mapped[0]
+    }
+  } else if (inputType(field) === 'enum' || inputType(field) === 'select') {
+    const found = combinedDataFields.value.find(f => f.key === field)
+    const options = found.options
+    return options.find(o => o.value === fieldValue).label
+  } else if (inputType(field) === 'datetime') {
+    return formatTimestamp(fieldValue)
+  } else if (inputType(field) === 'date') {
+    return formatDate(fieldValue)
+  } else {
+    return fieldValue
+  }
 }
 
 function formatDataForShow(field, record) {
@@ -510,118 +654,7 @@ function formatDataForSave(params) {
 
   return data
 }
-
-function resetCurrentRowForUpdate() {
-  currentRowForUpdate.value = null
-}
-
-async function openDeleteDialog(id) {
-  viewData(
-    id,
-    (record) => {
-      currentRowForDelete.value = record
-      deleteDialog.value = true
-    },
-    (error) => {
-      resetCurrentRowForDelete()
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
-    }
-  )
-}
-
-async function deleteDataAndCloseDialog() {
-  const params = currentRowForDelete.value
-  const id = params.id
-
-  await dataAccess
-    .remove(`${url.value}/${id}`)
-    .then((record) => {
-      showBanner(`Data deleted successfully!`)
-      loadData()
-    })
-    .catch((error) => {
-      errorAlert.value = true
-      errorContent.value = error.map(type => errorsMap[type]).join(', ')
-    })
-    .finally(() => {
-      closeDeleteDialog()
-    })
-}
-
-function closeDeleteDialog() {
-  deleteDialog.value = false
-  resetCurrentRowForDelete()
-}
-
-function resetCurrentRowForDelete() {
-  currentRowForDelete.value = null
-}
-
-async function openDownloadDialog() {
-  await dataAccess
-    .download(`${url.value}/download`)
-    .then((result) => {
-      const url = window.URL.createObjectURL(new Blob([result.data]))
-      downloadLink.value = url
-      downloadFile.value = result.filename
-      downloadDialog.value = true
-    })
-    .catch((error) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(result.error, false, 4)
-    })
-}
-
-function downloadDataAsFile() {
-  downloadAnchor.value.click()
-  closeDownloadDialog()
-}
-
-function closeDownloadDialog() {
-  downloadDialog.value = false
-  downloadLink.value = null
-  downloadFile.value = null
-}
-
-async function updateOffsetAndReload(updated) {
-  offset.value = updated
-  await loadData()
-}
-
-const combinedDataFields = ref(props.dataFields)
-
-async function loadSchemas() {
-  await dataAccess
-    .schemas(schemasUrl.value)
-    .then((result) => {
-      const fields = result.fields
-      combinedDataFields.value = combinedDataFields.value.map((field) => {
-        if (field.type === 'enum') {
-          const enums = fields[field.key].enums
-          const options = Object.keys(enums).map((e) => {
-            return { value: e, label: enums[e] }
-          })
-          const combined = Object.assign({}, field, { options })
-          return combined
-        } else {
-          return field
-        }
-      })
-    })
-    .catch((error) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
-    })
-}
-
-async function optionsOffsetChange(field, newOffset) {
-  const limit = schemasMap.value[field].limit || 5
-  await fetchOptions(field, newOffset)
-    .then((result) => {
-      inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
-    })
-}
+/*** section:formatting ***/
 
 onMounted(async () => {
   await loadSchemas()
