@@ -3,6 +3,7 @@ const env = import.meta.env
 
 const useConfig = () => {
   const baseUrl = ref('')
+  const dataAccess = 'api'
 
   if (env.MODE === 'development') {
     baseUrl.value = `http://localhost:${env.VITE_SERVER_PORT}`
@@ -11,7 +12,8 @@ const useConfig = () => {
   }
 
   return {
-    baseUrl: baseUrl.value
+    baseUrl: baseUrl.value,
+    dataAccess
   }
 }
 

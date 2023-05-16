@@ -1,11 +1,11 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import axios from 'axios'
 
 import useConfig from '../config'
 import { useInputHelper } from '../utils/input'
 import { useFormatter } from '../utils/formatter'
 import { useErrors } from '../utils/errors'
+import { useDataAccess } from '../utils/dataAccess'
 
 import {
   TTable,
@@ -58,6 +58,8 @@ const {
 } = useFormatter()
 
 const errorsMap = useErrors()
+
+const dataAccess = useDataAccess()
 
 const props = defineProps({
   dataType: {
@@ -331,6 +333,40 @@ function inputOptions(field) {
   }
 }
 
+async function loadData() {
+  const params = {
+    include: includeKeys.value,
+    offset: offset.value,
+    limit: limit.value
+  }
+
+  await dataAccess
+    .list(url.value, params)
+    .then((result) => {
+      data.value = result.data
+      totalData.value = result.total
+      dataLoading.value = false
+    })
+    .catch((error) => {
+      dataLoading.value = false
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+    })
+}
+
+async function viewData(id, resolve, reject) {
+  const params = { include: includeKeys.value }
+
+  await dataAccess
+    .view(`${url.value}/${id}`, params)
+    .then((result) => {
+      resolve(result)
+    })
+    .catch((error) => {
+      reject(error)
+    })
+}
+
 async function openCreateDialog(id) {
   newRow.value = creatableKeys.value.reduce((o, key) => {
     o[key] = formatDataForShow(key, {})
@@ -342,16 +378,17 @@ async function openCreateDialog(id) {
 async function createDataAndCloseDialog(rawParams) {
   const params = formatDataForSave(rawParams)
 
-  await createData(params)
-          .then((result) => {
-            showBanner(`Data created successfully!`)
-            loadData()
-            closeCreateDialog()
-          })
-          .catch((error) => {
-            createErrors.value = error.error
-            showBanner(`Error creating data!`)
-          })
+  await dataAccess
+    .create(url.value, params)
+    .then((result) => {
+      showBanner(`Data created successfully!`)
+      loadData()
+      closeCreateDialog()
+    })
+    .catch((error) => {
+      createErrors.value = error
+      showBanner(`Error creating data!`)
+    })
 }
 
 function closeCreateDialog() {
@@ -364,45 +401,50 @@ function resetNewRow() {
 }
 
 async function openViewDialog(id) {
-  await viewData(id)
-          .then((result) => {
-            currentRow.value = result.record
-            viewDialog.value = true
-          })
-          .catch((error) => {
-            currentRow.value = null
-            errorAlert.value = true
-            errorContent.value = JSON.stringify(error, false, 4)
-          })
+  viewData(
+    id,
+    (record) => {
+      currentRow.value = record
+      viewDialog.value = true
+    },
+    (error) => {
+      currentRow.value = null
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+    }
+  )
 }
 
 async function openUpdateDialog(id) {
-  await viewData(id)
-          .then((result) => {
-            formatCurrentRowForUpdate(result.record)
-            updateDialog.value = true
-          })
-          .catch((error) => {
-            resetCurrentRowForUpdate()
-            errorAlert.value = true
-            errorContent.value = JSON.stringify(error, false, 4)
-          })
+  viewData(
+    id,
+    (record) => {
+      formatCurrentRowForUpdate(record)
+      updateDialog.value = true
+    },
+    (error) => {
+      resetCurrentRowForUpdate()
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+    }
+  )
 }
 
 async function updateDataAndCloseDialog(rawParams) {
   const id = rawParams.id
   const params = formatDataForSave(rawParams)
 
-  await updateData(id, params)
-          .then((result) => {
-            showBanner(`Data updated successfully!`)
-            loadData()
-            closeUpdateDialog()
-          })
-          .catch((error) => {
-            updateErrors.value = error.error
-            showBanner(`Error updating data!`)
-          })
+  await dataAccess
+    .update(`${url.value}/${id}`, params)
+    .then((record) => {
+      showBanner(`Data updated successfully!`)
+      loadData()
+      closeUpdateDialog()
+    })
+    .catch((error) => {
+      updateErrors.value = error
+      showBanner(`Error updating data!`)
+    })
 }
 
 function closeUpdateDialog() {
@@ -474,34 +516,37 @@ function resetCurrentRowForUpdate() {
 }
 
 async function openDeleteDialog(id) {
-  await viewData(id)
-          .then((result) => {
-            currentRowForDelete.value = result.record
-            deleteDialog.value = true
-          })
-          .catch((error) => {
-            resetCurrentRowForDelete()
-            errorAlert.value = true
-            errorContent.value = JSON.stringify(result.error, false, 4)
-          })
+  viewData(
+    id,
+    (record) => {
+      currentRowForDelete.value = record
+      deleteDialog.value = true
+    },
+    (error) => {
+      resetCurrentRowForDelete()
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+    }
+  )
 }
 
 async function deleteDataAndCloseDialog() {
   const params = currentRowForDelete.value
   const id = params.id
 
-  await deleteData(id, params)
-          .then((result) => {
-            showBanner(`Data deleted successfully!`)
-            loadData()
-          })
-          .catch((error) => {
-            errorAlert.value = true
-            errorContent.value = error.error.map(type => errorsMap[type]).join(', ')
-          })
-          .finally(() => {
-            closeDeleteDialog()
-          })
+  await dataAccess
+    .remove(`${url.value}/${id}`)
+    .then((record) => {
+      showBanner(`Data deleted successfully!`)
+      loadData()
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = error.map(type => errorsMap[type]).join(', ')
+    })
+    .finally(() => {
+      closeDeleteDialog()
+    })
 }
 
 function closeDeleteDialog() {
@@ -514,17 +559,18 @@ function resetCurrentRowForDelete() {
 }
 
 async function openDownloadDialog() {
-  await downloadData()
-          .then((result) => {
-            const url = window.URL.createObjectURL(new Blob([result.data]))
-            downloadLink.value = url
-            downloadFile.value = result.filename
-            downloadDialog.value = true
-          })
-          .catch((error) => {
-            errorAlert.value = true
-            errorContent.value = JSON.stringify(result.error, false, 4)
-          })
+  await dataAccess
+    .download(`${url.value}/download`)
+    .then((result) => {
+      const url = window.URL.createObjectURL(new Blob([result.data]))
+      downloadLink.value = url
+      downloadFile.value = result.filename
+      downloadDialog.value = true
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(result.error, false, 4)
+    })
 }
 
 function downloadDataAsFile() {
@@ -546,10 +592,10 @@ async function updateOffsetAndReload(updated) {
 const combinedDataFields = ref(props.dataFields)
 
 async function loadSchemas() {
-  await axios
-    .get(schemasUrl.value)
-    .then((res) => {
-      const fields = res.data.fields
+  await dataAccess
+    .schemas(schemasUrl.value)
+    .then((result) => {
+      const fields = result.fields
       combinedDataFields.value = combinedDataFields.value.map((field) => {
         if (field.type === 'enum') {
           const enums = fields[field.key].enums
@@ -563,102 +609,10 @@ async function loadSchemas() {
         }
       })
     })
-    .catch((err) => {
+    .catch((error) => {
       errorAlert.value = true
-      errorContent.value = JSON.stringify(err, false, 4)
+      errorContent.value = JSON.stringify(error, false, 4)
     })
-}
-
-async function loadData() {
-  await axios
-    .get(url.value, { params: { include: includeKeys.value, offset: offset.value, limit: limit.value } })
-    .then((res) => {
-      data.value = res.data.data
-      totalData.value = res.data.total
-      dataLoading.value = false
-    })
-    .catch((err) => {
-      dataLoading.value = false
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(err, false, 4)
-    })
-}
-
-async function createData(params) {
-  return new Promise((resolve, reject) => {
-    axios
-      .post(`${url.value}`, params)
-      .then((res) => {
-        if (res.data.success) {
-          resolve({ success: true, record: res.data.record })
-        } else {
-          reject({ success: false, error: res.data.errors })
-        }
-      })
-      .catch((err) => {
-        reject({ success: false, error: err })
-      })
-  })
-}
-
-async function viewData(id) {
-  return new Promise((resolve, reject) => {
-    axios
-      .get(`${url.value}/${id}`, { params: { include: includeKeys.value } })
-      .then((res) => {
-        resolve({ success: true, record: res.data.record })
-      })
-      .catch((err) => {
-        reject({ success: false, error: err })
-      })
-  })
-}
-
-async function updateData(id, params) {
-  return new Promise((resolve, reject) => {
-    axios
-      .put(`${url.value}/${id}`, params)
-      .then((res) => {
-        if (res.data.success) {
-          resolve({ success: true, record: res.data.record })
-        } else {
-          reject({ success: false, error: res.data.errors })
-        }
-      })
-      .catch((err) => {
-        reject({ success: false, error: err })
-      })
-  })
-}
-
-async function deleteData(id, params) {
-  return new Promise((resolve, reject) => {
-    axios
-      .delete(`${url.value}/${id}`)
-      .then((res) => {
-        if (res.data.success) {
-          resolve({ success: true, record: res.data.record })
-        } else {
-          reject({ success: false, error: res.data.errors })
-        }
-      })
-      .catch((err) => {
-        reject({ success: false, error: err })
-      })
-  })
-}
-
-async function downloadData() {
-  return new Promise((resolve, reject) => {
-    axios
-      .get(`${url.value}/download`)
-      .then((res) => {
-        resolve({ success: true, filename: res.data.filename, data: res.data.data })
-      })
-      .catch((err) => {
-        reject({ success: false, error: err })
-      })
-  })
 }
 
 async function optionsOffsetChange(field, newOffset) {
