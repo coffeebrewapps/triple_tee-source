@@ -131,7 +131,6 @@ export default usePlugin" >> $index_file
     touch $view_file
     echo "<script setup>
 import { onMounted, computed, ref } from 'vue'
-import axios from 'axios'
 
 import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
@@ -146,6 +145,9 @@ const dataFields = computed(() => {
   ]
 })
 
+const validations = {
+}
+
 onMounted(async () => {
 })
 </script>
@@ -157,6 +159,7 @@ onMounted(async () => {
     schemas-url-base=\"api/schemas/${lower_model}\"
     :fields-layout=\"fieldsLayout\"
     :data-fields=\"dataFields\"
+    :validations=\"validations\"
   />
 </template>" >> $view_file
   fi
