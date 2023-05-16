@@ -59,7 +59,7 @@
       "primary": ["id"],
       "foreign": {},
       "unique": ["code|symbol|effectiveStart"],
-      "required": ["code", "symbol", "exchangeRate", "effectiveStart", "effectiveEnd"]
+      "required": ["code", "symbol", "exchangeRate", "effectiveStart"]
     }
   },
   "tags": {
