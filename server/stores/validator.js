@@ -1,16 +1,23 @@
 const logger = require('../logger')
 
-function validate(modelClass, record, schemas, indexes, data) {
+function validate(modelClass, record, schemas, indexes, data, check = { unique: true, required: true, foreign: true }) {
   const constraints = schemas[modelClass].constraints;
-
-  const uniqueConstraint = constraints.unique;
-  const requiredConstraint = constraints.required;
-  const foreignConstraint = constraints.foreign;
-
   const errors = {};
-  validateUnique(modelClass, indexes.unique, record, uniqueConstraint, data, errors);
-  validateRequired(modelClass, record, requiredConstraint, data, errors);
-  validateForeign(modelClass, record, foreignConstraint, data, errors);
+
+  if (check.unique) {
+    const uniqueConstraint = constraints.unique;
+    validateUnique(modelClass, indexes.unique, record, uniqueConstraint, data, errors);
+  }
+
+  if (check.required) {
+    const requiredConstraint = constraints.required;
+    validateRequired(modelClass, record, requiredConstraint, data, errors);
+  }
+
+  if (check.foreign) {
+    const foreignConstraint = constraints.foreign;
+    validateForeign(modelClass, record, foreignConstraint, data, errors);
+  }
 
   return {
     valid: Object.keys(errors).length === 0,
@@ -74,6 +81,15 @@ function validateForeign(modelClass, record, constraint, data, errors) {
   });
 }
 
+function isUsed(modelClass, record, schemas, indexes, data) {
+  const foreignIndexes = indexes.foreign[modelClass];
+  if (!foreignIndexes) { return false; }
+
+  const associations = foreignIndexes[record.id]
+  return !!associations;
+}
+
 module.exports = {
-  validate
+  validate,
+  isUsed
 }

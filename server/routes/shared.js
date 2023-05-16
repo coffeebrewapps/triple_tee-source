@@ -45,9 +45,7 @@ exports.remove = function(store) {
     const id = params.id;
     logger.log(`Removing record`, { id });
 
-    res.send({
-      success: store.remove(id)
-    });
+    res.send(store.remove(id));
   }
 };
 

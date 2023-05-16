@@ -168,19 +168,39 @@ function update(modelClass, id, params) {
 function remove(modelClass, id) {
   let data = dataCache[modelClass];
   const existing = view(modelClass, id);
-  if (!existing.record) { return false; }
+  const record = existing.record;
+  if (!record) {
+    return {
+      success: false,
+      errors: {}
+    };
+  }
 
-  const deletedRecord = data[id];
-  delete data[id];
-  cacheData(modelClass, data, data);
-  removeIndexes(modelClass, deletedRecord)
+  const used = validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
 
-  return true;
+  if (!used) {
+    delete data[id];
+    cacheData(modelClass, data, data);
+    removeIndexes(modelClass, record)
+    return {
+      success: true,
+      record: record
+    };
+  } else {
+    return {
+      success: false,
+      errors: ['isUsed']
+    };
+  }
 }
 
-// TODO
 function isUsed(modelClass, id) {
-  return false
+  let data = dataCache[modelClass];
+  const existing = view(modelClass, id);
+  const record = existing.record;
+  if (!record) { return false }
+
+  return validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
 }
 
 function fetchIncludes(modelClass, record, include) {
@@ -246,11 +266,18 @@ function cacheForeignIndexes(modelClass, record) {
     const foreignModelClass = foreignConstraints[key].reference;
     const existingIndexes = foreignIndexes[foreignModelClass] || {};
     const foreignValue = record[key];
-    const foreignValueAssocs = existingIndexes[foreignValue] || { [modelClass]: [] };
 
-    foreignValueAssocs[modelClass].push(record.id);
-    existingIndexes[foreignValue] = foreignValueAssocs;
-    indexCache.foreign[foreignModelClass] = existingIndexes;
+    if (foreignValue) {
+      const foreignValueAssocs = existingIndexes[foreignValue] || {};
+
+      if (!foreignValueAssocs[modelClass]) {
+        foreignValueAssocs[modelClass] = [];
+      }
+
+      foreignValueAssocs[modelClass].push(record.id);
+      existingIndexes[foreignValue] = foreignValueAssocs;
+      indexCache.foreign[foreignModelClass] = existingIndexes;
+    }
   });
 }
 

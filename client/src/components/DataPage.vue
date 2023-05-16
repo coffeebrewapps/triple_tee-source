@@ -5,6 +5,7 @@ import axios from 'axios'
 import useConfig from '../config'
 import { useInputHelper } from '../utils/input'
 import { useFormatter } from '../utils/formatter'
+import { useErrors } from '../utils/errors'
 
 import {
   TTable,
@@ -55,6 +56,8 @@ const {
   formatTag,
   tagStyle
 } = useFormatter()
+
+const errorsMap = useErrors()
 
 const props = defineProps({
   dataType: {
@@ -236,6 +239,11 @@ watch(updateDialog, (newVal, oldVal) => {
 
 const deleteDialog = ref(false)
 const currentRowForDelete = ref()
+const deleteErrors = ref({})
+
+watch(deleteDialog, (newVal, oldVal) => {
+  if (!newVal) { deleteErrors.value = {} }
+})
 
 const downloadDialog = ref(false)
 const downloadLink = ref()
@@ -484,11 +492,12 @@ async function deleteDataAndCloseDialog() {
 
   await deleteData(id, params)
           .then((result) => {
+            showBanner(`Data deleted successfully!`)
             loadData()
           })
           .catch((error) => {
             errorAlert.value = true
-            errorContent.value = JSON.stringify(error, false, 4)
+            errorContent.value = error.error.map(type => errorsMap[type]).join(', ')
           })
           .finally(() => {
             closeDeleteDialog()
@@ -628,9 +637,9 @@ async function deleteData(id, params) {
       .delete(`${url.value}/${id}`)
       .then((res) => {
         if (res.data.success) {
-          resolve({ success: true })
+          resolve({ success: true, record: res.data.record })
         } else {
-          reject({ success: false, error: `Delete failure` })
+          reject({ success: false, error: res.data.errors })
         }
       })
       .catch((err) => {
