@@ -762,17 +762,38 @@ onMounted(async () => {
             <div
               v-if="header.key !== 'tags'"
             >
-              {{ inputValue(header.key, row) }}
+              <div
+                v-if="row[header.key]"
+              >
+                {{ inputValue(header.key, row) }}
+              </div>
+
+              <div
+                v-if="!row[header.key]"
+                class="no-value"
+              >
+                --- no value ---
+              </div>
             </div>
 
             <!-- hardcode format for tags because it is standard through the app --->
             <div
               v-if="header.key === 'tags'"
-              v-for="tag in row.tags"
-              class="tag"
-              :style="tagStyle(row, tag)"
             >
-              {{ formatTag(row, tag) }}
+              <div
+                v-for="tag in row.tags"
+                class="tag"
+                :style="tagStyle(row, tag)"
+              >
+                {{ formatTag(row, tag) }}
+              </div>
+
+              <div
+                v-if="row.tags.length === 0"
+                class="no-value"
+              >
+                --- no value ---
+              </div>
             </div>
           </slot>
         </td>
@@ -882,5 +903,10 @@ td.col {
   text-align: left;
   padding: 0.5rem;
   border-bottom: 1px solid var(--color-border);
+}
+
+.col .no-value {
+  font-size: 0.8rem;
+  font-style: oblique;
 }
 </style>

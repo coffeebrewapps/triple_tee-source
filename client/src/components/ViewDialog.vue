@@ -93,18 +93,38 @@ function closeDialog() {
             v-if="field !== 'tags'"
             class="data-value"
           >
-            {{ inputValue(field, record) }}
+            <div
+              v-if="record[field]"
+            >
+              {{ inputValue(field, record) }}
+            </div>
+
+            <div
+              v-if="!record[field]"
+              class="no-value"
+            >
+              --- no value ---
+            </div>
           </div>
 
           <!-- hardcode format for tags because it is standard through the app --->
-          <div class="data-value tags">
+          <div
+            v-if="field === 'tags'"
+            class="data-value tags"
+          >
             <div
-              v-if="field === 'tags'"
               v-for="tag in record.tags"
               class="tag"
               :style="tagStyle(record, tag)"
             >
               {{ formatTag(record, tag) }}
+            </div>
+
+            <div
+              v-if="record.tags.length === 0"
+              class="no-value"
+            >
+              --- no value ---
             </div>
           </div>
         </div>
@@ -131,15 +151,25 @@ function closeDialog() {
 }
 
 .data-label {
+  display: flex;
+  align-items: flex-start;
   font-weight: 600;
+  padding: 0 0.5rem 0 0;
 }
 
 .data-value {
+  display: flex;
+  align-items: center;
   white-space: pre-wrap;
 }
 
 .data-value.tags {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
+}
+
+.data-value .no-value {
+  font-size: 0.8rem;
+  font-style: oblique;
 }
 </style>
