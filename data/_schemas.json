@@ -13,6 +13,12 @@
       "isRead": {
         "type": "boolean",
         "default": false
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
       }
     },
     "constraints": {
@@ -41,6 +47,12 @@
       },
       "effectiveEnd": {
         "type": "date"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
       }
     },
     "constraints": {
@@ -69,6 +81,12 @@
       },
       "backgroundColor": {
         "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
       }
     },
     "constraints": {
@@ -113,6 +131,12 @@
       },
       "associatedTransactionId": {
         "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
       }
     },
     "constraints": {
@@ -163,6 +187,12 @@
       "tags": {
         "type": "array",
         "default": []
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
       }
     },
     "constraints": {

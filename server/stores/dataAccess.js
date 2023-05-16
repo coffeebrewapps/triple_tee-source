@@ -51,9 +51,21 @@ function writeData(modelClass, data) {
   }
 }
 
-function cacheData(modelClass, data) {
-  dataCache[modelClass] = data;
-  writeData(modelClass, data);
+function cacheRecord(modelClass, record) {
+  const cacheableData = dataCache[modelClass];
+  cacheableData[record.id] = record;
+
+  const writable = Object.assign(record);
+  delete writable.includes;
+  const writableData = Object.assign({}, dataCache[modelClass]);
+  writableData[record.id] = writable;
+
+  cacheData(modelClass, cacheableData, writableData);
+}
+
+function cacheData(modelClass, cacheable, writable) {
+  dataCache[modelClass] = cacheable;
+  writeData(modelClass, writable)
 }
 
 function viewSchemas(modelClass) {
@@ -101,9 +113,9 @@ function create(modelClass, params) {
     let data = dataCache[modelClass];
     const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
     const newId = (lastId + 1).toString();
-    const newRow = Object.assign(params, { id: newId });
-    data[newId] = newRow;
-    cacheData(modelClass, data);
+    const now = new Date();
+    const newRow = Object.assign(params, { id: newId, createdAt: now, updatedAt: now });
+    cacheRecord(modelClass, newRow);
     cacheIndexes(modelClass, newRow);
 
     return {
@@ -133,13 +145,12 @@ function update(modelClass, id, params) {
     };
   }
 
-  const paramsWithId = Object.assign({}, params, { id: id.toString() })
-  const result = validator.validate(modelClass, paramsWithId, schemaCache, indexCache, dataCache);
+  const result = validator.validate(modelClass, params, schemaCache, indexCache, dataCache);
 
   if (result.valid) {
-    const updated = Object.assign(existing.record, params)
-    data[id] = updated;
-    cacheData(modelClass, data);
+    const now = new Date();
+    const updated = Object.assign(existing.record, params, { updatedAt: now })
+    cacheRecord(modelClass, updated);
     cacheIndexes(modelClass, updated);
 
     return {
@@ -159,8 +170,10 @@ function remove(modelClass, id) {
   const existing = view(modelClass, id);
   if (!existing.record) { return false; }
 
+  const deletedRecord = data[id];
   delete data[id];
-  cacheData(modelClass, data);
+  cacheData(modelClass, data, data);
+  removeIndexes(modelClass, deletedRecord)
 
   return true;
 }
@@ -200,7 +213,7 @@ function cacheIndexes(modelClass, record) {
     if (indexType === 'unique') {
       cacheUniqueIndexes(modelClass, record);
     }
-  })
+  });
   writeData(indexes, indexCache);
 }
 
@@ -218,9 +231,40 @@ function cacheUniqueIndexes(modelClass, record) {
     existingIndexes[values] = record.id;
     o[key] = existingIndexes;
     return o;
-  }, {})
+  }, {});
 
   uniqueIndexes[modelClass] = newIndexes;
+}
+
+function removeIndexes(modelClass, record) {
+  indexTypes.forEach((indexType) => {
+    if (indexType === 'unique') {
+      removeUniqueIndexes(modelClass, record);
+    }
+  });
+  writeData(indexes, indexCache);
+}
+
+function removeUniqueIndexes(modelClass, record) {
+  const uniqueIndexes = indexCache.unique;
+  if (!uniqueIndexes[modelClass]) {
+    return;
+  }
+
+  const uniqueConstraints = schemaCache[modelClass].constraints.unique || [];
+  uniqueConstraints.forEach((key) => {
+    const existingIndexes = uniqueIndexes[modelClass][key];
+    if (existingIndexes) {
+      const updatedIndexes = Object.keys(existingIndexes).reduce((o, index) => {
+        const id = existingIndexes[index];
+        if (id !== record.id) {
+          o[index] = id;
+        }
+        return o;
+      }, {});
+      uniqueIndexes[modelClass][key] = updatedIndexes;
+    }
+  });
 }
 
 module.exports = {
