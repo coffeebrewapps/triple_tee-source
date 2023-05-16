@@ -212,6 +212,8 @@ function cacheIndexes(modelClass, record) {
   indexTypes.forEach((indexType) => {
     if (indexType === 'unique') {
       cacheUniqueIndexes(modelClass, record);
+    } else if (indexType === 'foreign') {
+      cacheForeignIndexes(modelClass, record);
     }
   });
   writeData(indexes, indexCache);
@@ -234,6 +236,22 @@ function cacheUniqueIndexes(modelClass, record) {
   }, {});
 
   uniqueIndexes[modelClass] = newIndexes;
+}
+
+function cacheForeignIndexes(modelClass, record) {
+  const foreignIndexes = indexCache.foreign;
+  const foreignConstraints = schemaCache[modelClass].constraints.foreign || {};
+
+  Object.keys(foreignConstraints).forEach((key) => {
+    const foreignModelClass = foreignConstraints[key].reference;
+    const existingIndexes = foreignIndexes[foreignModelClass] || {};
+    const foreignValue = record[key];
+    const foreignValueAssocs = existingIndexes[foreignValue] || { [modelClass]: [] };
+
+    foreignValueAssocs[modelClass].push(record.id);
+    existingIndexes[foreignValue] = foreignValueAssocs;
+    indexCache.foreign[foreignModelClass] = existingIndexes;
+  });
 }
 
 function removeIndexes(modelClass, record) {
