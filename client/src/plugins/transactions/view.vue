@@ -83,7 +83,7 @@ const dataFields = [
     data-type="Transactions"
     url-base="api/transactions"
     schemas-url-base="api/schemas/transactions"
-    :form-dialog-full-screen="true"
+    :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
   />

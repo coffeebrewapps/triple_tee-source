@@ -88,7 +88,7 @@ const props = defineProps({
     type: Object,
     default: {}
   },
-  formDialogFullScreen: {
+  fullscreen: {
     type: Boolean,
     default: false
   },
@@ -797,7 +797,7 @@ onMounted(async () => {
       :data-fields="creatableKeys"
       :data="newRow"
       :dialog-title="createDialogTitle(dataType)"
-      :full-screen="formDialogFullScreen"
+      :fullscreen="fullscreen"
       :error-messages="createErrors"
       @submit="createDataAndCloseDialog"
     />
@@ -810,7 +810,7 @@ onMounted(async () => {
       :data-fields="updatableKeys"
       :data="currentRowForUpdate"
       :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
-      :full-screen="formDialogFullScreen"
+      :fullscreen="fullscreen"
       :error-messages="updateErrors"
       @submit="updateDataAndCloseDialog"
     />

@@ -66,7 +66,7 @@ function validateEndTime(record) {
     data-type="Work Logs"
     url-base="api/work_logs"
     schemas-url-base="api/schemas/work_logs"
-    :form-dialog-full-screen="true"
+    :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :validations="validations"

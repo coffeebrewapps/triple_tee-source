@@ -73,7 +73,7 @@ const props = defineProps({
     type: String,
     default: ``
   },
-  fullScreen: {
+  fullscreen: {
     type: Boolean,
     default: false
   },
@@ -102,20 +102,6 @@ const dialog = computed({
   },
   set: (val) => {
     emit('update:modelValue', val)
-  }
-})
-
-const dialogSize = computed(() => {
-  if (props.fullScreen) {
-    return {
-      width: window.screen.width - 100,
-      height: window.screen.height - 150
-    }
-  } else {
-    return {
-      width: 800,
-      height: 600
-    }
   }
 })
 /*** section:dialog ***/
@@ -244,8 +230,7 @@ onMounted(async () => {
   <TDialog
     v-model="dialog"
     :title="dialogTitle"
-    :width="dialogSize.width"
-    :height="dialogSize.height"
+    :fullscreen="fullscreen"
     class="form-dialog"
   >
     <template #body>
