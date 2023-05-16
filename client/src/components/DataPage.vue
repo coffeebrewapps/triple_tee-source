@@ -84,6 +84,10 @@ const props = defineProps({
     type: Array,
     default: []
   },
+  validations: {
+    type: Object,
+    default: {}
+  },
   formDialogFullScreen: {
     type: Boolean,
     default: false
@@ -149,6 +153,16 @@ const includeKeys = computed(() => {
 })
 
 const combinedDataFields = ref(props.dataFields)
+
+function validateParams(validations, params) {
+  return Object.keys(validations).reduce((errors, field) => {
+    const validators = validations[field]
+    errors[field] = validators.map((validator) => {
+      return validator(params)
+    }).filter(e => !!e)
+    return errors
+  }, {})
+}
 /*** section:global ***/
 
 /*** section:table ***/
@@ -376,6 +390,10 @@ const creatableKeys = computed(() => {
   return Object.keys(creatableFields.value)
 })
 
+const createValidations = computed(() => {
+  return props.validations.create || []
+})
+
 watch(createDialog, (newVal, oldVal) => {
   if (!newVal) { createErrors.value = {} }
 })
@@ -389,6 +407,14 @@ async function openCreateDialog(id) {
 }
 
 async function createDataAndCloseDialog(rawParams) {
+  const errors = validateCreateParams(rawParams)
+
+  if (Object.keys(errors).length > 0) {
+    createErrors.value = errors
+    showBanner(`Error creating data!`)
+    return
+  }
+
   const params = formatDataForSave(rawParams)
 
   await dataAccess
@@ -402,6 +428,10 @@ async function createDataAndCloseDialog(rawParams) {
       createErrors.value = error
       showBanner(`Error creating data!`)
     })
+}
+
+function validateCreateParams(params) {
+  return validateParams(createValidations.value, params)
 }
 
 function closeCreateDialog() {
@@ -431,6 +461,10 @@ const updatableKeys = computed(() => {
   return Object.keys(updatableFields.value)
 })
 
+const updateValidations = computed(() => {
+  return props.validations.update || []
+})
+
 watch(updateDialog, (newVal, oldVal) => {
   if (!newVal) { updateErrors.value = {} }
 })
@@ -451,6 +485,14 @@ async function openUpdateDialog(id) {
 }
 
 async function updateDataAndCloseDialog(rawParams) {
+  const errors = validateUpdateParams(rawParams)
+
+  if (Object.keys(errors).length > 0) {
+    updateErrors.value = errors
+    showBanner(`Error updating data!`)
+    return
+  }
+
   const id = rawParams.id
   const params = formatDataForSave(rawParams)
 
@@ -465,6 +507,10 @@ async function updateDataAndCloseDialog(rawParams) {
       updateErrors.value = error
       showBanner(`Error updating data!`)
     })
+}
+
+function validateUpdateParams(params) {
+  return validateParams(updateValidations.value, params)
 }
 
 function closeUpdateDialog() {
@@ -522,7 +568,9 @@ async function deleteDataAndCloseDialog() {
     })
     .catch((error) => {
       errorAlert.value = true
-      errorContent.value = error.map(type => errorsMap[type]).join(', ')
+      errorContent.value = error.map((type) => {
+        return errorsMap[type]()
+      }).join(', ')
     })
     .finally(() => {
       closeDeleteDialog()

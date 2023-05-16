@@ -1,8 +1,11 @@
 export function useErrors() {
   return {
-    required: 'Field is required',
-    unique: 'Value must be unique',
-    foreign: 'Foreign key value not found',
-    isUsed: 'Record is used'
+    required: (_) => { return 'Field is required' },
+    unique: (_) => { return 'Value must be unique' },
+    foreign: (_) => { return 'Foreign key value not found' },
+    isUsed: (_) => { return 'Record is used' },
+    earlierThan: ({ compareDate }) => {
+      return `Cannot be earlier than ${compareDate}`
+    }
   }
 }

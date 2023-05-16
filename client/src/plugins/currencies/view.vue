@@ -3,9 +3,11 @@ import { onMounted, computed, ref } from 'vue'
 import axios from 'axios'
 
 import useConfig from '@/config'
+import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
 const config = useConfig()
+const { notEarlierThan } = useValidations()
 
 const fieldsLayout = ref([
   { code: 'md', symbol: 'md', exchangeRate: 'md' },
@@ -23,6 +25,23 @@ const dataFields = computed(() => {
   ]
 })
 
+const validations = {
+  create: {
+    effectiveEnd: [
+      validateEffectiveEnd
+    ]
+  },
+  update: {
+    effectiveEnd: [
+      validateEffectiveEnd
+    ]
+  }
+}
+
+function validateEffectiveEnd(record) {
+  return notEarlierThan(record, 'effectiveEnd', 'effectiveStart')
+}
+
 onMounted(async () => {
 })
 </script>
@@ -34,5 +53,6 @@ onMounted(async () => {
     schemas-url-base="api/schemas/currencies"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
+    :validations="validations"
   />
 </template>

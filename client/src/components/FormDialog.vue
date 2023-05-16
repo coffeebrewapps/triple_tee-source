@@ -163,7 +163,7 @@ function fieldErrorMessage(field) {
   if (!props.errorMessages[field]) { return `` }
 
   return props.errorMessages[field].map((error) => {
-    return errorsMap[error]
+    return errorsMap[error.name](error.params)
   }).join(', ')
 }
 /*** section:inputUtils ***/

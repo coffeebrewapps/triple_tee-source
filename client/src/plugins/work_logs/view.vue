@@ -2,9 +2,11 @@
 import { onMounted, computed, ref } from 'vue'
 
 import useConfig from '@/config'
+import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
 const config = useConfig()
+const { notEarlierThan } = useValidations()
 
 const tagsUrl = computed(() => {
   return `${config.baseUrl}/api/tags`
@@ -47,6 +49,23 @@ const dataFields = computed(() => {
   ]
 })
 
+const validations = {
+  create: {
+    endTime: [
+      validateEndTime
+    ]
+  },
+  update: {
+    endTime: [
+      validateEndTime
+    ]
+  }
+}
+
+function validateEndTime(record) {
+  return notEarlierThan(record, 'endTime', 'startTime')
+}
+
 onMounted(async () => {
 })
 </script>
@@ -59,6 +78,7 @@ onMounted(async () => {
     :form-dialog-full-screen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
+    :validations="validations"
   />
 </template>
 
