@@ -157,9 +157,13 @@ const combinedDataFields = ref(props.dataFields)
 function validateParams(validations, params) {
   return Object.keys(validations).reduce((errors, field) => {
     const validators = validations[field]
-    errors[field] = validators.map((validator) => {
+    const fieldErrors = validators.map((validator) => {
       return validator(params)
     }).filter(e => !!e)
+
+    if (fieldErrors.length > 0) {
+      errors[field] = fieldErrors
+    }
     return errors
   }, {})
 }
@@ -425,7 +429,7 @@ async function createDataAndCloseDialog(rawParams) {
       closeCreateDialog()
     })
     .catch((error) => {
-      createErrors.value = error
+      createErrors.value = formatErrorsForDisplay(error)
       showBanner(`Error creating data!`)
     })
 }
@@ -504,7 +508,7 @@ async function updateDataAndCloseDialog(rawParams) {
       closeUpdateDialog()
     })
     .catch((error) => {
-      updateErrors.value = error
+      updateErrors.value = formatErrorsForDisplay(error)
       showBanner(`Error updating data!`)
     })
 }
@@ -701,6 +705,19 @@ function formatDataForSave(params) {
   })
 
   return data
+}
+
+function formatErrorsForDisplay(error) {
+  return Object.keys(error).reduce((errors, field) => {
+    const fieldErrors = error[field]
+    errors[field] = fieldErrors.map((errorName) => {
+      return {
+        name: errorName,
+        params: {}
+      }
+    })
+    return errors
+  }, {})
 }
 /*** section:formatting ***/
 

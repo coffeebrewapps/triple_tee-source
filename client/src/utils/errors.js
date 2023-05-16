@@ -6,6 +6,9 @@ export function useErrors() {
     isUsed: (_) => { return 'Record is used' },
     earlierThan: ({ compareDate }) => {
       return `Cannot be earlier than ${compareDate}`
+    },
+    greaterThan: ({ compareValue }) => {
+      return `Must be greater than ${compareValue}`
     }
   }
 }

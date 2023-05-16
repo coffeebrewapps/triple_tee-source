@@ -4,7 +4,7 @@ import axios from 'axios'
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
-const { notEarlierThan } = useValidations()
+const { notEarlierThan, greaterThan } = useValidations()
 
 const fieldsLayout = [
   { code: 'md', symbol: 'md', exchangeRate: 'md' },
@@ -22,11 +22,17 @@ const dataFields = [
 
 const validations = {
   create: {
+    exchangeRate: [
+      validateExchangeRate
+    ],
     effectiveEnd: [
       validateEffectiveEnd
     ]
   },
   update: {
+    exchangeRate: [
+      validateExchangeRate
+    ],
     effectiveEnd: [
       validateEffectiveEnd
     ]
@@ -35,6 +41,10 @@ const validations = {
 
 function validateEffectiveEnd(record) {
   return notEarlierThan(record, 'effectiveEnd', 'effectiveStart')
+}
+
+function validateExchangeRate(record) {
+  return greaterThan(record, 'exchangeRate', 0)
 }
 </script>
 
