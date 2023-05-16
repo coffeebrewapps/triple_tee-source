@@ -23,6 +23,34 @@ export function useValidations() {
     }
   }
 
+  function futureDate(record, dateToCheckField) {
+    const dateToCheck = record[dateToCheckField]
+
+    if (!dateToCheck) { return }
+
+    const now = new Date()
+    if (dateToCheck > now) {
+      return {
+        name: 'futureDate',
+        params: {}
+      }
+    }
+  }
+
+  function pastDate(record, dateToCheckField) {
+    const dateToCheck = record[dateToCheckField]
+
+    if (!dateToCheck) { return }
+
+    const now = new Date()
+    if (dateToCheck < now) {
+      return {
+        name: 'futureDate',
+        params: {}
+      }
+    }
+  }
+
   function greaterThan(record, numberToCheckField, compareValue) {
     const numberToCheck = record[numberToCheckField]
 
@@ -35,8 +63,58 @@ export function useValidations() {
     }
   }
 
-  return {
-    notEarlierThan,
-    greaterThan
+  function greaterThanOrEqual(record, numberToCheckField, compareValue) {
+    const numberToCheck = record[numberToCheckField]
+
+    if (isEmpty(numberToCheck)) { return }
+    if (numberToCheck >= compareValue) { return }
+
+    return {
+      name: 'greaterThanOrEqual',
+      params: { compareValue }
+    }
   }
+
+  function lessThan(record, numberToCheckField, compareValue) {
+    const numberToCheck = record[numberToCheckField]
+
+    if (isEmpty(numberToCheck)) { return }
+    if (numberToCheck < compareValue) { return }
+
+    return {
+      name: 'lessThan',
+      params: { compareValue }
+    }
+  }
+
+  function lessThanOrEqual(record, numberToCheckField, compareValue) {
+    const numberToCheck = record[numberToCheckField]
+
+    if (isEmpty(numberToCheck)) { return }
+    if (numberToCheck <= compareValue) { return }
+
+    return {
+      name: 'lessThanOrEqual',
+      params: { compareValue }
+    }
+  }
+
+  const dateValidations = {
+    notEarlierThan,
+    futureDate,
+    pastDate
+  }
+
+  const numberValidations = {
+    greaterThan,
+    greaterThanOrEqual,
+    lessThan,
+    lessThanOrEqual
+  }
+
+  return Object.assign(
+    {},
+    dateValidations,
+    numberValidations
+  )
 }
