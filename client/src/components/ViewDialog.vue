@@ -1,18 +1,25 @@
 <script setup>
+/*** import:global ***/
 import { computed } from 'vue'
+/*** import:global ***/
 
+/*** import:utils ***/
 import { useFormatter } from '../utils/formatter'
-
-import {
-  TDialog,
-  TButton
-} from 'coffeebrew-vue-components'
 
 const {
   formatTag,
   tagStyle
 } = useFormatter()
+/*** import:utils ***/
 
+/*** import:components ***/
+import {
+  TDialog,
+  TButton
+} from 'coffeebrew-vue-components'
+/*** import:components ***/
+
+/*** section:props ***/
 const props = defineProps({
   modelValue: {
     type: Boolean,
@@ -47,9 +54,13 @@ const props = defineProps({
     }
   }
 })
+/*** section:props ***/
 
+/*** section:emit ***/
 const emit = defineEmits(['update:modelValue'])
+/*** section:emit ***/
 
+/*** section:dialog ***/
 const dialog = computed({
   get: () => {
     return props.modelValue
@@ -62,6 +73,7 @@ const dialog = computed({
 function closeDialog() {
   emit('update:modelValue', false)
 }
+/*** section:dialog ***/
 </script>
 
 <template>
