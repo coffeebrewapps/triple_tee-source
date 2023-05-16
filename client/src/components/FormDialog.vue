@@ -1,25 +1,17 @@
 <script setup>
+/*** import:global ***/
 import { onMounted, ref, computed } from 'vue'
 import axios from 'axios'
+/*** import:global ***/
 
+/*** import:config ***/
 import useConfig from '../config'
-import { useInputHelper } from '../utils/input'
-import { useErrors } from '../utils/errors'
-
-import {
-  TAlert,
-  TCheckbox,
-  TDialog,
-  TDatePicker,
-  TDateTimePicker,
-  TInput,
-  TSelect,
-  TSelectTable,
-  TTextarea,
-  TButton
-} from 'coffeebrew-vue-components'
-
 const config = useConfig()
+/*** import:config ***/
+
+/*** import:utils ***/
+import { useInputHelper } from '../utils/input'
+
 const {
   schemasMap,
   serverOptionsFields,
@@ -36,8 +28,26 @@ const {
   initOptionsData
 } = useInputHelper(props.schemas)
 
+import { useErrors } from '../utils/errors'
 const errorsMap = useErrors()
+/*** import:utils ***/
 
+/*** import:components ***/
+import {
+  TAlert,
+  TCheckbox,
+  TDialog,
+  TDatePicker,
+  TDateTimePicker,
+  TInput,
+  TSelect,
+  TSelectTable,
+  TTextarea,
+  TButton
+} from 'coffeebrew-vue-components'
+/*** import:components ***/
+
+/*** section:props ***/
 const props = defineProps({
   modelValue: {
     type: Boolean,
@@ -74,12 +84,18 @@ const props = defineProps({
     }
   }
 })
+/*** section:props ***/
 
+/*** section:emit ***/
 const emit = defineEmits(['update:modelValue', 'submit'])
+/*** section:emit ***/
 
+/*** section:error ***/
 const errorAlert = ref(false)
 const errorContent = ref('')
+/*** section:error ***/
 
+/*** section:dialog ***/
 const dialog = computed({
   get: () => {
     return props.modelValue
@@ -102,6 +118,12 @@ const dialogSize = computed(() => {
     }
   }
 })
+/*** section:dialog ***/
+
+/*** section:inputUtils ***/
+function showField(field) {
+  return !nullToggleableField(field) || fieldToggles.value[field]
+}
 
 function showInput(field) {
   return showField(field) && inputableField(field)
@@ -123,18 +145,42 @@ function showSelect(field) {
   return showField(field) && (inputType(field) === 'enum' || inputType(field) === 'select')
 }
 
+function fieldUpdatable(field) {
+  return props.dataFields.find(f => f === field)
+}
+
+const fieldToggles = ref(nullToggleableFields.value.reduce((o, f) => {
+  o[f] = false
+  return o
+}, {}))
+
+function fieldToggleLabel(field) {
+  return `Has ${inputLabel(field)}`
+}
+
+function fieldErrorMessage(field) {
+  if (!props.errorMessages) { return `` }
+  if (!props.errorMessages[field]) { return `` }
+
+  return props.errorMessages[field].map((error) => {
+    return errorsMap[error]
+  }).join(', ')
+}
+/*** section:inputUtils ***/
+
+/*** section:selectTableUtils ***/
+const inputOptionsData = ref({})
+
+function inputOptions(field) {
+  return inputOptionsData.value[field]
+}
+
 function showSingleSelect(field) {
   return showField(field) && singleSelectableField(field) && !!inputOptions(field)
 }
 
 function showMultiSelect(field) {
   return showField(field) && multiSelectableField(field) && !!inputOptions(field)
-}
-
-const inputOptionsData = ref({})
-
-function inputOptions(field) {
-  return inputOptionsData.value[field]
 }
 
 const fieldOffsetChange = computed(() => {
@@ -151,7 +197,9 @@ async function offsetChange(field, newOffset) {
       inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
     })
 }
+/*** section:selectTableUtils ***/
 
+/*** section:action ***/
 function submitData() {
   const clonedData = Object.assign({}, props.data)
 
@@ -168,20 +216,9 @@ function closeDialog() {
   dialog.value = false
   emit('update:modelValue', false)
 }
+/*** section:action ***/
 
-function fieldUpdatable(field) {
-  return props.dataFields.find(f => f === field)
-}
-
-function fieldErrorMessage(field) {
-  if (!props.errorMessages) { return `` }
-  if (!props.errorMessages[field]) { return `` }
-
-  return props.errorMessages[field].map((error) => {
-    return errorsMap[error]
-  }).join(', ')
-}
-
+/*** section:styles ***/
 function dataFieldClass(field) {
   if (nullToggleableField(field)) {
     return `data-field toggleable`
@@ -189,19 +226,7 @@ function dataFieldClass(field) {
     return `data-field`
   }
 }
-
-const fieldToggles = ref(nullToggleableFields.value.reduce((o, f) => {
-  o[f] = false
-  return o
-}, {}))
-
-function showField(field) {
-  return !nullToggleableField(field) || fieldToggles.value[field]
-}
-
-function fieldToggleLabel(field) {
-  return `Has ${inputLabel(field)}`
-}
+/*** section:styles ***/
 
 onMounted(async () => {
   await initOptionsData()
