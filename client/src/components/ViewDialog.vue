@@ -97,7 +97,7 @@ function closeDialog() {
           </div>
 
           <!-- hardcode format for tags because it is standard through the app --->
-          <div class="data-value">
+          <div class="data-value tags">
             <div
               v-if="field === 'tags'"
               v-for="tag in record.tags"
@@ -136,5 +136,10 @@ function closeDialog() {
 
 .data-value {
   white-space: pre-wrap;
+}
+
+.data-value.tags {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 </style>
