@@ -76,7 +76,7 @@ export function useInputHelper(schemas) {
       {},
       {
         loading: false,
-        pagination: { limit: limit, client: false }
+        pagination: { offset, limit, client: false }
       },
       dataFromServer
     )
@@ -112,7 +112,7 @@ export function useInputHelper(schemas) {
             data: options,
             total: options.length,
             loading: false,
-            pagination: { limit: 5, client: true }
+            pagination: { offset: 0, limit: 5, client: true }
           }
         ))
       })
