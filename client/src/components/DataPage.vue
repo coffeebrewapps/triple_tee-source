@@ -227,6 +227,7 @@ const filtersStyleClass = computed(() => {
 })
 
 async function submitFilters(updatedFilters) {
+  offset.value = 0
   await loadData(updatedFilters)
 }
 
@@ -329,7 +330,7 @@ const listedData = computed(() => {
 
 async function updateOffsetAndReload(updated) {
   offset.value = updated
-  await loadData()
+  await loadData(filtersData.value)
 }
 /*** section:table ***/
 
@@ -529,7 +530,7 @@ async function createDataAndCloseDialog(rawParams) {
     .create(url.value, params)
     .then((result) => {
       showBanner(`Data created successfully!`)
-      loadData()
+      resetFilters()
       closeCreateDialog()
     })
     .catch((error) => {
@@ -608,7 +609,7 @@ async function updateDataAndCloseDialog(rawParams) {
     .update(`${url.value}/${id}`, params)
     .then((record) => {
       showBanner(`Data updated successfully!`)
-      loadData()
+      resetFilters()
       closeUpdateDialog()
     })
     .catch((error) => {
@@ -672,7 +673,7 @@ async function deleteDataAndCloseDialog() {
     .remove(`${url.value}/${id}`)
     .then((record) => {
       showBanner(`Data deleted successfully!`)
-      loadData()
+      resetFilters()
     })
     .catch((error) => {
       errorAlert.value = true
