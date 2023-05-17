@@ -1,4 +1,5 @@
-const logger = require('../logger')
+const logger = require('../logger');
+const utils = require('../utils');
 
 function validate(modelClass, record, schemas, indexes, data, check = { unique: true, required: true, foreign: true }) {
   const constraints = schemas[modelClass].constraints;
@@ -83,10 +84,16 @@ function validateForeign(modelClass, record, constraint, data, errors) {
 
 function isUsed(modelClass, record, schemas, indexes, data) {
   const foreignIndexes = indexes.foreign[modelClass];
-  if (!foreignIndexes) { return false; }
+  if (utils.isEmpty(foreignIndexes)) { return false; }
 
   const associations = foreignIndexes[record.id]
-  return !!associations;
+  if (utils.isEmpty(associations)) { return false; }
+
+  const someAssociated = Object.values(associations).filter((associatedData) => {
+    return associatedData.length > 0;
+  });
+
+  return someAssociated.length > 0;
 }
 
 module.exports = {

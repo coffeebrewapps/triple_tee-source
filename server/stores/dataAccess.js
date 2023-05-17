@@ -2,6 +2,7 @@
 
 const logger = require('../logger');
 const config = require('../config');
+const utils = require('../utils');
 const fileAccess = require('./fileAccess');
 const validator = require('./validator');
 
@@ -309,6 +310,7 @@ function cacheIndexes(modelClass, record) {
   writeData(indexes, indexCache);
 }
 
+// indexCache.unique = {"tags":{"category|name":{"activity|implementation":"1"}}}
 function cacheUniqueIndexes(modelClass, record) {
   const uniqueIndexes = indexCache.unique;
   if (!uniqueIndexes[modelClass]) {
@@ -328,6 +330,7 @@ function cacheUniqueIndexes(modelClass, record) {
   uniqueIndexes[modelClass] = newIndexes;
 }
 
+// indexCache.foreign = {"tags":{"1":{"work_logs":["1"]}}}
 function cacheForeignIndexes(modelClass, record) {
   const foreignIndexes = indexCache.foreign;
   const foreignConstraints = schemaCache[modelClass].constraints.foreign || {};
@@ -335,9 +338,15 @@ function cacheForeignIndexes(modelClass, record) {
   Object.keys(foreignConstraints).forEach((key) => {
     const foreignModelClass = foreignConstraints[key].reference;
     const existingIndexes = foreignIndexes[foreignModelClass] || {};
-    const foreignValue = record[key];
+    let foreignValues = record[key];
 
-    if (foreignValue) {
+    if (utils.isEmpty(foreignValues)) { return; }
+
+    if (!Array.isArray(foreignValues)) {
+      foreignValues = [foreignValues];
+    }
+
+    foreignValues.forEach((foreignValue) => {
       const foreignValueAssocs = existingIndexes[foreignValue] || {};
 
       if (!foreignValueAssocs[modelClass]) {
@@ -347,26 +356,36 @@ function cacheForeignIndexes(modelClass, record) {
       foreignValueAssocs[modelClass].push(record.id);
       existingIndexes[foreignValue] = foreignValueAssocs;
       indexCache.foreign[foreignModelClass] = existingIndexes;
-    }
+    });
   });
 }
 
+// indexCache.filter = {"tags":{"category":{"activity":["1","2","3","4"]}}}
 function cacheFilterIndexes(modelClass, record) {
   const filterIndexes = indexCache.filter;
   if (!filterIndexes[modelClass]) {
     filterIndexes[modelClass] = {};
   }
 
+  if (utils.isEmpty(schemaCache[modelClass].indexes)) { return; }
+
   const modelFilters = schemaCache[modelClass].indexes.filter || {};
   Object.entries(modelFilters).forEach(([field, options]) => {
     const fieldIndexes = filterIndexes[modelClass][field] || {};
-    const fieldValue = record[field];
-    if (fieldValue) {
+    let fieldValues = record[field];
+
+    if (utils.isEmpty(fieldValues)) { return; }
+
+    if (!Array.isArray(fieldValues)) {
+      fieldValues = [fieldValues];
+    }
+
+    fieldValues.forEach((fieldValue) => {
       const existingIds = fieldIndexes[fieldValue] || [];
       existingIds.push(record.id);
       fieldIndexes[fieldValue] = existingIds;
       filterIndexes[modelClass][field] = fieldIndexes;
-    }
+    });
   });
 }
 
@@ -374,8 +393,13 @@ function removeIndexes(modelClass, record) {
   indexTypes.forEach((indexType) => {
     if (indexType === 'unique') {
       removeUniqueIndexes(modelClass, record);
+    } else if (indexType === 'foreign') {
+      removeForeignIndexes(modelClass, record);
+    } else if (indexType === 'filter') {
+      removeFilterIndexes(modelClass, record);
     }
   });
+  cleanupIndexes(modelClass, record);
   writeData(indexes, indexCache);
 }
 
@@ -398,6 +422,105 @@ function removeUniqueIndexes(modelClass, record) {
       }, {});
       uniqueIndexes[modelClass][key] = updatedIndexes;
     }
+  });
+}
+
+function removeForeignIndexes(modelClass, record) {
+  const foreignIndexes = indexCache.foreign;
+  const foreignConstraints = schemaCache[modelClass].constraints.foreign;
+
+  if (utils.isEmpty(foreignConstraints)) { return; }
+
+  Object.keys(foreignConstraints).forEach((key) => {
+    const foreignModelClass = foreignConstraints[key].reference;
+    const existingIndexes = foreignIndexes[foreignModelClass];
+
+    if (utils.isEmpty(existingIndexes)) { return; }
+
+    let foreignValues = record[key];
+
+    if (utils.isEmpty(foreignValues)) { return; }
+
+    if (!Array.isArray(foreignValues)) {
+      foreignValues = [foreignValues]
+    }
+
+    foreignValues.forEach((foreignValue) => {
+      const foreignValueAssocs = existingIndexes[foreignValue];
+      const modelForeignAssocs = foreignValueAssocs[modelClass];
+
+      if (utils.isEmpty(modelForeignAssocs)) { return; }
+
+      const foundAssocIndex = modelForeignAssocs.indexOf(record.id);
+
+      if (foundAssocIndex < 0) { return; }
+
+      modelForeignAssocs.splice(foundAssocIndex, 1);
+      foreignValueAssocs[modelClass] = modelForeignAssocs;
+      existingIndexes[foreignValue] = foreignValueAssocs;
+      indexCache.foreign[foreignModelClass] = existingIndexes;
+    })
+  });
+}
+
+// {"work_logs":{"tags":{"3":["2"],"4":["3"],"10":["1","2","3"]}}}
+function removeFilterIndexes(modelClass, record) {
+  const filterIndexes = indexCache.filter;
+
+  if (utils.isEmpty(filterIndexes[modelClass])) { return; }
+
+  if (utils.isEmpty(schemaCache[modelClass].indexes)) { return; }
+
+  const modelFilters = schemaCache[modelClass].indexes.filter || {};
+
+  Object.keys(modelFilters).forEach((field) => {
+    const fieldIndexes = filterIndexes[modelClass][field];
+
+    if (utils.isEmpty(fieldIndexes)) { return; }
+
+    let fieldValues = record[field];
+
+    if (!Array.isArray(fieldValues)) {
+      fieldValues = [fieldValues];
+    }
+
+    fieldValues.forEach((fieldValue) => {
+      const existingIds = fieldIndexes[fieldValue];
+
+      if (utils.isEmpty(existingIds)) { return; }
+
+      const foundIndex = existingIds.indexOf(record.id);
+
+      if (foundIndex < 0) { return; }
+
+      existingIds.splice(foundIndex, 1);
+      fieldIndexes[fieldValue] = existingIds;
+      filterIndexes[modelClass][field] = fieldIndexes;
+    });
+  });
+}
+
+function cleanupIndexes(modelClass, record) {
+  const foreignIndexes = indexCache.foreign;
+  if (utils.isEmpty(foreignIndexes[modelClass])) { return; }
+
+  delete foreignIndexes[modelClass][record.id];
+
+  const filterIndexes = indexCache.filter;
+  Object.entries(filterIndexes).forEach(([indexModel, indexedData]) => {
+    if (indexModel === modelClass) { return; }
+
+    Object.entries(indexedData).forEach(([key, modelClassData]) => {
+      const foreignConstraints = schemaCache[indexModel].constraints.foreign[key];
+
+      if (utils.isEmpty(foreignConstraints)) { return; }
+
+      const reference = foreignConstraints.reference;
+
+      if (reference !== modelClass) { return; }
+
+      delete modelClassData[record.id];
+    });
   });
 }
 
