@@ -12,7 +12,7 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data)
         })
-        .catch((err) => {
+        .catch((error) => {
           reject(formatErrors(error))
         })
     })
@@ -25,7 +25,7 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data)
         })
-        .catch((err) => {
+        .catch((error) => {
           reject(formatErrors(error))
         })
     })
@@ -38,7 +38,7 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data.record)
         })
-        .catch((err) => {
+        .catch((error) => {
           reject(formatErrors(error))
         })
     })
@@ -55,7 +55,7 @@ export function useApiAccess() {
             reject(res.data.errors)
           }
         })
-        .catch((err) => {
+        .catch((error) => {
           reject(formatErrors(error))
         })
     })
@@ -72,7 +72,7 @@ export function useApiAccess() {
             reject(res.data.errors)
           }
         })
-        .catch((err) => {
+        .catch((error) => {
           reject(formatErrors(error))
         })
     })
@@ -89,7 +89,7 @@ export function useApiAccess() {
             reject(res.data.errors)
           }
         })
-        .catch((err) => {
+        .catch((error) => {
           reject(formatErrors(error))
         })
     })
@@ -102,7 +102,7 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data)
         })
-        .catch((err) => {
+        .catch((error) => {
           reject(formatErrors(error))
         })
     })
