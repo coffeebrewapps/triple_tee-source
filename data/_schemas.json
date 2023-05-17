@@ -94,6 +94,11 @@
       "foreign": {},
       "unique": ["category|name"],
       "required": ["category", "name"]
+    },
+    "indexes": {
+      "filter": {
+        "category": { "match": true }
+      }
     }
   },
   "transactions": {

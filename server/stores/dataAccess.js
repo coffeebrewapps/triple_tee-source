@@ -215,10 +215,25 @@ function isUsed(modelClass, id) {
 function filterFromIndexes(modelClass, filters) {
   const modelData = dataCache[modelClass] || {};
   const filterIndexes = indexCache.filter[modelClass] || {};
+  const filterSchemas = schemaCache[modelClass].indexes.filter || {};
+
   return Object.entries(filters).reduce((filteredData, [field, value]) => {
     if (filterIndexes[field]) {
-      const indexedIds = filterIndexes[field][value];
-      if (indexedIds) {
+      const filterOptions = filterSchemas[field] || {};
+      const indexedIds = Object.entries(filterIndexes[field]).reduce((arr, [indexedValue, ids]) => {
+        if (filterOptions.match) {
+          if (indexedValue.match(value)) {
+            arr = arr.concat(ids);
+          }
+        } else {
+          if (indexedValue === value) {
+            arr = arr.concat(ids);
+          }
+        }
+        return arr;
+      }, []);
+
+      if (indexedIds.length > 0) {
         logger.log(`Index hit`, { field, value })
         filteredData = filteredData.concat(indexedIds.map(i => modelData[i]));
       } else {
@@ -236,9 +251,18 @@ function filterFromIndexes(modelClass, filters) {
 }
 
 function filterFromData(modelClass, field, value) {
+  const filterSchemas = schemaCache[modelClass].indexes.filter || {};
+  const filterOptions = filterSchemas[field] || {};
   const data = Object.values(dataCache[modelClass] || {});
+
   return data.filter((record) => {
-    return record[field] === value;
+    if (!record[field]) { return false; }
+
+    if (filterOptions.match) {
+      return record[field].match(value);
+    } else {
+      return record[field] === value;
+    }
   });
 }
 
