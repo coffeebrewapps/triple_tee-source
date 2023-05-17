@@ -437,17 +437,9 @@ const errorAlertFitContent = computed(() => {
 })
 
 const errorAlertSize = computed(() => {
-  if (!!errorContent.value && errorContent.value.length > 100) {
-    const lines = Math.ceil(errorContent.value.length / 100) * 50
-    return {
-      width: 800,
-      height: lines <= 100 ? 200 : lines
-    }
-  } else {
-    return {
-      width: 400,
-      height: 200
-    }
+  return {
+    width: 800,
+    height: 400
   }
 })
 /*** section:error ***/
