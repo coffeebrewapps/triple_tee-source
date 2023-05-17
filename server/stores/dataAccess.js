@@ -85,7 +85,7 @@ function list(modelClass, filters = {}) {
     filteredData = data;
   }
 
-  const total = data.length;
+  const total = filteredData.length;
   const include = filters.include || [];
 
   if (filters.offset && filters.limit && filteredData.length > 0) {
@@ -217,11 +217,11 @@ function filterData(modelClass, filters) {
   const filterIndexes = indexCache.filter[modelClass] || {};
   const filterSchemas = schemaCache[modelClass].indexes.filter || {};
 
-  const filteredIds = [...filterFromIndexes(modelClass, modelData, indexes, schemas, filters)];
+  const filteredIds = [...filterFromIndexes(modelClass, modelData, filterIndexes, filterSchemas, filters)];
   return filteredIds.map(i => modelData[i]);
 }
 
-function filterValueMatch(field, indexedValue, filterValue) {
+function filterValueMatch(schemas, field, indexedValue, filterValue) {
   const filterOptions = schemas[field] || {};
 
   const partialMatch = filterOptions.match && indexedValue.match(filterValue);
@@ -236,7 +236,7 @@ function filterFromIndexes(modelClass, modelData, indexes, schemas, filters) {
     if (indexes[field]) {
       const filterOptions = schemas[field] || {};
       const indexedIds = Object.entries(indexes[field]).reduce((arr, [indexedValue, ids]) => {
-        if (filterValueMatch(field, indexedValue, filterValue)) {
+        if (filterValueMatch(schemas, field, indexedValue, filterValue)) {
           arr = arr.concat(ids);
         }
         return arr;
@@ -264,7 +264,7 @@ function filterIdsFromData(modelClass, modelData, schemas, field, filterValue) {
 
   return Object.entries(modelData).reduce((arr, [id, record]) => {
     const recordValue = record[field];
-    if (recordValue && filterValueMatch(field, recordValue, filterValue)) {
+    if (recordValue && filterValueMatch(schemas, field, recordValue, filterValue)) {
       arr.push(id);
     }
     return arr
