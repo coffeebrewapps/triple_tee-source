@@ -231,6 +231,19 @@ async function resetFilters() {
 function toggleFilters() {
   filtersState.value = !filtersState.value
 }
+
+function formatFilters(filters = {}) {
+  return Object.entries(filters).reduce((o, [field, value]) => {
+    if (value) {
+      if (singleSelectableField(field)) {
+        o[field] = value[0].value
+      } else {
+        o[field] = value
+      }
+    }
+    return o
+  }, {})
+}
 /*** section:filter ***/
 
 /*** section:table ***/
@@ -349,7 +362,7 @@ async function loadData(filters = {}) {
     include: includeKeys.value,
     offset: offset.value,
     limit: limit.value,
-    filters
+    filters: formatFilters(filters)
   }
 
   dataLoading.value = true

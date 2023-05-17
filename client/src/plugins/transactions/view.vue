@@ -86,10 +86,22 @@ const dataFields = [
 const filters = ref({
   initData: {},
   schemas: [
-    { key: 'type', type: 'enum', label: 'Type' }
+    { key: 'type', type: 'enum', label: 'Type' },
+    {
+      key: 'currencyId', type: 'singleSelect', label: 'Currency',
+      reference: { label: currencyLabel },
+      listable: true, viewable: true, creatable: true, updatable: true,
+      options: {
+        server: true,
+        pagination: true,
+        sourceUrl: currenciesUrl,
+        value: recordValue,
+        label: currencyLabel
+      }
+    }
   ],
   layout: [
-    { type: 'lg' }
+    { type: 'md', currencyId: 'md' }
   ]
 })
 
