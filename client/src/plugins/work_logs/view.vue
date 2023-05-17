@@ -32,7 +32,7 @@ const dataFields = [
   {
     key: 'tags', type: 'multiSelect', label: 'Tags',
     reference: { label: tagLabel },
-    listable: true, viewable: true, creatable: true, updatable: true,
+    listable: true, viewable: true, creatable: true, updatable: true, filterable: true,
     options: {
       server: true,
       pagination: true,
@@ -42,6 +42,13 @@ const dataFields = [
     }
   }
 ]
+
+const filters = {
+  initData: {},
+  layout: [
+    { tags: 'md' }
+  ]
+}
 
 const validations = {
   create: {
@@ -70,5 +77,6 @@ function validateEndTime(record) {
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :validations="validations"
+    :filters="filters"
   />
 </template>

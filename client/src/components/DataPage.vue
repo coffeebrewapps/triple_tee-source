@@ -244,6 +244,8 @@ function formatFilters(filters = {}) {
     if (value) {
       if (singleSelectableField(field)) {
         o[field] = value[0].value
+      } else if (multiSelectableField(field)) {
+        o[field] = value.map(v => v.value)
       } else {
         o[field] = value
       }

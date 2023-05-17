@@ -216,6 +216,11 @@
       },
       "unique": [],
       "required": []
+    },
+    "indexes": {
+      "filter": {
+        "tags": {}
+      }
     }
   }
 }
