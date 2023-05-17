@@ -80,7 +80,7 @@ function list(modelClass, filters = {}) {
   let filteredData = [];
 
   if (Object.keys(paramsFilters).length > 0) {
-    filteredData = filterFromIndexes(modelClass, paramsFilters);
+    filteredData = filterData(modelClass, paramsFilters);
   } else {
     filteredData = data;
   }
@@ -212,15 +212,20 @@ function isUsed(modelClass, id) {
   return validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
 }
 
-function filterFromIndexes(modelClass, filters) {
+function filterData(modelClass, filters) {
   const modelData = dataCache[modelClass] || {};
   const filterIndexes = indexCache.filter[modelClass] || {};
   const filterSchemas = schemaCache[modelClass].indexes.filter || {};
 
-  return Object.entries(filters).reduce((filteredData, [field, value]) => {
-    if (filterIndexes[field]) {
-      const filterOptions = filterSchemas[field] || {};
-      const indexedIds = Object.entries(filterIndexes[field]).reduce((arr, [indexedValue, ids]) => {
+  const filteredIds = [...filterFromIndexes(modelClass, modelData, indexes, schemas, filters)];
+  return filteredIds.map(i => modelData[i]);
+}
+
+function filterFromIndexes(modelClass, modelData, indexes, schemas, filters) {
+  return Object.entries(filters).reduce((filteredIds, [field, value]) => {
+    if (indexes[field]) {
+      const filterOptions = schemas[field] || {};
+      const indexedIds = Object.entries(indexes[field]).reduce((arr, [indexedValue, ids]) => {
         if (filterOptions.match) {
           if (indexedValue.match(value)) {
             arr = arr.concat(ids);
@@ -235,35 +240,33 @@ function filterFromIndexes(modelClass, filters) {
 
       if (indexedIds.length > 0) {
         logger.log(`Index hit`, { field, value })
-        filteredData = filteredData.concat(indexedIds.map(i => modelData[i]));
+        indexedIds.forEach(i => filteredIds.add(i));
       } else {
         logger.log(`Index miss`, { field, value })
-        const records = filterFromData(field, value);
-        filteredData = filteredData.concat(records);
+        const idsFromData = filterIdsFromData(modelClass, modelData, schemas, field, value);
+        idsFromData.forEach(i => filteredIds.add(i));
       }
     } else {
       logger.log(`Index miss`, { field, value })
-      const records = filterFromData(modelClass, field, value);
-      filteredData = filteredData.concat(records);
+      const idsFromData = filterIdsFromData(modelClass, modelData, schemas, field, value);
+      idsFromData.forEach(i => filteredIds.add(i));
     }
-    return filteredData;
-  }, []);
+    return filteredIds;
+  }, (new Set()));
 }
 
-function filterFromData(modelClass, field, value) {
-  const filterSchemas = schemaCache[modelClass].indexes.filter || {};
-  const filterOptions = filterSchemas[field] || {};
-  const data = Object.values(dataCache[modelClass] || {});
-
-  return data.filter((record) => {
-    if (!record[field]) { return false; }
-
-    if (filterOptions.match) {
-      return record[field].match(value);
-    } else {
-      return record[field] === value;
+function filterIdsFromData(modelClass, modelData, schemas, field, value) {
+  const filterOptions = schemas[field] || {};
+  return Object.entries(modelData).reduce((arr, [id, record]) => {
+    if (record[field]) {
+      if (filterOptions.match && record[field].match(value)) {
+        arr.push(id);
+      } else if (!filterOptions.match && record[field] === value) {
+        arr.push(id);
+      }
     }
-  });
+    return arr
+  }, []);
 }
 
 function fetchIncludes(modelClass, record, include) {
