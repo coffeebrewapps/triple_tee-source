@@ -80,24 +80,7 @@ function list(modelClass, filters = {}) {
   let filteredData = [];
 
   if (Object.keys(paramsFilters).length > 0) {
-    const filterIndexes = indexCache.filter[modelClass] || {};
-    Object.entries(paramsFilters).forEach(([field, value]) => {
-      if (filterIndexes[field]) {
-        const indexedIds = filterIndexes[field][value];
-        if (indexedIds) {
-          logger.log(`Index hit`, { field, value })
-          filteredData = filteredData.concat(indexedIds.map(i => modelData[i]));
-        } else {
-          logger.log(`Index miss`, { field, value })
-          const records = filterFromData(field, value);
-          filteredData = filteredData.concat(records);
-        }
-      } else {
-        logger.log(`Index miss`, { field, value })
-        const records = filterFromData(modelClass, field, value);
-        filteredData = filteredData.concat(records);
-      }
-    });
+    filteredData = filterFromIndexes(modelClass, paramsFilters);
   } else {
     filteredData = data;
   }
@@ -227,6 +210,29 @@ function isUsed(modelClass, id) {
   if (!record) { return false }
 
   return validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
+}
+
+function filterFromIndexes(modelClass, filters) {
+  const modelData = dataCache[modelClass] || {};
+  const filterIndexes = indexCache.filter[modelClass] || {};
+  return Object.entries(filters).reduce((filteredData, [field, value]) => {
+    if (filterIndexes[field]) {
+      const indexedIds = filterIndexes[field][value];
+      if (indexedIds) {
+        logger.log(`Index hit`, { field, value })
+        filteredData = filteredData.concat(indexedIds.map(i => modelData[i]));
+      } else {
+        logger.log(`Index miss`, { field, value })
+        const records = filterFromData(field, value);
+        filteredData = filteredData.concat(records);
+      }
+    } else {
+      logger.log(`Index miss`, { field, value })
+      const records = filterFromData(modelClass, field, value);
+      filteredData = filteredData.concat(records);
+    }
+    return filteredData;
+  }, []);
 }
 
 function filterFromData(modelClass, field, value) {
