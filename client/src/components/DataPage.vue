@@ -870,7 +870,7 @@ onMounted(async () => {
       :table-actions="tableActions"
       :actions="actions"
       :loading="dataLoading"
-      :pagination="{ limit: limit, client: false }"
+      :pagination="{ offset, limit, client: false }"
       :total-data="totalData"
       @offset-change="updateOffsetAndReload"
     >

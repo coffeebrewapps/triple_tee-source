@@ -78,7 +78,7 @@ onMounted(async () => {
       :headers="headers"
       :data="data"
       :loading="dataLoading"
-      :pagination="{ limit: limit, client: false }"
+      :pagination="{ offset, limit, client: false }"
       :total-data="totalData"
       @offset-change="updateOffsetAndReload"
     >
