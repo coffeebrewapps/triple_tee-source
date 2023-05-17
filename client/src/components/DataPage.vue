@@ -159,6 +159,8 @@ const includeKeys = computed(() => {
 
 const combinedDataFields = ref(props.dataFields)
 
+const schemasLoaded = ref(false)
+
 function validateParams(validations, params) {
   return Object.keys(validations).reduce((errors, field) => {
     const validators = validations[field]
@@ -175,11 +177,13 @@ function validateParams(validations, params) {
 /*** section:global ***/
 
 /*** section:filter ***/
+const filtersEnabled = ref(props.filters.layout)
+
 const filtersState = ref(false)
 
-const filtersData = ref({})
+const filtersData = ref(Object.assign({}, props.filters.initData))
 
-const filtersErrorMessages = ref(Object.assign({}, props.filters.initData))
+const filtersErrorMessages = ref({})
 
 const filtersConfirmButton = computed(() => {
   return {
@@ -195,20 +199,23 @@ const filtersCancelButton = computed(() => {
   }
 })
 
+const filterableFields = computed(() => {
+  return props.dataFields.filter(h => h.filterable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
+const filterableKeys = computed(() => {
+  return Object.keys(filterableFields.value)
+})
+
 const showFilters = computed(() => {
-  return props.filters.schemas
+  return filtersEnabled.value && schemasLoaded.value
 })
 
 const filtersLayout = computed(() => {
   return props.filters.layout
-})
-
-const filtersSchemas = computed(() => {
-  return props.filters.schemas
-})
-
-const filtersFields = computed(() => {
-  return props.filters.schemas.map(s => s.key)
 })
 
 const filtersStyleClass = computed(() => {
@@ -247,29 +254,36 @@ function formatFilters(filters = {}) {
 /*** section:filter ***/
 
 /*** section:table ***/
-const tableActions = ref([
-  {
-    name: 'Filter',
-    icon: 'fa-solid fa-filter',
-    click: async function() {
-      toggleFilters()
+const tableActions = computed(() => {
+  const initialActions = [
+    {
+      name: 'Create',
+      icon: 'fa-solid fa-circle-plus fa-xl',
+      click: async function(data) {
+        await openCreateDialog()
+      }
+    },
+    {
+      name: 'Export',
+      icon: 'fa-solid fa-file-export',
+      click: async function(data) {
+        await openDownloadDialog()
+      }
     }
-  },
-  {
-    name: 'Create',
-    icon: 'fa-solid fa-circle-plus fa-xl',
-    click: async function(data) {
-      await openCreateDialog()
-    }
-  },
-  {
-    name: 'Export',
-    icon: 'fa-solid fa-file-export',
-    click: async function(data) {
-      await openDownloadDialog()
-    }
+  ]
+
+  if (showFilters.value) {
+    initialActions.unshift({
+      name: 'Filter',
+      icon: 'fa-solid fa-filter',
+      click: async function() {
+        toggleFilters()
+      }
+    })
   }
-])
+
+  return initialActions
+})
 
 const actions = ref([
   {
@@ -350,6 +364,7 @@ async function loadSchemas() {
           return field
         }
       })
+      schemasLoaded.value = true
     })
     .catch((error) => {
       errorAlert.value = true
@@ -834,8 +849,8 @@ onMounted(async () => {
       <Form
         v-model="filtersData"
         :fields-layout="filtersLayout"
-        :data-fields="filtersFields"
-        :schemas="filtersSchemas"
+        :data-fields="filterableKeys"
+        :schemas="combinedDataFields"
         :error-messages="filtersErrorMessages"
         :confirm-button="filtersConfirmButton"
         :cancel-button="filtersCancelButton"

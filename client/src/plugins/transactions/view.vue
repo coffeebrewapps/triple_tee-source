@@ -1,9 +1,4 @@
 <script setup>
-import { ref, onMounted } from 'vue'
-
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
-
 import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
 
@@ -40,7 +35,7 @@ function transactionLabel(record) {
 
 const dataFields = [
   { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false },
-  { key: 'type', type: 'enum', label: 'Type', listable: true, viewable: true, creatable: true, updatable: false },
+  { key: 'type', type: 'enum', label: 'Type', listable: true, viewable: true, creatable: true, updatable: false, filterable: true },
   { key: 'transactionDate', type: 'date', label: 'Transaction Date', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
@@ -60,7 +55,7 @@ const dataFields = [
   {
     key: 'currencyId', type: 'singleSelect', label: 'Currency',
     reference: { label: currencyLabel },
-    listable: true, viewable: true, creatable: true, updatable: true,
+    listable: true, viewable: true, creatable: true, updatable: true, filterable: true,
     options: {
       server: true,
       pagination: true,
@@ -83,53 +78,12 @@ const dataFields = [
   }
 ]
 
-const filters = ref({
+const filters = {
   initData: {},
-  schemas: [
-    { key: 'type', type: 'enum', label: 'Type' },
-    {
-      key: 'currencyId', type: 'singleSelect', label: 'Currency',
-      reference: { label: currencyLabel },
-      listable: true, viewable: true, creatable: true, updatable: true,
-      options: {
-        server: true,
-        pagination: true,
-        sourceUrl: currenciesUrl,
-        value: recordValue,
-        label: currencyLabel
-      }
-    }
-  ],
   layout: [
     { type: 'md', currencyId: 'md' }
   ]
-})
-
-async function loadTypeEnums() {
-  return new Promise((resolve, reject) => {
-    dataAccess
-      .schemas(transactionSchemasUrl)
-      .then((result) => {
-        const fields = result.fields
-        const enums = fields.type.enums
-        const options = Object.keys(enums).map((e) => {
-          return { value: e, label: enums[e] }
-        })
-        resolve(options)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-  })
 }
-
-onMounted(async () => {
-  await loadTypeEnums()
-    .then((options) => {
-      const schemas = filters.value.schemas[0]
-      filters.value.schemas[0] = Object.assign({}, schemas, { options })
-    })
-})
 </script>
 
 <template>
