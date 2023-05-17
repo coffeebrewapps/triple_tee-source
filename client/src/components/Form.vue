@@ -62,16 +62,45 @@ const props = defineProps({
     default() {
       return {}
     }
+  },
+  compact: {
+    type: Boolean,
+    default: false
+  },
+  confirmButton: {
+    type: Object,
+    default() {
+      return {
+        type: 'text',
+        icon: 'fa-solid fa-check',
+        value: 'Confirm'
+      }
+    }
+  },
+  cancelButton: {
+    type: Object,
+    default() {
+      return {
+        type: 'text',
+        icon: 'fa-solid fa-xmark',
+        value: 'Cancel'
+      }
+    }
   }
 })
 
-const data = computed(() => {
-  return props.modelValue
+const data = computed({
+  get: () => {
+    return props.modelValue
+  },
+  set: (val) => {
+    emit('update:modelValue', val)
+  }
 })
 /*** section:props ***/
 
 /*** section:emit ***/
-const emit = defineEmits(['submit', 'cancel'])
+const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
 /*** section:emit ***/
 
 /*** section:inputUtils ***/
@@ -154,6 +183,14 @@ async function offsetChange(field, newOffset) {
 /*** section:selectTableUtils ***/
 
 /*** section:styles ***/
+const formClass = computed(() => {
+  if (props.compact) {
+    return `form compact`
+  } else {
+    return `form`
+  }
+})
+
 function dataFieldClass(field) {
   if (nullToggleableField(field)) {
     return `data-field toggleable`
@@ -187,7 +224,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="form"
+    :class="formClass"
   >
     <div class="body">
       <div
@@ -299,8 +336,8 @@ onMounted(async () => {
     </div> <!-- body -->
 
     <div class="actions">
-      <TButton class="confirm-button" button-type="text" value="Confirm" icon="fa-solid fa-check" @click="submitData()"/>
-      <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="cancel()"/>
+      <TButton class="button" :button-type="confirmButton.type" :value="confirmButton.value" :icon="confirmButton.icon" @click="submitData()"/>
+      <TButton class="button" :button-type="cancelButton.type" :value="cancelButton.value" :icon="cancelButton.icon" @click="cancel()"/>
     </div>
   </div> <!-- form -->
 </template>
@@ -310,6 +347,12 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.form.compact {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .form .body {
@@ -337,7 +380,13 @@ onMounted(async () => {
 
 .form .actions {
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 1rem;
+}
+
+.form.compact .actions {
+  align-self: flex-end;
+  gap: 0.5rem;
 }
 </style>

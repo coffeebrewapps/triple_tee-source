@@ -1,9 +1,15 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+
+import { useDataAccess } from '@/utils/dataAccess'
+const dataAccess = useDataAccess()
+
 import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
 
 const config = useConfig()
 
+const transactionSchemasUrl = `${config.baseUrl}/api/schemas/transactions`
 const tagsUrl = `${config.baseUrl}/api/tags`
 const currenciesUrl = `${config.baseUrl}/api/currencies`
 const transactionsUrl = `${config.baseUrl}/api/transactions`
@@ -76,6 +82,42 @@ const dataFields = [
     }
   }
 ]
+
+const filters = ref({
+  initData: {},
+  schemas: [
+    { key: 'type', type: 'enum', label: 'Type' }
+  ],
+  layout: [
+    { type: 'lg' }
+  ]
+})
+
+async function loadTypeEnums() {
+  return new Promise((resolve, reject) => {
+    dataAccess
+      .schemas(transactionSchemasUrl)
+      .then((result) => {
+        const fields = result.fields
+        const enums = fields.type.enums
+        const options = Object.keys(enums).map((e) => {
+          return { value: e, label: enums[e] }
+        })
+        resolve(options)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+onMounted(async () => {
+  await loadTypeEnums()
+    .then((options) => {
+      const schemas = filters.value.schemas[0]
+      filters.value.schemas[0] = Object.assign({}, schemas, { options })
+    })
+})
 </script>
 
 <template>
@@ -86,5 +128,6 @@ const dataFields = [
     :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
+    :filters="filters"
   />
 </template>

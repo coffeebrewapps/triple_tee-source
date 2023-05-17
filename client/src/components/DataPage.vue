@@ -58,6 +58,7 @@ import {
   TButton
 } from 'coffeebrew-vue-components'
 
+import Form from '@/components/Form.vue'
 import FormDialog from '@/components/FormDialog.vue'
 import ViewDialog from '@/components/ViewDialog.vue'
 /*** import:components ***/
@@ -75,6 +76,10 @@ const props = defineProps({
   schemasUrlBase: {
     type: String,
     default: ''
+  },
+  filters: {
+    type: Object,
+    default: {}
   },
   dataFields: {
     type: Array,
@@ -169,8 +174,74 @@ function validateParams(validations, params) {
 }
 /*** section:global ***/
 
+/*** section:filter ***/
+const filtersState = ref(false)
+
+const filtersData = ref({})
+
+const filtersErrorMessages = ref(Object.assign({}, props.filters.initData))
+
+const filtersConfirmButton = computed(() => {
+  return {
+    type: 'icon',
+    icon: 'fa-solid fa-check'
+  }
+})
+
+const filtersCancelButton = computed(() => {
+  return {
+    type: 'icon',
+    icon: 'fa-solid fa-filter-circle-xmark'
+  }
+})
+
+const showFilters = computed(() => {
+  return props.filters.schemas
+})
+
+const filtersLayout = computed(() => {
+  return props.filters.layout
+})
+
+const filtersSchemas = computed(() => {
+  return props.filters.schemas
+})
+
+const filtersFields = computed(() => {
+  return props.filters.schemas.map(s => s.key)
+})
+
+const filtersStyleClass = computed(() => {
+  if (filtersState.value) {
+    return `filters expanded`
+  } else {
+    return `filters collapsed`
+  }
+})
+
+async function submitFilters(updatedFilters) {
+  await loadData(updatedFilters)
+}
+
+async function resetFilters() {
+  filtersData.value = Object.assign({}, props.filters.initData)
+  await loadData(filtersData.value)
+}
+
+function toggleFilters() {
+  filtersState.value = !filtersState.value
+}
+/*** section:filter ***/
+
 /*** section:table ***/
 const tableActions = ref([
+  {
+    name: 'Filter',
+    icon: 'fa-solid fa-filter',
+    click: async function() {
+      toggleFilters()
+    }
+  },
   {
     name: 'Create',
     icon: 'fa-solid fa-circle-plus fa-xl',
@@ -273,12 +344,15 @@ async function loadSchemas() {
     })
 }
 
-async function loadData() {
+async function loadData(filters = {}) {
   const params = {
     include: includeKeys.value,
     offset: offset.value,
-    limit: limit.value
+    limit: limit.value,
+    filters
   }
+
+  dataLoading.value = true
 
   await dataAccess
     .list(url.value, params)
@@ -739,6 +813,25 @@ onMounted(async () => {
   <div class="page-container">
     <h2 class="heading">{{ dataType }}</h2>
 
+    <div
+      :class="filtersStyleClass"
+      v-if="showFilters"
+    >
+      <h3 class="heading">Filters</h3>
+      <Form
+        v-model="filtersData"
+        :fields-layout="filtersLayout"
+        :data-fields="filtersFields"
+        :schemas="filtersSchemas"
+        :error-messages="filtersErrorMessages"
+        :confirm-button="filtersConfirmButton"
+        :cancel-button="filtersCancelButton"
+        :compact="true"
+        @submit="submitFilters"
+        @cancel="resetFilters"
+      />
+    </div>
+
     <TTable
       name=""
       :headers="listedHeaders"
@@ -891,12 +984,21 @@ onMounted(async () => {
   font-weight: 900;
 }
 
-a.hidden {
+.filters {
+  margin-top: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.filters.expanded {
+  display: block;
+}
+
+.filters.collapsed {
   display: none;
 }
 
-.input-control {
-  margin: 0 auto;
+a.hidden {
+  display: none;
 }
 
 td.col {
