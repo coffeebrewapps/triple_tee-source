@@ -222,11 +222,12 @@ function filterData(modelClass, filters) {
   return filteredIds.map(i => modelData[i]);
 }
 
+// {"field":"tags","indexedValue":"3","ids":["2"],"filterValue":["10"]}
 function filterValueMatch(schemas, field, indexedValue, filterValue) {
   const filterOptions = schemas[field] || {};
 
   const partialMatch = filterOptions.match && indexedValue.match(filterValue);
-  const multiMatch = Array.isArray(filterValue) && indexedValue.some(iv => filterValue.some(fv => fv === iv));
+  const multiMatch = Array.isArray(filterValue) && filterValue.some(fv => fv === indexedValue);
   const exactMatch = !filterOptions.match && indexedValue === filterValue;
 
   return partialMatch || multiMatch || exactMatch;
@@ -234,7 +235,7 @@ function filterValueMatch(schemas, field, indexedValue, filterValue) {
 
 function filterFromIndexes(modelClass, modelData, indexes, schemas, filters) {
   return Object.entries(filters).reduce((filteredIds, [field, filterValue]) => {
-    if (indexes[field]) {
+    if (utils.notEmpty(indexes[field])) {
       const filterOptions = schemas[field] || {};
       const indexedIds = Object.entries(indexes[field]).reduce((arr, [indexedValue, ids]) => {
         if (filterValueMatch(schemas, field, indexedValue, filterValue)) {
