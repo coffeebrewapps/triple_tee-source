@@ -73,14 +73,40 @@ function viewSchemas(modelClass) {
 }
 
 function list(modelClass, filters = {}) {
-  const data = Object.values(dataCache[modelClass] || {});
+  const modelData = dataCache[modelClass] || {};
+  const data = Object.values(modelData);
+  const paramsFilters = filters.filters || {};
+
+  let filteredData = [];
+
+  if (Object.keys(paramsFilters).length > 0) {
+    const filterIndexes = indexCache.filter[modelClass] || {};
+    Object.entries(paramsFilters).forEach(([field, value]) => {
+      if (filterIndexes[field]) {
+        const indexedIds = filterIndexes[field][value];
+        if (indexedIds) {
+          logger.log(`Index hit`, { field, value })
+          filteredData = filteredData.concat(indexedIds.map(i => modelData[i]));
+        } else {
+          logger.log(`Index miss`, { field, value })
+          const records = filterFromData(field, value);
+          filteredData = filteredData.concat(records);
+        }
+      } else {
+        logger.log(`Index miss`, { field, value })
+        const records = filterFromData(modelClass, field, value);
+        filteredData = filteredData.concat(records);
+      }
+    });
+  } else {
+    filteredData = data;
+  }
+
   const total = data.length;
   const include = filters.include || [];
 
-  let filteredData = data;
-
-  if (filters.offset && filters.limit && data.length > 0) {
-    filteredData = Array.from(data).slice(filters.offset, filters.offset + filters.limit);
+  if (filters.offset && filters.limit && filteredData.length > 0) {
+    filteredData = Array.from(filteredData).slice(filters.offset, filters.offset + filters.limit);
   }
 
   filteredData = filteredData.map((record) => {
@@ -203,6 +229,13 @@ function isUsed(modelClass, id) {
   return validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
 }
 
+function filterFromData(modelClass, field, value) {
+  const data = Object.values(dataCache[modelClass] || {});
+  return data.filter((record) => {
+    return record[field] === value;
+  });
+}
+
 function fetchIncludes(modelClass, record, include) {
   const schema = schemaCache[modelClass];
   const foreignConstraints = schema.constraints.foreign;
@@ -234,6 +267,8 @@ function cacheIndexes(modelClass, record) {
       cacheUniqueIndexes(modelClass, record);
     } else if (indexType === 'foreign') {
       cacheForeignIndexes(modelClass, record);
+    } else if (indexType === 'filter') {
+      cacheFilterIndexes(modelClass, record);
     }
   });
   writeData(indexes, indexCache);
@@ -277,6 +312,25 @@ function cacheForeignIndexes(modelClass, record) {
       foreignValueAssocs[modelClass].push(record.id);
       existingIndexes[foreignValue] = foreignValueAssocs;
       indexCache.foreign[foreignModelClass] = existingIndexes;
+    }
+  });
+}
+
+function cacheFilterIndexes(modelClass, record) {
+  const filterIndexes = indexCache.filter;
+  if (!filterIndexes[modelClass]) {
+    filterIndexes[modelClass] = {};
+  }
+
+  const modelFilters = schemaCache[modelClass].indexes.filter || {};
+  Object.entries(modelFilters).forEach(([field, options]) => {
+    const fieldIndexes = filterIndexes[modelClass][field] || {};
+    const fieldValue = record[field];
+    if (fieldValue) {
+      const existingIds = fieldIndexes[fieldValue] || [];
+      existingIds.push(record.id);
+      fieldIndexes[fieldValue] = existingIds;
+      filterIndexes[modelClass][field] = fieldIndexes;
     }
   });
 }

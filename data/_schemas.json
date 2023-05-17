@@ -165,6 +165,12 @@
         "tags",
         "currencyId"
       ]
+    },
+    "indexes": {
+      "filter": {
+        "type": {},
+        "currencyId": {}
+      }
     }
   },
   "work_logs": {
