@@ -354,6 +354,10 @@ function cacheForeignIndexes(modelClass, record) {
         foreignValueAssocs[modelClass] = [];
       }
 
+      const existing = foreignValueAssocs[modelClass].indexOf(record.id);
+
+      if (existing > -1) { return; }
+
       foreignValueAssocs[modelClass].push(record.id);
       existingIndexes[foreignValue] = foreignValueAssocs;
       indexCache.foreign[foreignModelClass] = existingIndexes;
@@ -383,6 +387,11 @@ function cacheFilterIndexes(modelClass, record) {
 
     fieldValues.forEach((fieldValue) => {
       const existingIds = fieldIndexes[fieldValue] || [];
+
+      const found = existingIds.indexOf(record.id);
+
+      if (found > -1) { return; }
+
       existingIds.push(record.id);
       fieldIndexes[fieldValue] = existingIds;
       filterIndexes[modelClass][field] = fieldIndexes;
