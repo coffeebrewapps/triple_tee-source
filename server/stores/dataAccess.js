@@ -159,9 +159,22 @@ function update(modelClass, id, params) {
 
   if (result.valid) {
     const now = new Date();
-    const updated = Object.assign(existing.record, params, { updatedAt: now })
+    const updated = Object.assign({}, existing.record, params, { updatedAt: now })
+
+    const indexesToRemove = Object.entries(existing.record).reduce((o, [field, value]) => {
+      if (utils.isEmpty(value)) { return o; }
+
+      const existingValues = utils.wrapArray(value);
+      const newValues = utils.wrapArray(updated[field]);
+
+      o[field] = existingValues.filter(ev => !newValues.includes(ev));
+      return o;
+    }, {});
+    indexesToRemove.id = id;
+
     cacheRecord(modelClass, updated);
     cacheIndexes(modelClass, updated);
+    removeIndexes(modelClass, indexesToRemove);
 
     return {
       success: true,
