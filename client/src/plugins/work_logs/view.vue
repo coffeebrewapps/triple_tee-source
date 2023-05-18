@@ -2,6 +2,7 @@
 import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
+import TabContainer from '@/components/TabContainer.vue'
 
 const config = useConfig()
 const { notEarlierThan } = useValidations()
@@ -63,20 +64,49 @@ const validations = {
   }
 }
 
+const tabs = [
+  { label: 'Weekly' },
+  { label: 'All Logs' }
+]
+
 function validateEndTime(record) {
   return notEarlierThan(record, 'endTime', 'startTime')
 }
 </script>
 
 <template>
-  <DataPage
-    data-type="Work Logs"
-    url-base="api/work_logs"
-    schemas-url-base="api/schemas/work_logs"
-    :fullscreen="true"
-    :fields-layout="fieldsLayout"
-    :data-fields="dataFields"
-    :validations="validations"
-    :filters="filters"
-  />
+  <div class="view-container">
+    <h2 class="heading">Time Tracking</h2>
+
+    <TabContainer
+      :tabs="tabs"
+    >
+      <template #tab-0>
+        This Week
+      </template>
+
+      <template #tab-1>
+        <DataPage
+          data-type="Work Logs"
+          url-base="api/work_logs"
+          schemas-url-base="api/schemas/work_logs"
+          :fullscreen="true"
+          :fields-layout="fieldsLayout"
+          :data-fields="dataFields"
+          :validations="validations"
+          :filters="filters"
+        />
+      </template>
+    </TabContainer>
+  </div>
 </template>
+
+<style scoped>
+.view-container {
+  margin: 1rem 0;
+}
+
+.heading {
+  font-weight: 900;
+}
+</style>
