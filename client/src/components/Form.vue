@@ -30,6 +30,7 @@ const errorsMap = useErrors()
 import {
   TCheckbox,
   TDatePicker,
+  TDateRange,
   TDateTimePicker,
   TInput,
   TSelect,
@@ -324,33 +325,14 @@ onMounted(async () => {
                 @offset-change="fieldOffsetChange[field]"
               />
 
-              <div
+              <TDateRange
                 v-if="showDateRange(field)"
-                class="date-range"
-              >
-                <TDatePicker
-                  v-model="data[field].startDate"
-                  :label="`Start ${inputLabel(field)}`"
-                  :disabled="!fieldUpdatable(field)"
-                  align-pickers="top"
-                />
-
-                <div class="to">to</div>
-
-                <TDatePicker
-                  v-model="data[field].endDate"
-                  :label="`End ${inputLabel(field)}`"
-                  :disabled="!fieldUpdatable(field)"
-                  align-pickers="top"
-                />
-              </div>
-
-              <div
-                v-if="fieldErrorMessage(field)"
-                class="input-error"
-              >
-                {{ fieldErrorMessage(field) }}
-              </div>
+                v-model:start-date="data[field].startDate"
+                v-model:end-date="data[field].endDate"
+                :label="inputLabel(field)"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+              />
             </div> <!-- field-input -->
 
             <div

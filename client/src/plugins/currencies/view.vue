@@ -13,7 +13,7 @@ const fieldsLayout = [
 
 const dataFields = [
   { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false },
-  { key: 'code', type: 'text', label: 'Code', listable: true, viewable: true, creatable: true, updatable: false },
+  { key: 'code', type: 'text', label: 'Code', listable: true, viewable: true, creatable: true, updatable: false, filterable: true },
   { key: 'symbol', type: 'text', label: 'Symbol', listable: true, viewable: true, creatable: true, updatable: false },
   { key: 'exchangeRate', type: 'number', label: 'Exchange Rate', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'effectiveStart', type: 'date', label: 'Effectve Start', listable: true, viewable: true, creatable: true, updatable: true, filterable: true },
@@ -32,8 +32,8 @@ const filters = {
     }
   },
   layout: [
-    { effectiveStart: 'md' },
-    { effectiveEnd: 'md' }
+    { code: 'md' },
+    { effectiveStart: 'md', effectiveEnd: 'md' }
   ]
 }
 
