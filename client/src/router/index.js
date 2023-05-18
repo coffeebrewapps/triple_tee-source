@@ -5,6 +5,11 @@ const routes = [
     path: '/',
     name: 'Inbox',
     component: () => import('../views/HomeView.vue')
+  },
+  {
+    path: '/admin',
+    name: 'Data Admin',
+    component: () => import('../views/DataAdmin.vue')
   }
 ]
 

@@ -57,6 +57,26 @@ app.get('/api/schemas/:schema', function(req, res){
   const modelClass = req.params.schema;
   res.send(dataAccess.viewSchemas(modelClass));
 });
+
+app.get('/api/schemas/:schema/download', function(req, res){
+  const modelClass = req.params.schema;
+  res.send(dataAccess.download(modelClass));
+});
+
+app.put('/api/schemas/:schema/upload', function(req, res){
+  const modelClass = req.params.schema;
+  const data = req.body;
+  res.send(dataAccess.upload(modelClass, data));
+});
+
+app.get('/api/indexes', function(req, res){
+  res.send(dataAccess.downloadIndexes());
+});
+
+app.put('/api/indexes', function(req, res){
+  const data = req.body;
+  res.send(dataAccess.uploadIndexes(data));
+});
 /*** end:Routes ***/
 
 (async () => {

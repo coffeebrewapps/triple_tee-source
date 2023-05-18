@@ -213,6 +213,28 @@ function isUsed(modelClass, id) {
   return validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
 }
 
+function download(modelClass) {
+  const data = dataCache[modelClass];
+  return { data };
+}
+
+function upload(modelClass, data) {
+  dataCache[modelClass] = data;
+  writeData(modelClass, data);
+  return { data };
+}
+
+function downloadIndexes() {
+  const data = indexCache;
+  return { data };
+}
+
+function uploadIndexes(data) {
+  indexCache = data;
+  writeData(indexes, indexCache);
+  return { data };
+}
+
 function filterData(modelClass, filters) {
   const modelData = dataCache[modelClass] || {};
   const filterIndexes = indexCache.filter[modelClass] || {};
@@ -543,5 +565,9 @@ module.exports = {
   createIfNotExists,
   update,
   remove,
-  isUsed
+  isUsed,
+  download,
+  upload,
+  downloadIndexes,
+  uploadIndexes
 }
