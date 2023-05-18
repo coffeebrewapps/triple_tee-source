@@ -14,6 +14,10 @@ const props = defineProps({
 })
 /*** section:props ***/
 
+/*** section:emit ***/
+const emit = defineEmits(['tabChange'])
+/*** section:emit ***/
+
 /*** section:global ***/
 const selectedTab = ref(0)
 
@@ -23,6 +27,7 @@ function isActive(i) {
 
 function selectTab(tab) {
   selectedTab.value = tab
+  emit('tabChange', tab)
 }
 /*** section:global ***/
 
@@ -102,6 +107,5 @@ function tabContentStyle(i) {
 .tab-content.active {
   display: block;
   padding: 1rem;
-  border-radius: 0 0 4px 4px;
 }
 </style>

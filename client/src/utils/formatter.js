@@ -5,6 +5,12 @@ export function useFormatter() {
     return (new Date(rawValue)).toLocaleDateString(locale)
   }
 
+  function formatLongDate(rawValue) {
+    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
+    const locale = formatOptions.locale
+    return (new Date(rawValue)).toLocaleDateString(locale, { dateStyle: 'full' })
+  }
+
   function formatTimestamp(rawValue) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
@@ -42,6 +48,7 @@ export function useFormatter() {
 
   return {
     formatDate,
+    formatLongDate,
     formatTimestamp,
     formatTag,
     tagStyle

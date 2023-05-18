@@ -1,10 +1,10 @@
 export function useValidations() {
   function notEmpty(value) {
-    return (typeof value !== 'undefined') && value !== null
+    return !notEmpty(value)
   }
 
   function isEmpty(value) {
-    return !notEmpty(value)
+    return Object.is(value, undefined) || Object.is(value, null)
   }
 
   function notEarlierThan(record, dateToCheckField, compareDateField) {
@@ -114,6 +114,7 @@ export function useValidations() {
 
   return Object.assign(
     {},
+    { notEmpty, isEmpty },
     dateValidations,
     numberValidations
   )
