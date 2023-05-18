@@ -264,7 +264,7 @@ function filterValueMatch(filterSchemas, field, indexedValue, filterValue) {
   const partialMatch = filterOptions.match && indexedValue.match(filterValue);
   const multiMatch = Array.isArray(filterValue) && filterValue.some(fv => fv === indexedValue);
   const exactMatch = !filterOptions.match && indexedValue === filterValue;
-  const dateRangeMatch = rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
+  const dateRangeMatch = (Object.hasOwn(filterValue, 'startDate') || Object.hasOwn(filterValue, 'endDate')) && rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
 
   return partialMatch || multiMatch || exactMatch || dateRangeMatch;
 }
@@ -307,7 +307,7 @@ function filterIdsFromData(modelClass, modelData, schemas, field, filterValue) {
 
   return Object.entries(modelData).reduce((arr, [id, record]) => {
     const recordValue = record[field];
-    if (recordValue && filterValueMatch(schemas, field, recordValue, filterValue)) {
+    if (utils.notEmpty(recordValue) && filterValueMatch(schemas, field, recordValue, filterValue)) {
       arr.push(id);
     }
     return arr
