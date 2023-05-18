@@ -36,7 +36,7 @@ function transactionLabel(record) {
 const dataFields = [
   { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false },
   { key: 'type', type: 'enum', label: 'Type', listable: true, viewable: true, creatable: true, updatable: false, filterable: true },
-  { key: 'transactionDate', type: 'date', label: 'Transaction Date', listable: true, viewable: true, creatable: true, updatable: true },
+  { key: 'transactionDate', type: 'date', label: 'Transaction Date', listable: true, viewable: true, creatable: true, updatable: true, filterable: true },
   { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
@@ -79,9 +79,16 @@ const dataFields = [
 ]
 
 const filters = {
-  initData: {},
+  initData: {
+    type: "",
+    currencyId: null,
+    transactionDate: {
+      startDate: null,
+      endDate: null
+    }
+  },
   layout: [
-    { type: 'md', currencyId: 'md' }
+    { type: 'md', currencyId: 'md', transactionDate: 'md' }
   ]
 }
 </script>

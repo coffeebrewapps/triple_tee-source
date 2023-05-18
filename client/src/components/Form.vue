@@ -133,6 +133,10 @@ function showSelect(field) {
   return showField(field) && (inputType(field) === 'enum' || inputType(field) === 'select')
 }
 
+function showDateRange(field) {
+  return showField(field) && inputType(field) === 'daterange'
+}
+
 function fieldUpdatable(field) {
   return props.dataFields.find(f => f === field)
 }
@@ -231,7 +235,6 @@ onMounted(async () => {
         v-for="row in fieldsLayout"
         class="data-row"
       >
-
         <slot
           v-for="field in Object.keys(row)"
           :name="`form-col.${field}`"
@@ -320,6 +323,34 @@ onMounted(async () => {
                 :disabled="!fieldUpdatable(field)"
                 @offset-change="fieldOffsetChange[field]"
               />
+
+              <div
+                v-if="showDateRange(field)"
+                class="date-range"
+              >
+                <TDatePicker
+                  v-model="data[field].startDate"
+                  :label="`Start ${inputLabel(field)}`"
+                  :disabled="!fieldUpdatable(field)"
+                  align-pickers="top"
+                />
+
+                <div class="to">to</div>
+
+                <TDatePicker
+                  v-model="data[field].endDate"
+                  :label="`End ${inputLabel(field)}`"
+                  :disabled="!fieldUpdatable(field)"
+                  align-pickers="top"
+                />
+              </div>
+
+              <div
+                v-if="fieldErrorMessage(field)"
+                class="input-error"
+              >
+                {{ fieldErrorMessage(field) }}
+              </div>
             </div> <!-- field-input -->
 
             <div
@@ -388,5 +419,19 @@ onMounted(async () => {
 .form.compact .actions {
   align-self: flex-end;
   gap: 0.5rem;
+}
+
+.date-range {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.to {
+  margin: 0 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 </style>

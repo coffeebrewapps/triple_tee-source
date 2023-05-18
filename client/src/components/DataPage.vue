@@ -157,7 +157,7 @@ const includeKeys = computed(() => {
   return include.value.map(h => h.key)
 })
 
-const combinedDataFields = ref(props.dataFields)
+const combinedDataFields = ref(Array.from(props.dataFields))
 
 const schemasLoaded = ref(false)
 
@@ -173,6 +173,21 @@ function validateParams(validations, params) {
     }
     return errors
   }, {})
+}
+
+function formatDataFields(fields) {
+  combinedDataFields.value = combinedDataFields.value.map((field) => {
+    if (field.type === 'enum') {
+      const enums = fields[field.key].enums
+      const options = Object.keys(enums).map((e) => {
+        return { value: e, label: enums[e] }
+      })
+      const combined = Object.assign({}, field, { options })
+      return combined
+    } else {
+      return field
+    }
+  })
 }
 /*** section:global ***/
 
@@ -226,6 +241,8 @@ const filtersStyleClass = computed(() => {
   }
 })
 
+const filtersDataFields = ref(Array.from(props.dataFields))
+
 async function submitFilters(updatedFilters) {
   offset.value = 0
   await loadData(updatedFilters)
@@ -238,6 +255,21 @@ async function resetFilters() {
 
 function toggleFilters() {
   filtersState.value = !filtersState.value
+}
+
+function formatFiltersFields() {
+  filtersDataFields.value = Array.from(combinedDataFields.value).map((field) => {
+    const filterField = Object.assign({}, field)
+    if (!filterField.filterable) { return filterField }
+
+    if (filterField.type === 'date') {
+      filterField.type = 'daterange'
+    } else if (filterField.type === 'number') {
+      filterField.type = 'numberrange'
+    }
+
+    return filterField
+  }).filter(f => f.filterable)
 }
 
 function formatFilters(filters = {}) {
@@ -355,18 +387,8 @@ async function loadSchemas() {
     .schemas(schemasUrl.value)
     .then((result) => {
       const fields = result.fields
-      combinedDataFields.value = combinedDataFields.value.map((field) => {
-        if (field.type === 'enum') {
-          const enums = fields[field.key].enums
-          const options = Object.keys(enums).map((e) => {
-            return { value: e, label: enums[e] }
-          })
-          const combined = Object.assign({}, field, { options })
-          return combined
-        } else {
-          return field
-        }
-      })
+      formatDataFields(fields)
+      formatFiltersFields()
       schemasLoaded.value = true
     })
     .catch((error) => {
@@ -845,7 +867,7 @@ onMounted(async () => {
         v-model="filtersData"
         :fields-layout="filtersLayout"
         :data-fields="filterableKeys"
-        :schemas="combinedDataFields"
+        :schemas="filtersDataFields"
         :error-messages="filtersErrorMessages"
         :confirm-button="filtersConfirmButton"
         :cancel-button="filtersCancelButton"
