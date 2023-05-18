@@ -251,29 +251,35 @@ function uploadIndexes(data) {
 function filterData(modelClass, filters) {
   const modelData = dataCache[modelClass] || {};
   const filterIndexes = indexCache.filter[modelClass] || {};
-  const filterSchemas = schemaCache[modelClass].indexes.filter || {};
+  const filterSchemas = (schemaCache[modelClass].indexes || {}).filter || {};
 
   const filteredIds = [...filterFromIndexes(modelClass, modelData, filterIndexes, filterSchemas, filters)];
   return filteredIds.map(i => modelData[i]);
 }
 
 // {"field":"tags","indexedValue":"3","ids":["2"],"filterValue":["10"]}
-function filterValueMatch(schemas, field, indexedValue, filterValue) {
-  const filterOptions = schemas[field] || {};
+function filterValueMatch(filterSchemas, field, indexedValue, filterValue) {
+  const filterOptions = filterSchemas[field] || {};
 
   const partialMatch = filterOptions.match && indexedValue.match(filterValue);
   const multiMatch = Array.isArray(filterValue) && filterValue.some(fv => fv === indexedValue);
   const exactMatch = !filterOptions.match && indexedValue === filterValue;
+  const dateRangeMatch = rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
 
-  return partialMatch || multiMatch || exactMatch;
+  return partialMatch || multiMatch || exactMatch || dateRangeMatch;
 }
 
-function filterFromIndexes(modelClass, modelData, indexes, schemas, filters) {
+function rangeMatch(rangeStart, rangeEnd, compareValue) {
+  return (utils.isEmpty(rangeStart) || compareValue >= rangeStart) &&
+    (utils.isEmpty(rangeEnd) || compareValue <= rangeEnd)
+}
+
+function filterFromIndexes(modelClass, modelData, indexes, filterSchemas, filters) {
   return Object.entries(filters).reduce((filteredIds, [field, filterValue]) => {
     if (utils.notEmpty(indexes[field])) {
-      const filterOptions = schemas[field] || {};
+      const filterOptions = filterSchemas[field] || {};
       const indexedIds = Object.entries(indexes[field]).reduce((arr, [indexedValue, ids]) => {
-        if (filterValueMatch(schemas, field, indexedValue, filterValue)) {
+        if (filterValueMatch(filterSchemas, field, indexedValue, filterValue)) {
           arr = arr.concat(ids);
         }
         return arr;
@@ -284,12 +290,12 @@ function filterFromIndexes(modelClass, modelData, indexes, schemas, filters) {
         indexedIds.forEach(i => filteredIds.add(i));
       } else {
         logger.log(`Index miss`, { field, filterValue })
-        const idsFromData = filterIdsFromData(modelClass, modelData, schemas, field, filterValue);
+        const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
         idsFromData.forEach(i => filteredIds.add(i));
       }
     } else {
       logger.log(`Index miss`, { field, filterValue })
-      const idsFromData = filterIdsFromData(modelClass, modelData, schemas, field, filterValue);
+      const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
       idsFromData.forEach(i => filteredIds.add(i));
     }
     return filteredIds;

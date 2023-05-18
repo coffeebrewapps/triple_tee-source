@@ -196,7 +196,9 @@ const filtersEnabled = ref(props.filters.layout)
 
 const filtersState = ref(false)
 
-const filtersData = ref(Object.assign({}, props.filters.initData))
+const filtersData = ref(copyFiltersInitData())
+
+const filtersDataFields = ref(Array.from(props.dataFields))
 
 const filtersErrorMessages = ref({})
 
@@ -241,7 +243,21 @@ const filtersStyleClass = computed(() => {
   }
 })
 
-const filtersDataFields = ref(Array.from(props.dataFields))
+function copyFiltersInitData() {
+  return Object.entries(props.filters.initData).reduce((o, [key, value]) => {
+    if (typeof value === 'object') {
+      if (Array.isArray(value)) {
+        o[key] = Array.from(value)
+      } else {
+        o[key] = Object.assign({}, value)
+      }
+    } else {
+      o[key] = value
+    }
+
+    return o
+  }, {})
+}
 
 async function submitFilters(updatedFilters) {
   offset.value = 0
@@ -249,7 +265,8 @@ async function submitFilters(updatedFilters) {
 }
 
 async function resetFilters() {
-  filtersData.value = Object.assign({}, props.filters.initData)
+  filtersData.value = copyFiltersInitData()
+  console.log(filtersData.value)
   await loadData(filtersData.value)
 }
 
