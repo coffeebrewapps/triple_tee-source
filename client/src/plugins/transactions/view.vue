@@ -1,8 +1,13 @@
 <script setup>
 import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
+import { useFormatter } from '@/utils/formatter'
 
 const config = useConfig()
+
+const {
+  formatDate
+} = useFormatter()
 
 const transactionSchemasUrl = `${config.baseUrl}/api/schemas/transactions`
 const tagsUrl = `${config.baseUrl}/api/tags`
@@ -26,7 +31,10 @@ function tagLabel(record) {
 }
 
 function currencyLabel(record) {
-  return `${record.symbol} (${record.code})`
+  const startDate = formatDate(record.effectiveStart)
+  const endDate = formatDate(record.effectiveEnd)
+
+  return `${record.code} (${startDate} - ${endDate})`
 }
 
 function transactionLabel(record) {
@@ -43,7 +51,7 @@ const dataFields = [
   {
     key: 'tags', type: 'multiSelect', label: 'Tags',
     reference: { label: tagLabel },
-    listable: true, viewable: true, creatable: true, updatable: true,
+    listable: true, viewable: true, creatable: true, updatable: true, filterable: true,
     options: {
       server: true,
       pagination: true,
@@ -82,13 +90,15 @@ const filters = {
   initData: {
     type: "",
     currencyId: null,
+    tags: [],
     transactionDate: {
       startDate: null,
       endDate: null
     }
   },
   layout: [
-    { type: 'md', currencyId: 'md', transactionDate: 'md' }
+    { type: 'md', currencyId: 'md', tags: 'md' },
+    { transactionDate: 'md' }
   ]
 }
 </script>

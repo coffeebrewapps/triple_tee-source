@@ -196,7 +196,7 @@ const filtersEnabled = ref(props.filters.layout)
 
 const filtersState = ref(false)
 
-const filtersData = ref(copyFiltersInitData())
+const filtersData = ref(Object.assign({}, props.filters.initData))
 
 const filtersDataFields = ref(Array.from(props.dataFields))
 
@@ -266,7 +266,6 @@ async function submitFilters(updatedFilters) {
 
 async function resetFilters() {
   filtersData.value = copyFiltersInitData()
-  console.log(filtersData.value)
   await loadData(filtersData.value)
 }
 
