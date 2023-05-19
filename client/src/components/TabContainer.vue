@@ -19,6 +19,7 @@ const emit = defineEmits(['tabChange'])
 /*** section:emit ***/
 
 /*** section:global ***/
+const tabRefs = ref([])
 const selectedTab = ref(0)
 
 function isActive(i) {
@@ -26,7 +27,11 @@ function isActive(i) {
 }
 
 function selectTab(tab) {
+  if (tab < 0) { return }
+  if (tab > props.tabs.length - 1) { return }
+
   selectedTab.value = tab
+  tabRefs.value[tab].focus()
   emit('tabChange', tab)
 }
 /*** section:global ***/
@@ -55,8 +60,13 @@ function tabContentStyle(i) {
     <div class="tabs">
       <div
         :class="tabStyle(i)"
+        ref="tabRefs"
         v-for="(tab, i) in tabs"
+        tabindex="0"
         @click="selectTab(i)"
+        @keydown.enter="selectTab(i)"
+        @keydown.arrow-left="selectTab(i-1)"
+        @keydown.arrow-right="selectTab(i+1)"
       >
         {{ tab.label }}
       </div>
@@ -94,7 +104,8 @@ function tabContentStyle(i) {
   border-bottom: 3px solid var(--color-border);
 }
 
-.tab:hover {
+.tab:hover,
+.tab:focus {
   cursor: pointer;
   background-color: var(--color-border-hover);
   transition: background-color 0.5s linear;

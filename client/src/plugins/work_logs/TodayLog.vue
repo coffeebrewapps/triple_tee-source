@@ -305,7 +305,9 @@ onMounted(async () => {
       <div
         v-if="!openTask"
         class="button"
+        tabindex="0"
         @click="startTask"
+        @keydown.enter="startTask"
       >
         Start New Task
       </div>
@@ -313,7 +315,9 @@ onMounted(async () => {
       <div
         v-if="!openTask"
         class="button"
+        tabindex="0"
         @click="quickStartTask"
+        @keydown.enter="quickStartTask"
       >
         Quick Start New Task
       </div>
@@ -321,7 +325,9 @@ onMounted(async () => {
       <div
         v-if="openTask"
         class="button"
+        tabindex="0"
         @click="endTask"
+        @keydown.enter="endTask"
       >
         End Current Task
       </div>
@@ -329,7 +335,9 @@ onMounted(async () => {
       <div
         v-if="openTask"
         class="button"
+        tabindex="0"
         @click="endTaskAndStartTask"
+        @keydown.enter="endTaskAndStartTask"
       >
         End and Start New
       </div>
@@ -337,7 +345,9 @@ onMounted(async () => {
       <div
         v-if="openTask"
         class="button"
+        tabindex="0"
         @click="endTaskAndQuickStartTask"
+        @keydown.enter="endTaskAndQuickStartTask"
       >
         End and Quick Start
       </div>
@@ -444,6 +454,19 @@ onMounted(async () => {
 .today-logs-container .controls .button:hover {
   cursor: pointer;
   background-color: var(--color-border-hover);
+}
+
+.today-logs-container .controls .button:focus,
+.today-logs-container .controls .input:focus {
+  outline: 5px solid var(--color-border-hover);
+}
+
+.today-logs-container .controls .input {
+  padding: 1rem;
+  width: 300px;
+  background-color: var(--color-border-hover);
+  border: 1px solid var(--color-border-hover);
+  border-radius: 8px;
 }
 
 .today-logs-container .logs {
