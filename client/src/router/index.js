@@ -13,7 +13,7 @@ const routes = [
   }
 ]
 
-const plugins = import.meta.glob('@/plugins/**/*.js', { import: 'default', eager: true })
+const plugins = import.meta.glob('@/plugins/**/index.js', { import: 'default', eager: true })
 Object.keys(plugins).forEach((plugin) => {
   const route = plugins[plugin]()
   routes.push(route)
