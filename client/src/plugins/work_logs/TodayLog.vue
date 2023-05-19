@@ -54,6 +54,9 @@ const banner = useBannerStore()
 
 import { useEventsStore } from '@/stores/events'
 const events = useEventsStore()
+
+import { useShortcutsStore } from '@/stores/shortcuts'
+const shortcuts = useShortcutsStore()
 /*** import:stores ***/
 
 /*** import:components ***/
@@ -241,6 +244,85 @@ const shortcutStyles = computed(() => {
     return `shortcut hide`
   }
 })
+
+shortcuts.registerListener(
+  {
+    route: '/work_logs',
+    eventType: 'ctrl-n'
+  },
+  {
+    id: 'TodayStartTask',
+    invoke: (payload) => {
+      startTask()
+    }
+  }
+)
+
+shortcuts.registerListener(
+  {
+    route: '/work_logs',
+    eventType: 'ctrl-q'
+  },
+  {
+    id: 'TodayQuickStartTask',
+    invoke: (payload) => {
+      quickStartTask()
+    }
+  }
+)
+
+shortcuts.registerListener(
+  {
+    route: '/work_logs',
+    eventType: 'ctrl-e'
+  },
+  {
+    id: 'TodayEndTask',
+    invoke: (payload) => {
+      endTask()
+    }
+  }
+)
+
+shortcuts.registerListener(
+  {
+    route: '/work_logs',
+    eventType: 'ctrl-g'
+  },
+  {
+    id: 'TodayEndTaskAndStartTask',
+    invoke: (payload) => {
+      endTaskAndStartTask()
+    }
+  }
+)
+
+shortcuts.registerListener(
+  {
+    route: '/work_logs',
+    eventType: 'ctrl-f'
+  },
+  {
+    id: 'TodayEndTaskAndQuickStartTask',
+    invoke: (payload) => {
+      endTaskAndQuickStartTask()
+    }
+  }
+)
+
+shortcuts.registerListener(
+  {
+    route: '/work_logs',
+    eventType: 'keydown-Escape'
+  },
+  {
+    id: 'CloseTodayLogDialogs',
+    invoke: (payload) => {
+      if (startTaskDialog.value) { startTaskDialog.value = false }
+      if (endTaskDialog.value) { endTaskDialog.value = false }
+    }
+  }
+)
 /*** section:shortcuts ***/
 
 /*** section:banner ***/
@@ -261,33 +343,6 @@ events.registerListener(
     id: 'TodayLog',
     invoke: (payload) => {
       loadToday()
-    }
-  }
-)
-
-events.registerListener(
-  'evalShortcut',
-  {
-    id: 'TodayLogShortcut',
-    invoke: ({ route, key }) => {
-      if (route !== '/work_logs') { return }
-
-      if (key === 'n') {
-        startTask()
-      } else if (key === 'q') {
-        quickStartTask()
-      }
-    }
-  }
-)
-
-events.registerListener(
-  'keydown-Escape',
-  {
-    id: 'CloseTodayLogDialogs',
-    invoke: (payload) => {
-      if (startTaskDialog.value) { startTaskDialog.value = false }
-      if (endTaskDialog.value) { endTaskDialog.value = false }
     }
   }
 )
@@ -383,6 +438,7 @@ onMounted(async () => {
         @keydown.enter="endTask"
       >
         End Current Task
+        <div :class="shortcutStyles">E</div>
       </div>
 
       <div
@@ -393,6 +449,7 @@ onMounted(async () => {
         @keydown.enter="endTaskAndStartTask"
       >
         End and Start New
+        <div :class="shortcutStyles">G</div>
       </div>
 
       <div
@@ -403,6 +460,7 @@ onMounted(async () => {
         @keydown.enter="endTaskAndQuickStartTask"
       >
         End and Quick Start
+        <div :class="shortcutStyles">F</div>
       </div>
     </div> <!-- controls -->
 

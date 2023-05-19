@@ -8,6 +8,7 @@ import Alerts from './components/Alerts.vue'
 
 import { useNavStore } from './stores/nav'
 import { useEventsStore } from './stores/events'
+import { useShortcutsStore } from './stores/shortcuts'
 
 const router = useRouter()
 const transitionName = ref('default')
@@ -20,19 +21,23 @@ watch(router.currentRoute, (to, from) => {
 })
 
 const events = useEventsStore()
+const shortcuts = useShortcutsStore()
 
 const modifier = ref(false)
 
 onMounted(() => {
   document.addEventListener('keydown', (event) => {
+    const route = router.currentRoute.value.path
     if (modifier.value) {
-      events.emitEvent(
-        `evalShortcut`,
-        {
-          route: router.currentRoute.value.path,
-          key: event.key
-        }
-      )
+      if (event.key !== 'Control') {
+        shortcuts.emitShortcut(
+          {
+            route,
+            eventType: `ctrl-${event.key}`
+          },
+          event
+        )
+      }
       modifier.value = false
       events.emitEvent(`toggleShortcut`, event)
     } else {
@@ -40,7 +45,13 @@ onMounted(() => {
         modifier.value = true
         events.emitEvent(`toggleShortcut`, event)
       } else {
-        events.emitEvent(`keydown-${event.key}`, event)
+        shortcuts.emitShortcut(
+          {
+            route,
+            eventType: `keydown-${event.key}`
+          },
+          event
+        )
       }
     }
   })
