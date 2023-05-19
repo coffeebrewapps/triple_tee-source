@@ -60,6 +60,11 @@
       "foreign": {},
       "unique": ["code|symbol|effectiveStart"],
       "required": ["code", "symbol", "exchangeRate", "effectiveStart"]
+    },
+    "indexes": {
+      "filter": {
+        "code": { "match": true }
+      }
     }
   },
   "tags": {
