@@ -1,6 +1,6 @@
 export function useValidations() {
   function notEmpty(value) {
-    return !notEmpty(value)
+    return !isEmpty(value)
   }
 
   function isEmpty(value) {
