@@ -41,9 +41,9 @@ function tagLabel(record) {
 }
 
 const dataFields = [
-  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false },
-  { key: 'startTime', type: 'datetime', label: 'Start Time', listable: true, viewable: true, creatable: true, updatable: true },
-  { key: 'endTime', type: 'datetime', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true },
+  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
+  { key: 'startTime', type: 'datetime', label: 'Start Time', listable: true, viewable: true, creatable: true, updatable: true, sortable: true },
+  { key: 'endTime', type: 'datetime', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true, sortable: true },
   { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'content', type: 'textarea', label: 'Content', listable: false, viewable: true, creatable: true, updatable: true },
   {

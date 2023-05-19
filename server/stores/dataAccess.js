@@ -77,6 +77,7 @@ function list(modelClass, filters = {}) {
   const modelData = dataCache[modelClass] || {};
   const data = Object.values(modelData);
   const paramsFilters = filters.filters || {};
+  const sortFilters = filters.sort || {};
 
   let filteredData = [];
 
@@ -84,6 +85,10 @@ function list(modelClass, filters = {}) {
     filteredData = filterData(modelClass, paramsFilters);
   } else {
     filteredData = data;
+  }
+
+  if (sortFilters.field) {
+    sortData(filteredData, sortFilters)
   }
 
   const total = filteredData.length;
@@ -337,6 +342,20 @@ function fetchIncludes(modelClass, record, include) {
 
     return records;
   }, {});
+}
+
+function sortData(data, params) {
+  const sortField = params.field;
+  const sortOrder = params.order === 'asc' ? 1 : -1;
+  data.sort((a, b) => {
+    if (a[sortField] < b[sortField]) {
+      return sortOrder * -1;
+    } else if (a[sortField] > b[sortField]) {
+      return sortOrder * 1;
+    } else {
+      return 0;
+    }
+  });
 }
 
 function cacheIndexes(modelClass, record) {

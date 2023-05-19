@@ -261,12 +261,12 @@ function copyFiltersInitData() {
 
 async function submitFilters(updatedFilters) {
   offset.value = 0
-  await loadData(updatedFilters)
+  await loadData()
 }
 
 async function resetFilters() {
   filtersData.value = copyFiltersInitData()
-  await loadData(filtersData.value)
+  await loadData()
 }
 
 function toggleFilters() {
@@ -303,6 +303,65 @@ function formatFilters(filters = {}) {
   }, {})
 }
 /*** section:filter ***/
+
+/*** section:sort ***/
+const currentSortField = ref('id')
+const currentSortOrder = ref(true) // true = asc, false = desc
+
+const sortFilters = computed(() => {
+  return {
+    field: currentSortField.value,
+    order: currentSortOrder.value ? 'asc' : 'desc'
+  }
+})
+
+const sortableFields = computed(() => {
+  return props.dataFields.filter(h => h.sortable).reduce((o, h) => {
+    o[h.key] = h
+    return o
+  }, {})
+})
+
+const sortableKeys = computed(() => {
+  return Object.keys(sortableFields.value)
+})
+
+function sortableField(field) {
+  return sortableKeys.value.includes(field)
+}
+
+const sortHeaderStyles = computed(() => {
+  return props.dataFields.reduce((o, field) => {
+    const key = field.key
+    if (sortableField(key) && key === currentSortField.value) {
+      if (currentSortOrder.value) {
+        o[key] = `header-field sort down`
+      } else {
+        o[key] = `header-field sort up`
+      }
+    } else if (sortableField(key)) {
+      o[key] = `header-field sort reset`
+    } else {
+      o[key] = `header-field nosort`
+    }
+    return o
+  }, {})
+})
+
+async function toggleSort(field) {
+  if (!sortableField(field)) { return }
+
+  if (field === currentSortField.value) {
+    currentSortOrder.value = !currentSortOrder.value
+  } else {
+    currentSortField.value = field
+    currentSortOrder.value = true
+  }
+
+  offset.value = 0
+  await loadData()
+}
+/*** section:sort ***/
 
 /*** section:table ***/
 const tableActions = computed(() => {
@@ -378,7 +437,7 @@ const listedData = computed(() => {
 
 async function updateOffsetAndReload(updated) {
   offset.value = updated
-  await loadData(filtersData.value)
+  await loadData()
 }
 /*** section:table ***/
 
@@ -413,12 +472,13 @@ async function loadSchemas() {
     })
 }
 
-async function loadData(filters = {}) {
+async function loadData() {
   const params = {
     include: includeKeys.value,
     offset: offset.value,
     limit: limit.value,
-    filters: formatFilters(filters)
+    filters: formatFilters(filtersData.value),
+    sort: sortFilters.value
   }
 
   dataLoading.value = true
@@ -904,6 +964,31 @@ onMounted(async () => {
       :total-data="totalData"
       @offset-change="updateOffsetAndReload"
     >
+
+      <template #header-row="{ headers, actions }">
+        <th
+          v-for="(header, i) in headers"
+          class="col"
+          @click="toggleSort(header.key)"
+        >
+          <div
+            :class="sortHeaderStyles[header.key]"
+          >
+            {{ header.label }}
+
+            <i class="fa-solid fa-sort"></i>
+            <i class="fa-solid fa-sort-up"></i>
+            <i class="fa-solid fa-sort-down"></i>
+          </div>
+        </th>
+
+        <th
+          v-if="actions.length > 0"
+          class="col"
+        >
+        </th>
+      </template>
+
       <template #data-content="{ headers, row, i }">
         <td
           v-for="header in headers"
@@ -1062,7 +1147,35 @@ a.hidden {
   display: none;
 }
 
-td.col {
+.header-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.header-field i {
+  display: none;
+}
+
+.header-field.sort:hover {
+  cursor: pointer;
+}
+
+.header-field.sort.reset:hover .fa-sort {
+  display: inline-block;
+}
+
+.header-field.sort.down .fa-sort-down {
+  display: inline-block;
+}
+
+.header-field.sort.up .fa-sort-up {
+  display: inline-block;
+}
+
+.col {
   text-align: left;
   padding: 0.5rem;
   border-bottom: 1px solid var(--color-border);

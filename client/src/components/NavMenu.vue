@@ -67,7 +67,6 @@ const navContainerClass = computed(() => {
   align-items: center;
   left: 0;
   top: 0;
-  width: 300px;
   height: 100vh;
   z-index: 999;
   transition: all 0.5s linear;

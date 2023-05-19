@@ -42,9 +42,9 @@ function transactionLabel(record) {
 }
 
 const dataFields = [
-  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false },
+  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false, sortable: true },
   { key: 'type', type: 'enum', label: 'Type', listable: true, viewable: true, creatable: true, updatable: false, filterable: true },
-  { key: 'transactionDate', type: 'date', label: 'Transaction Date', listable: true, viewable: true, creatable: true, updatable: true, filterable: true },
+  { key: 'transactionDate', type: 'date', label: 'Transaction Date', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
   { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'amount', type: 'number', label: 'Amount', listable: true, viewable: true, creatable: true, updatable: true },
   { key: 'homeCurrencyAmount', type: 'number', label: 'Home Currency Amount', listable: false, viewable: true, creatable: true, updatable: true },
