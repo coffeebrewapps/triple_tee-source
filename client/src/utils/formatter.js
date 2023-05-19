@@ -17,6 +17,12 @@ export function useFormatter() {
     return (new Date(rawValue)).toLocaleString(locale)
   }
 
+  function formatShortTime(rawValue) {
+    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
+    const locale = formatOptions.locale
+    return (new Date(rawValue)).toLocaleTimeString(locale, { timeStyle: 'medium' })
+  }
+
   function formatTag(record, tag) {
     const includes = (record.includes || {}).tags
     if (includes[tag]) {
@@ -50,6 +56,7 @@ export function useFormatter() {
     formatDate,
     formatLongDate,
     formatTimestamp,
+    formatShortTime,
     formatTag,
     tagStyle
   }
