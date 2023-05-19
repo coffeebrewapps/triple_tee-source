@@ -5,26 +5,26 @@ export const useEventsStore = defineStore('events', () => {
   const listeners = ref({})
 
   function registerListener(eventType, listener) {
-    if(Array.isArray(listeners[eventType])) {
-      listeners[eventType].push(listener)
+    if(Array.isArray(listeners.value[eventType])) {
+      listeners.value[eventType].push(listener)
     } else {
-      listeners[eventType] = [listener]
+      listeners.value[eventType] = [listener]
     }
   }
 
   function unregisterListener(eventType, listener) {
-    if(!Array.isArray(listeners[eventType])) { return }
+    if(!Array.isArray(listeners.value[eventType])) { return }
 
-    const found = listeners.findIndex(l => l.id === listener.id)
+    const found = listeners.value[eventType].findIndex(l => l.id === listener.id)
     if (found < 0) { return }
 
-    listeners.splice(found, 1)
+    listeners.value[eventType].splice(found, 1)
   }
 
   function emitEvent(eventType, payload) {
-    if (!Array.isArray(listeners[eventType])) { return }
+    if (!Array.isArray(listeners.value[eventType])) { return }
 
-    listeners[eventType].forEach((listener) => {
+    listeners.value[eventType].forEach((listener) => {
       listener.invoke(payload)
     })
   }
