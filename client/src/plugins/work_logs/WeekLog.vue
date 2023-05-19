@@ -51,6 +51,9 @@ const props = defineProps({
 const selectedWeek = ref('this')
 const weeklyData = ref({})
 const currentWeek = ref(0)
+const prevWeekTab = ref('prevWeekTab')
+const thisWeekTab = ref('thisWeekTab')
+const nextWeekTab = ref('nextWeekTab')
 
 const weekStart = computed(() => {
   const today = new Date()
@@ -208,19 +211,32 @@ const nextWeekTabStyle = computed(() => {
 async function prevWeek() {
   currentWeek.value = currentWeek.value - 1
   selectedWeek.value = 'prev'
+  prevWeekTab.value.blur()
   await loadWeekly()
 }
 
 async function thisWeek() {
   currentWeek.value = 0
   selectedWeek.value = 'this'
+  thisWeekTab.value.blur()
   await loadWeekly()
 }
 
 async function nextWeek() {
   currentWeek.value = currentWeek.value + 1
   selectedWeek.value = 'next'
+  nextWeekTab.value.blur()
   await loadWeekly()
+}
+
+function selectWeekTab(tab) {
+  if (tab === 'prev') {
+    prevWeekTab.value.focus()
+  } else if (tab === 'next') {
+    nextWeekTab.value.focus()
+  } else {
+    thisWeekTab.value.focus()
+  }
 }
 /*** section:actions ***/
 
@@ -250,7 +266,11 @@ onMounted(async () => {
     <div class="weekly-tabs">
       <div
         :class="prevWeekTabStyle"
+        tabindex="0"
+        ref="prevWeekTab"
         @click="prevWeek"
+        @keydown.enter="prevWeek"
+        @keydown.arrow-right="selectWeekTab('this')"
       >
         <i class="fa-solid fa-angle-left"></i>
         Prev Week
@@ -258,14 +278,23 @@ onMounted(async () => {
 
       <div
         :class="thisWeekTabStyle"
+        tabindex="0"
+        ref="thisWeekTab"
         @click="thisWeek"
+        @keydown.enter="thisWeek"
+        @keydown.arrow-left="selectWeekTab('prev')"
+        @keydown.arrow-right="selectWeekTab('next')"
       >
         This Week
       </div>
 
       <div
         :class="nextWeekTabStyle"
+        tabindex="0"
+        ref="nextWeekTab"
         @click="nextWeek"
+        @keydown.enter="nextWeek"
+        @keydown.arrow-left="selectWeekTab('this')"
       >
         Next Week
         <i class="fa-solid fa-angle-right"></i>
@@ -353,6 +382,7 @@ onMounted(async () => {
   padding: 0.5rem 1rem;
   font-size: 0.8rem;
   font-weight: 600;
+  outline: none;
 }
 
 .weekly-tab.active {
@@ -363,6 +393,10 @@ onMounted(async () => {
   cursor: pointer;
   background-color: var(--color-border-hover);
   transition: background-color 0.5s linear;
+}
+
+.weekly-tab:focus {
+  outline: 5px solid var(--color-border-hover);
 }
 
 .weekly-tab-content {

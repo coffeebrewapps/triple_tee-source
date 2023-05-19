@@ -92,7 +92,7 @@ const todayLogs = ref([])
 const openTask = computed(() => {
   if (todayLogs.value.length === 0) { return false }
 
-  return isEmpty(currentTask.value.endTime)
+  return isEmpty(currentTask.value.endTime) && taskStarted.value
 })
 
 function formatWorkLogs(data) {
@@ -112,6 +112,7 @@ function formatExistingTask(record) {
 
 /*** section:startTask ***/
 const startTaskDialog = ref(false)
+const taskStarted = ref(false)
 
 function formatNewTask() {
   return dataFields.reduce((o, field) => {
@@ -158,6 +159,7 @@ async function submitNewTask() {
     .create(worklogsUrl, params)
     .then((result) => {
       showBanner(`Started task successfully!`)
+      taskStarted.value = true
       loadToday()
       closeStartTaskDialog()
     })
@@ -192,6 +194,7 @@ async function updateTask() {
     .update(`${worklogsUrl}/${currentTaskForUpdate.value.id}`, params)
     .then((result) => {
       showBanner(`Ended task successfully!`)
+      taskStarted.value = false
       loadToday()
       closeEndTaskDialog()
 
@@ -230,6 +233,18 @@ function closeEndTaskDialog() {
 }
 /*** section:endTask ***/
 
+/*** section:shortcuts ***/
+const showShortcuts = ref(false)
+
+const shortcutStyles = computed(() => {
+  if (showShortcuts.value) {
+    return `shortcut show`
+  } else {
+    return `shortcut hide`
+  }
+})
+/*** section:shortcuts ***/
+
 /*** section:banner ***/
 function showBanner(message) {
   banner.show(message)
@@ -248,6 +263,43 @@ events.registerListener(
     id: 'TodayLog',
     invoke: (payload) => {
       loadToday()
+    }
+  }
+)
+
+events.registerListener(
+  'evalShortcut',
+  {
+    id: 'TodayLogShortcut',
+    invoke: ({ route, key }) => {
+      if (route !== '/work_logs') { return }
+
+      if (key === 'n') {
+        startTask()
+      } else if (key === 'q') {
+        quickStartTask()
+      }
+    }
+  }
+)
+
+events.registerListener(
+  'keydown-Escape',
+  {
+    id: 'CloseTodayLogDialogs',
+    invoke: (payload) => {
+      if (startTaskDialog.value) { startTaskDialog.value = false }
+      if (endTaskDialog.value) { endTaskDialog.value = false }
+    }
+  }
+)
+
+events.registerListener(
+  'toggleShortcut',
+  {
+    id: 'ToggleTodayLogShortcut',
+    invoke: (payload) => {
+      showShortcuts.value = !showShortcuts.value
     }
   }
 )
@@ -310,6 +362,7 @@ onMounted(async () => {
         @keydown.enter="startTask"
       >
         Start New Task
+        <div :class="shortcutStyles">N</div>
       </div>
 
       <div
@@ -320,6 +373,7 @@ onMounted(async () => {
         @keydown.enter="quickStartTask"
       >
         Quick Start New Task
+        <div :class="shortcutStyles">Q</div>
       </div>
 
       <div
@@ -459,6 +513,29 @@ onMounted(async () => {
 .today-logs-container .controls .button:focus,
 .today-logs-container .controls .input:focus {
   outline: 5px solid var(--color-border-hover);
+}
+
+.today-logs-container .controls .button .shortcut {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 0.7rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  content: "AB"
+}
+
+.today-logs-container .controls .button .shortcut.show {
+  display: inline-flex;
+}
+
+.today-logs-container .controls .button .shortcut.hide {
+  display: none;
 }
 
 .today-logs-container .controls .input {
