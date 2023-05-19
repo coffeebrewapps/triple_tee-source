@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 
 import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
@@ -17,6 +17,30 @@ const {
 } = useFormatter()
 
 const worklogsUrl = `${config.baseUrl}/api/work_logs`
+
+const props = defineProps({
+  loadData: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const emit = defineEmits(['update:loadData'])
+
+const dataLoading = computed({
+  get: () => {
+    return props.loadData
+  },
+  set: (val) => {
+    emit('update:loadData', val)
+  }
+})
+
+watch(dataLoading, async (newVal, oldVal) => {
+  if (newVal) {
+    await loadWeekly()
+  }
+})
 
 const selectedWeek = ref('this')
 
@@ -63,7 +87,6 @@ async function nextWeek() {
 }
 
 const weeklyData = ref({})
-const dataLoading = ref(false)
 const currentWeek = ref(0)
 
 const weekStart = computed(() => {
@@ -214,17 +237,16 @@ async function loadWeekly() {
     filters: weeklyFilters.value
   }
 
-  dataLoading.value = true
-
   await dataAccess
     .list(worklogsUrl, params)
     .then((result) => {
       weeklyData.value = formatWeeklyData(result.data)
-      dataLoading.value = false
     })
     .catch((error) => {
-      dataLoading.value = false
       console.log(error)
+    })
+    .finally(() => {
+      dataLoading.value = false
     })
 }
 
