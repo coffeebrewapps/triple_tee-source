@@ -159,7 +159,6 @@ async function submitNewTask() {
     .create(worklogsUrl, params)
     .then((result) => {
       showBanner(`Started task successfully!`)
-      taskStarted.value = true
       loadToday()
       closeStartTaskDialog()
     })
@@ -194,7 +193,6 @@ async function updateTask() {
     .update(`${worklogsUrl}/${currentTaskForUpdate.value.id}`, params)
     .then((result) => {
       showBanner(`Ended task successfully!`)
-      taskStarted.value = false
       loadToday()
       closeEndTaskDialog()
 
@@ -338,6 +336,7 @@ async function loadToday() {
     .then((result) => {
       todayLogs.value = formatWorkLogs(result.data)
       currentTask.value = formatExistingTask(todayLogs.value[0])
+      if (notEmpty(currentTask.value.startTime)) { taskStarted.value = true }
     })
     .catch((error) => {
       showBanner(`Error loading work logs!`)
