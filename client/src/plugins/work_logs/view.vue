@@ -7,7 +7,7 @@ import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 import TabContainer from '@/components/TabContainer.vue'
 
-import CurrentLog from './CurrentLog.vue'
+import TodayLog from './TodayLog.vue'
 import WeekLog from './WeekLog.vue'
 
 const config = useConfig()
@@ -77,14 +77,14 @@ function validateEndTime(record) {
 }
 
 const tabs = [
-  { label: 'Current', onchange: updateCurrentLog },
+  { label: 'Today', onchange: updateTodayLog },
   { label: 'Weekly', onchange: updateWeeklyLogs },
   { label: 'All Logs', onchange: () => {} }
 ]
 
-const loadCurrentLog = ref(false)
-function updateCurrentLog() {
-  loadCurrentLog.value = true
+const loadTodayLog = ref(false)
+function updateTodayLog() {
+  loadTodayLog.value = true
 }
 
 const loadWeeklyLogs = ref(false)
@@ -106,8 +106,8 @@ function triggerTabEvent(i) {
       @tab-change="triggerTabEvent"
     >
       <template #tab-0>
-        <CurrentLog
-          v-model:load-data="loadCurrentLog"
+        <TodayLog
+          v-model:load-data="loadTodayLog"
         />
       </template>
 
