@@ -1,8 +1,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
-import useConfig from '@/config'
-import { useValidations } from '@/utils/validations'
+import { useEventsStore } from '@/stores/events'
+const events = useEventsStore()
+
+import { useWorkLogUtils } from './utils'
 
 import DataPage from '@/components/DataPage.vue'
 import TabContainer from '@/components/TabContainer.vue'
@@ -10,86 +12,29 @@ import TabContainer from '@/components/TabContainer.vue'
 import TodayLog from './TodayLog.vue'
 import WeekLog from './WeekLog.vue'
 
-const config = useConfig()
 const {
-  notEarlierThan
-} = useValidations()
-
-const tagsUrl = `${config.baseUrl}/api/tags`
-
-const fieldsLayout = [
-  { startTime: 'md', endTime: 'md' },
-  { description: 'lg' },
-  { content: 'lg' },
-  { tags: 'lg' }
-]
-
-function recordValue(record) {
-  return record.id
-}
-
-function tagLabel(record) {
-  return `${record.category}:${record.name}`
-}
-
-const dataFields = [
-  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-  { key: 'startTime', type: 'datetime', label: 'Start Time', listable: true, viewable: true, creatable: true, updatable: true, sortable: true },
-  { key: 'endTime', type: 'datetime', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true, sortable: true },
-  { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
-  { key: 'content', type: 'textarea', label: 'Content', listable: false, viewable: true, creatable: true, updatable: true },
-  {
-    key: 'tags', type: 'multiSelect', label: 'Tags',
-    reference: { label: tagLabel },
-    listable: true, viewable: true, creatable: true, updatable: true, filterable: true,
-    options: {
-      server: true,
-      pagination: true,
-      sourceUrl: tagsUrl,
-      value: recordValue,
-      label: tagLabel
-    }
-  }
-]
-
-const filters = {
-  initData: {},
-  layout: [
-    { tags: 'md' }
-  ]
-}
-
-const validations = {
-  create: {
-    endTime: [
-      validateEndTime
-    ]
-  },
-  update: {
-    endTime: [
-      validateEndTime
-    ]
-  }
-}
-
-function validateEndTime(record) {
-  return notEarlierThan(record, 'endTime', 'startTime')
-}
+  dataFields,
+  fieldsLayout,
+  filters,
+  validations
+} = useWorkLogUtils()
 
 const tabs = [
   { label: 'Today', onchange: updateTodayLog },
   { label: 'Weekly', onchange: updateWeeklyLogs },
-  { label: 'All Logs', onchange: () => {} }
+  { label: 'All Logs', onchange: updateAllLogs }
 ]
 
-const loadTodayLog = ref(false)
 function updateTodayLog() {
-  loadTodayLog.value = true
+  events.emitEvent('loadTodayLogs', {})
 }
 
-const loadWeeklyLogs = ref(false)
 function updateWeeklyLogs() {
-  loadWeeklyLogs.value = true
+  events.emitEvent('loadWeeklyLogs', {})
+}
+
+function updateAllLogs() {
+  events.emitEvent('loadData', { dataType: 'Work Logs' })
 }
 
 function triggerTabEvent(i) {
@@ -106,15 +51,11 @@ function triggerTabEvent(i) {
       @tab-change="triggerTabEvent"
     >
       <template #tab-0>
-        <TodayLog
-          v-model:load-data="loadTodayLog"
-        />
+        <TodayLog />
       </template>
 
       <template #tab-1>
-        <WeekLog
-          v-model:load-data="loadWeeklyLogs"
-        />
+        <WeekLog />
       </template>
 
       <template #tab-2>

@@ -82,6 +82,85 @@ export function useInputHelper(schemas) {
     )
   }
 
+  function formatDataFields(fields) {
+    return schemas.map((field) => {
+      if (field.type === 'enum') {
+        const enums = fields[field.key].enums
+        const options = Object.keys(enums).map((e) => {
+          return { value: e, label: enums[e] }
+        })
+        const combined = Object.assign({}, field, { options })
+        return combined
+      } else {
+        return field
+      }
+    })
+  }
+
+  function validateParams(validations, params) {
+    return Object.keys(validations).reduce((errors, field) => {
+      const validators = validations[field]
+      const fieldErrors = validators.map((validator) => {
+        return validator(params)
+      }).filter(e => !!e)
+
+      if (fieldErrors.length > 0) {
+        errors[field] = fieldErrors
+      }
+      return errors
+    }, {})
+  }
+
+  function formatDataForShow(field, record) {
+    if ((inputType(field) === 'date' || inputType(field) === 'datetime') && !!record[field]) {
+      return new Date(record[field])
+    } else if (multiSelectableField(field) && !!record.includes) {
+      const includes = record.includes[field]
+      const fieldValue = record[field]
+      if (!!includes && Object.keys(includes).length > 0) {
+        return fieldValue.map((v) => {
+          const include = includes[v]
+          const options = schemasMap.value[field].options
+          const value = options.value(include)
+          const label = options.label(include)
+          return { value, label }
+        })
+      } else {
+        return record[field]
+      }
+    } else if (singleSelectableField(field) && !!record.includes) {
+      const includes = record.includes[field]
+      const fieldValue = record[field]
+      if (!!fieldValue && !!includes && Object.keys(includes).length > 0) {
+        const include = includes[fieldValue]
+        const options = schemasMap.value[field].options
+        const value = options.value(include)
+        const label = options.label(include)
+        return [{ value, label }]
+      } else {
+        return record[field]
+      }
+    } else {
+      return record[field]
+    }
+  }
+
+  function formatDataForSave(params) {
+    const data = Object.assign({}, params)
+
+    multiSelectableFields.value.forEach((field) => {
+      const values = (data[field] || [])
+      data[field] = values.map(v => v.value)
+    })
+
+    singleSelectableFields.value.forEach((field) => {
+      const values = (data[field] || [])
+      data[field] = (values[0] || {}).value
+    })
+
+    return data
+  }
+
   async function fetchOptions(field, offset) {
     const options = schemasMap.value[field].options || {}
     if (options.server) {
@@ -156,6 +235,10 @@ export function useInputHelper(schemas) {
     nullToggleableField,
     nullToggleableFields,
     formatInputOptionsData,
+    formatDataFields,
+    formatDataForShow,
+    formatDataForSave,
+    validateParams,
     fetchOptions,
     initOptionsData
   }

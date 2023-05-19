@@ -44,6 +44,9 @@ const dataAccess = useDataAccess()
 /*** import:stores ***/
 import { useBannerStore } from '@/stores/banner'
 const banner = useBannerStore()
+
+import { useEventsStore } from '@/stores/events'
+const events = useEventsStore()
 /*** import:stores ***/
 
 /*** import:components ***/
@@ -453,8 +456,19 @@ async function optionsOffsetChange(field, newOffset) {
 }
 /*** section:inputOptions ***/
 
-/*** vars:computed ***/
-/*** vars:computed ***/
+/*** section:events ***/
+events.registerListener(
+  'loadData',
+  {
+    id: `DataPage-${props.dataType}`,
+    invoke: (payload) => {
+      if (payload.dataType === props.dataType) {
+        loadData()
+      }
+    }
+  }
+)
+/*** section:events ***/
 
 /*** section:dataAccess ***/
 async function loadSchemas() {

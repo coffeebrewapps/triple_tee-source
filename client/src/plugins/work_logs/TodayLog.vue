@@ -1,54 +1,75 @@
 <script setup>
+/*** import:global ***/
 import { ref, computed, watch, onMounted } from 'vue'
+/*** import:global ***/
 
+/*** import:config ***/
 import useConfig from '@/config'
-import { useValidations } from '@/utils/validations'
-import { useDataAccess } from '@/utils/dataAccess'
-import { useFormatter } from '@/utils/formatter'
-
-import { useWorkLogUtils } from './utils'
-
 const config = useConfig()
+/*** import:config ***/
+
+/*** import:utils ***/
+import { useValidations } from '@/utils/validations'
 const {
   isEmpty,
   notEmpty
 } = useValidations()
+
+import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
 
+import { useFormatter } from '@/utils/formatter'
 const {
   formatShortTime
 } = useFormatter()
 
+import { useWorkLogUtils } from './utils'
 const {
+  schemasUrl,
+  tagsUrl,
+  worklogsUrl,
+  dataFields,
+  fieldsLayout,
+  filters,
+  validations,
   formatDuration,
-  calculateDuration
+  calculateDuration,
+  includeKeys
 } = useWorkLogUtils()
 
-const worklogsUrl = `${config.baseUrl}/api/work_logs`
+import { useInputHelper } from '@/utils/input'
+const {
+  formatDataFields,
+  validateParams,
+  formatDataForShow,
+  formatDataForSave,
+  fetchOptions,
+  initOptionsData
+} = useInputHelper(dataFields)
+/*** import:utils ***/
 
-const props = defineProps({
-  loadData: {
-    type: Boolean,
-    default: false
-  }
+/*** import:stores ***/
+import { useBannerStore } from '@/stores/banner'
+const banner = useBannerStore()
+
+import { useEventsStore } from '@/stores/events'
+const events = useEventsStore()
+/*** import:stores ***/
+
+/*** import:components ***/
+import FormDialog from '@/components/FormDialog.vue'
+/*** import:components ***/
+
+/*** section:global ***/
+const combinedDataFields = ref([])
+
+const creatableKeys = computed(() => {
+  return dataFields.map(f => f.key)
 })
+/*** section:global ***/
 
-const emit = defineEmits(['update:loadData'])
-
-const dataLoading = computed({
-  get: () => {
-    return props.loadData
-  },
-  set: (val) => {
-    emit('update:loadData', val)
-  }
-})
-
-watch(dataLoading, async (newVal, oldVal) => {
-  if (newVal) {
-    await loadToday()
-  }
-})
+/*** section:data ***/
+const currentTask = ref({})
 
 const startOfToday = computed(() => {
   const today = new Date()
@@ -71,32 +92,8 @@ const todayLogs = ref([])
 const openTask = computed(() => {
   if (todayLogs.value.length === 0) { return false }
 
-  const latestEntry = todayLogs.value[0]
-
-  return isEmpty(latestEntry.endTime)
+  return isEmpty(currentTask.value.endTime)
 })
-
-function startTask() {
-}
-
-function quickStartTask() {
-}
-
-function endTask() {
-}
-
-function endTaskAndStartTask() {
-  endTask()
-  startTask()
-}
-
-function endTaskAndQuickStartTask() {
-  endTask()
-  quickStartTask()
-}
-
-function submitTaskForm() {
-}
 
 function formatWorkLogs(data) {
   return data.map((record) => {
@@ -105,8 +102,173 @@ function formatWorkLogs(data) {
   })
 }
 
+function formatExistingTask(record) {
+  if (isEmpty(record)) { return {} }
+
+  record.duration = calculateDuration(record)
+  return record
+}
+/*** section:data ***/
+
+/*** section:startTask ***/
+const startTaskDialog = ref(false)
+
+function formatNewTask() {
+  return dataFields.reduce((o, field) => {
+    const key = field.key
+    const defaultValue = field.defaultValue
+
+    if (notEmpty(defaultValue)) {
+      o[key] = defaultValue()
+    } else {
+      o[key] = null
+    }
+
+    return o
+  }, {})
+}
+
+function startTask() {
+  currentTask.value = formatNewTask()
+  startNew.value = ''
+  startTaskDialog.value = true
+}
+
+async function quickStartTask() {
+  currentTask.value = formatNewTask()
+  startNew.value = ''
+  await submitNewTask()
+}
+
+function closeStartTaskDialog() {
+  startTaskDialog.value = false
+}
+
+async function submitNewTask() {
+  const errors = validateParams(validations.create, currentTask.value)
+
+  if (Object.keys(errors).length > 0) {
+    showBanner(`Error submitting task!`)
+    return
+  }
+
+  const params = formatDataForSave(currentTask.value)
+
+  await dataAccess
+    .create(worklogsUrl, params)
+    .then((result) => {
+      showBanner(`Started task successfully!`)
+      loadToday()
+      closeStartTaskDialog()
+    })
+    .catch((error) => {
+      showBanner(`Error creating data!`)
+    })
+}
+/*** section:startTask ***/
+
+/*** section:endTask ***/
+const endTaskDialog = ref(false)
+const startNew = ref('')
+const currentTaskForUpdate = ref({})
+
+watch(endTaskDialog, (newVal, oldVal) => {
+  if (!newVal) {
+    currentTaskForUpdate.value = {}
+  }
+})
+
+async function updateTask() {
+  const errors = validateParams(validations.update, currentTaskForUpdate.value)
+
+  if (Object.keys(errors).length > 0) {
+    showBanner(`Error submitting task!`)
+    return
+  }
+
+  const params = formatDataForSave(currentTaskForUpdate.value)
+
+  await dataAccess
+    .update(`${worklogsUrl}/${currentTaskForUpdate.value.id}`, params)
+    .then((result) => {
+      showBanner(`Ended task successfully!`)
+      loadToday()
+      closeEndTaskDialog()
+
+      if (startNew.value === 'quick') {
+        quickStartTask()
+      } else if (startNew.value === 'input') {
+        setTimeout(startTask, 1000)
+      }
+    })
+    .catch((error) => {
+      showBanner(`Error submiting task!`)
+    })
+}
+
+function endTask() {
+  currentTaskForUpdate.value = Object.assign({}, currentTask.value)
+  currentTaskForUpdate.value.startTime = formatDataForShow('startTime', currentTaskForUpdate.value)
+  currentTaskForUpdate.value.tags = formatDataForShow('tags', currentTaskForUpdate.value)
+  currentTaskForUpdate.value.endTime = new Date()
+  endTaskDialog.value = true
+}
+
+function endTaskAndStartTask() {
+  endTask()
+  startNew.value = 'input'
+}
+
+function endTaskAndQuickStartTask() {
+  endTask()
+  startNew.value = 'quick'
+}
+
+function closeEndTaskDialog() {
+  currentTaskForUpdate.value = {}
+  endTaskDialog.value = false
+}
+/*** section:endTask ***/
+
+/*** section:banner ***/
+function showBanner(message) {
+  banner.show(message)
+  setTimeout(hideBanner, 5000)
+}
+
+function hideBanner() {
+  banner.hide()
+}
+/*** section:banner ***/
+
+/*** section:events ***/
+events.registerListener(
+  'loadTodayLogs',
+  {
+    id: 'TodayLog',
+    invoke: (payload) => {
+      loadToday()
+    }
+  }
+)
+/*** section:events ***/
+
+async function loadSchemas() {
+  await dataAccess
+    .schemas(schemasUrl)
+    .then((result) => {
+      const fields = result.fields
+      combinedDataFields.value = formatDataFields(fields)
+    })
+    .catch((error) => {
+      showBanner(`Error loading schemas!`)
+      console.log(error)
+    })
+}
+
 async function loadToday() {
   const params = {
+    include: includeKeys.value,
     filters: {
       startTime: {
         startDate: startOfToday.value,
@@ -123,17 +285,17 @@ async function loadToday() {
     .list(worklogsUrl, params)
     .then((result) => {
       todayLogs.value = formatWorkLogs(result.data)
+      currentTask.value = formatExistingTask(todayLogs.value[0])
     })
     .catch((error) => {
+      showBanner(`Error loading work logs!`)
       console.log(error)
-    })
-    .finally(() => {
-      dataLoading.value = false
     })
 }
 
 onMounted(async () => {
   await loadToday()
+  await loadSchemas()
 })
 </script>
 
@@ -183,6 +345,12 @@ onMounted(async () => {
 
     <div class="logs">
       <div
+        class="total"
+      >
+        Today's total: 0 h 0 m 0 s
+      </div>
+
+      <div
         v-for="log in todayLogs"
         class="log"
       >
@@ -218,12 +386,35 @@ onMounted(async () => {
         </div>
       </div>
     </div>
+
+    <FormDialog
+      v-model="startTaskDialog"
+      :schemas="combinedDataFields"
+      :fields-layout="fieldsLayout"
+      :data-fields="creatableKeys"
+      :data="currentTask"
+      :fullscreen="true"
+      dialog-title="Start Task"
+      @submit="submitNewTask"
+    />
+
+    <FormDialog
+      v-model="endTaskDialog"
+      :schemas="combinedDataFields"
+      :fields-layout="fieldsLayout"
+      :data-fields="creatableKeys"
+      :data="currentTaskForUpdate"
+      :fullscreen="true"
+      dialog-title="End Task"
+      @submit="updateTask"
+    />
   </div> <!-- today-logs-container -->
 </template>
 
 <style scoped>
 .today-logs-container {
   display: flex;
+  justify-content: space-evenly;
   gap: 1rem;
   margin: 1rem 0 0 0;
 }
@@ -233,7 +424,7 @@ onMounted(async () => {
   flex-direction: column;
   gap: 1rem;
   align-items: center;
-  width: 50%;
+  width: 30%;
 }
 
 .today-logs-container .controls .button {
@@ -258,6 +449,20 @@ onMounted(async () => {
 .today-logs-container .logs {
   display: flex;
   flex-direction: column;
+  padding: 0 1rem;
+  height: 500px;
+  width: 70%;
+  overflow-y: auto;
+}
+
+.today-logs-container .logs .total {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: var(--color-background-soft);
+  border-radius: 4px;
+  text-align: center;
+  width: 100%;
+  font-weight: 600;
 }
 
 .today-logs-container .logs .log {

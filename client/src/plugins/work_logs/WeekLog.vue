@@ -1,91 +1,54 @@
 <script setup>
+/*** import:global ***/
 import { ref, computed, watch, onMounted } from 'vue'
+/*** import:global ***/
 
+/*** import:config ***/
 import useConfig from '@/config'
-import { useValidations } from '@/utils/validations'
-import { useDataAccess } from '@/utils/dataAccess'
-import { useFormatter } from '@/utils/formatter'
-
 const config = useConfig()
+/*** import:config ***/
+
+/*** import:utils ***/
+import { useValidations } from '@/utils/validations'
 const {
   isEmpty
 } = useValidations()
+
+import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
 
+import { useFormatter } from '@/utils/formatter'
 const {
   formatLongDate
 } = useFormatter()
 
-const worklogsUrl = `${config.baseUrl}/api/work_logs`
+import { useWorkLogUtils } from './utils'
+const {
+  worklogsUrl,
+  formatDuration,
+  calculateDuration
+} = useWorkLogUtils()
+/*** import:utils ***/
 
+/*** import:stores ***/
+import { useBannerStore } from '@/stores/banner'
+const banner = useBannerStore()
+
+import { useEventsStore } from '@/stores/events'
+const events = useEventsStore()
+/*** import:stores ***/
+
+/*** section:props ***/
 const props = defineProps({
   loadData: {
     type: Boolean,
     default: false
   }
 })
+/*** section:props ***/
 
-const emit = defineEmits(['update:loadData'])
-
-const dataLoading = computed({
-  get: () => {
-    return props.loadData
-  },
-  set: (val) => {
-    emit('update:loadData', val)
-  }
-})
-
-watch(dataLoading, async (newVal, oldVal) => {
-  if (newVal) {
-    await loadWeekly()
-  }
-})
-
+/*** section:global ***/
 const selectedWeek = ref('this')
-
-const prevWeekTabStyle = computed(() => {
-  if (selectedWeek.value === 'prev') {
-    return `weekly-tab active`
-  } else {
-    return `weekly-tab`
-  }
-})
-
-const thisWeekTabStyle = computed(() => {
-  if (selectedWeek.value === 'this') {
-    return `weekly-tab active`
-  } else {
-    return `weekly-tab`
-  }
-})
-
-const nextWeekTabStyle = computed(() => {
-  if (selectedWeek.value === 'next') {
-    return `weekly-tab active`
-  } else {
-    return `weekly-tab`
-  }
-})
-
-async function prevWeek() {
-  currentWeek.value = currentWeek.value - 1
-  selectedWeek.value = 'prev'
-  await loadWeekly()
-}
-
-async function thisWeek() {
-  currentWeek.value = 0
-  selectedWeek.value = 'this'
-  await loadWeekly()
-}
-
-async function nextWeek() {
-  currentWeek.value = currentWeek.value + 1
-  selectedWeek.value = 'next'
-  await loadWeekly()
-}
-
 const weeklyData = ref({})
 const currentWeek = ref(0)
 
@@ -163,47 +126,6 @@ function dayEntries(day) {
   }
 }
 
-function formatDuration(ms) {
-  const days = Math.floor(ms / 1000 / 60 / 60 / 24)
-  const daysInMs = days * 1000 * 60 * 60 * 24
-
-  const hours = Math.floor((ms - daysInMs) / 1000 / 60 / 60)
-  const hoursInMs = hours * 1000 * 60 * 60
-
-  const minutes = Math.floor((ms - daysInMs - hoursInMs) / 1000 / 60)
-  const minutesInMs = minutes * 1000 * 60
-
-  const seconds = Math.floor((ms - daysInMs - hoursInMs - minutesInMs) / 1000)
-
-  const parts = []
-
-  if (days > 0) {
-    parts.push(`${days} d`)
-  }
-
-  if (hours > 0) {
-    parts.push(`${hours} h`)
-  }
-
-  if (minutes > 0) {
-    parts.push(`${minutes} m`)
-  }
-
-  if (seconds > 0) {
-    parts.push(`${seconds} s`)
-  }
-
-  return parts.join(' ')
-}
-
-function calculateDuration(entry) {
-  if (isEmpty(entry.endTime)) {
-    return ((new Date()) - (new Date(entry.startTime)))
-  } else {
-    return ((new Date(entry.endTime)) - (new Date(entry.startTime)))
-  }
-}
-
 function formatDayEntries(entries) {
   return entries.map((entry) => {
     const totaled = Object.assign({}, entry)
@@ -231,6 +153,76 @@ function formatWeeklyData(data) {
 
   return days
 }
+/*** section:global ***/
+
+/*** section:banner ***/
+function showBanner(message) {
+  banner.show(message)
+  setTimeout(hideBanner, 5000)
+}
+
+function hideBanner() {
+  banner.hide()
+}
+/*** section:banner ***/
+
+/*** section:events ***/
+events.registerListener(
+  'loadWeeklyLogs',
+  {
+    id: 'WeekLog',
+    invoke: (payload) => {
+      loadWeekly()
+    }
+  }
+)
+/*** section:events ***/
+
+/*** section:styles ***/
+const prevWeekTabStyle = computed(() => {
+  if (selectedWeek.value === 'prev') {
+    return `weekly-tab active`
+  } else {
+    return `weekly-tab`
+  }
+})
+
+const thisWeekTabStyle = computed(() => {
+  if (selectedWeek.value === 'this') {
+    return `weekly-tab active`
+  } else {
+    return `weekly-tab`
+  }
+})
+
+const nextWeekTabStyle = computed(() => {
+  if (selectedWeek.value === 'next') {
+    return `weekly-tab active`
+  } else {
+    return `weekly-tab`
+  }
+})
+/*** section:styles ***/
+
+/*** section:actions ***/
+async function prevWeek() {
+  currentWeek.value = currentWeek.value - 1
+  selectedWeek.value = 'prev'
+  await loadWeekly()
+}
+
+async function thisWeek() {
+  currentWeek.value = 0
+  selectedWeek.value = 'this'
+  await loadWeekly()
+}
+
+async function nextWeek() {
+  currentWeek.value = currentWeek.value + 1
+  selectedWeek.value = 'next'
+  await loadWeekly()
+}
+/*** section:actions ***/
 
 async function loadWeekly() {
   const params = {
@@ -243,10 +235,8 @@ async function loadWeekly() {
       weeklyData.value = formatWeeklyData(result.data)
     })
     .catch((error) => {
+      showBanner(`Error loading work logs!`)
       console.log(error)
-    })
-    .finally(() => {
-      dataLoading.value = false
     })
 }
 
