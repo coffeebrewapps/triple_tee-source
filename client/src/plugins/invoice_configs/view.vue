@@ -9,6 +9,7 @@ const { greaterThan } = useValidations()
 
 const tagsUrl = `${config.baseUrl}/api/tags`
 const sequencesUrl = `${config.baseUrl}/api/sequences`
+const contactsUrl = `${config.baseUrl}/api/contacts`
 
 const fieldsLayout = [
   { invoiceCycleDurationValue: 'md', invoiceCycleDurationUnit: 'md' },
@@ -16,7 +17,8 @@ const fieldsLayout = [
   { paymentTerms: 'lg' },
   { tags: 'lg' },
   { customFields: 'lg' },
-  { invoiceNumberSequenceId: 'lg' }
+  { invoiceNumberSequenceId: 'lg' },
+  { billingContactId: 'lg' }
 ]
 
 const dataFields = [
@@ -51,6 +53,18 @@ const dataFields = [
       label: sequenceNumberLabel
     }
   },
+  {
+    key: 'billingContactId', type: 'singleSelect', label: 'Contact',
+    reference: { label: contactLabel },
+    listable: true, viewable: true, creatable: true, updatable: false, filterable: true,
+    options: {
+      server: true,
+      pagination: true,
+      sourceUrl: contactsUrl,
+      value: recordValue,
+      label: contactLabel
+    }
+  },
 ]
 
 const validations = {
@@ -67,7 +81,7 @@ const validations = {
 const filters = {
   initData: {},
   layout: [
-    { tags: 'md' }
+    { tags: 'md', billingContactId: 'lg' }
   ]
 }
 
@@ -80,6 +94,10 @@ function tagLabel(record) {
 }
 
 function sequenceNumberLabel(record) {
+  return record.name
+}
+
+function contactLabel(record) {
   return record.name
 }
 </script>

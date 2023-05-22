@@ -245,6 +245,10 @@
         "invoiceNumberSequenceId": {
           "reference": "sequences",
           "primary": "id"
+        },
+        "billingContactId": {
+          "reference": "contacts",
+          "primary": "id"
         }
       },
       "unique": [],
@@ -255,7 +259,8 @@
         "dueDateCycleUnit",
         "tags",
         "customFields",
-        "invoiceNumberSequenceId"
+        "invoiceNumberSequenceId",
+        "billingContactId"
       ]
     },
     "indexes": {
