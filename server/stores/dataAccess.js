@@ -354,7 +354,7 @@ function fetchIncludes(modelClass, record, include) {
     const foreignClass = constraint.reference;
 
     records[foreignKey] = referenceValue.reduce((references, value) => {
-      if (dataCache[foreignClass]) {
+      if (utils.notEmpty(dataCache[foreignClass])) {
         references[value] = dataCache[foreignClass][value];
       } else {
         references[value] = null;
