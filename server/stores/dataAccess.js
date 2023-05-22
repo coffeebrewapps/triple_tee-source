@@ -122,7 +122,11 @@ function defaultValuesForCreate(modelClass) {
   const fields = schemaCache[modelClass].fields;
 
   return Object.entries(fields).reduce((o, [field, schema]) => {
-    o[field] = schema.default
+    if (utils.notEmpty(schema.default)) {
+      o[field] = schema.default
+    } else {
+      o[field] = null
+    }
     return o;
   }, {});
 }
