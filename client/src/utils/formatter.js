@@ -23,8 +23,8 @@ export function useFormatter() {
     return (new Date(rawValue)).toLocaleTimeString(locale, { timeStyle: 'medium' })
   }
 
-  function formatTag(record, tag) {
-    const includes = (record.includes || {}).tags
+  function formatTag(record, tag, field) {
+    const includes = (record.includes || {})[field] || {}
     if (includes[tag]) {
       const value = includes[tag] || {}
       return `${value.category}:${value.name}`
@@ -33,8 +33,8 @@ export function useFormatter() {
     }
   }
 
-  function tagStyle(record, tag) {
-    const includes = (record.includes || {}).tags
+  function tagStyle(record, tag, field) {
+    const includes = (record.includes || {})[field] || {}
     if (includes[tag]) {
       const color = includes[tag].textColor
       const background = includes[tag].backgroundColor

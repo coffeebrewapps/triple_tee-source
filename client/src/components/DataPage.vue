@@ -21,6 +21,7 @@ const {
   multiSelectableField,
   singleSelectableField,
   selectableField,
+  tagsField,
   formatInputOptionsData,
   fetchOptions,
   initOptionsData
@@ -1025,7 +1026,7 @@ onMounted(async () => {
             v-bind="{ header, row, i }"
           >
             <div
-              v-if="header.key !== 'tags'"
+              v-if="!tagsField(header.key)"
             >
               <div
                 v-if="row[header.key]"
@@ -1043,14 +1044,14 @@ onMounted(async () => {
 
             <!-- hardcode format for tags because it is standard through the app --->
             <div
-              v-if="header.key === 'tags'"
+              v-if="tagsField(header.key)"
             >
               <div
-                v-for="tag in row.tags"
+                v-for="tag in row[header.key]"
                 class="tag"
-                :style="tagStyle(row, tag)"
+                :style="tagStyle(row, tag, header.key)"
               >
-                {{ formatTag(row, tag) }}
+                {{ formatTag(row, tag, header.key) }}
               </div>
 
               <div

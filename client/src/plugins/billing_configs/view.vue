@@ -25,7 +25,7 @@ const dataFields = [
   { key: 'unit', type: 'enum', label: 'Unit', listable: true, viewable: true, creatable: true, updatable: false },
   { key: 'unitCost', type: 'number', label: 'Unit Cost', listable: true, viewable: true, creatable: true, updatable: false },
   {
-    key: 'includeTags', type: 'multiSelect', label: 'Include Tags',
+    key: 'includeTags', type: 'multiSelect', label: 'Include Tags', isTags: true,
     reference: { label: tagLabel },
     listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
     options: {
@@ -37,7 +37,7 @@ const dataFields = [
     }
   },
   {
-    key: 'excludeTags', type: 'multiSelect', label: 'Exclude Tags',
+    key: 'excludeTags', type: 'multiSelect', label: 'Exclude Tags', isTags: true,
     reference: { label: tagLabel },
     listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
     options: {

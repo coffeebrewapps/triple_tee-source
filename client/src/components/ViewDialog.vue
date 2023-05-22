@@ -10,6 +10,12 @@ const {
   formatTag,
   tagStyle
 } = useFormatter()
+
+import { useInputHelper } from '../utils/input'
+
+const {
+  tagsField
+} = useInputHelper(props.dataFields)
 /*** import:utils ***/
 
 /*** import:components ***/
@@ -35,6 +41,12 @@ const props = defineProps({
     type: Object,
     default() {
       return {}
+    }
+  },
+  dataFields: {
+    type: Array,
+    default() {
+      return []
     }
   },
   title: {
@@ -90,7 +102,7 @@ function closeDialog() {
         >
           <div class="data-label">{{ inputLabel(field) }}</div>
           <div
-            v-if="field !== 'tags'"
+            v-if="!tagsField(field)"
             class="data-value"
           >
             <div
@@ -109,19 +121,19 @@ function closeDialog() {
 
           <!-- hardcode format for tags because it is standard through the app --->
           <div
-            v-if="field === 'tags'"
+            v-if="tagsField(field)"
             class="data-value tags"
           >
             <div
-              v-for="tag in record.tags"
+              v-for="tag in record[field]"
               class="tag"
-              :style="tagStyle(record, tag)"
+              :style="tagStyle(record, tag, field)"
             >
-              {{ formatTag(record, tag) }}
+              {{ formatTag(record, tag, field) }}
             </div>
 
             <div
-              v-if="record.tags.length === 0"
+              v-if="record[field].length === 0"
               class="no-value"
             >
               --- no value ---
