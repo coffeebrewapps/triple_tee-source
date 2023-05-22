@@ -28,6 +28,120 @@
       "required": ["title", "content"]
     }
   },
+  "contacts": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "accountNumber": {
+        "type": "text"
+      },
+      "addressLine1": {
+        "type": "text"
+      },
+      "addressLine2": {
+        "type": "text"
+      },
+      "addressLine3": {
+        "type": "text"
+      },
+      "city": {
+        "type": "text"
+      },
+      "state": {
+        "type": "text"
+      },
+      "country": {
+        "type": "text"
+      },
+      "postcode": {
+        "type": "text"
+      },
+      "contactNumber1": {
+        "type": "text"
+      },
+      "contactNumber2": {
+        "type": "text"
+      },
+      "contactNumber3": {
+        "type": "text"
+      },
+      "contactPerson1": {
+        "type": "text"
+      },
+      "contactPerson2": {
+        "type": "text"
+      },
+      "contactPerson3": {
+        "type": "text"
+      },
+      "contactEmail1": {
+        "type": "text"
+      },
+      "contactEmail2": {
+        "type": "text"
+      },
+      "contactEmail3": {
+        "type": "text"
+      },
+      "url1": {
+        "type": "text"
+      },
+      "url2": {
+        "type": "text"
+      },
+      "url3": {
+        "type": "text"
+      },
+      "logo": {
+        "type": "file"
+      },
+      "customFields": {
+        "type": "object"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "country": {
+          "reference": "countries",
+          "primary": "alpha3Code"
+        }
+      },
+      "unique": [],
+      "required": ["name"]
+    },
+    "indexes": {
+      "filter": {
+        "name": { "match": true }
+      }
+    }
+  },
+  "countries": {
+    "fields": {
+      "alpha3Code": {
+        "type": "text"
+      },
+      "countryName": {
+        "type": "text"
+      }
+    },
+    "constraints": {
+      "primary": ["alpha3Code"],
+      "foreign": {},
+      "unique": [],
+      "required": []
+    }
+  },
   "currencies": {
     "fields": {
       "id": {

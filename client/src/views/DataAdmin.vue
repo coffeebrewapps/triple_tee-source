@@ -42,6 +42,8 @@ const errorAlert = ref(false)
 
 const schemas = [
   { value: 'indexes', label: 'Indexes' },
+  { value: 'contacts', label: 'Contacts' },
+  { value: 'countries', label: 'Countries' },
   { value: 'currencies', label: 'Currencies' },
   { value: 'tags', label: 'Tags' },
   { value: 'transactions', label: 'Transactions' },

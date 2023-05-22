@@ -77,6 +77,12 @@ app.put('/api/indexes', function(req, res){
   const data = req.body;
   res.send(dataAccess.uploadIndexes(data));
 });
+
+app.get('/api/countries', function(req, res){
+  const params = req.query;
+  console.log(`Requesting countries data`, params);
+  res.send(dataAccess.list('countries', params));
+});
 /*** end:Routes ***/
 
 (async () => {
