@@ -121,6 +121,7 @@ onMounted(async () => {
 
 <template>
   <TemplateEditor
+    v-if="currentTemplate"
     :content-markup="currentTemplate.contentMarkup"
     :content-styles="currentTemplate.contentStyles"
     @content-markup-change="updateMarkup"

@@ -1,8 +1,8 @@
 import { useRouter } from 'vue-router'
 
 const route = {
-  path: '/invoice_templates',
-  name: 'Invoice Templates',
+  path: '/document_templates',
+  name: 'Document Templates',
   component: () => import('./view.vue')
 }
 

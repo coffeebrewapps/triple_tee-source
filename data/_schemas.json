@@ -398,6 +398,43 @@
       }
     }
   },
+  "receipt_templates": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "contentMarkup": {
+        "type": "text"
+      },
+      "contentStyles": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": [],
+      "required": [
+        "name",
+        "contentMarkup",
+        "contentStyles"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "name": { "match": true }
+      }
+    }
+  },
   "sequences": {
     "fields": {
       "id": {

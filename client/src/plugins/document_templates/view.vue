@@ -31,15 +31,20 @@ const filters = {
 
 const tabs = [
   { label: 'Latest', onchange: updateLatestTemplate },
-  { label: 'All Templates', onchange: updateAllTemplates }
+  { label: 'Invoice', onchange: updateInvoiceTemplates },
+  { label: 'Receipt', onchange: updateReceiptTemplates }
 ]
 
 function updateLatestTemplate() {
   events.emitEvent('loadLatestTemplate', {})
 }
 
-function updateAllTemplates() {
+function updateInvoiceTemplates() {
   events.emitEvent('loadData', { dataType: 'Invoice Templates' })
+}
+
+function updateReceiptTemplates() {
+  events.emitEvent('loadData', { dataType: 'Receipt Templates' })
 }
 
 function triggerTabEvent(i) {
@@ -49,7 +54,7 @@ function triggerTabEvent(i) {
 
 <template>
   <div class="view-container">
-    <h2 class="heading">Invoice Templates</h2>
+    <h2 class="heading">Document Templates</h2>
 
     <TabContainer
       :tabs="tabs"
@@ -71,6 +76,29 @@ function triggerTabEvent(i) {
           :filters="filters"
         />
       </template>
+
+      <template #tab-2>
+        <DataPage
+          data-type="Receipt Templates"
+          url-base="api/receipt_templates"
+          schemas-url-base="api/schemas/receipt_templates"
+          :fullscreen="true"
+          :fields-layout="fieldsLayout"
+          :data-fields="dataFields"
+          :validations="validations"
+          :filters="filters"
+        />
+      </template>
     </TabContainer>
   </div>
 </template>
+
+<style scoped>
+.view-container {
+  margin: 1rem 0;
+}
+
+.heading {
+  font-weight: 900;
+}
+</style>
