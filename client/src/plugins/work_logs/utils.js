@@ -74,6 +74,10 @@ export function useWorkLogUtils() {
   }
 
   function formatDuration(ms) {
+    if (ms === 0) {
+      return `0 h 0 m 0 s`
+    }
+
     const days = Math.floor(ms / 1000 / 60 / 60 / 24)
     const daysInMs = days * 1000 * 60 * 60 * 24
 

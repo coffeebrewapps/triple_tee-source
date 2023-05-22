@@ -98,6 +98,12 @@ const openTask = computed(() => {
   return isEmpty(currentTask.value.endTime) && taskStarted.value
 })
 
+const todayTotalDuration = computed(() => {
+  return todayLogs.value.reduce((total, log) => {
+    return total + log.duration
+  }, 0)
+})
+
 function formatWorkLogs(data) {
   return data.map((record) => {
     record.duration = calculateDuration(record)
@@ -468,7 +474,7 @@ onMounted(async () => {
       <div
         class="total"
       >
-        Today's total: 0 h 0 m 0 s
+        Today's total: {{ formatDuration(todayTotalDuration) }}
       </div>
 
       <div
