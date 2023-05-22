@@ -3,6 +3,16 @@
 import { ref, computed } from 'vue'
 /*** import:global ***/
 
+/*** import:utils ***/
+import html2pdf from 'html2pdf.js'
+/*** import:utils ***/
+
+/*** import:components ***/
+import {
+  TButton
+} from 'coffeebrew-vue-components'
+/*** import:components ***/
+
 /*** section:props ***/
 const props = defineProps({
   contentMarkup: {
@@ -52,20 +62,49 @@ const stylesEditorStyleClass = computed(() => {
   }
 })
 
-function toggleMarkupEditor() {
-  if (markupEditable.value) {
-    updateMarkup()
-  }
+const combinedMarkup = computed(() => {
+  if (!template.value) { return `` }
 
-  markupEditable.value = !markupEditable.value
+  const content = []
+
+  content.push(`<html>`)
+  content.push(`<head>`)
+
+  content.push(`<style>`)
+  content.push(template.value.contentStyles)
+  content.push(`</style>`)
+
+  content.push(`</head>`)
+
+  content.push(`<body>`)
+  content.push(template.value.contentMarkup)
+  content.push(`</body>`)
+
+  content.push(`</html>`)
+
+  return content.join('')
+})
+
+const pdfViewer = ref('pdfViewer')
+const pdfWorker = ref()
+const templatePdf = ref()
+
+function toggleMarkupEditor() {
+  markupEditable.value = true
+}
+
+function confirmMarkupEdit() {
+  updateMarkup()
+  markupEditable.value = false
 }
 
 function toggleStylesEditor() {
-  if (stylesEditable.value) {
-    updateStyles()
-  }
+  stylesEditable.value = true
+}
 
-  stylesEditable.value = !stylesEditable.value
+function confirmStylesEdit() {
+  updateStyles()
+  stylesEditable.value = false
 }
 /*** section:editor ***/
 
@@ -84,6 +123,36 @@ function updateMarkup() {
 
 function updateStyles() {
   emit('contentStylesChange', stylesEditor.value.innerText)
+}
+
+function previewTemplate() {
+  if (!template.value) { return }
+
+  const scale = 4
+  const width = 874
+  const height = 1240
+  pdfViewer.value.width = width * scale
+  pdfViewer.value.height = height * scale
+  pdfViewer.value.style.width =  `${width}px`
+  pdfViewer.value.style.height = `${height}px`
+
+  const context = pdfViewer.value.getContext('2d')
+  context.scale(scale, scale)
+
+  const opt = {
+    filename:     'myfile.pdf',
+    image:        { type: 'jpeg', quality: 1 },
+    html2canvas:  { scale: 1, canvas: pdfViewer.value },
+    jsPDF:        { unit: 'px', format: 'a4', orientation: 'portrait', hotfixes: ['px_scaling'] }
+  }
+
+  pdfWorker.value = html2pdf().set(opt).from(combinedMarkup.value).toCanvas()
+}
+
+function downloadPdf() {
+  if (!pdfWorker.value) { return }
+
+  pdfWorker.value.save()
 }
 /*** section:action ***/
 </script>
@@ -110,10 +179,16 @@ function updateStyles() {
         </div>
 
         <div
-          class="editor-button"
+          class="editor-button edit"
           @click="toggleMarkupEditor"
         >
           <i class="fa-solid fa-pencil"></i>
+        </div>
+
+        <div
+          class="editor-button confirm"
+          @click="confirmMarkupEdit"
+        >
           <i class="fa-solid fa-check"></i>
         </div>
       </div>
@@ -137,29 +212,47 @@ function updateStyles() {
         </div>
 
         <div
-          class="editor-button"
+          class="editor-button edit"
           @click="toggleStylesEditor"
         >
           <i class="fa-solid fa-pencil"></i>
+        </div>
+
+        <div
+          class="editor-button confirm"
+          @click="confirmStylesEdit"
+        >
           <i class="fa-solid fa-check"></i>
         </div>
       </div>
+
+      <div
+        class="editor"
+      >
+        {{ combinedMarkup }}
+      </div>
     </div>
 
-    <div class="preview-panel">
-      <div
-        v-if="template"
-        v-html="template.contentMarkup"
-        class="template-container"
-      >
+    <div>
+      <div class="buttons">
+        <TButton
+          value="Preview"
+          icon="fa-solid fa-eye"
+          @click="previewTemplate"
+        />
+
+        <TButton
+          value="Download"
+          icon="fa-solid fa-eye"
+          @click="downloadPdf"
+        />
       </div>
-      <component
-        v-if="template"
-        is="style"
-        scoped
+
+      <canvas
+        class="preview-panel"
+        ref="pdfViewer"
       >
-        {{ template.contentStyles }}
-      </component>
+      </canvas>
     </div>
   </div>
 </template>
@@ -197,12 +290,12 @@ function updateStyles() {
   height: auto;
   border: 1px solid var(--color-border);
   border-radius: 4px;
+  background-color: var(--color-background-mute);
   white-space: pre-wrap;
 }
 
 .editor.editable {
-  background-color: white;
-  color: black;
+  background-color: var(--color-background);
 }
 
 .editor-content {
@@ -222,10 +315,6 @@ function updateStyles() {
   background-color: var(--color-border);
 }
 
-.editor.editable .editor-button {
-  color: rgba(255, 255, 255, 0.8);
-}
-
 .editor-button.cancel {
   left: -1rem;
 }
@@ -235,20 +324,20 @@ function updateStyles() {
   background-color: var(--color-border-hover);
 }
 
-.editor.editable .editor-button .fa-check {
-  display: inline-block;
+.editor.editable .editor-button.confirm {
+  display: grid;
 }
 
-.editor .editor-button .fa-check {
+.editor .editor-button.confirm {
   display: none;
 }
 
-.editor.editable .editor-button .fa-pencil {
+.editor.editable .editor-button.edit {
   display: none;
 }
 
-.editor .editor-button .fa-pencil {
-  display: inline-block;
+.editor .editor-button.edit {
+  display: grid;
 }
 
 .editor.editable .editor-button.cancel {
@@ -259,6 +348,15 @@ function updateStyles() {
   display: none;
 }
 
+.buttons {
+  display: flex;
+  gap: 1rem;
+}
+
 .preview-panel {
+  width: 874px;
+  height: 1240px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
 }
 </style>

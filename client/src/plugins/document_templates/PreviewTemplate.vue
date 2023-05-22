@@ -126,9 +126,5 @@ onMounted(async () => {
     :content-styles="currentTemplate.contentStyles"
     @content-markup-change="updateMarkup"
     @content-styles-change="updateStyles"
-  >
-  </TemplateEditor>
+  />
 </template>
-
-<style scoped>
-</style>
