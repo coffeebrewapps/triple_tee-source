@@ -32,6 +32,7 @@ import {
   TDatePicker,
   TDateRange,
   TDateTimePicker,
+  TDateTimeRange,
   TInput,
   TSelect,
   TSelectTable,
@@ -136,6 +137,10 @@ function showSelect(field) {
 
 function showDateRange(field) {
   return showField(field) && inputType(field) === 'daterange'
+}
+
+function showDateTimeRange(field) {
+  return showField(field) && inputType(field) === 'datetimerange'
 }
 
 function fieldUpdatable(field) {
@@ -331,6 +336,15 @@ onMounted(async () => {
                 v-if="showDateRange(field)"
                 v-model:start-date="data[field].startDate"
                 v-model:end-date="data[field].endDate"
+                :label="inputLabel(field)"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+              />
+
+              <TDateTimeRange
+                v-if="showDateTimeRange(field)"
+                v-model:start-time="data[field].startTime"
+                v-model:end-time="data[field].endTime"
                 :label="inputLabel(field)"
                 :disabled="!fieldUpdatable(field)"
                 :error-message="fieldErrorMessage(field)"

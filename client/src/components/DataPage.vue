@@ -287,6 +287,8 @@ function formatFiltersFields() {
 
     if (filterField.type === 'date') {
       filterField.type = 'daterange'
+    } else if (filterField.type === 'datetime') {
+      filterField.type = 'datetimerange'
     } else if (filterField.type === 'number') {
       filterField.type = 'numberrange'
     }
