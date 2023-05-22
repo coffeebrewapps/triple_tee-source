@@ -638,7 +638,7 @@ async function createDataAndCloseDialog(rawParams) {
       closeCreateDialog()
     })
     .catch((error) => {
-      createErrors.value = formatErrorsForDisplay(error)
+      createErrors.value = formatErrorsForDisplay(error[0].response.data)
       showBanner(`Error creating data!`)
     })
 }

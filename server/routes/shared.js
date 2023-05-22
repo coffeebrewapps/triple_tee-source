@@ -15,7 +15,13 @@ exports.create = function(store) {
     const params = req.body;
 
     logger.log(`Creating record`, params)
-    res.status(201).send(store.create(params));
+    const result = store.create(params);
+
+    if (result.success) {
+      res.status(201).send(result);
+    } else {
+      res.status(400).send(result);
+    }
   }
 };
 

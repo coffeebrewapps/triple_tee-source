@@ -120,6 +120,15 @@ function view(modelClass, id, params = {}) {
   };
 }
 
+function defaultValuesForCreate(modelClass) {
+  const fields = schemaCache[modelClass].fields;
+
+  return Object.entries(fields).reduce((o, [field, schema]) => {
+    o[field] = schema.default
+    return o;
+  }, {});
+}
+
 // TODO: check exists
 function create(modelClass, params) {
   const result = validator.validate(modelClass, params, schemaCache, indexCache, dataCache);
@@ -129,7 +138,8 @@ function create(modelClass, params) {
     const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
     const newId = (lastId + 1).toString();
     const now = new Date();
-    const newRow = Object.assign(params, { id: newId, createdAt: now, updatedAt: now });
+    const defaultValues = defaultValuesForCreate(modelClass);
+    const newRow = Object.assign({}, defaultValues, params, { id: newId, createdAt: now, updatedAt: now });
     cacheRecord(modelClass, newRow);
     cacheIndexes(modelClass, newRow);
 

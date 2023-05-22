@@ -67,6 +67,53 @@
       }
     }
   },
+  "sequences": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "startingNumber": {
+        "type": "number",
+        "default": 1
+      },
+      "lastUsedNumber": {
+        "type": "number",
+        "default": 1
+      },
+      "incrementStep": {
+        "type": "number",
+        "default": 1
+      },
+      "prefix": {
+        "type": "text"
+      },
+      "suffix": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": [],
+      "required": ["name", "startingNumber", "lastUsedNumber", "incrementStep"]
+    },
+    "indexes": {
+      "filter": {
+        "name": { "match": true },
+        "prefix": { "match": true },
+        "suffix": { "match": true }
+      }
+    }
+  },
   "tags": {
     "fields": {
       "id": {

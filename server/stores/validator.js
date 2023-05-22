@@ -3,6 +3,7 @@ const utils = require('../utils');
 
 function validate(modelClass, record, schemas, indexes, data, check = { unique: true, required: true, foreign: true }) {
   const constraints = schemas[modelClass].constraints;
+  const modelSchemas = schemas[modelClass].fields;
   const errors = {};
 
   if (check.unique) {
@@ -12,7 +13,7 @@ function validate(modelClass, record, schemas, indexes, data, check = { unique: 
 
   if (check.required) {
     const requiredConstraint = constraints.required;
-    validateRequired(modelClass, record, requiredConstraint, data, errors);
+    validateRequired(modelClass, modelSchemas, record, requiredConstraint, data, errors);
   }
 
   if (check.foreign) {
@@ -51,9 +52,10 @@ function validateUnique(modelClass, indexes, record, constraint, data, errors) {
   });
 }
 
-function validateRequired(modelClass, record, constraint, data, errors) {
+function validateRequired(modelClass, schemas, record, constraint, data, errors) {
   const errorFields = constraint.filter((field) => {
-    return !record[field];
+    const fieldDefault = schemas[field].default
+    return utils.isEmpty(record[field]) && utils.isEmpty(fieldDefault);
   });
 
   errorFields.forEach((field) => {
