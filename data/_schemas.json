@@ -333,6 +333,10 @@
         "billingContactId": {
           "reference": "contacts",
           "primary": "id"
+        },
+        "invoiceTemplateId": {
+          "reference": "invoice_templates",
+          "primary": "id"
         }
       },
       "unique": [],
@@ -344,7 +348,8 @@
         "tags",
         "customFields",
         "invoiceNumberSequenceId",
-        "billingContactId"
+        "billingContactId",
+        "invoiceTemplateId"
       ]
     },
     "indexes": {
@@ -353,6 +358,43 @@
         "invoiceNumberSequenceId": {},
         "billingContactId": {},
         "invoiceTemplateId": {}
+      }
+    }
+  },
+  "invoice_templates": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "name": {
+        "type": "text"
+      },
+      "contentMarkup": {
+        "type": "text"
+      },
+      "contentStyles": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": [],
+      "required": [
+        "name",
+        "contentMarkup",
+        "contentStyles"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "name": { "match": true }
       }
     }
   },
