@@ -638,7 +638,7 @@ async function createDataAndCloseDialog(rawParams) {
       closeCreateDialog()
     })
     .catch((error) => {
-      createErrors.value = formatErrorsForDisplay(error[0].response.data)
+      createErrors.value = formatErrorsForDisplay(error)
       showBanner(`Error creating data!`)
     })
 }
@@ -917,8 +917,7 @@ function formatDataForSave(params) {
 }
 
 function formatErrorsForDisplay(error) {
-  return Object.keys(error).reduce((errors, field) => {
-    const fieldErrors = error[field]
+  return Object.entries(error).reduce((errors, [field, fieldErrors]) => {
     errors[field] = fieldErrors.map((errorName) => {
       return {
         name: errorName,

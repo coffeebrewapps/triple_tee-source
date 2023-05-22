@@ -49,14 +49,10 @@ export function useApiAccess() {
       axios
         .post(url, params)
         .then((res) => {
-          if (res.data.success) {
-            resolve(res.data.record)
-          } else {
-            reject(res.data.errors)
-          }
+          resolve(res.data.record)
         })
-        .catch((error) => {
-          reject(formatErrors(error))
+        .catch(({ response }) => {
+          reject(response.data.errors)
         })
     })
   }

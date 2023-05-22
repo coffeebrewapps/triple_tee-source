@@ -308,6 +308,7 @@ onMounted(async () => {
                 :pagination="inputOptions(field).pagination"
                 :size="row[field]"
                 :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
                 @offset-change="fieldOffsetChange[field]"
               />
 
@@ -322,6 +323,7 @@ onMounted(async () => {
                 :pagination="inputOptions(field).pagination"
                 :size="row[field]"
                 :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
                 @offset-change="fieldOffsetChange[field]"
               />
 
