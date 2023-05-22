@@ -67,6 +67,92 @@
       }
     }
   },
+  "invoice_configs": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "invoiceCycleDurationValue": {
+        "type": "number",
+        "default": 1
+      },
+      "invoiceCycleDurationUnit": {
+        "type": "enum",
+        "default": "month",
+        "enums": {
+          "month": "Month",
+          "week": "Week",
+          "day": "Day"
+        }
+      },
+      "dueDateCycleValue": {
+        "type": "number",
+        "default": 30
+      },
+      "dueDateCycleUnit": {
+        "type": "enum",
+        "default": "day",
+        "enums": {
+          "month": "Month",
+          "week": "Week",
+          "day": "Day"
+        }
+      },
+      "paymentTerms": {
+        "type": "text"
+      },
+      "tags": {
+        "type": "array",
+        "default": []
+      },
+      "customFields": {
+        "type": "object",
+        "default": {}
+      },
+      "invoiceNumberSequenceId": {
+        "type": "text"
+      },
+      "billingContactId": {
+        "type": "text"
+      },
+      "invoiceTemplateId": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "invoiceNumberSequenceId": {
+          "reference": "sequences",
+          "primary": "id"
+        }
+      },
+      "unique": [],
+      "required": [
+        "invoiceCycleDurationValue",
+        "invoiceCycleDurationUnit",
+        "dueDateCycleValue",
+        "dueDateCycleUnit",
+        "tags",
+        "customFields",
+        "invoiceNumberSequenceId"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "tags": {},
+        "invoiceNumberSequenceId": {},
+        "billingContactId": {},
+        "invoiceTemplateId": {}
+      }
+    }
+  },
   "sequences": {
     "fields": {
       "id": {
