@@ -28,6 +28,90 @@
       "required": ["title", "content"]
     }
   },
+  "billing_configs": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "effectiveStart": {
+        "type": "datetime"
+      },
+      "effectiveEnd": {
+        "type": "datetime"
+      },
+      "rateType": {
+        "type": "enum",
+        "default": "duration",
+        "enums": {
+          "duration": "Duration",
+          "count": "Count",
+          "fixed": "Fixed"
+        }
+      },
+      "unit": {
+        "type": "enum",
+        "default": "hour",
+        "enums": {
+          "hour": "Hour",
+          "minute": "Minute"
+        }
+      },
+      "unitCost": {
+        "type": "number"
+      },
+      "includeTags": {
+        "type": "array",
+        "default": []
+      },
+      "excludeTags": {
+        "type": "array",
+        "default": []
+      },
+      "contactId": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "includeTags": {
+          "reference": "tags",
+          "primary": "id"
+        },
+        "excludeTags": {
+          "reference": "tags",
+          "primary": "id"
+        },
+        "contactId": {
+          "reference": "contacts",
+          "primary": "id"
+        }
+      },
+      "unique": [],
+      "required": [
+        "effectiveStart",
+        "rateType",
+        "unit",
+        "unitCost",
+        "includeTags",
+        "excludeTags",
+        "contactId"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "includeTags": {},
+        "excludeTags": {},
+        "contactId": {}
+      }
+    }
+  },
   "contacts": {
     "fields": {
       "id": {
