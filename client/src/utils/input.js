@@ -10,6 +10,10 @@ export function useInputHelper(schemas) {
     }, {})
   })
 
+  const clientOptionsFields = computed(() => {
+    return Object.keys(schemasMap.value).filter(f => clientOptionsField(f))
+  })
+
   const serverOptionsFields = computed(() => {
     return Object.keys(schemasMap.value).filter(f => serverOptionsField(f))
   })
@@ -52,6 +56,10 @@ export function useInputHelper(schemas) {
 
   function singleSelectableField(field) {
     return inputType(field) === 'singleSelect'
+  }
+
+  function clientOptionsField(field) {
+    return inputType(field) === 'select' || inputType(field) === 'enum'
   }
 
   function selectableField(field) {
@@ -220,6 +228,8 @@ export function useInputHelper(schemas) {
 
   return {
     schemasMap,
+    clientOptionsFields,
+    clientOptionsField,
     serverOptionsFields,
     serverOptionsField,
     selectableKeys,

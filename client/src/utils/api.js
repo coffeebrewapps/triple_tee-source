@@ -62,14 +62,10 @@ export function useApiAccess() {
       axios
         .put(url, params)
         .then((res) => {
-          if (res.data.success) {
-            resolve(res.data.record)
-          } else {
-            reject(res.data.errors)
-          }
+          resolve(res.data.record)
         })
-        .catch((error) => {
-          reject(formatErrors(error))
+        .catch(({ response }) => {
+          reject(response.data.errors)
         })
     })
   }
@@ -79,14 +75,10 @@ export function useApiAccess() {
       axios
         .delete(url)
         .then((res) => {
-          if (res.data.success) {
-            resolve(res.data.record)
-          } else {
-            reject(res.data.errors)
-          }
+          resolve(res.data.record)
         })
-        .catch((error) => {
-          reject(formatErrors(error))
+        .catch(({ response }) => {
+          reject(response.data.errors)
         })
     })
   }

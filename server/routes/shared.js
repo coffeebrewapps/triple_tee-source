@@ -41,7 +41,13 @@ exports.update = function(store) {
     const id = req.params.id;
 
     logger.log(`Updating record`, { id, params })
-    res.send(store.update(id, params));
+    const result = store.update(id, params);
+
+    if (result.success) {
+      res.status(200).send(result);
+    } else {
+      res.status(400).send(result);
+    }
   }
 };
 
@@ -50,8 +56,13 @@ exports.remove = function(store) {
     const params = req.params;
     const id = params.id;
     logger.log(`Removing record`, { id });
+    const result = store.remove(id);
 
-    res.send(store.remove(id));
+    if (result.success) {
+      res.status(200).send(result);
+    } else {
+      res.status(400).send(result);
+    }
   }
 };
 

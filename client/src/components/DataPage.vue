@@ -15,6 +15,7 @@ const {
   schemasMap,
   multiSelectableFields,
   singleSelectableFields,
+  clientOptionsFields,
   inputType,
   inputLabel,
   multiSelectableField,
@@ -39,6 +40,9 @@ const errorsMap = useErrors()
 
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
+
+import { useValidations } from '@/utils/validations'
+const { isEmpty } = useValidations()
 /*** import:utils ***/
 
 /*** import:stores ***/
@@ -911,6 +915,13 @@ function formatDataForSave(params) {
   singleSelectableFields.value.forEach((field) => {
     const values = (data[field] || [])
     data[field] = (values[0] || {}).value
+  })
+
+  clientOptionsFields.value.forEach((field) => {
+    const value = data[field]
+    if (isEmpty(value) || value.length === 0) {
+      delete data[field]
+    }
   })
 
   return data
