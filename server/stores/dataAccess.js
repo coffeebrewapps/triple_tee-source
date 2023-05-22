@@ -94,9 +94,7 @@ function list(modelClass, filters = {}) {
   const total = filteredData.length;
   const include = filters.include || [];
 
-  if (filters.offset && filters.limit && filteredData.length > 0) {
-    filteredData = Array.from(filteredData).slice(filters.offset, filters.offset + filters.limit);
-  }
+  filteredData = paginateData(filteredData, filters);
 
   filteredData = filteredData.map((record) => {
     const combined = Object.assign({}, record, { includes: fetchIncludes(modelClass, record, include) })
@@ -261,6 +259,17 @@ function uploadIndexes(data) {
   indexCache = data;
   writeData(indexes, indexCache);
   return { data };
+}
+
+function paginateData(data, filters) {
+  let filteredData = Array.from(data)
+  if (utils.notEmpty(filters.offset) && utils.notEmpty(filters.limit) && filteredData.length > 0) {
+    const offset = parseInt(filters.offset);
+    const limit = parseInt(filters.limit);
+
+    filteredData = filteredData.slice(offset, offset + limit);
+  }
+  return filteredData;
 }
 
 function filterData(modelClass, filters) {
@@ -599,7 +608,8 @@ function cleanupIndexes(modelClass, record) {
 
       if (reference !== modelClass) { return; }
 
-      delete modelClassData[record.id];
+      const foreignPrimaryKey = foreignConstraints.primary;
+      delete modelClassData[record[foreignPrimaryKey]];
     });
   });
 }
