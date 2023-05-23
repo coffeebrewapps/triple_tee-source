@@ -1,11 +1,14 @@
 <script setup>
 /*** import:global ***/
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 /*** import:global ***/
 
 /*** import:utils ***/
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
+
+import { Liquid } from 'liquidjs'
+const liquidEngine = new Liquid();
 /*** import:utils ***/
 
 /*** import:components ***/
@@ -14,6 +17,8 @@ import {
   TDialog,
   TProgressBar
 } from 'coffeebrew-vue-components'
+
+import TabContainer from './TabContainer.vue'
 /*** import:components ***/
 
 /*** section:props ***/
@@ -48,14 +53,22 @@ const template = computed(() => {
     contentStyles: props.contentStyles
   }
 })
+
+const editorTabs = [
+  { label: 'Markup' },
+  { label: 'Styles' },
+  { label: 'Data' }
+]
 /*** section:global ***/
 
 /*** section:editor ***/
 const markupEditor = ref('markupEditor')
 const stylesEditor = ref('stylesEditor')
+const sampleDataEditor = ref('sampleDataEditor')
 
 const markupEditable = ref(false)
 const stylesEditable = ref(false)
+const sampleDataEditable = ref(false)
 
 const markupEditorStyleClass = computed(() => {
   if (markupEditable.value) {
@@ -73,43 +86,33 @@ const stylesEditorStyleClass = computed(() => {
   }
 })
 
-const combinedMarkup = computed(() => {
-  if (!template.value) { return `` }
-
-  const content = []
-
-  content.push(`<html>`)
-  content.push(`<head>`)
-
-  content.push(`<style>`)
-  content.push(template.value.contentStyles)
-  content.push(`</style>`)
-
-  content.push(`</head>`)
-
-  content.push(`<body>`)
-  content.push(template.value.contentMarkup)
-  content.push(`</body>`)
-
-  content.push(`</html>`)
-
-  return content.join('')
+const sampleDataEditorStyleClass = computed(() => {
+  if (sampleDataEditable.value) {
+    return `editor editable`
+  } else {
+    return `editor`
+  }
 })
-
-const previewPdfDialog = ref(false)
-const pdfWorker = ref()
-const templatePdfData = ref()
-const downloadLink = ref()
-const downloadFile = ref()
-const downloadAnchor = ref('downloadAnchor')
 
 function toggleMarkupEditor() {
   markupEditable.value = true
 }
 
-function confirmMarkupEdit() {
-  updateMarkup()
-  markupEditable.value = false
+async function confirmMarkupEdit() {
+  previewError.value = false
+
+  await renderPreview()
+    .then((result) => {
+      updateMarkup()
+    })
+    .catch((error) => {
+      previewError.value = true
+      parsedMarkup.value = `Markup error`
+      console.log(error)
+    })
+    .finally(() => {
+      markupEditable.value = false
+    })
 }
 
 function toggleStylesEditor() {
@@ -120,15 +123,39 @@ function confirmStylesEdit() {
   updateStyles()
   stylesEditable.value = false
 }
-/*** section:editor ***/
 
-/*** section:action ***/
+function toggleSampleDataEditor() {
+  sampleDataEditable.value = true
+}
+
+async function confirmSampleDataEdit() {
+  samplePdfData.value = JSON.parse(sampleDataEditor.value.innerText)
+  previewError.value = false
+
+  await renderPreview()
+    .then((result) => {
+      updateMarkup()
+    })
+    .catch((error) => {
+      previewError.value = true
+      parsedMarkup.value = `Sample data error`
+      console.log(error)
+    })
+    .finally(() => {
+      sampleDataEditable.value = false
+    })
+}
+
 function cancelMarkupEdit() {
   markupEditable.value = !markupEditable.value
 }
 
 function cancelStylesEdit() {
   stylesEditable.value = !stylesEditable.value
+}
+
+function cancelSampleDataEdit() {
+  sampleDataEditable.value = !sampleDataEditable.value
 }
 
 function updateMarkup() {
@@ -138,6 +165,44 @@ function updateMarkup() {
 function updateStyles() {
   emit('contentStylesChange', stylesEditor.value.innerText)
 }
+/*** section:editor ***/
+
+/*** section:preview ***/
+const samplePdfData = ref()
+
+const previewContentStyles = computed(() => {
+  if (previewError.value) {
+    return `preview-content error`
+  } else {
+    return `preview-content`
+  }
+})
+
+const parsedMarkup = ref()
+const previewError = ref(false)
+
+async function renderPreview() {
+  return new Promise((resolve, reject) => {
+    parsedMarkup.value = null
+    liquidEngine
+      .parseAndRender(markupEditor.value.innerText, samplePdfData.value)
+      .then((result) => {
+        parsedMarkup.value = result
+        resolve(result)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+/*** section:preview ***/
+
+/*** section:generate ***/
+const previewPdfDialog = ref(false)
+const templatePdfData = ref()
+const downloadLink = ref()
+const downloadFile = ref()
+const downloadAnchor = ref('downloadAnchor')
 
 async function generateTemplate() {
   templatePdfData.value = null
@@ -165,83 +230,140 @@ function downloadPdf() {
 function closePreviewDialog() {
   previewPdfDialog.value = false
 }
-/*** section:action ***/
+/*** section:generate ***/
+
+onMounted(async () => {
+  samplePdfData.value = {
+    selfContact: 'Coffee Brew Apps',
+    billingContact: 'Company ABC',
+    invoiceLines: [
+      { description: 'Requirements gathering', unitCost: 85, unit: 4, subtotal: 340 }
+    ]
+  }
+
+  await renderPreview()
+})
 </script>
 
 <template>
   <div class="preview-template">
     <div class="template-editor">
-      <div
-        :class="markupEditorStyleClass"
+      <TabContainer
+        :tabs="editorTabs"
       >
-        <div
-          class="editor-button cancel"
-          @click="cancelMarkupEdit"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </div>
+        <template #tab-0>
+          <div
+            :class="markupEditorStyleClass"
+          >
+            <div
+              class="editor-button cancel"
+              @click="cancelMarkupEdit"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </div>
 
-        <div
-          ref="markupEditor"
-          class="editor-content"
-          :contenteditable="markupEditable"
-        >
-          {{ template.contentMarkup }}
-        </div>
+            <div
+              ref="markupEditor"
+              class="editor-content"
+              :contenteditable="markupEditable"
+            >
+              {{ template.contentMarkup }}
+            </div>
 
-        <div
-          class="editor-button edit"
-          @click="toggleMarkupEditor"
-        >
-          <i class="fa-solid fa-pencil"></i>
-        </div>
+            <div
+              class="editor-button edit"
+              @click="toggleMarkupEditor"
+            >
+              <i class="fa-solid fa-pencil"></i>
+            </div>
 
-        <div
-          class="editor-button confirm"
-          @click="confirmMarkupEdit"
-        >
-          <i class="fa-solid fa-check"></i>
-        </div>
-      </div>
+            <div
+              class="editor-button confirm"
+              @click="confirmMarkupEdit"
+            >
+              <i class="fa-solid fa-check"></i>
+            </div>
+          </div>
+        </template>
 
-      <div
-        :class="stylesEditorStyleClass"
-      >
-        <div
-          class="editor-button cancel"
-          @click="cancelStylesEdit"
-        >
-          <i class="fa-solid fa-xmark"></i>
-        </div>
+        <template #tab-1>
+          <div
+            :class="stylesEditorStyleClass"
+          >
+            <div
+              class="editor-button cancel"
+              @click="cancelStylesEdit"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </div>
 
-        <div
-          ref="stylesEditor"
-          class="editor-content"
-          :contenteditable="stylesEditable"
-        >
-          {{ template.contentStyles }}
-        </div>
+            <div
+              ref="stylesEditor"
+              class="editor-content"
+              :contenteditable="stylesEditable"
+            >
+              {{ template.contentStyles }}
+            </div>
 
-        <div
-          class="editor-button edit"
-          @click="toggleStylesEditor"
-        >
-          <i class="fa-solid fa-pencil"></i>
-        </div>
+            <div
+              class="editor-button edit"
+              @click="toggleStylesEditor"
+            >
+              <i class="fa-solid fa-pencil"></i>
+            </div>
 
-        <div
-          class="editor-button confirm"
-          @click="confirmStylesEdit"
-        >
-          <i class="fa-solid fa-check"></i>
-        </div>
-      </div>
+            <div
+              class="editor-button confirm"
+              @click="confirmStylesEdit"
+            >
+              <i class="fa-solid fa-check"></i>
+            </div>
+          </div>
+        </template>
+
+        <template #tab-2>
+          <div
+            :class="sampleDataEditorStyleClass"
+          >
+            <div
+              class="editor-button cancel"
+              @click="cancelSampleDataEdit"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </div>
+
+            <div
+              ref="sampleDataEditor"
+              class="editor-content"
+              :contenteditable="sampleDataEditable"
+            >
+              {{ samplePdfData }}
+            </div>
+
+            <div
+              class="editor-button edit"
+              @click="toggleSampleDataEditor"
+            >
+              <i class="fa-solid fa-pencil"></i>
+            </div>
+
+            <div
+              class="editor-button confirm"
+              @click="confirmSampleDataEdit"
+            >
+              <i class="fa-solid fa-check"></i>
+            </div>
+          </div>
+        </template>
+      </TabContainer>
     </div>
 
     <div class="preview-container">
+      <h3 class="heading">Preview</h3>
+
       <div
-        v-if="contentMarkup"
-        v-html="contentMarkup"
+        :class="previewContentStyles"
+        v-html="parsedMarkup"
       >
       </div>
 
@@ -300,16 +422,12 @@ function closePreviewDialog() {
 
 <style scoped>
 .preview-template {
-  margin: 1rem auto;
   display: flex;
   flex-direction: row;
   gap: 2rem;
 }
 
 .template-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
   width: 40%;
 }
 
@@ -385,12 +503,30 @@ function closePreviewDialog() {
   flex-direction: column;
   gap: 1rem;
   width: 60%;
+  height: 100vh;
+  margin-top: 1rem;
+}
+
+.preview-container .heading {
+  font-weight: 900;
 }
 
 .preview-container .buttons {
   display: flex;
   justify-content: center;
   gap: 1rem;
+}
+
+.preview-content {
+  padding: 1rem;
+  width: 100%;
+  height: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+
+.preview-content.error {
+  color: var(--color-error);
 }
 
 .preview-panel {
