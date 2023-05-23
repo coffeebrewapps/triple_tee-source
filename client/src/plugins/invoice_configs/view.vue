@@ -10,6 +10,7 @@ const { greaterThan } = useValidations()
 const tagsUrl = `${config.baseUrl}/api/tags`
 const sequencesUrl = `${config.baseUrl}/api/sequences`
 const contactsUrl = `${config.baseUrl}/api/contacts`
+const templatesUrl = `${config.baseUrl}/api/invoice_templates`
 
 const fieldsLayout = [
   { invoiceCycleDurationValue: 'md', invoiceCycleDurationUnit: 'md' },
@@ -18,7 +19,8 @@ const fieldsLayout = [
   { tags: 'lg' },
   { customFields: 'lg' },
   { invoiceNumberSequenceId: 'lg' },
-  { billingContactId: 'lg' }
+  { billingContactId: 'lg' },
+  { invoiceTemplateId: 'lg' }
 ]
 
 const dataFields = [
@@ -44,7 +46,7 @@ const dataFields = [
   {
     key: 'invoiceNumberSequenceId', type: 'singleSelect', label: 'Sequence Number',
     reference: { label: sequenceNumberLabel },
-    listable: true, viewable: true, creatable: true, updatable: false,
+    listable: false, viewable: true, creatable: true, updatable: false,
     options: {
       server: true,
       pagination: true,
@@ -65,6 +67,18 @@ const dataFields = [
       label: contactLabel
     }
   },
+  {
+    key: 'invoiceTemplateId', type: 'singleSelect', label: 'Template',
+    reference: { label: templateLabel },
+    listable: false, viewable: true, creatable: true, updatable: true,
+    options: {
+      server: true,
+      pagination: true,
+      sourceUrl: templatesUrl,
+      value: recordValue,
+      label: templateLabel
+    }
+  }
 ]
 
 const validations = {
@@ -98,6 +112,10 @@ function sequenceNumberLabel(record) {
 }
 
 function contactLabel(record) {
+  return record.name
+}
+
+function templateLabel(record) {
   return record.name
 }
 </script>
