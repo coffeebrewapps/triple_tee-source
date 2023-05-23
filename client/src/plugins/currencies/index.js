@@ -1,12 +1,11 @@
-import { useRouter } from 'vue-router'
-
 const route = {
   path: '/currencies',
   name: 'Currencies',
   component: () => import('./view.vue')
 }
 
-const usePlugin = () => {
+const usePlugin = (router) => {
+  router.addRoute(route)
   return route
 }
 

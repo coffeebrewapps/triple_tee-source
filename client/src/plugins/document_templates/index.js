@@ -1,12 +1,11 @@
-import { useRouter } from 'vue-router'
-
 const route = {
   path: '/document_templates',
   name: 'Document Templates',
   component: () => import('./view.vue')
 }
 
-const usePlugin = () => {
+const usePlugin = (router) => {
+  router.addRoute(route)
   return route
 }
 

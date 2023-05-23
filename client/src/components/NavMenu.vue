@@ -11,7 +11,7 @@ const navigator = useNavStore()
 
 const renderedRoutes = computed(() => {
   return routes.filter((route) => {
-    return !route.meta.hidden
+    return route && (!route.meta || !route.meta.hidden)
   })
 })
 
