@@ -38,6 +38,10 @@ const props = defineProps({
   contentStyles: {
     type: String,
     default: ''
+  },
+  disabled: {
+    type: Boolean,
+    default: false
   }
 })
 /*** section:props ***/
@@ -71,27 +75,51 @@ const stylesEditable = ref(false)
 const sampleDataEditable = ref(false)
 
 const markupEditorStyleClass = computed(() => {
+  const classNames = []
+
+  classNames.push(`editor`)
+
   if (markupEditable.value) {
-    return `editor editable`
-  } else {
-    return `editor`
+    classNames.push(`editable`)
   }
+
+  if (props.disabled) {
+    classNames.push(`disabled`)
+  }
+
+  return classNames.join(' ')
 })
 
 const stylesEditorStyleClass = computed(() => {
+  const classNames = []
+
+  classNames.push(`editor`)
+
   if (stylesEditable.value) {
-    return `editor editable`
-  } else {
-    return `editor`
+    classNames.push(`editable`)
   }
+
+  if (props.disabled) {
+    classNames.push(`disabled`)
+  }
+
+  return classNames.join(' ')
 })
 
 const sampleDataEditorStyleClass = computed(() => {
+  const classNames = []
+
+  classNames.push(`editor`)
+
   if (sampleDataEditable.value) {
-    return `editor editable`
-  } else {
-    return `editor`
+    classNames.push(`editable`)
   }
+
+  if (props.disabled) {
+    classNames.push(`disabled`)
+  }
+
+  return classNames.join(' ')
 })
 
 function toggleMarkupEditor() {
@@ -463,6 +491,10 @@ onMounted(async () => {
   height: 30px;
   border-radius: 50%;
   background-color: var(--color-border);
+}
+
+.editor.disabled .editor-button {
+  display: none !important;
 }
 
 .editor-button.cancel {

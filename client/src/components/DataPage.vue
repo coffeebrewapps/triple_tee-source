@@ -144,6 +144,10 @@ const props = defineProps({
       if (!row) { return `` }
       return JSON.stringify(row, false, 2)
     }
+  },
+  rowActions: {
+    type: Object,
+    default: {}
   }
 })
 /*** section:props ***/
@@ -405,29 +409,43 @@ const tableActions = computed(() => {
   return initialActions
 })
 
-const actions = ref([
-  {
+const actions = computed(() => {
+  const defaultViewAction = {
     name: 'View',
     icon: 'fa-solid fa-magnifying-glass',
     click: async function(row, index) {
       await openViewDialog(row.id)
     }
-  },
-  {
+  }
+  const viewOverride = props.rowActions.view || {}
+  const viewAction = Object.assign({}, defaultViewAction, viewOverride)
+
+  const defaultUpdateAction = {
     name: 'Update',
     icon: 'fa-solid fa-pen-to-square',
     click: async function(row, index) {
       await openUpdateDialog(row.id)
     }
-  },
-  {
+  }
+  const updateOverride = props.rowActions.update || {}
+  const updateAction = Object.assign({}, defaultUpdateAction, updateOverride)
+
+  const defaultRemoveAction = {
     name: 'Delete',
     icon: 'fa-solid fa-trash-can',
     click: async function(row, index) {
       await openDeleteDialog(row.id)
     }
   }
-])
+  const removeOverride = props.rowActions.remove || {}
+  const removeAction = Object.assign({}, defaultRemoveAction, removeOverride)
+
+  return [
+    viewAction,
+    updateAction,
+    removeAction
+  ]
+})
 
 const data = ref([])
 const totalData = ref(0)
@@ -1089,18 +1107,20 @@ onMounted(async () => {
       @submit="createDataAndCloseDialog"
     />
 
-    <FormDialog
-      v-if="currentRowForUpdate"
-      v-model="updateDialog"
-      :schemas="combinedDataFields"
-      :fields-layout="fieldsLayout"
-      :data-fields="updatableKeys"
-      :data="currentRowForUpdate"
-      :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
-      :fullscreen="fullscreen"
-      :error-messages="updateErrors"
-      @submit="updateDataAndCloseDialog"
-    />
+    <slot name="updateDialog" v-bind="{ row: currentRowForUpdate }">
+      <FormDialog
+        v-if="currentRowForUpdate"
+        v-model="updateDialog"
+        :schemas="combinedDataFields"
+        :fields-layout="fieldsLayout"
+        :data-fields="updatableKeys"
+        :data="currentRowForUpdate"
+        :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
+        :fullscreen="fullscreen"
+        :error-messages="updateErrors"
+        @submit="updateDataAndCloseDialog"
+      />
+    </slot>
 
     <ViewDialog
       v-if="currentRow"
