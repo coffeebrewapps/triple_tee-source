@@ -9,6 +9,8 @@ const common = require('./common');
 const dataAccess = require('./server/stores/dataAccess');
 const routes = require('./server/routes/shared');
 
+const pdf = require('@hyfi06/html2pdf/index');
+
 const app = express();
 const port = process.env.PORT || common.DEFAULT_PORT;
 
@@ -31,6 +33,11 @@ async function loadPlugins(app) {
         pluginRouter.routes.forEach((route) => {
           app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
         });
+        if (pluginRouter.middlewares) {
+          pluginRouter.middlewares.forEach((middleware) => {
+            app.use(`${pluginRouter.prefix}${middleware.path}`, middleware.handler);
+          });
+        }
         console.log(`Loaded plugin: ${plugin.name}`);
       }
     })
@@ -43,6 +50,7 @@ async function loadPlugins(app) {
 app.use(express.json())
 app.use(cors(corsConfig));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(pdf);
 /*** end:Middleware ***/
 
 /*** start:Routes ***/

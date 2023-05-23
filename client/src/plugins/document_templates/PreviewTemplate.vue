@@ -120,11 +120,34 @@ onMounted(async () => {
 </script>
 
 <template>
-  <TemplateEditor
-    v-if="currentTemplate"
-    :content-markup="currentTemplate.contentMarkup"
-    :content-styles="currentTemplate.contentStyles"
-    @content-markup-change="updateMarkup"
-    @content-styles-change="updateStyles"
-  />
+  <div class="page-container">
+    <TemplateEditor
+      v-if="currentTemplate"
+      :templates-url="templatesUrl"
+      :id="currentTemplate.id"
+      :content-markup="currentTemplate.contentMarkup"
+      :content-styles="currentTemplate.contentStyles"
+      @content-markup-change="updateMarkup"
+      @content-styles-change="updateStyles"
+    />
+  </div>
 </template>
+
+<style scoped>
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.preview-panel {
+  width: 100%;
+}
+
+.preview-panel iframe {
+  width: 100%;
+  height: 100vh;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+}
+</style>

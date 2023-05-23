@@ -4,7 +4,8 @@ import { ref, computed } from 'vue'
 /*** import:global ***/
 
 /*** import:utils ***/
-import html2pdf from 'html2pdf.js'
+import { useDataAccess } from '@/utils/dataAccess'
+const dataAccess = useDataAccess()
 /*** import:utils ***/
 
 /*** import:components ***/
@@ -15,6 +16,14 @@ import {
 
 /*** section:props ***/
 const props = defineProps({
+  templatesUrl: {
+    type: String,
+    default: null
+  },
+  id: {
+    type: String,
+    default: null
+  },
   contentMarkup: {
     type: String,
     default: ''
@@ -85,9 +94,11 @@ const combinedMarkup = computed(() => {
   return content.join('')
 })
 
-const pdfViewer = ref('pdfViewer')
 const pdfWorker = ref()
-const templatePdf = ref()
+const templatePdfData = ref()
+const downloadLink = ref()
+const downloadFile = ref()
+const downloadAnchor = ref('downloadAnchor')
 
 function toggleMarkupEditor() {
   markupEditable.value = true
@@ -125,34 +136,25 @@ function updateStyles() {
   emit('contentStylesChange', stylesEditor.value.innerText)
 }
 
-function previewTemplate() {
-  if (!template.value) { return }
-
-  const scale = 4
-  const width = 874
-  const height = 1240
-  pdfViewer.value.width = width * scale
-  pdfViewer.value.height = height * scale
-  pdfViewer.value.style.width =  `${width}px`
-  pdfViewer.value.style.height = `${height}px`
-
-  const context = pdfViewer.value.getContext('2d')
-  context.scale(scale, scale)
-
-  const opt = {
-    filename:     'myfile.pdf',
-    image:        { type: 'jpeg', quality: 1 },
-    html2canvas:  { scale: 1, canvas: pdfViewer.value },
-    jsPDF:        { unit: 'px', format: 'a4', orientation: 'portrait', hotfixes: ['px_scaling'] }
-  }
-
-  pdfWorker.value = html2pdf().set(opt).from(combinedMarkup.value).toCanvas()
+async function previewTemplate() {
+  console.log(props.templatesUrl)
+  console.log(props.id)
+  await dataAccess
+    .downloadStream(`${props.templatesUrl}/${props.id}/pdf`)
+    .then((result) => {
+      const blob = new Blob([result.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      downloadLink.value = url
+      downloadFile.value = `invoice_templates_${props.id}.pdf`
+      templatePdfData.value = url
+    })
+    .catch((error) => {
+      console.log(error)
+    })
 }
 
 function downloadPdf() {
-  if (!pdfWorker.value) { return }
-
-  pdfWorker.value.save()
+  downloadAnchor.value.click()
 }
 /*** section:action ***/
 </script>
@@ -246,13 +248,15 @@ function downloadPdf() {
           icon="fa-solid fa-eye"
           @click="downloadPdf"
         />
+
+        <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
       </div>
 
-      <canvas
+      <iframe
         class="preview-panel"
-        ref="pdfViewer"
+        :src="templatePdfData"
       >
-      </canvas>
+      </iframe>
     </div>
   </div>
 </template>

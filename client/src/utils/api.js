@@ -96,6 +96,22 @@ export function useApiAccess() {
     })
   }
 
+  async function downloadStream(url) {
+    return new Promise((resolve, reject) => {
+      axios({
+        method: 'get',
+        url: url,
+        responseType: 'blob'
+      })
+      .then((res) => {
+        resolve(res)
+      })
+      .catch((error) => {
+        reject(formatErrors(error))
+      })
+    })
+  }
+
   return {
     schemas,
     list,
@@ -103,6 +119,7 @@ export function useApiAccess() {
     create,
     update,
     remove,
-    download
+    download,
+    downloadStream
   }
 }
