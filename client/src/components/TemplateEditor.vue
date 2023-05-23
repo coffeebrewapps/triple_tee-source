@@ -10,7 +10,9 @@ const dataAccess = useDataAccess()
 
 /*** import:components ***/
 import {
-  TButton
+  TButton,
+  TDialog,
+  TProgressBar
 } from 'coffeebrew-vue-components'
 /*** import:components ***/
 
@@ -94,6 +96,7 @@ const combinedMarkup = computed(() => {
   return content.join('')
 })
 
+const previewPdfDialog = ref(false)
 const pdfWorker = ref()
 const templatePdfData = ref()
 const downloadLink = ref()
@@ -136,9 +139,10 @@ function updateStyles() {
   emit('contentStylesChange', stylesEditor.value.innerText)
 }
 
-async function previewTemplate() {
-  console.log(props.templatesUrl)
-  console.log(props.id)
+async function generateTemplate() {
+  templatePdfData.value = null
+  previewPdfDialog.value = true
+
   await dataAccess
     .downloadStream(`${props.templatesUrl}/${props.id}/pdf`)
     .then((result) => {
@@ -155,6 +159,11 @@ async function previewTemplate() {
 
 function downloadPdf() {
   downloadAnchor.value.click()
+  closePreviewDialog()
+}
+
+function closePreviewDialog() {
+  previewPdfDialog.value = false
 }
 /*** section:action ***/
 </script>
@@ -227,71 +236,87 @@ function downloadPdf() {
           <i class="fa-solid fa-check"></i>
         </div>
       </div>
+    </div>
 
+    <div class="preview-container">
       <div
-        class="editor"
+        v-if="contentMarkup"
+        v-html="contentMarkup"
       >
-        {{ combinedMarkup }}
+      </div>
+
+      <component
+        v-if="contentStyles"
+        is="style"
+        v-html="contentStyles"
+      >
+      </component>
+
+      <div class="buttons">
+        <TButton
+          value="Generate"
+          icon="fa-solid fa-file-export"
+          @click="generateTemplate"
+        />
       </div>
     </div>
 
-    <div>
-      <div class="buttons">
-        <TButton
-          value="Preview"
-          icon="fa-solid fa-eye"
-          @click="previewTemplate"
+    <TDialog
+      v-model="previewPdfDialog"
+      title="Generate Template"
+      :fullscreen="true"
+    >
+      <template #body>
+        <TProgressBar
+          v-if="!templatePdfData"
         />
 
+        <iframe
+          v-if="templatePdfData"
+          class="preview-panel"
+          :src="templatePdfData"
+        >
+        </iframe>
+      </template>
+
+      <template #actions>
         <TButton
           value="Download"
-          icon="fa-solid fa-eye"
+          icon="fa-solid fa-file-arrow-down"
           @click="downloadPdf"
         />
 
-        <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
-      </div>
+        <TButton
+          value="Cancel"
+          icon="fa-solid fa-xmark"
+          @click="closePreviewDialog"
+        />
 
-      <iframe
-        class="preview-panel"
-        :src="templatePdfData"
-      >
-      </iframe>
-    </div>
+        <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
+      </template>
+    </TDialog>
   </div>
 </template>
 
 <style scoped>
 .preview-template {
   margin: 1rem auto;
-  display: grid;
-  grid-template-columns: 2fr 4fr;
-  gap: 2rem;
-}
-
-.template-container {
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto;
-  padding: 1rem;
-  width: 100%;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  flex-direction: row;
+  gap: 2rem;
 }
 
 .template-editor {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  width: 40%;
 }
 
 .editor {
   padding: 1rem;
   width: 100%;
-  height: auto;
+  height: 60vh;
   border: 1px solid var(--color-border);
   border-radius: 4px;
   background-color: var(--color-background-mute);
@@ -303,7 +328,10 @@ function downloadPdf() {
 }
 
 .editor-content {
+  width: 100%;
+  height: 100%;
   outline: none;
+  overflow-y: auto;
 }
 
 .editor-button {
@@ -352,15 +380,22 @@ function downloadPdf() {
   display: none;
 }
 
-.buttons {
+.preview-container {
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 60%;
+}
+
+.preview-container .buttons {
+  display: flex;
+  justify-content: center;
   gap: 1rem;
 }
 
 .preview-panel {
-  width: 874px;
-  height: 1240px;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
+  width: 100%;
+  height: 100%;
+  border: none;
 }
 </style>
