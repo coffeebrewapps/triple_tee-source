@@ -38,6 +38,8 @@ const props = defineProps({
 /*** section:props ***/
 
 /*** section:global ***/
+const sampleData = ref({})
+
 const currentRoute = Object.assign({}, router.currentRoute.value)
 const templateId = computed(() => {
   return currentRoute.params.id
@@ -99,6 +101,10 @@ async function updateStyles(updated) {
       showBanner(`Error updating styles !`)
     })
 }
+
+function updateData(updated) {
+  sampleData.value = updated
+}
 /*** section:action ***/
 
 /*** section:banner ***/
@@ -133,6 +139,14 @@ async function loadTemplate() {
 }
 
 onMounted(async () => {
+  sampleData.value = {
+    selfContact: 'Coffee Brew Apps',
+    billingContact: 'Company ABC',
+    invoiceLines: [
+      { description: 'Requirements gathering', unitCost: 85, unit: 4, subtotal: 340 }
+    ]
+  }
+
   await loadTemplate()
 })
 </script>
@@ -147,9 +161,11 @@ onMounted(async () => {
       :id="currentTemplate.id"
       :content-markup="currentTemplate.contentMarkup"
       :content-styles="currentTemplate.contentStyles"
+      :data="sampleData"
       :disabled="disabled"
       @content-markup-change="updateMarkup"
       @content-styles-change="updateStyles"
+      @data-change="updateData"
     />
   </div>
 </template>

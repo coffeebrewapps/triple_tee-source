@@ -42,12 +42,16 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  data: {
+    type: Object,
+    default: {}
   }
 })
 /*** section:props ***/
 
 /*** section:emit ***/
-const emit = defineEmits(['contentMarkupChange', 'contentStylesChange'])
+const emit = defineEmits(['contentMarkupChange', 'contentStylesChange', 'dataChange'])
 /*** section:emit ***/
 
 /*** section:global ***/
@@ -157,12 +161,11 @@ function toggleSampleDataEditor() {
 }
 
 async function confirmSampleDataEdit() {
-  samplePdfData.value = JSON.parse(sampleDataEditor.value.innerText)
   previewError.value = false
 
   await renderPreview()
     .then((result) => {
-      updateMarkup()
+      updateData()
     })
     .catch((error) => {
       previewError.value = true
@@ -193,10 +196,17 @@ function updateMarkup() {
 function updateStyles() {
   emit('contentStylesChange', stylesEditor.value.innerText)
 }
+
+function updateData() {
+  emit('dataChange', JSON.parse(sampleDataEditor.value.innerText))
+}
+
 /*** section:editor ***/
 
 /*** section:preview ***/
-const samplePdfData = ref()
+const samplePdfData = computed(() => {
+  return props.data
+})
 
 const previewContentStyles = computed(() => {
   if (previewError.value) {
@@ -213,7 +223,7 @@ async function renderPreview() {
   return new Promise((resolve, reject) => {
     parsedMarkup.value = null
     liquidEngine
-      .parseAndRender(markupEditor.value.innerText, samplePdfData.value)
+      .parseAndRender(markupEditor.value.innerText, JSON.parse(sampleDataEditor.value.innerText))
       .then((result) => {
         parsedMarkup.value = result
         resolve(result)
@@ -261,14 +271,6 @@ function closePreviewDialog() {
 /*** section:generate ***/
 
 onMounted(async () => {
-  samplePdfData.value = {
-    selfContact: 'Coffee Brew Apps',
-    billingContact: 'Company ABC',
-    invoiceLines: [
-      { description: 'Requirements gathering', unitCost: 85, unit: 4, subtotal: 340 }
-    ]
-  }
-
   await renderPreview()
 })
 </script>

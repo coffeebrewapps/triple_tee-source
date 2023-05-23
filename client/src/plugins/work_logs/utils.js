@@ -16,8 +16,8 @@ export function useWorkLogUtils() {
 
   const dataFields = [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-    { key: 'startTime', type: 'datetime', label: 'Start Time', defaultValue: () => { return new Date() }, listable: true, viewable: true, creatable: true, updatable: true, sortable: true },
-    { key: 'endTime', type: 'datetime', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true, sortable: true },
+    { key: 'startTime', type: 'datetime', label: 'Start Time', defaultValue: () => { return new Date() }, listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
+    { key: 'endTime', type: 'datetime', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
     { key: 'description', type: 'text', label: 'Description', defaultValue: () => { return `New Task` }, listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'content', type: 'textarea', label: 'Content', listable: false, viewable: true, creatable: true, updatable: true },
     {
@@ -42,9 +42,20 @@ export function useWorkLogUtils() {
   ]
 
   const filters = {
-    initData: {},
+    initData: {
+      startTime: {
+        startTime: null,
+        endTime: null
+      },
+      endTime: {
+        startTime: null,
+        endTime: null
+      }
+    },
     layout: [
-      { tags: 'md' }
+      { tags: 'md' },
+      { startTime: 'md' },
+      { endTime: 'md' }
     ]
   }
 
@@ -136,6 +147,8 @@ export function useWorkLogUtils() {
     validations,
     formatDuration,
     calculateDuration,
-    includeKeys
+    includeKeys,
+    recordValue,
+    tagLabel
   }
 }
