@@ -1,6 +1,8 @@
 <script setup>
 /*** import:global ***/
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 /*** import:global ***/
 
 /*** import:config ***/
@@ -16,18 +18,45 @@ const dataAccess = useDataAccess()
 /*** import:stores ***/
 import { useBannerStore } from '@/stores/banner'
 const banner = useBannerStore()
-
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
 /*** import:stores ***/
 
 /*** import:components ***/
+import {
+  TButton
+} from 'coffeebrew-vue-components'
+
 import TemplateEditor from '@/components/TemplateEditor.vue'
 /*** import:components ***/
 
+/*** section:props ***/
+const props = defineProps({
+  disabled: {
+    type: Boolean,
+    default: false
+  }
+})
+/*** section:props ***/
+
 /*** section:global ***/
-const templatesUrl = `${config.baseUrl}/api/invoice_templates`
+const currentRoute = Object.assign({}, router.currentRoute.value)
+const templateId = computed(() => {
+  return currentRoute.params.id
+})
+const templateType = computed(() => {
+  return currentRoute.params.templateType
+})
+const templatesUrl = computed(() => {
+  return `${config.baseUrl}/api/${templateType.value}`
+})
 const currentTemplate = ref()
+
+const heading = computed(() => {
+  if (templateType.value === 'invoice_templates') {
+    return `Invoice Template ${templateId.value}`
+  } else {
+    return `Receipt Template ${templateId.value}`
+  }
+})
 /*** section:global ***/
 
 /*** section:action ***/
@@ -41,7 +70,7 @@ async function updateMarkup(updated) {
   )
 
   await dataAccess
-    .update(`${templatesUrl}/${currentTemplate.value.id}`, params)
+    .update(`${templatesUrl.value}/${templateId.value}`, params)
     .then((result) => {
       currentTemplate.value = result
       showBanner(`Updated markup successfully!`)
@@ -61,7 +90,7 @@ async function updateStyles(updated) {
   )
 
   await dataAccess
-    .update(`${templatesUrl}/${currentTemplate.value.id}`, params)
+    .update(`${templatesUrl.value}/${templateId.value}`, params)
     .then((result) => {
       currentTemplate.value = result
       showBanner(`Updated styles successfully!`)
@@ -83,19 +112,7 @@ function hideBanner() {
 }
 /*** section:banner ***/
 
-/*** section:events ***/
-events.registerListener(
-  'loadLatestTemplate',
-  {
-    id: 'PreviewTemplate',
-    invoke: (payload) => {
-      loadLatest()
-    }
-  }
-)
-/*** section:events ***/
-
-async function loadLatest() {
+async function loadTemplate() {
   const params = {
     limit: 1,
     sort: {
@@ -105,28 +122,32 @@ async function loadLatest() {
   }
 
   await dataAccess
-    .list(templatesUrl, params)
+    .view(`${templatesUrl.value}/${templateId.value}`, params)
     .then((result) => {
-      currentTemplate.value = result.data[0]
+      currentTemplate.value = result
     })
     .catch((error) => {
+      showBanner(`Error loading template!`)
       console.log(error)
     })
 }
 
 onMounted(async () => {
-  await loadLatest()
+  await loadTemplate()
 })
 </script>
 
 <template>
   <div class="page-container">
+    <h2 class="heading">{{ heading }}</h2>
+
     <TemplateEditor
       v-if="currentTemplate"
       :templates-url="templatesUrl"
       :id="currentTemplate.id"
       :content-markup="currentTemplate.contentMarkup"
       :content-styles="currentTemplate.contentStyles"
+      :disabled="disabled"
       @content-markup-change="updateMarkup"
       @content-styles-change="updateStyles"
     />
@@ -135,9 +156,14 @@ onMounted(async () => {
 
 <style scoped>
 .page-container {
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+.page-container .heading {
+  font-weight: 900;
 }
 
 .preview-panel {

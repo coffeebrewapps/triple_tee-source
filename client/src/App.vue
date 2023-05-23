@@ -5,6 +5,7 @@ import Banner from './components/Banner.vue'
 import NavMenu from './components/NavMenu.vue'
 import TopNav from './components/TopNav.vue'
 import Alerts from './components/Alerts.vue'
+import Breadcrumbs from '@/components/Breadcrumbs.vue'
 
 import { useNavStore } from './stores/nav'
 import { useEventsStore } from './stores/events'
@@ -69,6 +70,8 @@ onMounted(() => {
         <TopNav />
 
         <div class="divider"></div>
+
+        <Breadcrumbs />
 
         <Transition mode="out-in">
           <component :is="Component" />
