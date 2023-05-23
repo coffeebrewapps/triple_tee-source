@@ -112,15 +112,14 @@ function client {
 
   if [[ ! -f $index_file ]]; then
     touch $index_file
-    echo "import { useRouter } from 'vue-router'
-
-const route = {
+    echo "const route = {
   path: '/${lower_model}',
   name: '${model}',
   component: () => import('./view.vue')
 }
 
-const usePlugin = () => {
+const usePlugin = (router) => {
+  router.addRoute(route)
   return route
 }
 
