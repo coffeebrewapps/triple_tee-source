@@ -96,12 +96,13 @@ export function useApiAccess() {
     })
   }
 
-  async function downloadStream(url) {
+  async function downloadStream(url, params) {
     return new Promise((resolve, reject) => {
       axios({
-        method: 'get',
+        method: 'post',
         url: url,
-        responseType: 'blob'
+        responseType: 'blob',
+        data: params
       })
       .then((res) => {
         resolve(res)

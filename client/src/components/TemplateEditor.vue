@@ -209,7 +209,7 @@ async function generateTemplate() {
   previewPdfDialog.value = true
 
   await dataAccess
-    .downloadStream(`${props.templatesUrl}/${props.id}/pdf`)
+    .downloadStream(`${props.templatesUrl}/${props.id}/pdf`, samplePdfData.value)
     .then((result) => {
       const blob = new Blob([result.data], { type: 'application/pdf' })
       const url = window.URL.createObjectURL(blob)
@@ -522,6 +522,7 @@ onMounted(async () => {
   width: 100%;
   height: 100%;
   border: 1px solid var(--color-border);
+  background-color: white;
   border-radius: 4px;
 }
 

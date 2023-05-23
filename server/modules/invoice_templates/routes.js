@@ -1,7 +1,11 @@
 'use strict'
 
+const { Liquid } = require('liquidjs');
+const liquidEngine = new Liquid();
+
 function downloadPdf(stores) {
   return async function(req, res) {
+    const params = req.body;
     const id = req.params.id;
     const result = stores.view(id, {});
     const template = result.record;
@@ -17,6 +21,23 @@ function downloadPdf(stores) {
     content.push(`<head>`);
 
     content.push(`<style>`);
+    content.push(`
+    @page {
+      size: A4 portrait;
+      margin: 0 0 0 -12px;
+      font-family: Roboto, sans-serif;
+      font-size: 12px;
+    }
+
+    @page landscape {
+      size: A4 landscape;
+    }
+
+    @page portrait {
+      size: A4 portrait;
+    }
+
+    `);
     content.push(template.contentStyles);
     content.push(`</style>`)
 
@@ -31,14 +52,21 @@ function downloadPdf(stores) {
     const filename = `invoice_templates_${id}.pdf`;
     const htmlString = content.join('')
 
-    try {
-      await res.html2pdf({
-        filename: filename,
-        htmlString: htmlString,
-      });
-    } catch(error) {
-      console.log(error);
-    }
+    liquidEngine
+      .parseAndRender(htmlString, params)
+      .then((result) => {
+        try {
+          res.html2pdf({
+            filename: filename,
+            htmlString: result,
+          });
+        } catch(error) {
+          console.log(error);
+        }
+      })
+      .catch((error) => {
+        res.status(400).send({ errors: error })
+      })
   }
 }
 
