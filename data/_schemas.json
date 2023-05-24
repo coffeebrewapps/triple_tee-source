@@ -398,6 +398,64 @@
       }
     }
   },
+  "receipt_configs": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "customFields": {
+        "type": "object",
+        "default": {}
+      },
+      "receiptNumberSequenceId": {
+        "type": "text"
+      },
+      "billingContactId": {
+        "type": "text"
+      },
+      "receiptTemplateId": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "receiptNumberSequenceId": {
+          "reference": "sequences",
+          "primary": "id"
+        },
+        "billingContactId": {
+          "reference": "contacts",
+          "primary": "id"
+        },
+        "receiptTemplateId": {
+          "reference": "receipt_templates",
+          "primary": "id"
+        }
+      },
+      "unique": [],
+      "required": [
+        "customFields",
+        "receiptNumberSequenceId",
+        "billingContactId",
+        "receiptTemplateId"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "tags": {},
+        "receiptNumberSequenceId": {},
+        "billingContactId": {},
+        "receiptTemplateId": {}
+      }
+    }
+  },
   "receipt_templates": {
     "fields": {
       "id": {
