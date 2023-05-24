@@ -1,5 +1,8 @@
 import { computed } from 'vue'
 
+import { useDataAccess } from '@/utils/dataAccess'
+const dataAccess = useDataAccess()
+
 import { useFormatter } from '@/utils/formatter'
 const {
   formatDate,
@@ -8,7 +11,8 @@ const {
   tagStyle
 } = useFormatter()
 
-import axios from 'axios'
+import { useValidations } from '@/utils/validations'
+const { isEmpty, notEmpty } = useValidations()
 
 export function useInputHelper(schemas) {
   const schemasMap = computed(() => {
@@ -46,6 +50,10 @@ export function useInputHelper(schemas) {
     return Object.keys(schemasMap.value).filter(f => tagsField(f))
   })
 
+  const objectFields = computed(() => {
+    return Object.keys(schemasMap.value).filter(f => objectField(f))
+  })
+
   function inputType(field) {
     return (schemasMap.value[field] || {}).type
   }
@@ -54,7 +62,7 @@ export function useInputHelper(schemas) {
     return (schemasMap.value[field] || {}).label
   }
 
-  function inputValue(field, record, includeKeys) {
+  function inputValue(field, record, includeKeys, schemas) {
     const referenceField = includeKeys.find(v => v === field)
     const fieldValue = record[field]
     if (!fieldValue) { return }
@@ -127,6 +135,10 @@ export function useInputHelper(schemas) {
     return field === 'tags' || Object.is(schemasMap.value[field].isTags, true)
   }
 
+  function objectField(field) {
+    return inputType(field) === 'object'
+  }
+
   function formatInputOptionsData(field, offset, limit, dataFromServer) {
     return Object.assign(
       {},
@@ -167,38 +179,121 @@ export function useInputHelper(schemas) {
     }, {})
   }
 
-  function formatDataForShow(field, record) {
-    if ((inputType(field) === 'date' || inputType(field) === 'datetime') && !!record[field]) {
-      return new Date(record[field])
-    } else if (multiSelectableField(field) && !!record.includes) {
-      const includes = record.includes[field]
-      const fieldValue = record[field]
-      if (!!includes && Object.keys(includes).length > 0) {
-        return fieldValue.map((v) => {
+  async function loadForeignModelAsOption(url, id) {
+    return dataAccess.view(`${url}/${id}`, {})
+  }
+
+  async function loadIncludesFromServer(field, fieldValue) {
+    const options = schemasMap.value[field].options
+    const foreignModelUrl = options.sourceUrl
+
+    const promises = fieldValue.map((v) => {
+      return loadForeignModelAsOption(foreignModelUrl, v)
+    })
+
+    return new Promise((resolve, reject) => {
+      Promise.all(promises)
+        .then((results) => {
+          const formattedOptions = results.map((result) => {
+            const value = options.value(result)
+            const label = options.label(result)
+            return { value, label }
+          })
+          resolve(formattedOptions)
+        })
+        .catch((error) => {
+          console.error(error)
+          reject(error)
+        })
+    })
+  }
+
+  function setDefaultValue(field, record) {
+    const fieldValue = record[field]
+    if (notEmpty(fieldValue)) { return fieldValue }
+
+    const defaultValue = schemasMap.value[field].defaultValue
+    if (notEmpty(defaultValue)) {
+      return defaultValue()
+    } else {
+      return fieldValue
+    }
+  }
+
+  async function formatDataForShow(field, record) {
+    return new Promise((resolve, reject) => {
+      const fieldValue = setDefaultValue(field, record)
+
+      if (isEmpty(fieldValue)) {
+        resolve(fieldValue)
+        return
+      }
+
+      if (objectField(field)) {
+        if (notEmpty(fieldValue)) {
+          resolve(JSON.stringify(fieldValue, false, 4))
+        } else {
+          resolve(fieldValue)
+        }
+        return
+      }
+
+      if (
+        inputType(field) !== 'date' && inputType(field) !== 'datetime' &&
+        !multiSelectableField(field) && !singleSelectableField(field)
+      ) {
+        resolve(fieldValue)
+        return
+      }
+
+      if (inputType(field) === 'date' || inputType(field) === 'datetime') {
+        let formattedValue;
+        if (typeof fieldValue === 'object') {
+          formattedValue = Object.entries(fieldValue).reduce((o, [k, v]) => {
+            if (notEmpty(v)) {
+              o[k] = new Date(v)
+            } else {
+              o[k] = v
+            }
+            return o
+          }, {})
+        } else {
+          formattedValue = new Date(fieldValue)
+        }
+        resolve(formattedValue)
+        return
+      }
+
+      const fieldIncludeValues = [fieldValue].flat()
+
+      if (notEmpty(record.includes) && notEmpty(record.includes[field]) && Object.keys(record.includes[field]).length > 0) {
+        const includes = record.includes[field]
+        const formattedOptions = fieldIncludeValues.map((v) => {
           const include = includes[v]
           const options = schemasMap.value[field].options
           const value = options.value(include)
           const label = options.label(include)
           return { value, label }
         })
+        resolve(formattedOptions)
       } else {
-        return record[field]
-      }
-    } else if (singleSelectableField(field) && !!record.includes) {
-      const includes = record.includes[field]
-      const fieldValue = record[field]
-      if (!!fieldValue && !!includes && Object.keys(includes).length > 0) {
-        const include = includes[fieldValue]
         const options = schemasMap.value[field].options
-        const value = options.value(include)
-        const label = options.label(include)
-        return [{ value, label }]
-      } else {
-        return record[field]
+        const foreignModelUrl = options.sourceUrl
+        loadIncludesFromServer(field, fieldIncludeValues)
+          .then((formattedOptions) => {
+            resolve(formattedOptions)
+          })
+          .catch((error) => {
+            const formattedOptions = []
+            fieldIncludeValues.forEach((v) => {
+              if (notEmpty(v)) {
+                formattedOptions.push({ value: v, label: v })
+              }
+            })
+            resolve(formattedOptions)
+          })
       }
-    } else {
-      return record[field]
-    }
+    })
   }
 
   function formatDataForSave(params) {
@@ -214,7 +309,32 @@ export function useInputHelper(schemas) {
       data[field] = (values[0] || {}).value
     })
 
+    clientOptionsFields.value.forEach((field) => {
+      const value = data[field]
+      if (isEmpty(value) || value.length === 0) {
+        delete data[field]
+      }
+    })
+
+    objectFields.value.forEach((field) => {
+      if (notEmpty(data[field]) && data[field].length > 0) {
+        data[field] = JSON.parse(data[field])
+      }
+    })
+
     return data
+  }
+
+  function formatErrorsForDisplay(error) {
+    return Object.entries(error).reduce((errors, [field, fieldErrors]) => {
+      errors[field] = fieldErrors.map((errorName) => {
+        return {
+          name: errorName,
+          params: {}
+        }
+      })
+      return errors
+    }, {})
   }
 
   async function fetchOptions(field, offset) {
@@ -222,11 +342,11 @@ export function useInputHelper(schemas) {
     if (options.server) {
       const limit = schemasMap.value[field].limit || 5
       return new Promise((resolve, reject) => {
-        axios
-          .get(options.sourceUrl, { params: { offset, limit } })
+        dataAccess
+          .list(options.sourceUrl, { params: { offset, limit } })
           .then((result) => {
-            const data = result.data.data
-            const total = result.data.total
+            const data = result.data
+            const total = result.total
             const dataFromServer = {
               total,
               data: data.map((row) => {
@@ -295,10 +415,13 @@ export function useInputHelper(schemas) {
     nullToggleableFields,
     tagsField,
     tagsFields,
+    objectField,
+    objectFields,
     formatInputOptionsData,
     formatDataFields,
     formatDataForShow,
     formatDataForSave,
+    formatErrorsForDisplay,
     validateParams,
     fetchOptions,
     initOptionsData

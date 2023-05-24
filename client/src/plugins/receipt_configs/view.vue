@@ -29,7 +29,7 @@ const fieldsLayout = [
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-    { key: 'customFields', type: 'text', label: 'Custom Fields', listable: false, viewable: true, creatable: true, updatable: true },
+    { key: 'customFields', type: 'object', label: 'Custom Fields (JSON)', listable: false, viewable: true, creatable: true, updatable: true },
     {
       key: 'receiptNumberSequenceId', type: 'singleSelect', label: 'Sequence Number',
       reference: { label: sequenceNumberLabel },

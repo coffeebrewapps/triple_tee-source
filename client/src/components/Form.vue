@@ -17,6 +17,7 @@ const {
   singleSelectableField,
   nullToggleableField,
   nullToggleableFields,
+  objectField,
   formatInputOptionsData,
   fetchOptions,
   initOptionsData
@@ -120,7 +121,7 @@ function showInput(field) {
 }
 
 function showTextarea(field) {
-  return showField(field) && multiInputableField(field)
+  return showField(field) && (multiInputableField(field) || objectField(field))
 }
 
 function showDatePicker(field) {

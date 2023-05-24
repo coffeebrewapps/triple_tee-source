@@ -18,11 +18,15 @@ const {
   clientOptionsFields,
   inputType,
   inputLabel,
+  inputValue,
   multiSelectableField,
   singleSelectableField,
   selectableField,
   tagsField,
   formatInputOptionsData,
+  formatDataForShow,
+  formatDataForSave,
+  formatErrorsForDisplay,
   fetchOptions,
   initOptionsData
 } = useInputHelper(props.dataFields)
@@ -172,6 +176,7 @@ const includeKeys = computed(() => {
 const combinedDataFields = ref(Array.from(props.dataFields))
 
 const schemasLoaded = ref(false)
+const filtersLoaded = ref(false)
 
 function validateParams(validations, params) {
   return Object.keys(validations).reduce((errors, field) => {
@@ -208,7 +213,7 @@ const filtersEnabled = ref(props.filters.layout)
 
 const filtersState = ref(false)
 
-const filtersData = ref(Object.assign({}, props.filters.initData))
+const filtersData = ref({})
 
 const filtersDataFields = ref(Array.from(props.dataFields))
 
@@ -240,7 +245,7 @@ const filterableKeys = computed(() => {
 })
 
 const showFilters = computed(() => {
-  return filtersEnabled.value && schemasLoaded.value
+  return filtersEnabled.value && schemasLoaded.value && filtersLoaded.value
 })
 
 const filtersLayout = computed(() => {
@@ -277,8 +282,21 @@ async function submitFilters(updatedFilters) {
 }
 
 async function resetFilters() {
-  filtersData.value = copyFiltersInitData()
-  await loadData()
+  filtersLoaded.value = false
+  filtersData.value = formatFilters(Object.assign({}, props.filters.initData))
+
+  const promises = filterableKeys.value.map((key) => {
+    return formatDataForShow(key, filtersData.value)
+  })
+
+  Promise.all(promises)
+    .then((results) => {
+      filterableKeys.value.forEach((key, i) => {
+        filtersData.value[key] = results[i]
+      })
+      filtersLoaded.value = true
+      loadData()
+    })
 }
 
 function toggleFilters() {
@@ -304,7 +322,7 @@ function formatFiltersFields() {
 
 function formatFilters(filters = {}) {
   return Object.entries(filters).reduce((o, [field, value]) => {
-    if (value) {
+    if (notEmpty(value)) {
       if (singleSelectableField(field)) {
         o[field] = value[0].value
       } else if (multiSelectableField(field)) {
@@ -518,8 +536,8 @@ async function loadSchemas() {
       schemasLoaded.value = true
     })
     .catch((error) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
+      console.error(error)
+      showBanner(`Error loading schemas!`)
     })
 }
 
@@ -543,8 +561,8 @@ async function loadData() {
     })
     .catch((error) => {
       dataLoading.value = false
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
+      console.error(error)
+      showBanner(`Error loading data!`)
     })
 }
 
@@ -885,171 +903,6 @@ function closeDownloadDialog() {
 }
 /*** section:download ***/
 
-/*** section:formatting ***/
-function inputValue(field, record) {
-  const referenceField = includeKeys.value.find(v => v === field)
-  const fieldValue = record[field]
-  if (!fieldValue) { return }
-
-  if (referenceField) {
-    const includes = record.includes || {}
-    const rawValue = [fieldValue].flat().filter(v => !!v)
-
-    const mapped = rawValue.map((value) => {
-      const foreignValue = includes[field][value]
-      return schemasMap.value[field].reference.label(foreignValue)
-    })
-
-    if (multiSelectableField(field)) {
-      return mapped
-    } else {
-      return mapped[0]
-    }
-  } else if (inputType(field) === 'enum' || inputType(field) === 'select') {
-    const found = combinedDataFields.value.find(f => f.key === field)
-    const options = found.options
-    return options.find(o => o.value === fieldValue).label
-  } else if (inputType(field) === 'datetime') {
-    return formatTimestamp(fieldValue)
-  } else if (inputType(field) === 'date') {
-    return formatDate(fieldValue)
-  } else {
-    return fieldValue
-  }
-}
-
-async function loadForeignModelAsOption(url, id) {
-  return dataAccess.view(`${url}/${id}`, {})
-}
-
-async function loadIncludesFromServer(field, fieldValue) {
-  const options = schemasMap.value[field].options
-  const foreignModelUrl = options.sourceUrl
-
-  const promises = fieldValue.map((v) => {
-    return loadForeignModelAsOption(foreignModelUrl, v)
-  })
-
-  return new Promise((resolve, reject) => {
-    Promise.all(promises)
-      .then((results) => {
-        const formattedOptions = results.map((result) => {
-          const value = options.value(result)
-          const label = options.label(result)
-          return { value, label }
-        })
-        resolve(formattedOptions)
-      })
-      .catch((error) => {
-        console.log(error)
-        reject(error)
-      })
-  })
-}
-
-function setDefaultValue(field, record) {
-  const fieldValue = record[field]
-  if (notEmpty(fieldValue)) { return fieldValue }
-
-  const defaultValue = schemasMap.value[field].defaultValue
-  if (notEmpty(defaultValue)) {
-    return defaultValue()
-  } else {
-    return fieldValue
-  }
-}
-
-async function formatDataForShow(field, record) {
-  return new Promise((resolve, reject) => {
-    const fieldValue = setDefaultValue(field, record)
-
-    if (isEmpty(fieldValue)) {
-      resolve(fieldValue)
-      return
-    }
-
-    if (
-      inputType(field) !== 'date' && inputType(field) !== 'datetime' &&
-      !multiSelectableField(field) && !singleSelectableField(field)
-    ) {
-      resolve(fieldValue)
-      return
-    }
-
-    if (inputType(field) === 'date' || inputType(field) === 'datetime') {
-      const formattedValue = new Date(fieldValue)
-      resolve(formattedValue)
-      return
-    }
-
-    const fieldIncludeValues = [fieldValue].flat()
-
-    if (notEmpty(record.includes) && notEmpty(record.includes[field]) && Object.keys(record.includes[field]).length > 0) {
-      const includes = record.includes[field]
-      const formattedOptions = fieldIncludeValues.map((v) => {
-        const include = includes[v]
-        const options = schemasMap.value[field].options
-        const value = options.value(include)
-        const label = options.label(include)
-        return { value, label }
-      })
-      resolve(formattedOptions)
-    } else {
-      const options = schemasMap.value[field].options
-      const foreignModelUrl = options.sourceUrl
-      loadIncludesFromServer(field, fieldIncludeValues)
-        .then((formattedOptions) => {
-          resolve(formattedOptions)
-        })
-        .catch((error) => {
-          const formattedOptions = []
-          fieldIncludeValues.forEach((v) => {
-            if (notEmpty(v)) {
-              formattedOptions.push({ value: v, label: v })
-            }
-          })
-          resolve(formattedOptions)
-        })
-    }
-  })
-}
-
-function formatDataForSave(params) {
-  const data = Object.assign({}, params)
-
-  multiSelectableFields.value.forEach((field) => {
-    const values = (data[field] || [])
-    data[field] = values.map(v => v.value)
-  })
-
-  singleSelectableFields.value.forEach((field) => {
-    const values = (data[field] || [])
-    data[field] = (values[0] || {}).value
-  })
-
-  clientOptionsFields.value.forEach((field) => {
-    const value = data[field]
-    if (isEmpty(value) || value.length === 0) {
-      delete data[field]
-    }
-  })
-
-  return data
-}
-
-function formatErrorsForDisplay(error) {
-  return Object.entries(error).reduce((errors, [field, fieldErrors]) => {
-    errors[field] = fieldErrors.map((errorName) => {
-      return {
-        name: errorName,
-        params: {}
-      }
-    })
-    return errors
-  }, {})
-}
-/*** section:formatting ***/
-
 onMounted(async () => {
   await loadSchemas()
   await loadData()
@@ -1061,6 +914,7 @@ onMounted(async () => {
       errorAlert.value = true
       errorContent.value = JSON.stringify(error, false, 4)
     })
+  await resetFilters()
 })
 </script>
 
@@ -1138,7 +992,7 @@ onMounted(async () => {
               <div
                 v-if="row[header.key]"
               >
-                {{ inputValue(header.key, row) }}
+                {{ inputValue(header.key, row, includeKeys, combinedDataFields) }}
               </div>
 
               <div

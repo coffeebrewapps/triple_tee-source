@@ -64,6 +64,12 @@ const props = defineProps({
     default(f, r) {
       return r[f]
     }
+  },
+  includeKeys: {
+    type: Array,
+    default() {
+      return []
+    }
   }
 })
 /*** section:props ***/
@@ -108,7 +114,7 @@ function closeDialog() {
             <div
               v-if="record[field]"
             >
-              {{ inputValue(field, record) }}
+              {{ inputValue(field, record, includeKeys, dataFields) }}
             </div>
 
             <div

@@ -32,13 +32,21 @@ const dataAccess = useDataAccess()
 /*** import:utils ***/
 
 /*** import:stores ***/
+import { useEventsStore } from '@/stores/events'
+const events = useEventsStore()
+
 import { useBannerStore } from '@/stores/banner'
 const banner = useBannerStore()
 /*** import:stores ***/
 
 /*** import:components ***/
+import {
+  TProgressBar
+} from 'coffeebrew-vue-components'
+
 import TabContainer from '@/components/TabContainer.vue'
 import InvoiceConfig from '@/plugins/invoice_configs/view.vue'
+import ReceiptConfig from '@/plugins/receipt_configs/view.vue'
 /*** import:components ***/
 
 /*** section:global ***/
@@ -54,11 +62,12 @@ const heading = computed(() => {
   if (currentContact.value) {
     return `Contact: ${currentContact.value.name}`
   } else {
-    return `Contact`
+    return `Loading Contact...`
   }
 })
 
 async function loadContact() {
+  currentContact.value = null
   const params = { include: includeKeys.value }
 
   await dataAccess
@@ -71,9 +80,6 @@ async function loadContact() {
       console.log(error)
       showBanner(`Error loading contact!`);
     })
-}
-
-async function loadInvoiceConfig() {
 }
 /*** section:global ***/
 
@@ -91,8 +97,17 @@ function hideBanner() {
 /*** section:tabs ***/
 const tabs = [
   { label: 'Details', onchange: loadContact },
-  { label: 'Invoice Configs', onchange: loadInvoiceConfig }
+  { label: 'Invoice Configs', onchange: loadInvoiceConfig },
+  { label: 'Receipt Configs', onchange: loadReceiptConfig }
 ]
+
+async function loadInvoiceConfig() {
+  events.emitEvent('loadData', { dataType: 'Invoice Configs' })
+}
+
+async function loadReceiptConfig() {
+  events.emitEvent('loadData', { dataType: 'Receipt Configs' })
+}
 
 function triggerTabEvent(i) {
   tabs[i].onchange()
@@ -108,7 +123,12 @@ onMounted(async () => {
   <div class="page-container">
     <h2 class="heading">{{ heading }}</h2>
 
+    <TProgressBar
+      v-if="!currentContact"
+    />
+
     <TabContainer
+      v-if="currentContact"
       :tabs="tabs"
       @tab-change="triggerTabEvent"
     >
@@ -137,7 +157,7 @@ onMounted(async () => {
                 <span
                   v-if="currentContact && currentContact[field]"
                 >
-                  {{ inputValue(field, currentContact, includeKeys) }}
+                  {{ inputValue(field, currentContact, includeKeys, dataFields) }}
                 </span>
 
                 <span
@@ -157,6 +177,12 @@ onMounted(async () => {
           :billing-contact-id="contactId"
         />
       </template> <!-- template-1 -->
+
+      <template #tab-2>
+        <ReceiptConfig
+          :billing-contact-id="contactId"
+        />
+      </template> <!-- template-2 -->
     </TabContainer>
   </div> <!-- page-container -->
 </template>

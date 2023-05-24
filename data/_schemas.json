@@ -326,6 +326,10 @@
     "constraints": {
       "primary": ["id"],
       "foreign": {
+        "tags": {
+          "reference": "tags",
+          "primary": "id"
+        },
         "invoiceNumberSequenceId": {
           "reference": "sequences",
           "primary": "id"

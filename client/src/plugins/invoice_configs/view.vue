@@ -51,7 +51,7 @@ const dataFields = computed(() => {
         label: tagLabel
       }
     },
-    { key: 'customFields', type: 'text', label: 'Custom Fields', listable: false, viewable: true, creatable: true, updatable: true },
+    { key: 'customFields', type: 'object', label: 'Custom Fields (JSON)', listable: false, viewable: true, creatable: true, updatable: true },
     {
       key: 'invoiceNumberSequenceId', type: 'singleSelect', label: 'Sequence Number',
       reference: { label: sequenceNumberLabel },
