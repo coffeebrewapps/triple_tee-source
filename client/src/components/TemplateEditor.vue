@@ -1,6 +1,8 @@
 <script setup>
 /*** import:global ***/
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 /*** import:global ***/
 
 /*** import:utils ***/
@@ -240,7 +242,6 @@ const previewPdfDialog = ref(false)
 const templatePdfData = ref()
 const downloadLink = ref()
 const downloadFile = ref()
-const downloadAnchor = ref('downloadAnchor')
 
 async function generateTemplate() {
   templatePdfData.value = null
@@ -254,15 +255,34 @@ async function generateTemplate() {
       downloadLink.value = url
       downloadFile.value = `invoice_templates_${props.id}.pdf`
       templatePdfData.value = url
+      viewPdf()
     })
     .catch((error) => {
       console.log(error)
     })
+    .finally(() => {
+      closePreviewDialog()
+    })
 }
 
-function downloadPdf() {
-  downloadAnchor.value.click()
-  closePreviewDialog()
+function viewPdf() {
+  const currentRoute = Object.assign({}, router.currentRoute.value)
+  const viewPdfRoute = {
+    path: '/document_templates/:templateType/:id/pdf',
+    name: 'View Pdf',
+    component: () => import('@/components/PdfViewer.vue'),
+    props: {
+      templatePdfData: templatePdfData.value,
+      downloadLink: downloadLink.value,
+      downloadFile: downloadFile.value
+    },
+    meta: {
+      parentRoute: { name: currentRoute.name },
+      hidden: true
+    }
+  }
+  router.addRoute(viewPdfRoute)
+  router.push({ name: 'View Pdf', params: { id: props.id } })
 }
 
 function closePreviewDialog() {
@@ -414,37 +434,18 @@ onMounted(async () => {
     </div>
 
     <TDialog
+      class="generate-dialog"
       v-model="previewPdfDialog"
-      title="Generate Template"
-      :fullscreen="true"
+      title="Generating PDF"
+      :width="400"
+      :height="250"
     >
       <template #body>
         <TProgressBar
           v-if="!templatePdfData"
         />
 
-        <iframe
-          v-if="templatePdfData"
-          class="preview-panel"
-          :src="templatePdfData"
-        >
-        </iframe>
-      </template>
-
-      <template #actions>
-        <TButton
-          value="Download"
-          icon="fa-solid fa-file-arrow-down"
-          @click="downloadPdf"
-        />
-
-        <TButton
-          value="Cancel"
-          icon="fa-solid fa-xmark"
-          @click="closePreviewDialog"
-        />
-
-        <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
+        <div class="message">Generating PDF...</div>
       </template>
     </TDialog>
   </div>
@@ -564,9 +565,7 @@ onMounted(async () => {
   color: var(--color-error);
 }
 
-.preview-panel {
-  width: 100%;
-  height: 100%;
-  border: none;
+.generate-dialog .message {
+  margin: 1rem 0;
 }
 </style>
