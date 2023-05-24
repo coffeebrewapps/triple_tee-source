@@ -53,10 +53,12 @@ const templatesUrl = computed(() => {
 const currentTemplate = ref()
 
 const heading = computed(() => {
+  if (!currentTemplate.value) { return `` }
+
   if (templateType.value === 'invoice_templates') {
-    return `Invoice Template ${templateId.value}`
+    return `Invoice Template: ${currentTemplate.value.name}`
   } else {
-    return `Receipt Template ${templateId.value}`
+    return `Receipt Template: ${currentTemplate.value.name}`
   }
 })
 /*** section:global ***/
@@ -119,16 +121,8 @@ function hideBanner() {
 /*** section:banner ***/
 
 async function loadTemplate() {
-  const params = {
-    limit: 1,
-    sort: {
-      field: 'createdAt',
-      order: 'desc'
-    }
-  }
-
   await dataAccess
-    .view(`${templatesUrl.value}/${templateId.value}`, params)
+    .view(`${templatesUrl.value}/${templateId.value}`, {})
     .then((result) => {
       currentTemplate.value = result
     })

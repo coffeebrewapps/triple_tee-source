@@ -29,7 +29,7 @@ const navs = computed(() => {
 })
 
 function goToNav(nav) {
-  router.replace(nav)
+  router.push(nav)
 }
 </script>
 

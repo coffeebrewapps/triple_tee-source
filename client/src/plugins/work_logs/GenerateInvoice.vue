@@ -155,7 +155,6 @@ function formatFilters(filters = {}) {
 }
 
 async function submitFilters() {
-  console.log(`submitFilters`)
   const formattedFilters = formatFilters(filtersData.value)
   const params = {
     filters: formattedFilters,

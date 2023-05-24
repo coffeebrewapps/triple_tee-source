@@ -79,7 +79,13 @@ function triggerTabEvent(i) {
 /*** section:tab ***/
 
 /*** section:dataPage ***/
-const invoiceRowActions = {
+const invoiceActions = {
+  create: {
+    click: async function(data) {
+      templateType.value = 'invoice_templates'
+      await openCreatePage()
+    }
+  },
   view: {
     click: async function(row, index) {
       templateType.value = 'invoice_templates'
@@ -94,7 +100,13 @@ const invoiceRowActions = {
   }
 }
 
-const receiptRowActions = {
+const receiptActions = {
+  create: {
+    click: async function(data) {
+      templateType.value = 'receipt_templates'
+      await openCreatePage()
+    }
+  },
   view: {
     click: async function(row, index) {
       templateType.value = 'receipt_templates'
@@ -107,6 +119,10 @@ const receiptRowActions = {
       await openUpdatePage(row.id)
     }
   }
+}
+
+async function openCreatePage() {
+  router.push({ name: 'Create Template', params: { templateType: templateType.value } })
 }
 
 async function openViewPage(id) {
@@ -137,7 +153,7 @@ async function openUpdatePage(id) {
           :data-fields="dataFields"
           :validations="validations"
           :filters="filters"
-          :row-actions="invoiceRowActions"
+          :actions="invoiceActions"
         />
       </template>
 
@@ -151,7 +167,7 @@ async function openUpdatePage(id) {
           :data-fields="dataFields"
           :validations="validations"
           :filters="filters"
-          :row-actions="receiptRowActions"
+          :actions="receiptActions"
         />
       </template>
     </TabContainer>

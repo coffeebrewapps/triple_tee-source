@@ -4,6 +4,16 @@ const route = {
   component: () => import('./view.vue')
 }
 
+const createTemplateRoute = {
+  path: '/document_templates/:templateType',
+  name: 'Create Template',
+  component: () => import('./NewTemplate.vue'),
+  meta: {
+    parentRoute: { name: 'Document Templates' },
+    hidden: true
+  }
+}
+
 const viewTemplateRoute = {
   path: '/document_templates/:templateType/:id',
   name: 'View Template',
@@ -28,6 +38,7 @@ const updateTemplateRoute = {
 
 const usePlugin = (router) => {
   router.addRoute(route)
+  router.addRoute(createTemplateRoute)
   router.addRoute(viewTemplateRoute)
   router.addRoute(updateTemplateRoute)
   return route

@@ -17,6 +17,7 @@ const liquidEngine = new Liquid();
 import {
   TButton,
   TDialog,
+  TInput,
   TProgressBar
 } from 'coffeebrew-vue-components'
 
@@ -48,6 +49,14 @@ const props = defineProps({
   data: {
     type: Object,
     default: {}
+  },
+  errorMessages: {
+    type: Object,
+    default: {}
+  },
+  enableGenerate: {
+    type: Boolean,
+    default: true
   }
 })
 /*** section:props ***/
@@ -334,7 +343,14 @@ onMounted(async () => {
               <i class="fa-solid fa-check"></i>
             </div>
           </div>
-        </template>
+
+          <div
+            v-if="errorMessages.contentMarkup"
+            class="error-message"
+          >
+            {{ errorMessages.contentMarkup }}
+          </div>
+        </template> <!-- template-0 -->
 
         <template #tab-1>
           <div
@@ -369,7 +385,14 @@ onMounted(async () => {
               <i class="fa-solid fa-check"></i>
             </div>
           </div>
-        </template>
+
+          <div
+            v-if="errorMessages.contentStyles"
+            class="error-message"
+          >
+            {{ errorMessages.contentStyles }}
+          </div>
+        </template> <!-- template-1 -->
 
         <template #tab-2>
           <div
@@ -404,9 +427,9 @@ onMounted(async () => {
               <i class="fa-solid fa-check"></i>
             </div>
           </div>
-        </template>
+        </template> <!-- template-2 -->
       </TabContainer>
-    </div>
+    </div> <!-- template-editor -->
 
     <div class="preview-container">
       <h3 class="heading">Preview</h3>
@@ -426,12 +449,13 @@ onMounted(async () => {
 
       <div class="buttons">
         <TButton
+          v-if="enableGenerate"
           value="Generate"
           icon="fa-solid fa-file-export"
           @click="generateTemplate"
         />
       </div>
-    </div>
+    </div> <!-- preview-container -->
 
     <TDialog
       class="generate-dialog"
@@ -448,10 +472,14 @@ onMounted(async () => {
         <div class="message">Generating PDF...</div>
       </template>
     </TDialog>
-  </div>
+  </div> <!-- preview-template -->
 </template>
 
 <style scoped>
+.heading {
+  font-weight: 900;
+}
+
 .preview-template {
   display: flex;
   flex-direction: row;
@@ -533,6 +561,12 @@ onMounted(async () => {
   display: none;
 }
 
+.error-message {
+  margin: 8px 0;
+  font-size: 0.8rem;
+  color: var(--color-error);
+}
+
 .preview-container {
   display: flex;
   flex-direction: column;
@@ -540,10 +574,6 @@ onMounted(async () => {
   width: 60%;
   height: 100vh;
   margin-top: 1rem;
-}
-
-.preview-container .heading {
-  font-weight: 900;
 }
 
 .preview-container .buttons {

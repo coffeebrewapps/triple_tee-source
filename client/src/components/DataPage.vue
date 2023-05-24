@@ -145,7 +145,7 @@ const props = defineProps({
       return JSON.stringify(row, false, 2)
     }
   },
-  rowActions: {
+  actions: {
     type: Object,
     default: {}
   }
@@ -379,31 +379,43 @@ async function toggleSort(field) {
 
 /*** section:table ***/
 const tableActions = computed(() => {
-  const initialActions = [
-    {
-      name: 'Create',
-      icon: 'fa-solid fa-circle-plus fa-xl',
-      click: async function(data) {
-        await openCreateDialog()
-      }
-    },
-    {
-      name: 'Export',
-      icon: 'fa-solid fa-file-export',
-      click: async function(data) {
-        await openDownloadDialog()
-      }
+  const defaultCreateAction = {
+    name: 'Create',
+    icon: 'fa-solid fa-circle-plus fa-xl',
+    click: async function(data) {
+      await openCreateDialog()
     }
+  }
+  const createOverride = props.actions.create || {}
+  const createAction = Object.assign({}, defaultCreateAction, createOverride)
+
+  const defaultExportAction = {
+    name: 'Export',
+    icon: 'fa-solid fa-file-export',
+    click: async function(data) {
+      await openDownloadDialog()
+    }
+  }
+  const exportOverride = props.actions.export || {}
+  const exportAction = Object.assign({}, defaultExportAction, exportOverride)
+
+  const defaultFilterAction = {
+    name: 'Filter',
+    icon: 'fa-solid fa-filter',
+    click: async function() {
+      toggleFilters()
+    }
+  }
+  const filterOverride = props.actions.filter || {}
+  const filterAction = Object.assign({}, defaultFilterAction, filterOverride)
+
+  const initialActions = [
+    createAction,
+    exportAction
   ]
 
   if (showFilters.value) {
-    initialActions.unshift({
-      name: 'Filter',
-      icon: 'fa-solid fa-filter',
-      click: async function() {
-        toggleFilters()
-      }
-    })
+    initialActions.unshift(filterAction)
   }
 
   return initialActions
@@ -417,7 +429,7 @@ const actions = computed(() => {
       await openViewDialog(row.id)
     }
   }
-  const viewOverride = props.rowActions.view || {}
+  const viewOverride = props.actions.view || {}
   const viewAction = Object.assign({}, defaultViewAction, viewOverride)
 
   const defaultUpdateAction = {
@@ -427,7 +439,7 @@ const actions = computed(() => {
       await openUpdateDialog(row.id)
     }
   }
-  const updateOverride = props.rowActions.update || {}
+  const updateOverride = props.actions.update || {}
   const updateAction = Object.assign({}, defaultUpdateAction, updateOverride)
 
   const defaultRemoveAction = {
@@ -437,7 +449,7 @@ const actions = computed(() => {
       await openDeleteDialog(row.id)
     }
   }
-  const removeOverride = props.rowActions.remove || {}
+  const removeOverride = props.actions.remove || {}
   const removeAction = Object.assign({}, defaultRemoveAction, removeOverride)
 
   return [

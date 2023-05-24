@@ -42,6 +42,7 @@
   --color-text: var(--vt-c-text-light-1);
 
   --color-error: var(--vt-c-red);
+  --color-error-hover: var(--vt-c-red-darker);
 
   --section-gap: 160px;
 }
