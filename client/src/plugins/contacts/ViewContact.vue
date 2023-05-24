@@ -47,6 +47,7 @@ import {
 import TabContainer from '@/components/TabContainer.vue'
 import InvoiceConfig from '@/plugins/invoice_configs/view.vue'
 import ReceiptConfig from '@/plugins/receipt_configs/view.vue'
+import BillingConfig from '@/plugins/billing_configs/view.vue'
 /*** import:components ***/
 
 /*** section:global ***/
@@ -98,7 +99,8 @@ function hideBanner() {
 const tabs = [
   { label: 'Details', onchange: loadContact },
   { label: 'Invoice Configs', onchange: loadInvoiceConfig },
-  { label: 'Receipt Configs', onchange: loadReceiptConfig }
+  { label: 'Receipt Configs', onchange: loadReceiptConfig },
+  { label: 'Billing Configs', onchange: loadBillingConfig }
 ]
 
 async function loadInvoiceConfig() {
@@ -107,6 +109,10 @@ async function loadInvoiceConfig() {
 
 async function loadReceiptConfig() {
   events.emitEvent('loadData', { dataType: 'Receipt Configs' })
+}
+
+async function loadBillingConfig() {
+  events.emitEvent('loadData', { dataType: 'Billing Configs' })
 }
 
 function triggerTabEvent(i) {
@@ -183,6 +189,12 @@ onMounted(async () => {
           :billing-contact-id="contactId"
         />
       </template> <!-- template-2 -->
+
+      <template #tab-3>
+        <BillingConfig
+          :contact-id="contactId"
+        />
+      </template> <!-- template-3 -->
     </TabContainer>
   </div> <!-- page-container -->
 </template>

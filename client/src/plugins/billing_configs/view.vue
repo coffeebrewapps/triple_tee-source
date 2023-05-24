@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
@@ -10,6 +11,13 @@ const { notEarlierThan, greaterThanOrEqual } = useValidations()
 const tagsUrl = `${config.baseUrl}/api/tags`
 const contactsUrl = `${config.baseUrl}/api/contacts`
 
+const props = defineProps({
+  contactId: {
+    type: String,
+    default: null
+  }
+})
+
 const fieldsLayout = [
   { effectiveStart: 'md', effectiveEnd: 'md' },
   { rateType: 'md', unitCost: 'md', unit: 'md' },
@@ -17,50 +25,52 @@ const fieldsLayout = [
   { contactId: 'lg' }
 ]
 
-const dataFields = [
-  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-  { key: 'effectiveStart', type: 'datetime', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: false, filterable: true, sortable: true },
-  { key: 'effectiveEnd', type: 'datetime', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
-  { key: 'rateType', type: 'enum', label: 'Rate Type', listable: true, viewable: true, creatable: true, updatable: false },
-  { key: 'unit', type: 'enum', label: 'Unit', listable: true, viewable: true, creatable: true, updatable: false },
-  { key: 'unitCost', type: 'number', label: 'Unit Cost', listable: true, viewable: true, creatable: true, updatable: false },
-  {
-    key: 'includeTags', type: 'multiSelect', label: 'Include Tags', isTags: true,
-    reference: { label: tagLabel },
-    listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
-    options: {
-      server: true,
-      pagination: true,
-      sourceUrl: tagsUrl,
-      value: recordValue,
-      label: tagLabel
-    }
-  },
-  {
-    key: 'excludeTags', type: 'multiSelect', label: 'Exclude Tags', isTags: true,
-    reference: { label: tagLabel },
-    listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
-    options: {
-      server: true,
-      pagination: true,
-      sourceUrl: tagsUrl,
-      value: recordValue,
-      label: tagLabel
-    }
-  },
-  {
-    key: 'contactId', type: 'singleSelect', label: 'Contact',
-    reference: { label: contactLabel },
-    listable: true, viewable: true, creatable: true, updatable: false, filterable: true,
-    options: {
-      server: true,
-      pagination: true,
-      sourceUrl: contactsUrl,
-      value: recordValue,
-      label: contactLabel
-    }
-  },
-]
+const dataFields = computed(() => {
+  return [
+    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
+    { key: 'effectiveStart', type: 'datetime', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: false, filterable: true, sortable: true },
+    { key: 'effectiveEnd', type: 'datetime', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
+    { key: 'rateType', type: 'enum', label: 'Rate Type', listable: true, viewable: true, creatable: true, updatable: false },
+    { key: 'unit', type: 'enum', label: 'Unit', listable: true, viewable: true, creatable: true, updatable: false },
+    { key: 'unitCost', type: 'number', label: 'Unit Cost', listable: true, viewable: true, creatable: true, updatable: false },
+    {
+      key: 'includeTags', type: 'multiSelect', label: 'Include Tags', isTags: true,
+      reference: { label: tagLabel },
+      listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
+      options: {
+        server: true,
+        pagination: true,
+        sourceUrl: tagsUrl,
+        value: recordValue,
+        label: tagLabel
+      }
+    },
+    {
+      key: 'excludeTags', type: 'multiSelect', label: 'Exclude Tags', isTags: true,
+      reference: { label: tagLabel },
+      listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
+      options: {
+        server: true,
+        pagination: true,
+        sourceUrl: tagsUrl,
+        value: recordValue,
+        label: tagLabel
+      }
+    },
+    {
+      key: 'contactId', type: 'singleSelect', label: 'Contact',
+      reference: { label: contactLabel }, defaultValue: () => { return props.contactId },
+      listable: true, viewable: true, creatable: true, updatable: false, filterable: true,
+      options: {
+        server: true,
+        pagination: true,
+        sourceUrl: contactsUrl,
+        value: recordValue,
+        label: contactLabel
+      }
+    },
+  ]
+})
 
 const validations = {
   create: {
@@ -73,24 +83,33 @@ const validations = {
   }
 }
 
-const filters = {
-  initData: {
-    effectiveStart: {
-      startTime: null,
-      endTime: null
-    },
-    effectiveEnd: {
-      startTime: null,
-      endTime: null
-    }
-  },
-  layout: [
-    { effectiveStart: 'md' },
-    { effectiveEnd: 'md' },
-    { includeTags: 'lg', excludeTags: 'lg' },
-    { contactId: 'lg' }
-  ]
-}
+const filters = computed(() => {
+  const initData = {}
+
+  if (props.contactId) {
+    initData.contactId = [{ value: props.contactId }]
+  }
+
+  initData.effectiveStart = {
+    startTime: null,
+    endTime: null
+  }
+
+  initData.effectiveEnd = {
+    startTime: null,
+    endTime: null
+  }
+
+  return {
+    initData,
+    layout: [
+      { effectiveStart: 'md' },
+      { effectiveEnd: 'md' },
+      { includeTags: 'lg', excludeTags: 'lg' },
+      { contactId: 'lg' }
+    ]
+  }
+})
 
 function validateEffectiveEnd(record) {
   return notEarlierThan(record, 'effectiveEnd', 'effectiveStart')
