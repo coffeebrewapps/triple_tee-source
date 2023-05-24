@@ -18,10 +18,13 @@ const {
   tagLabel
 } = useWorkLogUtils()
 
+const invoiceConfigsUrl = `${config.baseUrl}/api/invoice_configs`
 const templatesUrl = `${config.baseUrl}/api/invoice_templates`
+const contactsUrl = `${config.baseUrl}/api/invoice_contacts`
+const billingConfigsUrl = `${config.baseUrl}/api/billing_configs`
 
-function templateLabel(record) {
-  return record.name
+function configLabel(record) {
+  return `Every ${record.invoiceCycleDurationValue} ${record.invoiceCycleDurationUnit}, due in ${record.dueDateCycleValue} ${record.dueDateCycleUnit}`
 }
 
 const filtersDataFields = computed(() => {
@@ -32,15 +35,15 @@ const filtersDataFields = computed(() => {
   fields.push(Object.assign({}, dataFields.find(f => f.key === 'endTime'), { type: 'datetimerange' }))
 
   fields.push({
-    key: 'invoiceTemplateId', type: 'singleSelect', label: 'Template',
+    key: 'invoiceConfigId', type: 'singleSelect', label: 'Invoice Config',
     updatable: true,
-    reference: { label: templateLabel },
+    reference: { label: configLabel },
     options: {
       server: true,
       pagination: true,
-      sourceUrl: templatesUrl,
+      sourceUrl: invoiceConfigsUrl,
       value: recordValue,
-      label: templateLabel
+      label: configLabel
     }
   })
 
@@ -50,8 +53,7 @@ const filtersDataFields = computed(() => {
 import { useInputHelper } from '@/utils/input'
 
 const {
-  multiSelectableField,
-  singleSelectableField
+  formatFilters
 } = useInputHelper(filtersDataFields.value)
 
 import { useDataAccess } from '@/utils/dataAccess'
@@ -79,7 +81,7 @@ const props = defineProps({
 /*** section:global ***/
 const filtersData = ref({
   tags: [],
-  invoiceTemplateId: [],
+  invoiceConfigId: [],
   startTime: {
     startTime: null,
     endTime: null
@@ -92,7 +94,7 @@ const filtersData = ref({
 
 const filtersLayout = computed(() => {
   return [
-    { invoiceTemplateId: 'lg', tags: 'lg' },
+    { invoiceConfigId: 'lg', tags: 'lg' },
     { startTime: 'md' },
     { endTime: 'md' }
   ]
@@ -107,7 +109,7 @@ const filtersErrorMessages = ref({})
 const filtersConfirmButton = computed(() => {
   return {
     type: 'text',
-    value: 'Generate',
+    value: 'Filter',
     icon: 'fa-solid fa-check'
   }
 })
@@ -139,79 +141,37 @@ function hideBanner() {
 /*** section:styles ***/
 
 /*** section:actions ***/
-function formatFilters(filters = {}) {
-  return Object.entries(filters).reduce((o, [field, value]) => {
-    if (value) {
-      if (singleSelectableField(field)) {
-        o[field] = value[0].value
-      } else if (multiSelectableField(field)) {
-        o[field] = value.map(v => v.value)
-      } else {
-        o[field] = value
-      }
-    }
-    return o
-  }, {})
-}
+const currentBillingConfig = ref()
+const currentContact = ref()
+const currentInvoiceConfig = ref()
+const currentSequence = ref()
+const currentTemplate = ref()
+const templateData = ref()
+const filteredWorklogs = ref({})
 
 async function submitFilters() {
-  const formattedFilters = formatFilters(filtersData.value)
-  const params = {
-    filters: formattedFilters,
-    sort: {
-      field: 'createdAt',
-      order: 'asc'
-    }
-  }
-
-  const invoiceTemplateId = formattedFilters.invoiceTemplateId
-
-  Promise
-    .all([loadFilteredWorkLogs(params), loadTemplate(invoiceTemplateId)])
-    .then((results) => {
-      filteredWorklogs.value = {
-        invoiceLines: results[0]
-      }
-      currentTemplate.value = results[1]
+  const params = formatFilters(filtersData.value)
+  dataAccess
+    .create(`${worklogsUrl}/preview_invoice`, params)
+    .then((result) => {
+      templateData.value = result
+      currentBillingConfig.value = result.billingConfigs
+      currentContact.value = result.billingContact
+      currentInvoiceConfig.value = result.invoiceConfig
+      currentSequence.value = result.invoiceNumberSequence
+      currentTemplate.value = result.invoiceTemplate
+      filteredWorklogs.value = result.workLogs
     })
     .catch((error) => {
-      console.log(error)
-      showBanner(`Error loading data!`)
+      console.error(error)
+      showBanner(`Error previewing invoice!`)
     })
-}
-
-const filteredWorklogs = ref({})
-async function loadFilteredWorkLogs(params) {
-  return new Promise((resolve, reject) => {
-    dataAccess
-      .list(worklogsUrl, params)
-      .then((result) => {
-        resolve(result.data)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-  })
-}
-
-const currentTemplate = ref()
-async function loadTemplate(id) {
-  return new Promise((resolve, reject) => {
-    dataAccess
-      .view(`${templatesUrl}/${id}`)
-      .then((result) => {
-        resolve(result)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-  })
 }
 
 function resetFilters() {
   filtersData.value = {
     tags: [],
-    invoiceTemplateId: [],
+    invoiceConfigId: [],
     startTime: {
       startTime: null,
       endTime: null
@@ -249,7 +209,7 @@ onMounted(() => {
       :id="currentTemplate.id"
       :content-markup="currentTemplate.contentMarkup"
       :content-styles="currentTemplate.contentStyles"
-      :data="filteredWorklogs"
+      :data="templateData"
       :disabled="true"
     />
   </div>

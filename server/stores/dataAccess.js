@@ -292,7 +292,7 @@ function filterValueMatch(filterSchemas, field, indexedValue, filterValue) {
   const partialMatch = filterOptions.match && indexedValue.match(filterValue);
   const multiMatch = Array.isArray(filterValue) && filterValue.some(fv => fv === indexedValue);
   const exactMatch = !filterOptions.match && indexedValue === filterValue;
-  const dateRangeMatch = (Object.hasOwn(filterValue, 'startDate') || Object.hasOwn(filterValue, 'endDate')) && rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
+  const dateRangeMatch = (Object.hasOwn(filterValue, 'startDate') || Object.hasOwn(filterValue, 'endDate') || Object.hasOwn(filterValue, 'startTime') || Object.hasOwn(filterValue, 'endTime')) && rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
 
   return partialMatch || multiMatch || exactMatch || dateRangeMatch;
 }

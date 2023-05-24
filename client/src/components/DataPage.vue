@@ -27,6 +27,7 @@ const {
   formatDataForShow,
   formatDataForSave,
   formatErrorsForDisplay,
+  formatFilters,
   fetchOptions,
   initOptionsData
 } = useInputHelper(props.dataFields)
@@ -318,21 +319,6 @@ function formatFiltersFields() {
 
     return filterField
   }).filter(f => f.filterable)
-}
-
-function formatFilters(filters = {}) {
-  return Object.entries(filters).reduce((o, [field, value]) => {
-    if (notEmpty(value)) {
-      if (singleSelectableField(field)) {
-        o[field] = value[0].value
-      } else if (multiSelectableField(field)) {
-        o[field] = value.map(v => v.value)
-      } else {
-        o[field] = value
-      }
-    }
-    return o
-  }, {})
 }
 /*** section:filter ***/
 

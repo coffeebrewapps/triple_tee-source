@@ -337,6 +337,21 @@ export function useInputHelper(schemas) {
     }, {})
   }
 
+  function formatFilters(filters = {}) {
+    return Object.entries(filters).reduce((o, [field, value]) => {
+      if (notEmpty(value)) {
+        if (singleSelectableField(field)) {
+          o[field] = value[0].value
+        } else if (multiSelectableField(field)) {
+          o[field] = value.map(v => v.value)
+        } else {
+          o[field] = value
+        }
+      }
+      return o
+    }, {})
+  }
+
   async function fetchOptions(field, offset) {
     const options = schemasMap.value[field].options || {}
     if (options.server) {
@@ -422,6 +437,7 @@ export function useInputHelper(schemas) {
     formatDataForShow,
     formatDataForSave,
     formatErrorsForDisplay,
+    formatFilters,
     validateParams,
     fetchOptions,
     initOptionsData

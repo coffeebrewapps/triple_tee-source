@@ -216,10 +216,19 @@ async function updateTask() {
     })
 }
 
-function endTask() {
+async function endTask() {
   currentTaskForUpdate.value = Object.assign({}, currentTask.value)
-  currentTaskForUpdate.value.startTime = formatDataForShow('startTime', currentTaskForUpdate.value)
-  currentTaskForUpdate.value.tags = formatDataForShow('tags', currentTaskForUpdate.value)
+
+  await formatDataForShow('startTime', currentTaskForUpdate.value)
+    .then((result) => {
+      currentTaskForUpdate.value.startTime = result
+    })
+
+  await formatDataForShow('tags', currentTaskForUpdate.value)
+    .then((result) => {
+      currentTaskForUpdate.value.tags = result
+    })
+
   currentTaskForUpdate.value.endTime = new Date()
   endTaskDialog.value = true
 }

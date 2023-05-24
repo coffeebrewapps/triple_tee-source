@@ -23,12 +23,55 @@ module.exports = (dataAccess) => {
     return dataAccess.remove(modelClass, id);
   }
 
+  function previewInvoice(params) {
+    const invoiceConfigId = params.invoiceConfigId
+    const tags = params.tags
+    const startTime = params.startTime
+    const endTime = params.endTime
+
+    const invoiceConfig = dataAccess.view(
+      'invoice_configs',
+      invoiceConfigId,
+      { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId'] }
+    ).record;
+
+    const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
+    const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
+    const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
+
+    const billingConfigs = dataAccess.list(
+      'billing_configs',
+      { filters: { contactId: billingContact.id, includeTags: tags } }
+    ).data
+
+    const workLogs = list({
+      filters: {
+        tags,
+        startTime,
+        endTime
+      }
+    }).data
+
+    return {
+      success: true,
+      record: {
+        invoiceConfig,
+        invoiceNumberSequence,
+        billingContact,
+        invoiceTemplate,
+        billingConfigs,
+        workLogs
+      }
+    }
+  }
+
   return {
     modelClass,
     list,
     view,
     create,
     update,
-    remove
+    remove,
+    previewInvoice
   }
 }
