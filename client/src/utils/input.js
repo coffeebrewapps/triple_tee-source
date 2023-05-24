@@ -1,5 +1,13 @@
 import { computed } from 'vue'
 
+import { useFormatter } from '@/utils/formatter'
+const {
+  formatDate,
+  formatTimestamp,
+  formatTag,
+  tagStyle
+} = useFormatter()
+
 import axios from 'axios'
 
 export function useInputHelper(schemas) {
@@ -44,6 +52,38 @@ export function useInputHelper(schemas) {
 
   function inputLabel(field) {
     return (schemasMap.value[field] || {}).label
+  }
+
+  function inputValue(field, record, includeKeys) {
+    const referenceField = includeKeys.find(v => v === field)
+    const fieldValue = record[field]
+    if (!fieldValue) { return }
+
+    if (referenceField) {
+      const includes = record.includes || {}
+      const rawValue = [fieldValue].flat().filter(v => !!v)
+
+      const mapped = rawValue.map((value) => {
+        const foreignValue = includes[field][value]
+        return schemasMap.value[field].reference.label(foreignValue)
+      })
+
+      if (multiSelectableField(field)) {
+        return mapped
+      } else {
+        return mapped[0]
+      }
+    } else if (inputType(field) === 'enum' || inputType(field) === 'select') {
+      const found = schemas.find(f => f.key === field)
+      const options = found.options
+      return options.find(o => o.value === fieldValue).label
+    } else if (inputType(field) === 'datetime') {
+      return formatTimestamp(fieldValue)
+    } else if (inputType(field) === 'date') {
+      return formatDate(fieldValue)
+    } else {
+      return fieldValue
+    }
   }
 
   function inputableField(field) {
@@ -245,6 +285,7 @@ export function useInputHelper(schemas) {
     singleSelectableFields,
     inputType,
     inputLabel,
+    inputValue,
     inputableField,
     multiInputableField,
     multiSelectableField,
