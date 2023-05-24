@@ -9,10 +9,8 @@ module.exports = (routes, stores) => {
       { method: 'get', path: '/:id', handler: routes.view(stores) },
       { method: 'post', path: '/', handler: routes.create(stores) },
       { method: 'put', path: '/:id', handler: routes.update(stores) },
-      { method: 'delete', path: '/:id', handler: routes.remove(stores) }
-    ],
-    middlewares: [
-      { path: '/:id/pdf', handler: routes.downloadPdf('invoice_templates', stores) }
+      { method: 'delete', path: '/:id', handler: routes.remove(stores) },
+      { method: 'post', path: '/:id/pdf', handler: routes.downloadPdf('invoice_templates', stores) }
     ]
   }
 }

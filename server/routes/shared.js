@@ -80,6 +80,6 @@ exports.download = function(store) {
 };
 
 exports.downloadPdf = function(templateType, store) {
-  const pdf = require('./pdf')(templateType);
-  return pdf.downloadPdf(store);
+  const pdf = require('./pdf')(templateType, store, logger);
+  return pdf.downloadPdf;
 }

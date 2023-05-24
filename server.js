@@ -5,11 +5,10 @@ const fsPromises = require('fs').promises;
 
 const cors = require('cors');
 
+const logger = require('./server/logger.js');
 const common = require('./common');
 const dataAccess = require('./server/stores/dataAccess');
 const routes = require('./server/routes/shared');
-
-const pdf = require('@hyfi06/html2pdf/index');
 
 const app = express();
 const port = process.env.PORT || common.DEFAULT_PORT;
@@ -24,6 +23,14 @@ if (process.env.NODE_ENV === 'development') {
   }
 }
 
+process.on('uncaughtException', (error, origin) => {
+  logger.error(`Uncaught error occurred`, { error, origin });
+});
+
+process.on('unhandledRejection', (error, origin) => {
+  logger.error(`Unhandled rejection occurred`, { error, origin });
+});
+
 async function loadPlugins(app) {
   await fsPromises.readdir(path.join(__dirname, 'server/modules'))
     .then((files) => {
@@ -34,11 +41,6 @@ async function loadPlugins(app) {
         pluginRouter.routes.forEach((route) => {
           app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
         });
-        if (pluginRouter.middlewares) {
-          pluginRouter.middlewares.forEach((middleware) => {
-            app.use(`${pluginRouter.prefix}${middleware.path}`, middleware.handler);
-          });
-        }
         console.log(`Loaded plugin: ${plugin.name}`);
       }
     })
@@ -51,7 +53,6 @@ async function loadPlugins(app) {
 app.use(express.json())
 app.use(cors(corsConfig));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(pdf);
 /*** end:Middleware ***/
 
 /*** start:Routes ***/
