@@ -4,21 +4,27 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const currentRoute = ref(router.currentRoute)
-const parentRoute = computed(() => {
-  return router.getRoutes().find((route) => {
-    if (!currentRoute.value.meta) { return false }
-    if (!currentRoute.value.meta.parentRoute) { return false }
 
-    return route.name === currentRoute.value.meta.parentRoute.name
+function findParentRoute(thisRoute) {
+  return router.getRoutes().find((route) => {
+    if (!thisRoute.meta) { return false }
+    if (!thisRoute.meta.parentRoute) { return false }
+
+    return route.name === thisRoute.meta.parentRoute.name
   })
-})
+}
+
+function buildHierarchy(stack, thisRoute) {
+  const myParent = findParentRoute(thisRoute)
+  if (myParent) {
+    buildHierarchy(stack, myParent)
+  }
+  stack.push(thisRoute)
+}
 
 const navs = computed(() => {
   const routes = []
-  if (parentRoute.value) {
-    routes.push(parentRoute.value)
-  }
-  routes.push(currentRoute.value)
+  buildHierarchy(routes, currentRoute.value)
   return routes
 })
 
