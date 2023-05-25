@@ -54,6 +54,10 @@ export function useInputHelper(schemas) {
     return Object.keys(schemasMap.value).filter(f => objectField(f))
   })
 
+  const numberFields = computed(() => {
+    return Object.keys(schemasMap.value).filter(f => numberField(f))
+  })
+
   function inputType(field) {
     return (schemasMap.value[field] || {}).type
   }
@@ -137,6 +141,10 @@ export function useInputHelper(schemas) {
 
   function objectField(field) {
     return inputType(field) === 'object'
+  }
+
+  function numberField(field) {
+    return inputType(field) === 'number'
   }
 
   function formatInputOptionsData(field, offset, limit, dataFromServer) {
@@ -322,6 +330,12 @@ export function useInputHelper(schemas) {
       }
     })
 
+    numberFields.value.forEach((field) => {
+      if (notEmpty(data[field])) {
+        data[field] = parseFloat(data[field])
+      }
+    })
+
     return data
   }
 
@@ -432,6 +446,8 @@ export function useInputHelper(schemas) {
     tagsFields,
     objectField,
     objectFields,
+    numberField,
+    numberFields,
     formatInputOptionsData,
     formatDataFields,
     formatDataForShow,

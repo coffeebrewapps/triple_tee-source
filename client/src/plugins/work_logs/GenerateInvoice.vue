@@ -15,7 +15,8 @@ const {
   worklogsUrl,
   dataFields,
   recordValue,
-  tagLabel
+  tagLabel,
+  calculateDuration
 } = useWorkLogUtils()
 
 const invoiceConfigsUrl = `${config.baseUrl}/api/invoice_configs`
@@ -55,6 +56,11 @@ import { useInputHelper } from '@/utils/input'
 const {
   formatFilters
 } = useInputHelper(filtersDataFields.value)
+
+import { useValidations } from '@/utils/validations'
+const {
+  isEmpty
+} = useValidations()
 
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
@@ -140,7 +146,7 @@ function hideBanner() {
 /*** section:styles ***/
 /*** section:styles ***/
 
-/*** section:actions ***/
+/*** section:data ***/
 const currentBillingConfig = ref()
 const currentContact = ref()
 const currentInvoiceConfig = ref()
@@ -149,18 +155,108 @@ const currentTemplate = ref()
 const templateData = ref()
 const filteredWorklogs = ref({})
 
+const invoiceDate = computed(() => {
+  return new Date()
+})
+
+const dueDate = computed(() => {
+  const date = new Date(invoiceDate.value)
+  const dueUnit = currentInvoiceConfig.value.dueDateCycleUnit
+  const dueValue = parseInt(currentInvoiceConfig.value.dueDateCycleValue)
+
+  if (dueUnit === 'day') {
+    date.setDate(date.getDate() + dueValue)
+  } else if (dueUnit === 'month') {
+    date.setMonth(date.getMonth() + dueValue)
+  } else {
+    for (const i = 0; i < dueValue; i++) {
+      date.setDate(date.getDate() + 7)
+    }
+  }
+
+  return date
+})
+
+const invoiceNumberSequence = computed(() => {
+  if (isEmpty(currentSequence.value)) { return `` }
+
+  const lastUsedNumber = currentSequence.value.lastUsedNumber
+  const incrementStep = currentSequence.value.incrementStep
+  return parseInt(lastUsedNumber) + parseInt(incrementStep)
+})
+
+const invoiceLines = computed(() => {
+  if (isEmpty(filteredWorklogs.value)) { return [] }
+
+  return Object.entries(filteredWorklogs.value).map(([configId, logs]) => {
+    const config = currentBillingConfig.value.find(c => c.id === configId)
+    const cost = parseFloat(config.unitCost)
+
+    let totalDuration = 0
+    let subTotal = 0
+
+    if (config.rateType === 'duration') {
+      totalDuration = logs.reduce((sum, log) => {
+        const duration = calculateDuration(log)
+        return duration + sum
+      }, 0)
+
+      let totalDurationInUnit = 0
+
+      const unit = config.unit
+      if (unit === 'hour') {
+        totalDurationInUnit = totalDuration / 1000 / 60 / 60
+        subTotal = totalDurationInUnit * cost
+      } else {
+        totalDurationInUnit = totalDuration / 1000 / 60
+        subTotal = (totalDurationInUnit) * cost
+      }
+
+    } else if (config.rateType === 'fixed') {
+      subTotal = cost
+    } else {
+      subTotal = logs.length * cost
+    }
+
+    const tags = config.includeTags.map((tag) => {
+      return config.includes.includeTags[tag]
+    })
+
+    return Object.assign({}, config, { tags, subTotal, totalDuration, totalDurationInUnit, unitCost: cost })
+  })
+})
+
+const invoice = computed(() => {
+  const totalAmount = invoiceLines.value.reduce((sum, line) => {
+    return sum + line.subTotal
+  }, 0)
+
+  return {
+    totalAmount
+  }
+})
+/*** section:data ***/
+
+/*** section:actions ***/
 async function submitFilters() {
   const params = formatFilters(filtersData.value)
   dataAccess
     .create(`${worklogsUrl}/preview_invoice`, params)
     .then((result) => {
-      templateData.value = result
       currentBillingConfig.value = result.billingConfigs
       currentContact.value = result.billingContact
       currentInvoiceConfig.value = result.invoiceConfig
       currentSequence.value = result.invoiceNumberSequence
       currentTemplate.value = result.invoiceTemplate
-      filteredWorklogs.value = result.workLogs
+      filteredWorklogs.value = result.workLogsForBilling
+
+      templateData.value = {
+        billingContact: result.billingContact,
+        invoiceConfig: Object.assign({}, result.invoiceConfig, { invoiceDate: invoiceDate.value, dueDate: dueDate.value }),
+        invoiceNumberSequence: Object.assign({}, result.invoiceNumberSequence, { currentSequence: invoiceNumberSequence.value }),
+        invoiceLines: invoiceLines.value,
+        invoice: invoice.value
+      }
     })
     .catch((error) => {
       console.error(error)

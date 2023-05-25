@@ -35,7 +35,7 @@ async function loadPlugins(app) {
   await fsPromises.readdir(path.join(__dirname, 'server/modules'))
     .then((files) => {
       for (const file of files) {
-        const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'))(dataAccess, routes);
+        const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'))(dataAccess, routes, logger);
         logger.log(`Loading plugin: ${plugin.name}`);
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {

@@ -2,7 +2,7 @@
 
 const modelClass = 'work_logs';
 
-module.exports = (dataAccess) => {
+module.exports = (dataAccess, logger) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }
@@ -24,43 +24,61 @@ module.exports = (dataAccess) => {
   }
 
   function previewInvoice(params) {
-    const invoiceConfigId = params.invoiceConfigId
-    const tags = params.tags
-    const startTime = params.startTime
-    const endTime = params.endTime
+    try {
+      const invoiceConfigId = params.invoiceConfigId
+      const tags = params.tags
+      const startTime = params.startTime
+      const endTime = params.endTime
 
-    const invoiceConfig = dataAccess.view(
-      'invoice_configs',
-      invoiceConfigId,
-      { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId'] }
-    ).record;
+      const invoiceConfig = dataAccess.view(
+        'invoice_configs',
+        invoiceConfigId,
+        { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId'] }
+      ).record;
 
-    const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
-    const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
-    const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
+      const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
+      const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
+      const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
 
-    const billingConfigs = dataAccess.list(
-      'billing_configs',
-      { filters: { contactId: billingContact.id, includeTags: tags } }
-    ).data
+      const billingConfigs = dataAccess.list(
+        'billing_configs',
+        {
+          filters: { contactId: billingContact.id, includeTags: tags },
+          include: ['includeTags']
+        }
+      ).data
 
-    const workLogs = list({
-      filters: {
-        tags,
-        startTime,
-        endTime
+      const workLogsForBilling = billingConfigs.reduce((o, config) => {
+        const logs = list({
+          filters: {
+            tags: config.includeTags,
+            startTime,
+            endTime
+          }
+        }).data;
+        o[config.id] = logs;
+        return o;
+      }, {});
+
+      const workLogs = Object.values(workLogsForBilling).flat();
+
+      return {
+        success: true,
+        record: {
+          invoiceConfig,
+          invoiceNumberSequence,
+          billingContact,
+          invoiceTemplate,
+          billingConfigs,
+          workLogs,
+          workLogsForBilling
+        }
       }
-    }).data
-
-    return {
-      success: true,
-      record: {
-        invoiceConfig,
-        invoiceNumberSequence,
-        billingContact,
-        invoiceTemplate,
-        billingConfigs,
-        workLogs
+    } catch(error) {
+      logger.error(`previewInvoice`, { error });
+      return {
+        success: false,
+        errors: error
       }
     }
   }
