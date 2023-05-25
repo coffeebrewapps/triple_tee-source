@@ -355,10 +355,10 @@ export function useInputHelper(schemas) {
   async function fetchOptions(field, offset) {
     const options = schemasMap.value[field].options || {}
     if (options.server) {
-      const limit = schemasMap.value[field].limit || 5
+      const limit = options.limit || 5
       return new Promise((resolve, reject) => {
         dataAccess
-          .list(options.sourceUrl, { params: { offset, limit } })
+          .list(options.sourceUrl, { offset, limit })
           .then((result) => {
             const data = result.data
             const total = result.total

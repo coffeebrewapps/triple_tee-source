@@ -36,16 +36,16 @@ async function loadPlugins(app) {
     .then((files) => {
       for (const file of files) {
         const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'))(dataAccess, routes);
-        console.log(`Loading plugin: ${plugin.name}`);
+        logger.log(`Loading plugin: ${plugin.name}`);
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {
           app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
         });
-        console.log(`Loaded plugin: ${plugin.name}`);
+        logger.log(`Loaded plugin: ${plugin.name}`);
       }
     })
     .catch((err) => {
-      console.error(err);
+      logger.error(err);
     })
 }
 
@@ -59,7 +59,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', function(req, res){
   (async () => {
     await dataAccess.initData();
-    console.log(`Refreshed data`);
+    logger.log(`Refreshed data`);
   })();
 });
 
@@ -90,7 +90,7 @@ app.put('/api/indexes', function(req, res){
 
 app.get('/api/countries', function(req, res){
   const params = req.query;
-  console.log(`Requesting countries data`, params);
+  logger.log(`Requesting countries data`, params);
   res.send(dataAccess.list('countries', params));
 });
 /*** end:Routes ***/
@@ -105,7 +105,7 @@ app.get('/api/countries', function(req, res){
     res.redirect('/');
   });
 
-  console.log(`Server starting at port ${port}`);
+  logger.log(`Server starting at port ${port}`);
 
   server = app.listen(port);
 })();

@@ -41,6 +41,7 @@ export function useContactUtils() {
       options: {
         server: true,
         pagination: true,
+        limit: 250,
         sourceUrl: countriesUrl,
         value: countryValue,
         label: countryLabel
