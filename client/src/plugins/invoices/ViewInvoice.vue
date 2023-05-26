@@ -6,26 +6,7 @@ const router = useRouter()
 /*** import:global ***/
 
 /*** import:utils ***/
-import { useContactUtils } from './utils'
-const {
-  contactsUrl,
-  invoiceConfigsUrl,
-  countriesUrl,
-  fieldsLayout,
-  dataFields,
-  filters,
-  validations,
-  includeKeys,
-  countryValue,
-  countryLabel
-} = useContactUtils()
-
 import { useInputHelper } from '@/utils/input'
-const {
-  schemasMap,
-  inputLabel,
-  inputValue
-} = useInputHelper(dataFields)
 
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
@@ -45,42 +26,61 @@ import {
 } from 'coffeebrew-vue-components'
 
 import TabContainer from '@/components/TabContainer.vue'
-import InvoiceConfig from '@/plugins/invoice_configs/view.vue'
-import ReceiptConfig from '@/plugins/receipt_configs/view.vue'
-import BillingConfig from '@/plugins/billing_configs/view.vue'
-import Invoices from '@/plugins/invoices/view.vue'
+import Invoice from '@/plugins/invoices/view.vue'
+import InvoiceLines from '@/plugins/invoice_lines/view.vue'
 /*** import:components ***/
 
 /*** section:global ***/
 const currentRoute = Object.assign({}, router.currentRoute.value)
 
-const contactId = computed(() => {
+const invoiceId = computed(() => {
   return currentRoute.params.id
 })
 
-const currentContact = ref()
+const contactId = computed(() => {
+  return currentRoute.query.contactId
+})
+
+import { useInvoiceUtils } from './utils'
+const {
+  invoicesUrl,
+  fieldsLayout,
+  generateDataFields
+} = useInvoiceUtils()
+
+const dataFields = computed(() => {
+  return generateDataFields(contactId.value)
+})
+
+const {
+  inputLabel,
+  inputValue,
+  includeKeys
+} = useInputHelper(dataFields.value)
+
+const currentInvoice = ref()
 
 const heading = computed(() => {
-  if (currentContact.value) {
-    return `Contact: ${currentContact.value.name}`
+  if (currentInvoice.value) {
+    return `Invoice: ${currentInvoice.value.name}`
   } else {
-    return `Loading Contact...`
+    return `Loading Invoice...`
   }
 })
 
-async function loadContact() {
-  currentContact.value = null
+async function loadInvoice() {
+  currentInvoice.value = null
   const params = { include: includeKeys.value }
 
   await dataAccess
-    .view(`${contactsUrl}/${contactId.value}`, params)
+    .view(`${invoicesUrl}/${invoiceId.value}`, params)
     .then((result) => {
-      currentContact.value = result
-      showBanner(`Loaded contact successfully!`);
+      currentInvoice.value = result
+      showBanner(`Loaded invoice successfully!`);
     })
     .catch((error) => {
       console.log(error)
-      showBanner(`Error loading contact!`);
+      showBanner(`Error loading invoice!`);
     })
 }
 /*** section:global ***/
@@ -98,27 +98,12 @@ function hideBanner() {
 
 /*** section:tabs ***/
 const tabs = [
-  { label: 'Details', onchange: loadContact },
-  { label: 'Invoice Configs', onchange: loadInvoiceConfig },
-  { label: 'Receipt Configs', onchange: loadReceiptConfig },
-  { label: 'Billing Configs', onchange: loadBillingConfig },
-  { label: 'Invoices', onchange: loadInvoices }
+  { label: 'Details', onchange: loadInvoice },
+  { label: 'Invoice Lines', onchange: loadInvoiceLines }
 ]
 
-async function loadInvoiceConfig() {
-  events.emitEvent('loadData', { dataType: 'Invoice Configs' })
-}
-
-async function loadReceiptConfig() {
-  events.emitEvent('loadData', { dataType: 'Receipt Configs' })
-}
-
-async function loadBillingConfig() {
-  events.emitEvent('loadData', { dataType: 'Billing Configs' })
-}
-
-async function loadInvoices() {
-  events.emitEvent('loadData', { dataType: 'Invoices' })
+async function loadInvoiceLines() {
+  events.emitEvent('loadData', { dataType: 'Invoice Lines' })
 }
 
 function triggerTabEvent(i) {
@@ -127,7 +112,7 @@ function triggerTabEvent(i) {
 /*** section:tabs ***/
 
 onMounted(async () => {
-  await loadContact()
+  await loadInvoice()
 })
 </script>
 
@@ -136,18 +121,18 @@ onMounted(async () => {
     <h2 class="heading">{{ heading }}</h2>
 
     <TProgressBar
-      v-if="!currentContact"
+      v-if="!currentInvoice"
     />
 
     <TabContainer
-      v-if="currentContact"
+      v-if="currentInvoice"
       :tabs="tabs"
       @tab-change="triggerTabEvent"
     >
 
       <template #tab-0>
         <div
-          class="contact-container"
+          class="invoice-container"
         >
           <div
             v-for="row in fieldsLayout"
@@ -167,13 +152,13 @@ onMounted(async () => {
                 class="field-value"
               >
                 <span
-                  v-if="currentContact && currentContact[field]"
+                  v-if="currentInvoice && currentInvoice[field]"
                 >
-                  {{ inputValue(field, currentContact, includeKeys, dataFields) }}
+                  {{ inputValue(field, currentInvoice, includeKeys, dataFields) }}
                 </span>
 
                 <span
-                  v-if="!currentContact || !currentContact[field]"
+                  v-if="!currentInvoice || !currentInvoice[field]"
                 >
                 --- no value ---
                 </span>
@@ -181,32 +166,14 @@ onMounted(async () => {
             </div> <!-- data-field -->
 
           </div> <!-- data-row -->
-        </div> <!-- contact-container -->
+        </div> <!-- invoice-container -->
       </template> <!-- template-0 -->
 
       <template #tab-1>
-        <InvoiceConfig
-          :billing-contact-id="contactId"
+        <InvoiceLines
+          :invoice-id="invoiceId"
         />
       </template> <!-- template-1 -->
-
-      <template #tab-2>
-        <ReceiptConfig
-          :billing-contact-id="contactId"
-        />
-      </template> <!-- template-2 -->
-
-      <template #tab-3>
-        <BillingConfig
-          :contact-id="contactId"
-        />
-      </template> <!-- template-3 -->
-
-      <template #tab-4>
-        <Invoices
-          :contact-id="contactId"
-        />
-      </template> <!-- template-4 -->
     </TabContainer>
   </div> <!-- page-container -->
 </template>
@@ -220,7 +187,7 @@ onMounted(async () => {
   font-weight: 900;
 }
 
-.contact-container {
+.invoice-container {
   display: flex;
   flex-direction: column;
 }

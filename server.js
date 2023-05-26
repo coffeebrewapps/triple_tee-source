@@ -6,6 +6,7 @@ const fsPromises = require('fs').promises;
 const cors = require('cors');
 
 const logger = require('./server/logger.js');
+const utils = require('./server/utils.js');
 const common = require('./common');
 const dataAccess = require('./server/stores/dataAccess');
 const routes = require('./server/routes/shared');
@@ -35,7 +36,7 @@ async function loadPlugins(app) {
   await fsPromises.readdir(path.join(__dirname, 'server/modules'))
     .then((files) => {
       for (const file of files) {
-        const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'))(dataAccess, routes, logger);
+        const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'))(dataAccess, routes, logger, utils);
         logger.log(`Loading plugin: ${plugin.name}`);
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {

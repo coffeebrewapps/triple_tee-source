@@ -33,6 +33,9 @@
       "id": {
         "type": "text"
       },
+      "description": {
+        "type": "text"
+      },
       "effectiveStart": {
         "type": "datetime"
       },
@@ -95,6 +98,7 @@
       },
       "unique": [],
       "required": [
+        "description",
         "effectiveStart",
         "rateType",
         "unit",
@@ -391,6 +395,9 @@
       "invoiceTemplateId": {
         "type": "text"
       },
+      "currencyId": {
+        "type": "text"
+      },
       "createdAt": {
         "type": "datetime"
       },
@@ -416,6 +423,10 @@
         "invoiceTemplateId": {
           "reference": "invoice_templates",
           "primary": "id"
+        },
+        "currencyId": {
+          "reference": "currencies",
+          "primary": "id"
         }
       },
       "unique": [],
@@ -428,7 +439,8 @@
         "customFields",
         "invoiceNumberSequenceId",
         "billingContactId",
-        "invoiceTemplateId"
+        "invoiceTemplateId",
+        "currencyId"
       ]
     },
     "indexes": {
@@ -462,6 +474,10 @@
         "type": "number",
         "default": 0
       },
+      "unitValue": {
+        "type": "number",
+        "default": 0
+      },
       "subtotal": {
         "type": "number",
         "default": 0
@@ -489,6 +505,8 @@
         "description",
         "unit",
         "unitCost",
+        "unitValue",
+        "subtotal",
         "invoiceId"
       ]
     },
@@ -641,11 +659,11 @@
       },
       "startingNumber": {
         "type": "number",
-        "default": 1
+        "default": 0
       },
       "lastUsedNumber": {
         "type": "number",
-        "default": 1
+        "default": 0
       },
       "incrementStep": {
         "type": "number",

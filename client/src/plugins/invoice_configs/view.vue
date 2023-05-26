@@ -12,6 +12,7 @@ const tagsUrl = `${config.baseUrl}/api/tags`
 const sequencesUrl = `${config.baseUrl}/api/sequences`
 const contactsUrl = `${config.baseUrl}/api/contacts`
 const templatesUrl = `${config.baseUrl}/api/invoice_templates`
+const currenciesUrl = `${config.baseUrl}/api/currencies`
 
 const props = defineProps({
   billingContactId: {
@@ -28,7 +29,8 @@ const fieldsLayout = [
   { customFields: 'lg' },
   { invoiceNumberSequenceId: 'lg' },
   { billingContactId: 'lg' },
-  { invoiceTemplateId: 'lg' }
+  { invoiceTemplateId: 'lg' },
+  { currencyId: 'lg' }
 ]
 
 const dataFields = computed(() => {
@@ -87,6 +89,18 @@ const dataFields = computed(() => {
         value: recordValue,
         label: templateLabel
       }
+    },
+    {
+      key: 'currencyId', type: 'singleSelect', label: 'Currency',
+      reference: { label: currencyLabel },
+      listable: false, viewable: true, creatable: true, updatable: true,
+      options: {
+        server: true,
+        pagination: true,
+        sourceUrl: currenciesUrl,
+        value: recordValue,
+        label: currencyLabel
+      }
     }
   ]
 })
@@ -135,6 +149,10 @@ function contactLabel(record) {
 
 function templateLabel(record) {
   return record.name
+}
+
+function currencyLabel(record) {
+  return `${record.code} (${record.symbol})`
 }
 </script>
 

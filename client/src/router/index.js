@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 const routes = []
 
 const router = createRouter({
+  mode: 'history',
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: routes
 })
@@ -14,9 +15,9 @@ router.addRoute({
 })
 
 router.addRoute({
-    path: '/admin',
-    name: 'Data Admin',
-    component: () => import('@/views/DataAdmin.vue')
+  path: '/admin',
+  name: 'Data Admin',
+  component: () => import('@/views/DataAdmin.vue')
 })
 
 const plugins = import.meta.glob('@/plugins/**/index.js', { import: 'default', eager: true })

@@ -70,6 +70,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  submittable: {
+    type: Boolean,
+    default: true
+  },
   confirmButton: {
     type: Object,
     default() {
@@ -142,6 +146,10 @@ function showDateRange(field) {
 
 function showDateTimeRange(field) {
   return showField(field) && inputType(field) === 'datetimerange'
+}
+
+function showCheckbox(field) {
+  return showField(field) && inputType(field) === 'boolean'
 }
 
 function fieldUpdatable(field) {
@@ -350,6 +358,14 @@ onMounted(async () => {
                 :disabled="!fieldUpdatable(field)"
                 :error-message="fieldErrorMessage(field)"
               />
+
+              <TCheckbox
+                v-if="showCheckbox(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+              />
             </div> <!-- field-input -->
 
             <div
@@ -365,7 +381,10 @@ onMounted(async () => {
       </div> <!-- data-row -->
     </div> <!-- body -->
 
-    <div class="actions">
+    <div
+      v-if="submittable"
+      class="actions"
+    >
       <TButton class="button" :button-type="confirmButton.type" :value="confirmButton.value" :icon="confirmButton.icon" @click="submitData()"/>
       <TButton class="button" :button-type="cancelButton.type" :value="cancelButton.value" :icon="cancelButton.icon" @click="cancel()"/>
     </div>

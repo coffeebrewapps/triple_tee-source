@@ -134,13 +134,54 @@ async function loadTemplate() {
 
 onMounted(async () => {
   sampleData.value = {
+    invoice: {
+      invoiceNumber: 2,
+      invoiceDate: "2023-05-26T14:06:15.686Z",
+      dueDate: "2023-06-25T14:06:15.686Z",
+      totalAmount: 574.98
+    },
+    invoiceLines: [
+      {
+        id: "1",
+        description: "Requirements gathering",
+        unit: "hour",
+        unitCost: 100,
+        unitValue: 2.06,
+        subtotal: 205.93,
+        invoiceId: "1",
+        createdAt: "2023-05-26T14:07:10.051Z",
+        updatedAt: "2023-05-26T14:07:10.051Z"
+      },
+      {
+        id: "2",
+        description: "Implementation",
+        unit: "hour",
+        unitCost: 85,
+        unitValue: 4.17,
+        subtotal: 354.05,
+        invoiceId: "1",
+        createdAt: "2023-05-26T14:07:10.055Z",
+        updatedAt: "2023-05-26T14:07:10.055Z"
+      },
+      {
+        id: "3",
+        description: "GST",
+        unit: "fixed",
+        unitCost: 15,
+        unitValue: 1,
+        subtotal: 15,
+        invoiceId: "1",
+        createdAt: "2023-05-26T14:07:10.057Z",
+        updatedAt: "2023-05-26T14:07:10.057Z"
+      }
+    ],
     invoiceConfig: {
       id: "1",
       invoiceCycleDurationValue: 1,
       invoiceCycleDurationUnit: "month",
       dueDateCycleValue: 30,
       dueDateCycleUnit: "day",
-      paymentTerms: null,
+      paymentTerms: "Payment due to account 395-17573-542",
       tags: [
         "1"
       ],
@@ -148,99 +189,58 @@ onMounted(async () => {
       invoiceNumberSequenceId: "1",
       billingContactId: "1",
       invoiceTemplateId: "1",
-      createdAt: "2023-05-24T12:33:34.246Z",
-      updatedAt: "2023-05-24T12:33:34.246Z",
-      invoiceDate: "2023-04-01",
-      dueDate: "2023-04-30"
+      currencyId: "1",
+      createdAt: "2023-05-26T06:32:33.830Z",
+      updatedAt: "2023-05-26T06:32:33.830Z"
     },
     invoiceNumberSequence: {
       id: "1",
       name: "Company ABC Invoice Sequence",
-      startingNumber: "1",
+      startingNumber: 1,
       lastUsedNumber: 1,
-      incrementStep: "1",
-      prefix: "inv",
-      suffix: "abc",
-      createdAt: "2023-05-24T12:31:12.948Z",
-      updatedAt: "2023-05-24T12:31:12.948Z",
-      currentSequence: 4
+      incrementStep: 1,
+      prefix: "INV",
+      suffix: "ABC",
+      createdAt: "2023-05-26T06:30:04.445Z",
+      updatedAt: "2023-05-26T06:30:04.445Z"
     },
     billingContact: {
       id: "1",
-      name: "Company XYZ",
+      name: "Company ABC",
       accountNumber: null,
-      addressLine1: "123 City Street",
-      addressLine2: "Northern Building",
+      addressLine1: null,
+      addressLine2: null,
       addressLine3: null,
-      city: "Singapore",
+      city: null,
       state: null,
-      country: "Singapore",
-      postcode: "432662",
-      contactNumber1: "+6563782346",
+      country: "SGP",
+      postcode: null,
+      contactNumber1: null,
       contactNumber2: null,
       contactNumber3: null,
-      contactPerson1: "Ms May",
+      contactPerson1: null,
       contactPerson2: null,
       contactPerson3: null,
-      contactEmail1: "may@company-xyz.com",
+      contactEmail1: null,
       contactEmail2: null,
       contactEmail3: null,
-      url1: "company-xyz.com",
+      url1: null,
       url2: null,
       url3: null,
       logo: null,
       customFields: null,
-      createdAt: "2023-05-24T07:02:04.463Z",
-      updatedAt: "2023-05-24T07:02:04.463Z"
+      createdAt: "2023-05-26T06:30:24.570Z",
+      updatedAt: "2023-05-26T06:30:24.570Z"
     },
-    invoiceLines: [
-      {
-        id: "1",
-        effectiveStart: "2023-04-30T16:00:00.000Z",
-        effectiveEnd: null,
-        rateType: "duration",
-        unit: "hour",
-        unitCost: 85,
-        includeTags: [
-          "1"
-        ],
-        excludeTags: [],
-        contactId: "1",
-        createdAt: "2023-05-24T13:08:13.707Z",
-        updatedAt: "2023-05-24T13:08:13.707Z",
-        includes: {
-          includeTags: {
-            "1": {
-              id: "1",
-              category: "company",
-              name: "company-abc",
-              description: "Company ABC",
-              textColor: null,
-              backgroundColor: null,
-              createdAt: "2023-05-24T08:05:06.789Z",
-              updatedAt: "2023-05-24T08:05:06.789Z"
-            }
-          }
-        },
-        tags: [
-          {
-            id: "1",
-            category: "company",
-            name: "company-abc",
-            description: "Company ABC",
-            textColor: null,
-            backgroundColor: null,
-            createdAt: "2023-05-24T08:05:06.789Z",
-            updatedAt: "2023-05-24T08:05:06.789Z"
-          }
-        ],
-        subTotal: 30.207134722222225,
-        totalDuration: 1279361,
-        totalDurationInUnit: 0.3553780556
-      }
-    ],
-    invoice: {
-      totalAmount: 30.207134722222225
+    currency: {
+      id: "1",
+      code: "USD",
+      symbol: "$",
+      exchangeRate: 1,
+      effectiveStart: "2012-12-31T16:00:00.000Z",
+      effectiveEnd: null,
+      createdAt: "2023-05-26T06:29:49.052Z",
+      updatedAt: "2023-05-26T06:29:49.052Z"
     }
   }
 

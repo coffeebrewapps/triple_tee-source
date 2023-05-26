@@ -58,6 +58,14 @@ export function useInputHelper(schemas) {
     return Object.keys(schemasMap.value).filter(f => numberField(f))
   })
 
+  const include = computed(() => {
+    return props.dataFields.filter(h => h.reference)
+  })
+
+  const includeKeys = computed(() => {
+    return include.value.map(h => h.key)
+  })
+
   function inputType(field) {
     return (schemasMap.value[field] || {}).type
   }
@@ -448,6 +456,7 @@ export function useInputHelper(schemas) {
     objectFields,
     numberField,
     numberFields,
+    includeKeys,
     formatInputOptionsData,
     formatDataFields,
     formatDataForShow,

@@ -19,6 +19,7 @@ const props = defineProps({
 })
 
 const fieldsLayout = [
+  { description: 'lg' },
   { effectiveStart: 'md', effectiveEnd: 'md' },
   { rateType: 'md', unitCost: 'md', unit: 'md' },
   { includeTags: 'lg', excludeTags: 'lg' },
@@ -28,6 +29,7 @@ const fieldsLayout = [
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
+    { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'effectiveStart', type: 'datetime', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: false, filterable: true, sortable: true },
     { key: 'effectiveEnd', type: 'datetime', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
     { key: 'rateType', type: 'enum', label: 'Rate Type', listable: true, viewable: true, creatable: true, updatable: false },
