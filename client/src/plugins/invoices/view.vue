@@ -31,7 +31,7 @@ const filters = computed(() => {
 const actions = {
   view: {
     click: async function(row, index) {
-      await openViewPage(row.id)
+      await openViewPage(row)
     }
   },
   create: {
@@ -41,12 +41,12 @@ const actions = {
   }
 }
 
-async function openViewPage(id) {
-  router.push({ name: 'View Invoice', params: { id }, query: { contactId: props.contactId } })
+async function openViewPage(row) {
+  router.push({ name: 'View Invoice', params: { id: row.id }, query: { contactId: row.contactId } })
 }
 
-async function openCreatePage(id) {
-  router.push({ name: 'Create Invoice', query: { contactId: props.contactId } })
+async function openCreatePage() {
+  router.push({ name: 'Create Invoice' })
 }
 </script>
 

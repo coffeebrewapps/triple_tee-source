@@ -59,7 +59,7 @@ export function useInputHelper(schemas) {
   })
 
   const include = computed(() => {
-    return props.dataFields.filter(h => h.reference)
+    return schemas.filter(h => h.reference)
   })
 
   const includeKeys = computed(() => {

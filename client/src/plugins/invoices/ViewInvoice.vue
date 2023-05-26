@@ -62,7 +62,7 @@ const currentInvoice = ref()
 
 const heading = computed(() => {
   if (currentInvoice.value) {
-    return `Invoice: ${currentInvoice.value.name}`
+    return `Invoice: ${currentInvoice.value.invoiceNumber}`
   } else {
     return `Loading Invoice...`
   }
