@@ -2,9 +2,9 @@
 
 const name = 'invoices';
 
-module.exports = (dataAccess, routes, logger) => {
-  const stores = require('./stores')(dataAccess, logger);
-  const router = require('./routes')(routes, stores, logger);
+module.exports = (dataAccess, routes, logger, utils) => {
+  const stores = require('./stores')(dataAccess, logger, utils);
+  const router = require('./routes')(routes, stores, logger, utils);
 
   return {
     name,

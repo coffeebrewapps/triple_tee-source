@@ -1,6 +1,20 @@
 'use strict'
 
-module.exports = (routes, stores, logger) => {
+module.exports = (routes, stores, logger, utils) => {
+  function previewInvoice(stores) {
+    return function(req, res) {
+      const params = req.body;
+
+      const result = stores.previewInvoice(params);
+
+      if (result.success) {
+        res.status(200).send(result);
+      } else {
+        res.status(400).send(result);
+      }
+    }
+  }
+
   function createWithLines(stores) {
     return function(req, res) {
       const params = req.body;
@@ -24,6 +38,7 @@ module.exports = (routes, stores, logger) => {
       { method: 'post', path: '/', handler: routes.create(stores) },
       { method: 'put', path: '/:id', handler: routes.update(stores) },
       { method: 'delete', path: '/:id', handler: routes.remove(stores) },
+      { method: 'post', path: '/preview_invoice', handler: previewInvoice(stores) },
       { method: 'post', path: '/generate_with_lines', handler: createWithLines(stores) }
     ]
   }
