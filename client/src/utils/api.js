@@ -83,6 +83,19 @@ export function useApiAccess() {
     })
   }
 
+  async function upload(url, params) {
+    return new Promise((resolve, reject) => {
+      axios
+        .put(url, params)
+        .then((res) => {
+          resolve(res.data)
+        })
+        .catch(({ response }) => {
+          reject(response.data.errors)
+        })
+    })
+  }
+
   async function download(url) {
     return new Promise((resolve, reject) => {
       axios
@@ -120,6 +133,7 @@ export function useApiAccess() {
     create,
     update,
     remove,
+    upload,
     download,
     downloadStream
   }

@@ -67,6 +67,10 @@ module.exports = (config, logger, utils) => {
     writeData(modelClass, writable)
   }
 
+  function listSchemas() {
+    return Object.keys(schemaCache);
+  }
+
   function viewSchemas(modelClass) {
     return schemaCache[modelClass];
   }
@@ -618,6 +622,7 @@ module.exports = (config, logger, utils) => {
 
   return {
     initData,
+    listSchemas,
     viewSchemas,
     list,
     view,

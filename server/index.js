@@ -67,6 +67,10 @@ app.get('/', function(req, res){
   })();
 });
 
+app.get('/api/schemas', function(req, res){
+  res.send(dataAccess.listSchemas());
+});
+
 app.get('/api/schemas/:schema', function(req, res){
   const modelClass = req.params.schema;
   res.send(dataAccess.viewSchemas(modelClass));
