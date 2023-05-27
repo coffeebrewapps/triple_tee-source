@@ -254,6 +254,7 @@ onMounted(async () => {
 
     <TemplateEditor
       v-if="currentTemplate"
+      :template-type="templateType"
       :templates-url="templatesUrl"
       :id="currentTemplate.id"
       :content-markup="currentTemplate.contentMarkup"
