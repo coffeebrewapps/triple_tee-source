@@ -1,0 +1,8 @@
+#!/bin/bash
+yarn build
+app_dir="../triple_tee-app"
+if [[ ! -f $app_dir ]]; then
+  mkdir ${app_dir}
+fi
+cp -r ./dist ${app_dir}/dist
+cp -r ./data ${app_dir}/data
