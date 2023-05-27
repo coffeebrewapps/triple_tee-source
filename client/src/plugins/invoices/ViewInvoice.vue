@@ -92,45 +92,16 @@ async function loadInvoice() {
     })
 }
 
-async function loadInvoiceLines() {
-  const params = { filters: { invoiceId: currentInvoice.value.id } }
-
-  return new Promise((resolve, reject) => {
-    dataAccess
-      .list(`${invoiceLinesUrl}`, params)
-      .then((result) => {
-        resolve(result.data)
-      })
-      .catch((error) => {
-        reject(result)
-      })
-  })
-}
-
-async function loadInvoiceConfig() {
-  const params = { include: ['invoiceTemplateId', 'invoiceNumberSequenceId', 'billingContactId', 'currencyId'] }
-
-  return new Promise((resolve, reject) => {
-    dataAccess
-      .view(`${invoiceConfigsUrl}/${currentInvoice.value.invoiceConfigId}`, params)
-      .then((result) => {
-        resolve(result)
-      })
-      .catch((error) => {
-        reject(error)
-      })
-  })
-}
-
 async function loadTemplateData() {
   invoiceLines.value = null
   invoiceConfig.value = null
   invoiceTemplate.value = null
 
-  Promise.all([loadInvoiceLines(), loadInvoiceConfig()])
-    .then((results) => {
-      invoiceLines.value = results[0]
-      invoiceConfig.value = results[1]
+  dataAccess
+    .view(`${invoicesUrl}/${currentInvoice.value.id}/template_data`)
+    .then((result) => {
+      invoiceLines.value = result.invoiceLines
+      invoiceConfig.value = result.invoiceConfig
       invoiceTemplate.value = invoiceConfig.value.includes.invoiceTemplateId[invoiceConfig.value.invoiceTemplateId]
       const invoiceNumberSequence = invoiceConfig.value.includes.invoiceNumberSequenceId[invoiceConfig.value.invoiceNumberSequenceId]
       const billingContact = invoiceConfig.value.includes.billingContactId[invoiceConfig.value.billingContactId]
@@ -167,11 +138,11 @@ function hideBanner() {
 /*** section:tabs ***/
 const tabs = [
   { label: 'Details', onchange: loadInvoice },
-  { label: 'Invoice Lines', onchange: reloadInvoiceLines },
+  { label: 'Invoice Lines', onchange: loadInvoiceLines },
   { label: 'View Invoice PDF', onchange: loadTemplateData }
 ]
 
-async function reloadInvoiceLines() {
+async function loadInvoiceLines() {
   events.emitEvent('loadData', { dataType: 'Invoice Lines' })
 }
 

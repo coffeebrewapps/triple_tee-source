@@ -238,6 +238,48 @@ module.exports = (dataAccess, logger, utils) => {
     }
   }
 
+  function viewTemplateData(params) {
+    try {
+      const invoiceId = params.id;
+      const invoice = view(invoiceId, {}).record;
+      const invoiceConfigId = invoice.invoiceConfigId;
+
+      const invoiceConfig = dataAccess.view(
+        'invoice_configs',
+        invoiceConfigId,
+        { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId', 'currencyId'] }
+      ).record;
+
+      const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
+      const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
+      const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
+      const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+
+      const invoiceLines = dataAccess.list(
+        'invoice_lines',
+        { filters: { invoiceId } }
+      ).data;
+
+      return {
+        success: true,
+        record: {
+          invoice,
+          invoiceLines,
+          invoiceConfig,
+          invoiceNumberSequence,
+          billingContact,
+          invoiceTemplate,
+          currency
+        }
+      }
+    } catch(error) {
+      return {
+        success: false,
+        errors: error
+      }
+    }
+  }
+
   return {
     modelClass,
     list,
@@ -246,6 +288,7 @@ module.exports = (dataAccess, logger, utils) => {
     update,
     remove,
     createWithLines,
-    previewInvoice
+    previewInvoice,
+    viewTemplateData
   }
 }
