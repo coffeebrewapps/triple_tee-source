@@ -6,7 +6,8 @@ const useConfig = () => {
   const dataAccess = 'api'
 
   if (env.MODE === 'development') {
-    baseUrl.value = `http://localhost:${env.VITE_SERVER_PORT}`
+    const port = env.VITE_SERVER_PORT || env.VITE_DEFAULT_SERVER_PORT
+    baseUrl.value = `http://localhost:${port}`
   } else {
     baseUrl.value = ``
   }
