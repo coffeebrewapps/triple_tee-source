@@ -13,6 +13,7 @@ const useConfig = () => {
     dataAccess.value = 'web'
   } else {
     baseUrl.value = ``
+    dataAccess.value = 'api'
   }
 
   return {
