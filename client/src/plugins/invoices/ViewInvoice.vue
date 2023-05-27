@@ -28,6 +28,7 @@ import {
 import TabContainer from '@/components/TabContainer.vue'
 import Invoice from '@/plugins/invoices/view.vue'
 import InvoiceLines from '@/plugins/invoice_lines/view.vue'
+import TemplateEditor from '@/components/TemplateEditor.vue'
 /*** import:components ***/
 
 /*** section:global ***/
@@ -44,6 +45,9 @@ const contactId = computed(() => {
 import { useInvoiceUtils } from './utils'
 const {
   invoicesUrl,
+  invoiceLinesUrl,
+  invoiceConfigsUrl,
+  templatesUrl,
   fieldsLayout,
   generateDataFields
 } = useInvoiceUtils()
@@ -59,6 +63,10 @@ const {
 } = useInputHelper(dataFields.value)
 
 const currentInvoice = ref()
+const invoiceLines = ref()
+const invoiceConfig = ref()
+const invoiceTemplate = ref()
+const templateData = ref()
 
 const heading = computed(() => {
   if (currentInvoice.value) {
@@ -79,8 +87,68 @@ async function loadInvoice() {
       showBanner(`Loaded invoice successfully!`);
     })
     .catch((error) => {
-      console.log(error)
+      console.error(error)
       showBanner(`Error loading invoice!`);
+    })
+}
+
+async function loadInvoiceLines() {
+  const params = { filters: { invoiceId: currentInvoice.value.id } }
+
+  return new Promise((resolve, reject) => {
+    dataAccess
+      .list(`${invoiceLinesUrl}`, params)
+      .then((result) => {
+        resolve(result.data)
+      })
+      .catch((error) => {
+        reject(result)
+      })
+  })
+}
+
+async function loadInvoiceConfig() {
+  const params = { include: ['invoiceTemplateId', 'invoiceNumberSequenceId', 'billingContactId', 'currencyId'] }
+
+  return new Promise((resolve, reject) => {
+    dataAccess
+      .view(`${invoiceConfigsUrl}/${currentInvoice.value.invoiceConfigId}`, params)
+      .then((result) => {
+        resolve(result)
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+async function loadTemplateData() {
+  invoiceLines.value = null
+  invoiceConfig.value = null
+  invoiceTemplate.value = null
+
+  Promise.all([loadInvoiceLines(), loadInvoiceConfig()])
+    .then((results) => {
+      invoiceLines.value = results[0]
+      invoiceConfig.value = results[1]
+      invoiceTemplate.value = invoiceConfig.value.includes.invoiceTemplateId[invoiceConfig.value.invoiceTemplateId]
+      const invoiceNumberSequence = invoiceConfig.value.includes.invoiceNumberSequenceId[invoiceConfig.value.invoiceNumberSequenceId]
+      const billingContact = invoiceConfig.value.includes.billingContactId[invoiceConfig.value.billingContactId]
+      const currency = invoiceConfig.value.includes.currencyId[invoiceConfig.value.currencyId]
+
+      templateData.value = {
+        invoice: currentInvoice.value,
+        invoiceLines: invoiceLines.value,
+        invoiceConfig: invoiceConfig.value,
+        invoiceNumberSequence,
+        billingContact,
+        currency
+      }
+      showBanner(`Loaded template data successfully!`);
+    })
+    .catch((error) => {
+      console.error(error)
+      showBanner(`Error loading template data!`);
     })
 }
 /*** section:global ***/
@@ -99,10 +167,11 @@ function hideBanner() {
 /*** section:tabs ***/
 const tabs = [
   { label: 'Details', onchange: loadInvoice },
-  { label: 'Invoice Lines', onchange: loadInvoiceLines }
+  { label: 'Invoice Lines', onchange: reloadInvoiceLines },
+  { label: 'View Invoice PDF', onchange: loadTemplateData }
 ]
 
-async function loadInvoiceLines() {
+async function reloadInvoiceLines() {
   events.emitEvent('loadData', { dataType: 'Invoice Lines' })
 }
 
@@ -132,7 +201,7 @@ onMounted(async () => {
 
       <template #tab-0>
         <div
-          class="invoice-container"
+          class="details-container"
         >
           <div
             v-for="row in fieldsLayout"
@@ -166,7 +235,7 @@ onMounted(async () => {
             </div> <!-- data-field -->
 
           </div> <!-- data-row -->
-        </div> <!-- invoice-container -->
+        </div> <!-- details-container -->
       </template> <!-- template-0 -->
 
       <template #tab-1>
@@ -174,6 +243,19 @@ onMounted(async () => {
           :invoice-id="invoiceId"
         />
       </template> <!-- template-1 -->
+
+      <template #tab-2>
+        <TemplateEditor
+          v-if="invoiceTemplate"
+          :templates-url="templatesUrl"
+          :id="invoiceTemplate.id"
+          :content-markup="invoiceTemplate.contentMarkup"
+          :content-styles="invoiceTemplate.contentStyles"
+          :data="templateData"
+          :disabled="true"
+          template-type="invoice_templates"
+        />
+      </template> <!-- template-2 -->
     </TabContainer>
   </div> <!-- page-container -->
 </template>
@@ -187,7 +269,7 @@ onMounted(async () => {
   font-weight: 900;
 }
 
-.invoice-container {
+.details-container {
   display: flex;
   flex-direction: column;
 }
