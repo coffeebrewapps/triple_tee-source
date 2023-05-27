@@ -640,12 +640,13 @@ onMounted(() => {
       <template #step-2>
         <TemplateEditor
           v-if="invoiceTemplate"
-          :templates-url="templateData.templatesUrl"
+          :templates-url="templatesUrl"
           :id="invoiceTemplate.id"
           :content-markup="invoiceTemplate.contentMarkup"
           :content-styles="invoiceTemplate.contentStyles"
           :data="templateData"
           :disabled="true"
+          template-type="invoice_templates"
         />
       </template> <!-- step-2:preview invoice -->
     </WorkflowContainer>

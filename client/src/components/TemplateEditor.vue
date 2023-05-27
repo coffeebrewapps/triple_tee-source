@@ -57,6 +57,10 @@ const props = defineProps({
   enableGenerate: {
     type: Boolean,
     default: true
+  },
+  templateType: {
+    type: String,
+    default: null
   }
 })
 /*** section:props ***/
@@ -291,7 +295,7 @@ function viewPdf() {
     }
   }
   router.addRoute(viewPdfRoute)
-  router.push({ name: 'View Pdf', params: { id: props.id } })
+  router.push({ name: 'View Pdf', params: { templateType: props.templateType, id: props.id } })
 }
 
 function closePreviewDialog() {
