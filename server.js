@@ -5,11 +5,14 @@ const fsPromises = require('fs').promises;
 
 const cors = require('cors');
 
-const logger = require('./server/logger.js');
-const utils = require('./server/utils.js');
 const common = require('./common');
-const dataAccess = require('./server/stores/dataAccess');
-const routes = require('./server/routes/shared');
+const utils = require('./server/utils.js');
+const config = require('./server/config.js');
+const logger = require('./server/logger.js')(config);
+const dataAccess = require('./server/stores/dataAccess')(config, logger, utils);
+const routes = require('./server/routes/shared')(config, logger, utils);
+
+logger.log(`Loaded configs`, config);
 
 const app = express();
 const port = process.env.PORT || common.DEFAULT_PORT;
@@ -33,10 +36,10 @@ process.on('unhandledRejection', (error, origin) => {
 });
 
 async function loadPlugins(app) {
-  await fsPromises.readdir(path.join(__dirname, 'server/modules'))
+  await fsPromises.readdir(config.modulesDir)
     .then((files) => {
       for (const file of files) {
-        const plugin = require(path.join(__dirname, 'server/modules', file, 'index.js'))(dataAccess, routes, logger, utils);
+        const plugin = require(path.join(config.modulesDir, file, 'index.js'))(dataAccess, routes, logger, utils);
         logger.log(`Loading plugin: ${plugin.name}`);
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {

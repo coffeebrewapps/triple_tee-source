@@ -1,26 +1,42 @@
 const fs = require('fs');
 const path = require('path');
 
-const log_file = fs.createWriteStream(path.join(__dirname, '../debug.log'), { flags : 'w' });
-const log_stdout = process.stdout;
+module.exports = (config) => {
+  const logToFile = fs.createWriteStream(config.logFile, { flags : 'w' });
+  const logToStdout = process.stdout;
 
-const log = function(message, params = {}) {
-  log_stdout.write(`[LOG] ${message}: ${JSON.stringify(params)}\n`);
-  log_file.write(`[LOG] ${message}: ${JSON.stringify(params)}\n`);
-}
+  const logLevels = {
+    log: 'LOG',
+    error: 'ERROR',
+    warn: 'WARN'
+  }
 
-const error = function(message, params = {}) {
-  log_stdout.write(`[ERROR] ${message}: ${JSON.stringify(params)}\n`);
-  log_file.write(`[ERROR] ${message}: ${JSON.stringify(params)}\n`);
-}
+  function formatMessage(level, message, params) {
+    const now = (new Date()).toLocaleString({ dateStyle: 'long' });
+    return `[${now}][${level}] ${message}: ${JSON.stringify(params)}\n`;
+  }
 
-const warn = function(message, params = {}) {
-  log_stdout.write(`[WARN] ${message}: ${JSON.stringify(params)}\n`);
-  log_file.write(`[WARN] ${message}: ${JSON.stringify(params)}\n`);
-}
+  const log = function(message, params = {}) {
+    const formattedMessage = formatMessage(logLevels.log, message, params);
+    logToStdout.write(formattedMessage);
+    logToFile.write(formattedMessage);
+  }
 
-module.exports = {
-  log,
-  error,
-  warn
+  const error = function(message, params = {}) {
+    const formattedMessage = formatMessage(logLevels.error, message, params);
+    logToStdout.write(formattedMessage);
+    logToFile.write(formattedMessage);
+  }
+
+  const warn = function(message, params = {}) {
+    const formattedMessage = formatMessage(logLevels.warn, message, params);
+    logToStdout.write(formattedMessage);
+    logToFile.write(formattedMessage);
+  }
+
+  return {
+    log,
+    error,
+    warn
+  }
 }
