@@ -88,6 +88,7 @@ const filtersDataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'contacts',
         sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
@@ -100,6 +101,7 @@ const filtersDataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'invoice_configs',
         sourceUrl: invoiceConfigsUrl,
         value: recordValue,
         label: invoiceConfigLabel
@@ -112,6 +114,7 @@ const filtersDataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'tags',
         sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
@@ -201,7 +204,7 @@ async function submitFilters() {
 
   const params = filtersInputHelper.formatFilters(filtersData.value)
   dataAccess
-    .create(`${invoicesUrl}/preview_invoice`, params)
+    .create('invoices', params, { path: 'preview_invoice' })
     .then((result) => {
       updateInvoiceData(result)
       invoiceLinesLoading.value = false
@@ -463,7 +466,7 @@ async function createInvoice() {
       )
 
       dataAccess
-        .create(`${invoicesUrl}/generate_with_lines`, params)
+        .create('invoices', params, { path: 'generate_with_lines' })
         .then((result) => {
           updatedInvoice.value.id = result.id
           updatedInvoiceLines.value = result.invoiceLines

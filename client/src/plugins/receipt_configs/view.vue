@@ -37,6 +37,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'sequences',
         sourceUrl: sequencesUrl,
         value: recordValue,
         label: sequenceNumberLabel
@@ -49,6 +50,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'contacts',
         sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
@@ -61,6 +63,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'receipt_templates',
         sourceUrl: templatesUrl,
         value: recordValue,
         label: templateLabel
@@ -106,6 +109,7 @@ function templateLabel(record) {
 
 <template>
   <DataPage
+    model-class="receipt_configs"
     data-type="Receipt Configs"
     url-base="api/receipt_configs"
     schemas-url-base="api/schemas/receipt_configs"

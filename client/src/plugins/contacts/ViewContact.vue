@@ -73,7 +73,7 @@ async function loadContact() {
   const params = { include: includeKeys.value }
 
   await dataAccess
-    .view(`${contactsUrl}/${contactId.value}`, params)
+    .view(`contacts`, contactId.value, params)
     .then((result) => {
       currentContact.value = result
       showBanner(`Loaded contact successfully!`);

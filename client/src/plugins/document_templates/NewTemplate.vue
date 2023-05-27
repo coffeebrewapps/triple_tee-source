@@ -140,7 +140,7 @@ async function updateMarkup(updated) {
   )
 
   await dataAccess
-    .update(`${templatesUrl.value}/${templateId.value}`, params)
+    .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result
       showBanner(`Updated markup successfully!`)
@@ -165,7 +165,7 @@ async function updateStyles(updated) {
   )
 
   await dataAccess
-    .update(`${templatesUrl.value}/${templateId.value}`, params)
+    .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result
       showBanner(`Updated styles successfully!`)
@@ -203,7 +203,7 @@ async function createTemplate() {
   }
 
   await dataAccess
-    .create(`${templatesUrl.value}`, params)
+    .create(templateType.value, params)
     .then((result) => {
       currentTemplate.value = result
       showBanner(`Template created successfully!`)

@@ -30,6 +30,7 @@ async function openViewPage(id) {
 
 <template>
   <DataPage
+    model-class="contacts"
     data-type="Contacts"
     url-base="api/contacts"
     schemas-url-base="api/schemas/contacts"

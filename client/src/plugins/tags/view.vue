@@ -26,6 +26,7 @@ const filters = {
 
 <template>
   <DataPage
+    model-class="tags"
     data-type="Tags"
     url-base="api/tags"
     schemas-url-base="api/schemas/tags"

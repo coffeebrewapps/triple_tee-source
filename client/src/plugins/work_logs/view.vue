@@ -66,6 +66,7 @@ function triggerTabEvent(i) {
 
       <template #tab-3>
         <DataPage
+          model-class="work_logs"
           data-type="Work Logs"
           url-base="api/work_logs"
           schemas-url-base="api/schemas/work_logs"

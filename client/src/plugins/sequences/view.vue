@@ -40,6 +40,7 @@ const filters = {
 
 <template>
   <DataPage
+    model-class="sequences"
     data-type="Sequences"
     url-base="api/sequences"
     schemas-url-base="api/schemas/sequences"

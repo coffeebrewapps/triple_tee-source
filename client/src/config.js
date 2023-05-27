@@ -3,7 +3,7 @@ const env = import.meta.env
 
 const useConfig = () => {
   const baseUrl = ref('')
-  const dataAccess = 'api'
+  const dataAccess = 'web'
 
   if (env.MODE === 'development') {
     const port = env.VITE_SERVER_PORT || env.VITE_DEFAULT_SERVER_PORT

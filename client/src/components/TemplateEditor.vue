@@ -261,12 +261,12 @@ async function generateTemplate() {
   previewPdfDialog.value = true
 
   await dataAccess
-    .downloadStream(`${props.templatesUrl}/${props.id}/pdf`, samplePdfData.value)
+    .downloadStream(props.templateType, props.id, samplePdfData.value)
     .then((result) => {
       const blob = new Blob([result.data], { type: 'application/pdf' })
       const url = window.URL.createObjectURL(blob)
       downloadLink.value = url
-      downloadFile.value = `invoice_templates_${props.id}.pdf`
+      downloadFile.value = `${props.templateType}_${props.id}.pdf`
       templatePdfData.value = url
       viewPdf()
     })

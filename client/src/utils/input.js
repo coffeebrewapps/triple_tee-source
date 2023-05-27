@@ -195,16 +195,16 @@ export function useInputHelper(schemas) {
     }, {})
   }
 
-  async function loadForeignModelAsOption(url, id) {
-    return dataAccess.view(`${url}/${id}`, {})
+  async function loadForeignModelAsOption(modelClass, id) {
+    return dataAccess.view(modelClass, id, {})
   }
 
   async function loadIncludesFromServer(field, fieldValue) {
     const options = schemasMap.value[field].options
-    const foreignModelUrl = options.sourceUrl
+    const foreignModelClass = options.modelClass
 
     const promises = fieldValue.map((v) => {
-      return loadForeignModelAsOption(foreignModelUrl, v)
+      return loadForeignModelAsOption(foreignModelClass, v)
     })
 
     return new Promise((resolve, reject) => {
@@ -294,7 +294,6 @@ export function useInputHelper(schemas) {
         resolve(formattedOptions)
       } else {
         const options = schemasMap.value[field].options
-        const foreignModelUrl = options.sourceUrl
         loadIncludesFromServer(field, fieldIncludeValues)
           .then((formattedOptions) => {
             resolve(formattedOptions)
@@ -380,7 +379,7 @@ export function useInputHelper(schemas) {
       const limit = options.limit || 5
       return new Promise((resolve, reject) => {
         dataAccess
-          .list(options.sourceUrl, { offset, limit })
+          .list(options.modelClass, { offset, limit })
           .then((result) => {
             const data = result.data
             const total = result.total

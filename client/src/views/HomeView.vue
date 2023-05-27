@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
 
 import useConfig from '../config'
 import { useBannerStore } from '../stores/banner'
+import { useDataAccess } from '@/utils/dataAccess'
 
 import {
   TTable
@@ -11,6 +11,7 @@ import {
 
 const config = useConfig()
 const banner = useBannerStore()
+const dataAccess = useDataAccess()
 
 const url = computed(() => {
   return `${config.baseUrl}/api/alerts`
@@ -43,11 +44,11 @@ function hideBanner() {
 }
 
 async function loadData() {
-  await axios
-    .get(url.value, { params: { offset: offset.value, limit: limit.value } })
+  await dataAccess
+    .list('alerts', { offset: offset.value, limit: limit.value })
     .then((res) => {
-      data.value = res.data.data
-      totalData.value = res.data.total
+      data.value = res.data
+      totalData.value = res.total
       dataLoading.value = false
     })
     .catch((err) => {

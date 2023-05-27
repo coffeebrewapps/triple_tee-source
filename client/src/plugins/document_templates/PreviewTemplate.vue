@@ -74,7 +74,7 @@ async function updateMarkup(updated) {
   )
 
   await dataAccess
-    .update(`${templatesUrl.value}/${templateId.value}`, params)
+    .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result
       showBanner(`Updated markup successfully!`)
@@ -94,7 +94,7 @@ async function updateStyles(updated) {
   )
 
   await dataAccess
-    .update(`${templatesUrl.value}/${templateId.value}`, params)
+    .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result
       showBanner(`Updated styles successfully!`)
@@ -122,7 +122,7 @@ function hideBanner() {
 
 async function loadTemplate() {
   await dataAccess
-    .view(`${templatesUrl.value}/${templateId.value}`, {})
+    .view(templateType.value, templateId.value, {})
     .then((result) => {
       currentTemplate.value = result
     })

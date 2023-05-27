@@ -82,6 +82,10 @@ const props = defineProps({
     type: String,
     default: ''
   },
+  modelClass: {
+    type: String,
+    default: null
+  },
   urlBase: {
     type: String,
     default: ''
@@ -514,7 +518,7 @@ events.registerListener(
 /*** section:dataAccess ***/
 async function loadSchemas() {
   await dataAccess
-    .schemas(schemasUrl.value)
+    .schemas(props.modelClass)
     .then((result) => {
       const fields = result.fields
       formatDataFields(fields)
@@ -539,7 +543,7 @@ async function loadData() {
   dataLoading.value = true
 
   await dataAccess
-    .list(url.value, params)
+    .list(props.modelClass, params)
     .then((result) => {
       data.value = result.data
       totalData.value = result.total
@@ -556,7 +560,7 @@ async function viewData(id, resolve, reject) {
   const params = { include: includeKeys.value }
 
   await dataAccess
-    .view(`${url.value}/${id}`, params)
+    .view(props.modelClass, id, params)
     .then((result) => {
       resolve(result)
     })
@@ -679,7 +683,7 @@ async function createDataAndCloseDialog(rawParams) {
   const params = formatDataForSave(rawParams)
 
   await dataAccess
-    .create(url.value, params)
+    .create(props.modelClass, params)
     .then((result) => {
       showBanner(`Data created successfully!`)
       resetFilters()
@@ -758,7 +762,7 @@ async function updateDataAndCloseDialog(rawParams) {
   const params = formatDataForSave(rawParams)
 
   await dataAccess
-    .update(`${url.value}/${id}`, params)
+    .update(props.modelClass, id, params)
     .then((record) => {
       showBanner(`Data updated successfully!`)
       resetFilters()
@@ -830,7 +834,7 @@ async function deleteDataAndCloseDialog() {
   const id = params.id
 
   await dataAccess
-    .remove(`${url.value}/${id}`)
+    .remove(props.modelClass, id)
     .then((record) => {
       showBanner(`Data deleted successfully!`)
       resetFilters()
@@ -864,7 +868,7 @@ const downloadAnchor = ref('downloadAnchor')
 
 async function openDownloadDialog() {
   await dataAccess
-    .download(`${url.value}/download`)
+    .download(props.modelClass)
     .then((result) => {
       const url = window.URL.createObjectURL(new Blob([result.data]))
       downloadLink.value = url

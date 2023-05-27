@@ -246,7 +246,7 @@ async function loadWeekly() {
   }
 
   await dataAccess
-    .list(worklogsUrl, params)
+    .list('work_logs', params)
     .then((result) => {
       weeklyData.value = formatWeeklyData(result.data)
     })

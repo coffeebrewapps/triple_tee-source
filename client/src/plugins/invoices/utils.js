@@ -37,6 +37,7 @@ export function useInvoiceUtils() {
         options: {
           server: true,
           pagination: true,
+          modelClass: 'invoice_configs',
           sourceUrl: invoiceConfigsUrl,
           value: recordValue,
           label: invoiceConfigLabel
@@ -49,6 +50,7 @@ export function useInvoiceUtils() {
         options: {
           server: true,
           pagination: true,
+          modelClass: 'currencies',
           sourceUrl: currenciesUrl,
           value: recordValue,
           label: currencyLabel
@@ -61,6 +63,7 @@ export function useInvoiceUtils() {
         options: {
           server: true,
           pagination: true,
+          modelClass: 'contacts',
           sourceUrl: contactsUrl,
           value: recordValue,
           label: contactLabel

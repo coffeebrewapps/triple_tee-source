@@ -145,6 +145,7 @@ async function openUpdatePage(id) {
     >
       <template #tab-0>
         <DataPage
+          model-class="invoice_templates"
           data-type="Invoice Templates"
           url-base="api/invoice_templates"
           schemas-url-base="api/schemas/invoice_templates"
@@ -159,6 +160,7 @@ async function openUpdatePage(id) {
 
       <template #tab-1>
         <DataPage
+          model-class="receipt_templates"
           data-type="Receipt Templates"
           url-base="api/receipt_templates"
           schemas-url-base="api/schemas/receipt_templates"

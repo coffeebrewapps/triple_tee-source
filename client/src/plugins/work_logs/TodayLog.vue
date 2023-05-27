@@ -165,7 +165,7 @@ async function submitNewTask() {
   const params = formatDataForSave(currentTask.value)
 
   await dataAccess
-    .create(worklogsUrl, params)
+    .create('work_logs', params)
     .then((result) => {
       showBanner(`Started task successfully!`)
       loadToday()
@@ -199,7 +199,7 @@ async function updateTask() {
   const params = formatDataForSave(currentTaskForUpdate.value)
 
   await dataAccess
-    .update(`${worklogsUrl}/${currentTaskForUpdate.value.id}`, params)
+    .update('work_logs', currentTaskForUpdate.value.id, params)
     .then((result) => {
       showBanner(`Ended task successfully!`)
       loadToday()
@@ -375,7 +375,7 @@ events.registerListener(
 
 async function loadSchemas() {
   await dataAccess
-    .schemas(schemasUrl)
+    .schemas('work_logs')
     .then((result) => {
       const fields = result.fields
       combinedDataFields.value = formatDataFields(fields)
@@ -402,7 +402,7 @@ async function loadToday() {
   }
 
   await dataAccess
-    .list(worklogsUrl, params)
+    .list('work_logs', params)
     .then((result) => {
       todayLogs.value = formatWorkLogs(result.data)
       currentTask.value = formatExistingTask(todayLogs.value[0])

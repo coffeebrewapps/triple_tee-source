@@ -52,6 +52,7 @@ async function openCreatePage() {
 
 <template>
   <DataPage
+    model-class="invoices"
     data-type="Invoices"
     url-base="api/invoices"
     schemas-url-base="api/schemas/invoices"

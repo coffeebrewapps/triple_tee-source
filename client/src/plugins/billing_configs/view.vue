@@ -42,6 +42,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'tags',
         sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
@@ -54,6 +55,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'tags',
         sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
@@ -66,6 +68,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'contacts',
         sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
@@ -132,6 +135,7 @@ function contactLabel(record) {
 
 <template>
   <DataPage
+    model-class="billing_configs"
     data-type="Billing Configs"
     url-base="api/billing_configs"
     schemas-url-base="api/schemas/billing_configs"

@@ -42,6 +42,7 @@ const filtersDataFields = computed(() => {
     options: {
       server: true,
       pagination: true,
+      modelClass: 'invoice_configs',
       sourceUrl: invoiceConfigsUrl,
       value: recordValue,
       label: configLabel
@@ -149,7 +150,7 @@ async function submitFilters() {
 
   const params = workLogInputHelper.formatFilters(filtersData.value)
   dataAccess
-    .create(`${worklogsUrl}/preview_invoice`, params)
+    .create('work_logs', params, { path: 'preview_invoice' })
     .then((result) => {
       invoiceData.value = result
       invoiceData.value.invoice.invoiceDate = new Date(invoiceData.value.invoice.invoiceDate)

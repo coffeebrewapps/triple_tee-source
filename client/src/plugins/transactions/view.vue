@@ -55,6 +55,7 @@ const dataFields = [
     options: {
       server: true,
       pagination: true,
+      modelClass: 'tags',
       sourceUrl: tagsUrl,
       value: recordValue,
       label: tagLabel
@@ -67,6 +68,7 @@ const dataFields = [
     options: {
       server: true,
       pagination: true,
+      modelClass: 'currencies',
       sourceUrl: currenciesUrl,
       value: recordValue,
       label: currencyLabel
@@ -79,6 +81,7 @@ const dataFields = [
     options: {
       server: true,
       pagination: true,
+      modelClass: 'transactions',
       sourceUrl: transactionsUrl,
       value: recordValue,
       label: transactionLabel
@@ -105,6 +108,7 @@ const filters = {
 
 <template>
   <DataPage
+    model-class="transactions"
     data-type="Transactions"
     url-base="api/transactions"
     schemas-url-base="api/schemas/transactions"

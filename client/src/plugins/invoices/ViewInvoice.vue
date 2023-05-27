@@ -81,7 +81,7 @@ async function loadInvoice() {
   const params = { include: includeKeys.value }
 
   await dataAccess
-    .view(`${invoicesUrl}/${invoiceId.value}`, params)
+    .view('invoices', invoiceId.value, params)
     .then((result) => {
       currentInvoice.value = result
       showBanner(`Loaded invoice successfully!`);
@@ -98,7 +98,7 @@ async function loadTemplateData() {
   invoiceTemplate.value = null
 
   dataAccess
-    .view(`${invoicesUrl}/${currentInvoice.value.id}/template_data`)
+    .view('invoices', currentInvoice.value.id, {}, { path: 'template_data' })
     .then((result) => {
       invoiceLines.value = result.invoiceLines
       invoiceConfig.value = result.invoiceConfig

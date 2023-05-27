@@ -39,6 +39,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'invoices',
         sourceUrl: invoicesUrl,
         value: recordValue,
         label: invoiceLabel
@@ -94,6 +95,7 @@ const filters = computed(() => {
 
 <template>
   <DataPage
+    model-class="invoice_lines"
     data-type="Invoice Lines"
     url-base="api/invoice_lines"
     schemas-url-base="api/schemas/invoice_lines"

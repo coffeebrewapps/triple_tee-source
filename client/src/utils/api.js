@@ -1,12 +1,33 @@
 import axios from 'axios'
 
+import useConfig from '@/config'
+const config = useConfig()
+
 export function useApiAccess() {
+  function formatUrl(modelClass, id = null, suffix) {
+    const parts = []
+    parts.push(config.baseUrl)
+    parts.push('api')
+    parts.push(modelClass)
+
+    if (id) {
+      parts.push(id)
+    }
+
+    if (suffix) {
+      parts.push(suffix.path)
+    }
+
+    return parts.join('/')
+  }
+
   function formatErrors(error) {
     return [error].flat().filter(e => !!e)
   }
 
-  async function schemas(url) {
+  async function schemas(modelClass = null) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl('schemas', modelClass)
       axios
         .get(url)
         .then((res) => {
@@ -18,8 +39,9 @@ export function useApiAccess() {
     })
   }
 
-  async function list(url, params) {
+  async function list(modelClass, params, suffix = null) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl(modelClass, null, suffix)
       axios
         .get(url, { params })
         .then((res) => {
@@ -31,8 +53,9 @@ export function useApiAccess() {
     })
   }
 
-  async function view(url, params) {
+  async function view(modelClass, id, params, suffix = null) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl(modelClass, id, suffix)
       axios
         .get(url, { params })
         .then((res) => {
@@ -44,8 +67,9 @@ export function useApiAccess() {
     })
   }
 
-  async function create(url, params) {
+  async function create(modelClass, params, suffix = null) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl(modelClass, null, suffix)
       axios
         .post(url, params)
         .then((res) => {
@@ -57,8 +81,9 @@ export function useApiAccess() {
     })
   }
 
-  async function update(url, params) {
+  async function update(modelClass, id, params, suffix = null) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl(modelClass, id, suffix)
       axios
         .put(url, params)
         .then((res) => {
@@ -70,8 +95,9 @@ export function useApiAccess() {
     })
   }
 
-  async function remove(url) {
+  async function remove(modelClass, id, suffix = null) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl(modelClass, id, suffix)
       axios
         .delete(url)
         .then((res) => {
@@ -83,8 +109,9 @@ export function useApiAccess() {
     })
   }
 
-  async function upload(url, params) {
+  async function upload(modelClass, params) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl('schemas', modelClass, { path: 'upload' })
       axios
         .put(url, params)
         .then((res) => {
@@ -96,8 +123,9 @@ export function useApiAccess() {
     })
   }
 
-  async function download(url) {
+  async function download(modelClass) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl(modelClass, null, { path: 'download' })
       axios
         .get(url)
         .then((res) => {
@@ -109,8 +137,9 @@ export function useApiAccess() {
     })
   }
 
-  async function downloadStream(url, params) {
+  async function downloadStream(modelClass, id, params) {
     return new Promise((resolve, reject) => {
+      const url = formatUrl(modelClass, id, { path: 'pdf' })
       axios({
         method: 'post',
         url: url,

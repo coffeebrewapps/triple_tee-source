@@ -27,6 +27,7 @@ export function useWorkLogUtils() {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'tags',
         sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel

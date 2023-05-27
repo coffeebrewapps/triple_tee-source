@@ -50,6 +50,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'tags',
         sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
@@ -63,6 +64,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'sequences',
         sourceUrl: sequencesUrl,
         value: recordValue,
         label: sequenceNumberLabel
@@ -75,6 +77,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'contacts',
         sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
@@ -87,6 +90,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'invoice_templates',
         sourceUrl: templatesUrl,
         value: recordValue,
         label: templateLabel
@@ -99,6 +103,7 @@ const dataFields = computed(() => {
       options: {
         server: true,
         pagination: true,
+        modelClass: 'currencies',
         sourceUrl: currenciesUrl,
         value: recordValue,
         label: currencyLabel
@@ -160,6 +165,7 @@ function currencyLabel(record) {
 
 <template>
   <DataPage
+    model-class="invoice_configs"
     data-type="Invoice Configs"
     url-base="api/invoice_configs"
     schemas-url-base="api/schemas/invoice_configs"

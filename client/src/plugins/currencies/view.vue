@@ -1,6 +1,4 @@
 <script setup>
-import axios from 'axios'
-
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
@@ -67,6 +65,7 @@ function validateExchangeRate(record) {
 
 <template>
   <DataPage
+    model-class="currencies"
     data-type="Currencies"
     url-base="api/currencies"
     schemas-url-base="api/schemas/currencies"

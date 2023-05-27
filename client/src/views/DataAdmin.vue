@@ -77,7 +77,7 @@ const dataFields = [
 
 async function fetchSchemas() {
   await dataAccess
-    .list(schemasUrl.value)
+    .schemas()
     .then((result) => {
       modelSchemas.value = result.map((schema) => {
         return { value: schema, label: schema }
@@ -96,40 +96,25 @@ async function fetchData() {
 
   if (!modelClass.value) { return; }
 
-  if (modelClass.value === 'indexes') {
-    await dataAccess
-      .download(indexesUrl.value)
-      .then((result) => {
-        rawData.value = result.data
-        dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
-        dataLoading.value = false
-        showBanner(`Fetched indexes successfully!`)
-      })
-      .catch((error) => {
-        errorAlert.value = true
-        errorContent.value = JSON.stringify(error, false, 4)
-      })
-  } else {
-    await dataAccess
-      .download(downloadUrl.value)
-      .then((result) => {
-        rawData.value = result.data
-        dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
-        dataLoading.value = false
-        showBanner(`Fetched ${modelClass.value} data successfully!`)
-      })
-      .catch((error) => {
-        errorAlert.value = true
-        errorContent.value = JSON.stringify(error, false, 4)
-        showBanner(`Error fetching ${modelClass.value} data!`)
-      })
-  }
+  await dataAccess
+    .list(modelClass.value)
+    .then((result) => {
+      rawData.value = result.data
+      dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
+      dataLoading.value = false
+      showBanner(`Fetched ${modelClass.value} successfully!`)
+    })
+    .catch((error) => {
+      errorAlert.value = true
+      errorContent.value = JSON.stringify(error, false, 4)
+      showBanner(`Error fetching ${modelClass.value} data!`)
+    })
 }
 
 async function submitData() {
   if (modelClass.value === 'indexes') {
     await dataAccess
-      .upload(indexesUrl.value, JSON.parse(dataForUpdate.value))
+      .upload('indexes', JSON.parse(dataForUpdate.value))
       .then((result) => {
         rawData.value = result.data
         dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
@@ -143,7 +128,7 @@ async function submitData() {
       })
   } else {
     await dataAccess
-      .upload(uploadUrl.value, JSON.parse(dataForUpdate.value))
+      .upload(modelClass.value, JSON.parse(dataForUpdate.value))
       .then((result) => {
         rawData.value = result.data
         dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
@@ -201,8 +186,8 @@ onMounted(async () => {
       title="Error"
       class="error-alert"
       :content="errorContent"
-      width="800"
-      height="500"
+      :width="800"
+      :height="500"
     />
 
     <TButton button-type="text" value="Update" icon="fa-solid fa-check" @click="submitData"/>
