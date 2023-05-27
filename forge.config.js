@@ -7,7 +7,6 @@ module.exports = {
       '^/public$',
       '^/server$',
       '^/.tool-versions',
-      '^/server.js',
       '^/yarn.lock'
     ]
   },

@@ -2,7 +2,7 @@ const { app, BrowserWindow } = require('electron');
 const fs = require('fs');
 const path = require('path');
 
-const server = require('./dist/server');
+const server = require('./dist/index');
 const common = require('./common');
 
 const port = process.env.PORT || common.DEFAULT_PORT;

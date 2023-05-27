@@ -5,12 +5,12 @@ const fsPromises = require('fs').promises;
 
 const cors = require('cors');
 
-const common = require('./common');
-const utils = require('./server/utils.js');
-const config = require('./server/config.js');
-const logger = require('./server/logger.js')(config);
-const dataAccess = require('./server/stores/dataAccess')(config, logger, utils);
-const routes = require('./server/routes/shared')(config, logger, utils);
+const common = require('../common');
+const utils = require('./utils.js');
+const config = require('./config.js');
+const logger = require('./logger.js')(config);
+const dataAccess = require('./stores/dataAccess')(config, logger, utils);
+const routes = require('./routes/shared')(config, logger, utils);
 
 logger.log(`Loaded configs`, config);
 
