@@ -1,8 +1,8 @@
 #!/bin/bash
-yarn build
-app_dir="../triple_tee-app"
-if [[ ! -f $app_dir ]]; then
-  mkdir ${app_dir}
-fi
-cp -r ./dist ${app_dir}/dist
-cp -r ./data ${app_dir}/data
+yarn client-build --mode staging --base=/triple_tee_app/
+app_dir="../triple_tee_app"
+pushd $app_dir
+  git checkout gh-pages
+  rm -r assets
+  cp -r ../triple_tee-source/dist/public/* ${app_dir}/
+popd
