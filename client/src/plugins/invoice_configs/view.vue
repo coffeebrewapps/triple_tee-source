@@ -22,6 +22,7 @@ const props = defineProps({
 })
 
 const fieldsLayout = [
+  { description: 'lg' },
   { invoiceCycleDurationValue: 'md', invoiceCycleDurationUnit: 'md' },
   { dueDateCycleValue: 'md', dueDateCycleUnit: 'md' },
   { paymentTerms: 'lg' },
@@ -36,6 +37,7 @@ const fieldsLayout = [
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
+    { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'invoiceCycleDurationValue', type: 'number', label: 'Invoice Cycle Duration Value', listable: true, viewable: true, creatable: true, updatable: false },
     { key: 'invoiceCycleDurationUnit', type: 'enum', label: 'Invoice Cycle Duration Unit', listable: true, viewable: true, creatable: true, updatable: false },
     { key: 'dueDateCycleValue', type: 'number', label: 'Due Date Cycle Value', listable: true, viewable: true, creatable: true, updatable: false },

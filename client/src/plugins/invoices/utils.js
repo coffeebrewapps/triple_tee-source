@@ -78,7 +78,7 @@ export function useInvoiceUtils() {
   }
 
   function invoiceConfigLabel(record) {
-    return `Every ${record.invoiceCycleDurationValue} ${record.invoiceCycleDurationUnit}, due in ${record.dueDateCycleValue} ${record.dueDateCycleUnit}`
+    return record.description
   }
 
   function currencyLabel(record) {

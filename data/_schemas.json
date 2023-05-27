@@ -349,6 +349,9 @@
       "id": {
         "type": "text"
       },
+      "description": {
+        "type": "text"
+      },
       "invoiceCycleDurationValue": {
         "type": "number",
         "default": 1
@@ -431,6 +434,7 @@
       },
       "unique": [],
       "required": [
+        "description",
         "invoiceCycleDurationValue",
         "invoiceCycleDurationUnit",
         "dueDateCycleValue",
@@ -445,6 +449,7 @@
     },
     "indexes": {
       "filter": {
+        "description": { "match": true },
         "tags": {},
         "invoiceNumberSequenceId": {},
         "billingContactId": {},
