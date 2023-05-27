@@ -28,9 +28,9 @@ function module {
 
 const name = '$model';
 
-module.exports = (dataAccess, routes, logger) => {
-  const stores = require('./stores')(dataAccess, logger);
-  const router = require('./routes')(routes, stores, logger);
+module.exports = (dataAccess, routes, logger, utils) => {
+  const stores = require('./stores')(dataAccess, logger, utils);
+  const router = require('./routes')(routes, stores, logger, utils);
 
   return {
     name,
@@ -44,7 +44,7 @@ module.exports = (dataAccess, routes, logger) => {
   if [[ ! -f $route_file ]]; then
     echo "'use strict'
 
-module.exports = (routes, stores, logger) => {
+module.exports = (routes, stores, logger, utils) => {
   return {
     prefix: '/api/${model}',
     routes: [
@@ -65,7 +65,7 @@ module.exports = (routes, stores, logger) => {
 
 const modelClass = '$model';
 
-module.exports = (dataAccess, logger) => {
+module.exports = (dataAccess, logger, utils) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }
