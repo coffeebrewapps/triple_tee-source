@@ -5,6 +5,7 @@ import { useDataValidations } from '@/utils/dataValidations'
 
 import schemasData from '@/../../data/_schemas.json'
 import indexesData from '@/../../data/_indexes.json'
+import countriesData from '@/../../data/countries.json'
 
 export const useDataStore = defineStore('data', () => {
   const indexes = '_indexes';
@@ -56,6 +57,7 @@ export const useDataStore = defineStore('data', () => {
           dataCache.value[modelClass] = {};
           console.log(`Init data complete`, { modelClass });
         })
+        dataCache.value.countries = countriesData;
         localStorage.setItem('data', JSON.stringify(dataCache.value));
       }
 
