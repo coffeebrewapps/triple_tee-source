@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <title>Configure Your App</title>
+    <link href="./styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="input-control">
+        <div class="input-label">Port</div>
+        <div class="input-field"><input type="number" id="portInput" /></div>
+      </div>
+
+      <div class="input-control">
+        <div class="input-label">Data Directory</div>
+        <div class="input-field">
+          <input type="text" id="dataDirInput">
+          <div class="input-hint">If you want to use an absolute path, make sure to start with a / character, eg. /home/you/Documents/data.</div>
+        </div>
+      </div>
+
+      <div class="input-control">
+        <div class="input-label">Log File Path</div>
+        <div class="input-field">
+          <input type="text" id="logFileInput" />
+          <div class="input-hint">If you want to use an absolute path, make sure to start with a / character, eg. /home/you/Documents/logs/debug.log.</div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="button" id="launchBtn">Launch App</button>
+      </div>
+    </div>
+    <script src="./main.js"></script>
+  </body>
+</html>

@@ -8,9 +8,26 @@ function readConfigFile() {
   const result = fs.readFileSync(configFile, { encoding: 'utf8' });
   const parsedResult = JSON.parse(result);
 
-  const dataDir = path.join(rootDir, parsedResult.dataDir);
-  const logFile = path.join(rootDir, parsedResult.logFile);
-  const modulesDir = path.join(rootDir, parsedResult.modulesDir);
+  let dataDir = null;
+  if (path.isAbsolute(parsedResult.dataDir)) {
+    dataDir = parsedResult.dataDir
+  } else {
+    dataDir = path.join(rootDir, parsedResult.dataDir);
+  }
+
+  let logFile = null;
+  if (path.isAbsolute(parsedResult.logFile)) {
+    logFile = parsedResult.logFile
+  } else {
+    logFile = path.join(rootDir, parsedResult.logFile);
+  }
+
+  let modulesDir = null;
+  if (path.isAbsolute(parsedResult.modulesDir)) {
+    modulesDir = parsedResult.modulesDir
+  } else {
+    modulesDir = path.join(rootDir, parsedResult.modulesDir);
+  }
 
   return Object.assign(
     {},

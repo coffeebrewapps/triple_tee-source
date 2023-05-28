@@ -1,11 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const fs = require('fs');
 const path = require('path');
-
-const server = require('./dist/index');
 const common = require('./common');
-
-const port = process.env.PORT || common.DEFAULT_PORT;
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -17,11 +13,35 @@ const createWindow = () => {
     }
   })
 
-  const res = win.loadURL(`http://localhost:${port}`)
-  res.then((data) => {
-    console.log('Server started')
-  }).catch((error) => {
-    console.log(error)
+  win.loadFile('./config_app/index.html')
+
+  ipcMain.on('set-app-config', (event, { port, dataDir, logFile }) => {
+    const configFile = path.join(__dirname, 'app_config.json')
+    const result = fs.readFileSync(configFile, { encoding: 'utf8' })
+    const parsedResult = JSON.parse(result)
+    const updatedConfig = Object.assign({}, parsedResult)
+    if (port) {
+      updatedConfig.port = port
+    }
+
+    if (dataDir) {
+      updatedConfig.dataDir = dataDir
+    }
+
+    if (logFile) {
+      updatedConfig.logFile = logFile
+    }
+
+    fs.writeFileSync(configFile, JSON.stringify(updatedConfig), { encoding: 'utf8' })
+
+    const server = require('./dist/index');
+    const res = win.loadURL(`http://localhost:${port}`)
+
+    res.then((data) => {
+      console.log('Server started')
+    }).catch((error) => {
+      console.log(error)
+    })
   })
 }
 
