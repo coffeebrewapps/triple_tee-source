@@ -1,7 +1,7 @@
 const route = {
   path: '/invoice_configs',
   name: 'Invoice Configs',
-  component: () => import('./view.vue')
+  component: () => import('./InvoiceConfigs.vue')
 }
 
 const usePlugin = (router) => {

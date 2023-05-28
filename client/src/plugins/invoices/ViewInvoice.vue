@@ -26,8 +26,7 @@ import {
 } from 'coffeebrew-vue-components'
 
 import TabContainer from '@/components/TabContainer.vue'
-import Invoice from '@/plugins/invoices/view.vue'
-import InvoiceLines from '@/plugins/invoice_lines/view.vue'
+import InvoiceLines from '@/plugins/invoice_lines/InvoiceLines.vue'
 import TemplateEditor from '@/components/TemplateEditor.vue'
 /*** import:components ***/
 

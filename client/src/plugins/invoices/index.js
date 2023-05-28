@@ -3,7 +3,7 @@ import { useStore } from './store'
 const route = {
   path: '/invoices',
   name: 'Invoices',
-  component: () => import('./view.vue')
+  component: () => import('./Invoices.vue')
 }
 
 const viewInvoiceRoute = {

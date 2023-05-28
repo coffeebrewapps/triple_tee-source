@@ -45,10 +45,10 @@ import {
 } from 'coffeebrew-vue-components'
 
 import TabContainer from '@/components/TabContainer.vue'
-import InvoiceConfig from '@/plugins/invoice_configs/view.vue'
-import ReceiptConfig from '@/plugins/receipt_configs/view.vue'
-import BillingConfig from '@/plugins/billing_configs/view.vue'
-import Invoices from '@/plugins/invoices/view.vue'
+import InvoiceConfigs from '@/plugins/invoice_configs/InvoiceConfigs.vue'
+import ReceiptConfigs from '@/plugins/receipt_configs/ReceiptConfigs.vue'
+import BillingConfigs from '@/plugins/billing_configs/BillingConfigs.vue'
+import Invoices from '@/plugins/invoices/Invoices.vue'
 /*** import:components ***/
 
 /*** section:global ***/
@@ -185,19 +185,19 @@ onMounted(async () => {
       </template> <!-- template-0 -->
 
       <template #tab-1>
-        <InvoiceConfig
+        <InvoiceConfigs
           :billing-contact-id="contactId"
         />
       </template> <!-- template-1 -->
 
       <template #tab-2>
-        <ReceiptConfig
+        <ReceiptConfigs
           :billing-contact-id="contactId"
         />
       </template> <!-- template-2 -->
 
       <template #tab-3>
-        <BillingConfig
+        <BillingConfigs
           :contact-id="contactId"
         />
       </template> <!-- template-3 -->

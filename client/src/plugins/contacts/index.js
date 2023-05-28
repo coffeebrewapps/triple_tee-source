@@ -1,7 +1,7 @@
 const route = {
   path: '/contacts',
   name: 'Contacts',
-  component: () => import('./view.vue')
+  component: () => import('./Contacts.vue')
 }
 
 const viewContactRoute = {

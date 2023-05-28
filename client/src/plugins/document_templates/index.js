@@ -3,7 +3,7 @@ import { useStore } from './store'
 const route = {
   path: '/document_templates',
   name: 'Document Templates',
-  component: () => import('./view.vue')
+  component: () => import('./DocumentTemplates.vue')
 }
 
 const createTemplateRoute = {

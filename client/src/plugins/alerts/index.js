@@ -1,7 +1,7 @@
 const route = {
   path: '/alerts',
   name: 'Alerts',
-  component: () => import('./view.vue')
+  component: () => import('./Alerts.vue')
 }
 
 const usePlugin = (router) => {

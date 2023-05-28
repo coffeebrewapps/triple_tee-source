@@ -1,7 +1,7 @@
 const route = {
   path: '/transactions',
   name: 'Transactions',
-  component: () => import('./view.vue')
+  component: () => import('./Transactions.vue')
 }
 
 const usePlugin = (router) => {

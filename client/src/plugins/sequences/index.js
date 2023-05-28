@@ -1,7 +1,7 @@
 const route = {
   path: '/sequences',
   name: 'Sequences',
-  component: () => import('./view.vue')
+  component: () => import('./Sequences.vue')
 }
 
 const usePlugin = (router) => {

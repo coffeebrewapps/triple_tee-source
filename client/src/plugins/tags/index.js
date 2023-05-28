@@ -1,7 +1,7 @@
 const route = {
   path: '/tags',
   name: 'Tags',
-  component: () => import('./view.vue')
+  component: () => import('./Tags.vue')
 }
 
 const usePlugin = (router) => {

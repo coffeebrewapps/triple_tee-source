@@ -1,7 +1,7 @@
 const route = {
   path: '/billing_configs',
   name: 'Billing Configs',
-  component: () => import('./view.vue')
+  component: () => import('./BillingConfigs.vue')
 }
 
 const usePlugin = (router) => {

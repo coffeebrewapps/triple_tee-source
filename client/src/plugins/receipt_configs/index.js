@@ -1,7 +1,7 @@
 const route = {
   path: '/receipt_configs',
   name: 'Receipt Configs',
-  component: () => import('./view.vue')
+  component: () => import('./ReceiptConfigs.vue')
 }
 
 const usePlugin = (router) => {

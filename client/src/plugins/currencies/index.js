@@ -1,7 +1,7 @@
 const route = {
   path: '/currencies',
   name: 'Currencies',
-  component: () => import('./view.vue')
+  component: () => import('./Currencies.vue')
 }
 
 const usePlugin = (router) => {
