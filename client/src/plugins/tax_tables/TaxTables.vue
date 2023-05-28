@@ -24,8 +24,8 @@ function tagLabel(record) {
 const dataFields = [
   { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false, sortable: true },
   { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true, filterable: true },
-  { key: 'effectiveStart', type: 'datetime', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
-  { key: 'effectiveEnd', type: 'datetime', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
+  { key: 'effectiveStart', type: 'date', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
+  { key: 'effectiveEnd', type: 'date', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
   {
     key: 'includeTags', type: 'multiSelect', label: 'Include Tags', isTags: true,
     reference: { label: tagLabel },
@@ -75,12 +75,12 @@ const filters = {
     includeTags: [],
     excludeTags: [],
     effectiveStart: {
-      startTime: null,
-      endTime: null
+      startDate: null,
+      endDate: null
     },
     effectiveEnd: {
-      startTime: null,
-      endTime: null
+      startDate: null,
+      endDate: null
     }
   },
   layout: [

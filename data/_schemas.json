@@ -749,10 +749,10 @@
         "type": "text"
       },
       "effectiveStart": {
-        "type": "datetime"
+        "type": "date"
       },
       "effectiveEnd": {
-        "type": "datetime"
+        "type": "date"
       },
       "includeTags": {
         "type": "array",
