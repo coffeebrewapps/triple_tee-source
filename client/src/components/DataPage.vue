@@ -1006,7 +1006,7 @@ onMounted(async () => {
               </div>
 
               <div
-                v-if="row.tags.length === 0"
+                v-if="row[header.key].length === 0"
                 class="no-value"
               >
                 --- no value ---

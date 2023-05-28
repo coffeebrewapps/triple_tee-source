@@ -740,6 +740,61 @@
       }
     }
   },
+  "tax_tables": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "effectiveStart": {
+        "type": "datetime"
+      },
+      "effectiveEnd": {
+        "type": "datetime"
+      },
+      "includeTags": {
+        "type": "array",
+        "default": []
+      },
+      "excludeTags": {
+        "type": "array",
+        "default": []
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "includeTags": {
+          "reference": "tags",
+          "primary": "id"
+        },
+        "excludeTags": {
+          "reference": "tags",
+          "primary": "id"
+        }
+      },
+      "unique": [],
+      "required": [
+        "description",
+        "effectiveStart"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "description": { "match": true },
+        "includeTags": {},
+        "excludeTags": {}
+      }
+    }
+  },
   "transactions": {
     "fields": {
       "id": {
