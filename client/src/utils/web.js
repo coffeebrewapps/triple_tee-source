@@ -122,8 +122,13 @@ export function useWebAccess() {
     return new Promise((resolve, reject) => {
       const fn = lookupFunction(modelClass, 'downloadStream', suffix)
 
-      const result = fn(modelClass, id, params)
-      resolve(result)
+      fn(modelClass, id, params)
+        .then((result) => {
+          resolve(result)
+        })
+        .catch((error) => {
+          reject(error)
+        })
     })
   }
 

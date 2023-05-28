@@ -48,15 +48,19 @@ export function useStore(dataStore) {
     const template = dataStore.view(modelClass, id, {}).record
     const htmlString = await createHtmlString(template, params)
 
-    return await html2pdf().from(htmlString).outputPdf('datauristring')
-      .then((result) => {
-        console.log(`Parsing complete!`);
-        return result;
-      })
-      .catch((error) => {
-        console.log(`Error parsing template!`, error);
-        return
-      });
+    return new Promise((resolve, reject) => {
+      html2pdf().from(htmlString).outputPdf('arraybuffer')
+        .then((result) => {
+          console.log(`Parsing complete!`);
+          resolve({
+            data: result
+          })
+        })
+        .catch((error) => {
+          console.log(`Error parsing template!`, error);
+          reject(error)
+        });
+    })
   }
 
   return {
