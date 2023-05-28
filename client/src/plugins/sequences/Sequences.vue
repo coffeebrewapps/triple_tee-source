@@ -42,8 +42,6 @@ const filters = {
   <DataPage
     model-class="sequences"
     data-type="Sequences"
-    url-base="api/sequences"
-    schemas-url-base="api/schemas/sequences"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :validations="validations"

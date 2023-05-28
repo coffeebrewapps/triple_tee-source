@@ -17,8 +17,6 @@ const dataFields = [
   <DataPage
     model-class="alerts"
     data-type="Alerts"
-    url-base="api/alerts"
-    schemas-url-base="api/schemas/alerts"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
   />

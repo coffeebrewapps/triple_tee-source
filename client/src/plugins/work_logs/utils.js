@@ -1,19 +1,12 @@
 import { computed } from 'vue'
 
-import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
-
-const config = useConfig()
 const {
   isEmpty,
   notEarlierThan
 } = useValidations()
 
 export function useWorkLogUtils() {
-  const schemasUrl = `${config.baseUrl}/api/schemas/work_logs`
-  const tagsUrl = `${config.baseUrl}/api/tags`
-  const worklogsUrl = `${config.baseUrl}/api/work_logs`
-
   const dataFields = [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
     { key: 'startTime', type: 'datetime', label: 'Start Time', defaultValue: () => { return new Date() }, listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
@@ -28,7 +21,6 @@ export function useWorkLogUtils() {
         server: true,
         pagination: true,
         modelClass: 'tags',
-        sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
       }
@@ -139,9 +131,6 @@ export function useWorkLogUtils() {
   })
 
   return {
-    schemasUrl,
-    tagsUrl,
-    worklogsUrl,
     dataFields,
     fieldsLayout,
     filters,

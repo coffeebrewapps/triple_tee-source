@@ -41,13 +41,6 @@ const contactId = computed(() => {
 })
 
 const {
-  worklogsUrl,
-  invoicesUrl,
-  invoiceLinesUrl,
-  contactsUrl,
-  invoiceConfigsUrl,
-  templatesUrl,
-  tagsUrl,
   generateDataFields,
   recordValue,
   tagLabel,
@@ -89,7 +82,6 @@ const filtersDataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'contacts',
-        sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
       }
@@ -102,7 +94,6 @@ const filtersDataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'invoice_configs',
-        sourceUrl: invoiceConfigsUrl,
         value: recordValue,
         label: invoiceConfigLabel
       }
@@ -115,7 +106,6 @@ const filtersDataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'tags',
-        sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
       }
@@ -643,13 +633,12 @@ onMounted(() => {
       <template #step-2>
         <TemplateEditor
           v-if="invoiceTemplate"
-          :templates-url="templatesUrl"
+          template-type="invoice_templates"
           :id="invoiceTemplate.id"
           :content-markup="invoiceTemplate.contentMarkup"
           :content-styles="invoiceTemplate.contentStyles"
           :data="templateData"
           :disabled="true"
-          template-type="invoice_templates"
         />
       </template> <!-- step-2:preview invoice -->
     </WorkflowContainer>

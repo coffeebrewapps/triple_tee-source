@@ -26,10 +26,6 @@ import TabContainer from './TabContainer.vue'
 
 /*** section:props ***/
 const props = defineProps({
-  templatesUrl: {
-    type: String,
-    default: null
-  },
   id: {
     type: String,
     default: null

@@ -1,18 +1,9 @@
 <script setup>
 import { computed } from 'vue'
-import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
-const config = useConfig()
-
 const { greaterThan } = useValidations()
-
-const tagsUrl = `${config.baseUrl}/api/tags`
-const sequencesUrl = `${config.baseUrl}/api/sequences`
-const contactsUrl = `${config.baseUrl}/api/contacts`
-const templatesUrl = `${config.baseUrl}/api/invoice_templates`
-const currenciesUrl = `${config.baseUrl}/api/currencies`
 
 const props = defineProps({
   billingContactId: {
@@ -51,7 +42,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'tags',
-        sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
       }
@@ -65,7 +55,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'sequences',
-        sourceUrl: sequencesUrl,
         value: recordValue,
         label: sequenceNumberLabel
       }
@@ -78,7 +67,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'contacts',
-        sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
       }
@@ -91,7 +79,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'invoice_templates',
-        sourceUrl: templatesUrl,
         value: recordValue,
         label: templateLabel
       }
@@ -104,7 +91,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'currencies',
-        sourceUrl: currenciesUrl,
         value: recordValue,
         label: currencyLabel
       }
@@ -167,8 +153,6 @@ function currencyLabel(record) {
   <DataPage
     model-class="invoice_configs"
     data-type="Invoice Configs"
-    url-base="api/invoice_configs"
-    schemas-url-base="api/schemas/invoice_configs"
     :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"

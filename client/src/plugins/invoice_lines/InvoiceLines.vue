@@ -1,16 +1,11 @@
 <script setup>
 import { computed } from 'vue'
-import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
-
-const config = useConfig()
 
 const {
   greaterThanOrEqual
 } = useValidations()
-
-const invoicesUrl = `${config.baseUrl}/api/invoices`
 
 const props = defineProps({
   invoiceId: {
@@ -40,7 +35,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'invoices',
-        sourceUrl: invoicesUrl,
         value: recordValue,
         label: invoiceLabel
       }
@@ -97,8 +91,6 @@ const filters = computed(() => {
   <DataPage
     model-class="invoice_lines"
     data-type="Invoice Lines"
-    url-base="api/invoice_lines"
-    schemas-url-base="api/schemas/invoice_lines"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :validations="validations"

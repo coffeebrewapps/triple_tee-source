@@ -1,8 +1,5 @@
 import { computed } from 'vue'
 
-import useConfig from '@/config'
-const config = useConfig()
-
 import { useValidations } from '@/utils/validations'
 const {
   notEarlierThan,
@@ -10,15 +7,6 @@ const {
 } = useValidations()
 
 export function useInvoiceUtils() {
-  const worklogsUrl = `${config.baseUrl}/api/work_logs`
-  const invoicesUrl = `${config.baseUrl}/api/invoices`
-  const invoiceLinesUrl = `${config.baseUrl}/api/invoice_lines`
-  const contactsUrl = `${config.baseUrl}/api/contacts`
-  const currenciesUrl = `${config.baseUrl}/api/currencies`
-  const invoiceConfigsUrl = `${config.baseUrl}/api/invoice_configs`
-  const templatesUrl = `${config.baseUrl}/api/invoice_templates`
-  const tagsUrl = `${config.baseUrl}/api/tags`
-
   const fieldsLayout = [
     { invoiceNumber: 'lg' },
     { invoiceDate: 'md', dueDate: 'md', totalAmount: 'md' },
@@ -44,7 +32,6 @@ export function useInvoiceUtils() {
           server: true,
           pagination: true,
           modelClass: 'invoice_configs',
-          sourceUrl: invoiceConfigsUrl,
           value: recordValue,
           label: invoiceConfigLabel
         }
@@ -57,7 +44,6 @@ export function useInvoiceUtils() {
           server: true,
           pagination: true,
           modelClass: 'currencies',
-          sourceUrl: currenciesUrl,
           value: recordValue,
           label: currencyLabel
         }
@@ -70,7 +56,6 @@ export function useInvoiceUtils() {
           server: true,
           pagination: true,
           modelClass: 'contacts',
-          sourceUrl: contactsUrl,
           value: recordValue,
           label: contactLabel
         }
@@ -139,14 +124,6 @@ export function useInvoiceUtils() {
   }
 
   return {
-    worklogsUrl,
-    invoicesUrl,
-    invoiceLinesUrl,
-    contactsUrl,
-    currenciesUrl,
-    invoiceConfigsUrl,
-    templatesUrl,
-    tagsUrl,
     fieldsLayout,
     generateDataFields,
     recordValue,

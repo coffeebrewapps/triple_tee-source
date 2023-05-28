@@ -54,8 +54,6 @@ async function openCreatePage() {
   <DataPage
     model-class="invoices"
     data-type="Invoices"
-    url-base="api/invoices"
-    schemas-url-base="api/schemas/invoices"
     :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"

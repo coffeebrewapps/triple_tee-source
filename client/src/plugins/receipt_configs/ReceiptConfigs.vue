@@ -1,16 +1,9 @@
 <script setup>
 import { computed } from 'vue'
-import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
-const config = useConfig()
-
 const { greaterThan } = useValidations()
-
-const sequencesUrl = `${config.baseUrl}/api/sequences`
-const contactsUrl = `${config.baseUrl}/api/contacts`
-const templatesUrl = `${config.baseUrl}/api/receipt_templates`
 
 const props = defineProps({
   billingContactId: {
@@ -38,7 +31,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'sequences',
-        sourceUrl: sequencesUrl,
         value: recordValue,
         label: sequenceNumberLabel
       }
@@ -51,7 +43,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'contacts',
-        sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
       }
@@ -64,7 +55,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'receipt_templates',
-        sourceUrl: templatesUrl,
         value: recordValue,
         label: templateLabel
       }
@@ -111,8 +101,6 @@ function templateLabel(record) {
   <DataPage
     model-class="receipt_configs"
     data-type="Receipt Configs"
-    url-base="api/receipt_configs"
-    schemas-url-base="api/schemas/receipt_configs"
     :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"

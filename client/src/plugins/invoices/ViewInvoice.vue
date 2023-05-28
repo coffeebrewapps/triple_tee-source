@@ -43,10 +43,6 @@ const contactId = computed(() => {
 
 import { useInvoiceUtils } from './utils'
 const {
-  invoicesUrl,
-  invoiceLinesUrl,
-  invoiceConfigsUrl,
-  templatesUrl,
   fieldsLayout,
   generateDataFields
 } = useInvoiceUtils()
@@ -217,13 +213,12 @@ onMounted(async () => {
       <template #tab-2>
         <TemplateEditor
           v-if="invoiceTemplate"
-          :templates-url="templatesUrl"
+          template-type="invoice_templates"
           :id="invoiceTemplate.id"
           :content-markup="invoiceTemplate.contentMarkup"
           :content-styles="invoiceTemplate.contentStyles"
           :data="templateData"
           :disabled="true"
-          template-type="invoice_templates"
         />
       </template> <!-- template-2 -->
     </TabContainer>

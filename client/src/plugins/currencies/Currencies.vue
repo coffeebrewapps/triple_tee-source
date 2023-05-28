@@ -67,8 +67,6 @@ function validateExchangeRate(record) {
   <DataPage
     model-class="currencies"
     data-type="Currencies"
-    url-base="api/currencies"
-    schemas-url-base="api/schemas/currencies"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :validations="validations"

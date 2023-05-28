@@ -5,11 +5,6 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 /*** import:global ***/
 
-/*** import:config ***/
-import useConfig from '@/config'
-const config = useConfig()
-/*** import:config ***/
-
 /*** import:utils ***/
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
@@ -72,10 +67,6 @@ const heading = computed(() => {
   } else {
     return `Create Receipt Template`
   }
-})
-
-const templatesUrl = computed(() => {
-  return `${config.baseUrl}/api/${templateType.value}`
 })
 
 const currentTemplate = ref({
@@ -352,7 +343,6 @@ onMounted(async () => {
     <TemplateEditor
       v-if="currentTemplate"
       :template-type="templateType"
-      :templates-url="templatesUrl"
       :id="currentTemplate.id"
       :content-markup="currentTemplate.contentMarkup"
       :content-styles="currentTemplate.contentStyles"

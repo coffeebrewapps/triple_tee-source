@@ -1,15 +1,9 @@
 <script setup>
 import { computed } from 'vue'
-import useConfig from '@/config'
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
-const config = useConfig()
-
 const { notEarlierThan, greaterThanOrEqual } = useValidations()
-
-const tagsUrl = `${config.baseUrl}/api/tags`
-const contactsUrl = `${config.baseUrl}/api/contacts`
 
 const props = defineProps({
   contactId: {
@@ -43,7 +37,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'tags',
-        sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
       }
@@ -56,7 +49,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'tags',
-        sourceUrl: tagsUrl,
         value: recordValue,
         label: tagLabel
       }
@@ -69,7 +61,6 @@ const dataFields = computed(() => {
         server: true,
         pagination: true,
         modelClass: 'contacts',
-        sourceUrl: contactsUrl,
         value: recordValue,
         label: contactLabel
       }
@@ -137,8 +128,6 @@ function contactLabel(record) {
   <DataPage
     model-class="billing_configs"
     data-type="Billing Configs"
-    url-base="api/billing_configs"
-    schemas-url-base="api/schemas/billing_configs"
     :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"

@@ -5,11 +5,6 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 /*** import:global ***/
 
-/*** import:config ***/
-import useConfig from '@/config'
-const config = useConfig()
-/*** import:config ***/
-
 /*** import:utils ***/
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
@@ -46,9 +41,6 @@ const templateId = computed(() => {
 })
 const templateType = computed(() => {
   return currentRoute.params.templateType
-})
-const templatesUrl = computed(() => {
-  return `${config.baseUrl}/api/${templateType.value}`
 })
 const currentTemplate = ref()
 
@@ -255,7 +247,6 @@ onMounted(async () => {
     <TemplateEditor
       v-if="currentTemplate"
       :template-type="templateType"
-      :templates-url="templatesUrl"
       :id="currentTemplate.id"
       :content-markup="currentTemplate.contentMarkup"
       :content-styles="currentTemplate.contentStyles"

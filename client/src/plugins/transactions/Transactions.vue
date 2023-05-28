@@ -1,18 +1,10 @@
 <script setup>
-import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
 import { useFormatter } from '@/utils/formatter'
-
-const config = useConfig()
 
 const {
   formatDate
 } = useFormatter()
-
-const transactionSchemasUrl = `${config.baseUrl}/api/schemas/transactions`
-const tagsUrl = `${config.baseUrl}/api/tags`
-const currenciesUrl = `${config.baseUrl}/api/currencies`
-const transactionsUrl = `${config.baseUrl}/api/transactions`
 
 const fieldsLayout = [
   { type: 'lg', transactionDate: 'md' },
@@ -56,7 +48,6 @@ const dataFields = [
       server: true,
       pagination: true,
       modelClass: 'tags',
-      sourceUrl: tagsUrl,
       value: recordValue,
       label: tagLabel
     }
@@ -69,7 +60,6 @@ const dataFields = [
       server: true,
       pagination: true,
       modelClass: 'currencies',
-      sourceUrl: currenciesUrl,
       value: recordValue,
       label: currencyLabel
     }
@@ -82,7 +72,6 @@ const dataFields = [
       server: true,
       pagination: true,
       modelClass: 'transactions',
-      sourceUrl: transactionsUrl,
       value: recordValue,
       label: transactionLabel
     }
@@ -110,8 +99,6 @@ const filters = {
   <DataPage
     model-class="transactions"
     data-type="Transactions"
-    url-base="api/transactions"
-    schemas-url-base="api/schemas/transactions"
     :fullscreen="true"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"

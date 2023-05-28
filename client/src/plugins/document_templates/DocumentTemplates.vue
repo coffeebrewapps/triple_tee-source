@@ -147,8 +147,6 @@ async function openUpdatePage(id) {
         <DataPage
           model-class="invoice_templates"
           data-type="Invoice Templates"
-          url-base="api/invoice_templates"
-          schemas-url-base="api/schemas/invoice_templates"
           :fullscreen="true"
           :fields-layout="fieldsLayout"
           :data-fields="dataFields"
@@ -162,8 +160,6 @@ async function openUpdatePage(id) {
         <DataPage
           model-class="receipt_templates"
           data-type="Receipt Templates"
-          url-base="api/receipt_templates"
-          schemas-url-base="api/schemas/receipt_templates"
           :fullscreen="true"
           :fields-layout="fieldsLayout"
           :data-fields="dataFields"

@@ -1,14 +1,6 @@
 import { computed } from 'vue'
 
-import useConfig from '@/config'
-
-const config = useConfig()
-
 export function useContactUtils() {
-  const contactsUrl = `${config.baseUrl}/api/contacts`
-  const invoiceConfigsUrl = `${config.baseUrl}/api/invoice_configs`
-  const countriesUrl = `${config.baseUrl}/api/countries`
-
   const fieldsLayout = [
     { name: 'lg', accountNumber: 'md' },
     { addressLine1: 'lg' },
@@ -43,7 +35,6 @@ export function useContactUtils() {
         pagination: true,
         limit: 250,
         modelClass: 'countries',
-        sourceUrl: countriesUrl,
         value: countryValue,
         label: countryLabel
       }
@@ -92,9 +83,6 @@ export function useContactUtils() {
   }
 
   return {
-    contactsUrl,
-    invoiceConfigsUrl,
-    countriesUrl,
     fieldsLayout,
     dataFields,
     filters,

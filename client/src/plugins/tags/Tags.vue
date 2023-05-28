@@ -28,8 +28,6 @@ const filters = {
   <DataPage
     model-class="tags"
     data-type="Tags"
-    url-base="api/tags"
-    schemas-url-base="api/schemas/tags"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :filters="filters"

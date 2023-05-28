@@ -3,26 +3,14 @@
 import { ref, computed, onMounted } from 'vue'
 /*** import:global ***/
 
-/*** import:config ***/
-import useConfig from '@/config'
-const config = useConfig()
-/*** import:config ***/
-
 /*** import:utils ***/
 import { useWorkLogUtils } from './utils'
 const {
-  tagsUrl,
-  worklogsUrl,
   dataFields,
   recordValue,
   tagLabel,
   calculateDuration
 } = useWorkLogUtils()
-
-const invoiceConfigsUrl = `${config.baseUrl}/api/invoice_configs`
-const templatesUrl = `${config.baseUrl}/api/invoice_templates`
-const contactsUrl = `${config.baseUrl}/api/invoice_contacts`
-const billingConfigsUrl = `${config.baseUrl}/api/billing_configs`
 
 function configLabel(record) {
   return `Every ${record.invoiceCycleDurationValue} ${record.invoiceCycleDurationUnit}, due in ${record.dueDateCycleValue} ${record.dueDateCycleUnit}`
@@ -43,7 +31,6 @@ const filtersDataFields = computed(() => {
       server: true,
       pagination: true,
       modelClass: 'invoice_configs',
-      sourceUrl: invoiceConfigsUrl,
       value: recordValue,
       label: configLabel
     }

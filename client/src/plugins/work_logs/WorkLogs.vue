@@ -68,8 +68,6 @@ function triggerTabEvent(i) {
         <DataPage
           model-class="work_logs"
           data-type="Work Logs"
-          url-base="api/work_logs"
-          schemas-url-base="api/schemas/work_logs"
           :fullscreen="true"
           :fields-layout="fieldsLayout"
           :data-fields="dataFields"

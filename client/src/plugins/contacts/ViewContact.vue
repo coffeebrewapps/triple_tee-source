@@ -8,9 +8,6 @@ const router = useRouter()
 /*** import:utils ***/
 import { useContactUtils } from './utils'
 const {
-  contactsUrl,
-  invoiceConfigsUrl,
-  countriesUrl,
   fieldsLayout,
   dataFields,
   filters,

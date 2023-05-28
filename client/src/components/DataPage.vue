@@ -3,11 +3,6 @@
 import { ref, computed, watch, onMounted } from 'vue'
 /*** import:global ***/
 
-/*** import:config ***/
-import useConfig from '@/config'
-const config = useConfig()
-/*** import:config ***/
-
 /*** import:utils ***/
 import { useInputHelper } from '@/utils/input'
 
@@ -86,14 +81,6 @@ const props = defineProps({
     type: String,
     default: null
   },
-  urlBase: {
-    type: String,
-    default: ''
-  },
-  schemasUrlBase: {
-    type: String,
-    default: ''
-  },
   filters: {
     type: Object,
     default: {}
@@ -162,14 +149,6 @@ const props = defineProps({
 /*** section:props ***/
 
 /*** section:global ***/
-const url = computed(() => {
-  return `${config.baseUrl}/${props.urlBase}`
-})
-
-const schemasUrl = computed(() => {
-  return `${config.baseUrl}/${props.schemasUrlBase}`
-})
-
 const include = computed(() => {
   return props.dataFields.filter(h => h.reference)
 })

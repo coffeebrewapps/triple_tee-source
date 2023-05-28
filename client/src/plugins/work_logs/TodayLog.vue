@@ -3,11 +3,6 @@
 import { ref, computed, watch, onMounted } from 'vue'
 /*** import:global ***/
 
-/*** import:config ***/
-import useConfig from '@/config'
-const config = useConfig()
-/*** import:config ***/
-
 /*** import:utils ***/
 import { useValidations } from '@/utils/validations'
 const {
@@ -25,9 +20,6 @@ const {
 
 import { useWorkLogUtils } from './utils'
 const {
-  schemasUrl,
-  tagsUrl,
-  worklogsUrl,
   dataFields,
   fieldsLayout,
   filters,
