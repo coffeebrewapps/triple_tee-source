@@ -8,15 +8,8 @@ import { useInputHelper } from '@/utils/input'
 
 const {
   schemasMap,
-  multiSelectableFields,
-  singleSelectableFields,
-  clientOptionsFields,
-  inputType,
   inputLabel,
   inputValue,
-  multiSelectableField,
-  singleSelectableField,
-  selectableField,
   tagsField,
   formatInputOptionsData,
   formatDataForShow,
@@ -43,7 +36,7 @@ import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
 
 import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
+const { notEmpty } = useValidations()
 /*** import:utils ***/
 
 /*** import:stores ***/
