@@ -5,7 +5,8 @@ const config = useConfig()
 
 import { useValidations } from '@/utils/validations'
 const {
-  notEarlierThan
+  notEarlierThan,
+  greaterThanOrEqual
 } = useValidations()
 
 export function useInvoiceUtils() {
