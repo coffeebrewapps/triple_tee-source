@@ -1,3 +1,5 @@
+import { useStore } from './store'
+
 const route = {
   path: '/document_templates',
   name: 'Document Templates',
@@ -36,11 +38,16 @@ const updateTemplateRoute = {
   }
 }
 
-const usePlugin = (router) => {
+const usePlugin = (router, dataStore) => {
+  const store = useStore(dataStore)
+
   router.addRoute(route)
   router.addRoute(createTemplateRoute)
   router.addRoute(viewTemplateRoute)
   router.addRoute(updateTemplateRoute)
+
+  dataStore.registerFunction('invoice_templates', 'downloadStream', 'pdf', store.downloadPdf)
+
   return route
 }
 

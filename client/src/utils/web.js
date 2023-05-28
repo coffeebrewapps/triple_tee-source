@@ -8,6 +8,15 @@ export function useWebAccess() {
     return [error].flat().filter(e => !!e)
   }
 
+  function lookupFunction(modelClass, fnType, suffix) {
+    if (suffix) {
+      const functions = dataStore.customFunctionsForModel(modelClass, fnType) || {}
+      return functions[suffix.path] || dataStore[fnType]
+    } else {
+      return dataStore[fnType]
+    }
+  }
+
   async function initData(force = false) {
     await dataStore.initData(force)
   }
@@ -26,10 +35,12 @@ export function useWebAccess() {
   async function list(modelClass, params, suffix = null) {
     await initData()
     return new Promise((resolve, reject) => {
+      const fn = lookupFunction(modelClass, 'list', suffix)
+
       if (modelClass === 'indexes') {
         resolve(dataStore.downloadIndexes())
       } else {
-        resolve(dataStore.list(modelClass, params))
+        resolve(fn(modelClass, params))
       }
     })
   }
@@ -37,14 +48,18 @@ export function useWebAccess() {
   async function view(modelClass, id, params, suffix) {
     await initData()
     return new Promise((resolve, reject) => {
-      resolve(dataStore.view(modelClass, id, params).record)
+      const fn = lookupFunction(modelClass, 'view', suffix)
+
+      resolve(fn(modelClass, id, params).record)
     })
   }
 
   async function create(modelClass, params, suffix = null) {
     await initData()
     return new Promise((resolve, reject) => {
-      const result = dataStore.create(modelClass, params)
+      const fn = lookupFunction(modelClass, 'create', suffix)
+
+      const result = fn(modelClass, params)
       if (result.success) {
         resolve(result.record)
       } else {
@@ -56,7 +71,9 @@ export function useWebAccess() {
   async function update(modelClass, id, params, suffix = null) {
     await initData()
     return new Promise((resolve, reject) => {
-      const result = dataStore.update(modelClass, id, params)
+      const fn = lookupFunction(modelClass, 'update', suffix)
+
+      const result = fn(modelClass, id, params)
       if (result.success) {
         resolve(result.record)
       } else {
@@ -68,7 +85,9 @@ export function useWebAccess() {
   async function remove(modelClass, id, suffix = null) {
     await initData()
     return new Promise((resolve, reject) => {
-      const result = dataStore.remove(modelClass, id)
+      const fn = lookupFunction(modelClass, 'remove', suffix)
+
+      const result = fn(modelClass, id)
       if (result.success) {
         resolve(result.record)
       } else {
@@ -98,13 +117,13 @@ export function useWebAccess() {
     })
   }
 
-  async function downloadStream(modelClass, id, params) {
+  async function downloadStream(modelClass, id, params, suffix = null) {
     await initData()
     return new Promise((resolve, reject) => {
-      resolve({
-        filename: `blank.json`,
-        data: JSON.stringify({})
-      })
+      const fn = lookupFunction(modelClass, 'downloadStream', suffix)
+
+      const result = fn(modelClass, id, params)
+      resolve(result)
     })
   }
 

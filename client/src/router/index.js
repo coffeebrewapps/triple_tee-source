@@ -20,12 +20,6 @@ router.addRoute({
   component: () => import('@/views/DataAdmin.vue')
 })
 
-const plugins = import.meta.glob('@/plugins/**/index.js', { import: 'default', eager: true })
-Object.keys(plugins).forEach((plugin) => {
-  const route = plugins[plugin](router)
-  console.log(`Installed plugin ${plugin}`)
-})
-
 router.addRoute({
   path: '/:catchAll(.*)',
   redirect: '/',

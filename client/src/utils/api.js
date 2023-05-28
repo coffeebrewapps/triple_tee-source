@@ -137,9 +137,9 @@ export function useApiAccess() {
     })
   }
 
-  async function downloadStream(modelClass, id, params) {
+  async function downloadStream(modelClass, id, params, suffix = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, id, { path: 'pdf' })
+      const url = formatUrl(modelClass, id, suffix)
       axios({
         method: 'post',
         url: url,

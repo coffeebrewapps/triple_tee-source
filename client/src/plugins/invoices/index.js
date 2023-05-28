@@ -1,3 +1,5 @@
+import { useStore } from './store'
+
 const route = {
   path: '/invoices',
   name: 'Invoices',
@@ -24,10 +26,17 @@ const createInvoiceRoute = {
   }
 }
 
-const usePlugin = (router) => {
+const usePlugin = (router, dataStore) => {
+  const store = useStore(dataStore)
+
   router.addRoute(route)
   router.addRoute(viewInvoiceRoute)
   router.addRoute(createInvoiceRoute)
+
+  dataStore.registerFunction('invoices', 'create', 'generate_with_lines', store.createWithLines)
+  dataStore.registerFunction('invoices', 'create', 'preview_invoice', store.previewInvoice)
+  dataStore.registerFunction('invoices', 'view', 'template_data', store.viewTemplateData)
+
   return route
 }
 

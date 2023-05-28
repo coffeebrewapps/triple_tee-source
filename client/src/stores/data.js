@@ -5,7 +5,6 @@ import { useDataValidations } from '@/utils/dataValidations'
 
 import schemasData from '@/../../data/_schemas.json'
 import indexesData from '@/../../data/_indexes.json'
-import countriesData from '@/../../data/countries.json'
 
 export const useDataStore = defineStore('data', () => {
   const indexes = '_indexes';
@@ -18,6 +17,28 @@ export const useDataStore = defineStore('data', () => {
   const indexCache = ref({});
   const indexTypes = ref([]);
 
+  const customFunctions = ref({});
+
+  function registerFunction(modelClass, fnType, fnName, fn) {
+    if (!customFunctions.value[modelClass]) {
+      customFunctions.value[modelClass] = {}
+    }
+
+    if (!customFunctions.value[modelClass][fnType]) {
+      customFunctions.value[modelClass][fnType] = {}
+    }
+
+    customFunctions.value[modelClass][fnType][fnName] = fn
+  }
+
+  function customFunctionsForModel(modelClass, fnType) {
+    return (customFunctions.value[modelClass] || {})[fnType]
+  }
+
+  function listCustomFunctions() {
+    return customFunctions.value
+  }
+
   function wrapArray(val) {
     if (Array.isArray(val)) {
       return val;
@@ -26,9 +47,15 @@ export const useDataStore = defineStore('data', () => {
     }
   }
 
+  async function importJsonData(modelClass) {
+    return new Promise((resolve, reject) => {
+      resolve(import(`../../../data/${modelClass}.json`));
+    })
+  }
+
   async function initData(force = false) {
-    console.log(`Init data start`);
     if (!init.value || force) {
+      console.log(`Init data start`);
       const existingSchemas = localStorage.getItem('_schemas');
       const existingIndexes = localStorage.getItem('_indexes');
       const existingModelData = localStorage.getItem('data');
@@ -53,12 +80,20 @@ export const useDataStore = defineStore('data', () => {
       if (existingModelData) {
         dataCache.value = JSON.parse(existingModelData);
       } else {
-        Object.keys(schemasData).forEach((modelClass) => {
-          dataCache.value[modelClass] = {};
-          console.log(`Init data complete`, { modelClass });
-        })
-        dataCache.value.countries = countriesData;
-        localStorage.setItem('data', JSON.stringify(dataCache.value));
+        const promises = Object.keys(schemasData).map((modelClass) => {
+          return importJsonData(modelClass);
+        });
+
+        Promise
+          .all(promises)
+          .then((results) => {
+            Object.keys(schemasData).forEach((modelClass, i) => {
+              dataCache.value[modelClass] = results[i].default
+              console.log(`Init data complete`, { modelClass, modelData: dataCache.value[modelClass] });
+            })
+
+            localStorage.setItem('data', JSON.stringify(dataCache.value));
+          })
       }
 
       init.value = true;
@@ -646,6 +681,9 @@ export const useDataStore = defineStore('data', () => {
   }
 
   return {
+    registerFunction,
+    customFunctionsForModel,
+    listCustomFunctions,
     initData,
     listSchemas,
     viewSchemas,

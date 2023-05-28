@@ -264,7 +264,9 @@ export function useInputHelper(schemas) {
 
       if (inputType(field) === 'date' || inputType(field) === 'datetime') {
         let formattedValue;
-        if (typeof fieldValue === 'object') {
+        if (fieldValue instanceof Date) {
+          formattedValue = new Date(fieldValue)
+        } else {
           formattedValue = Object.entries(fieldValue).reduce((o, [k, v]) => {
             if (notEmpty(v)) {
               o[k] = new Date(v)
@@ -273,8 +275,6 @@ export function useInputHelper(schemas) {
             }
             return o
           }, {})
-        } else {
-          formattedValue = new Date(fieldValue)
         }
         resolve(formattedValue)
         return
