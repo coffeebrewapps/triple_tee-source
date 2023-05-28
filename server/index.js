@@ -7,7 +7,9 @@ const cors = require('cors');
 
 const common = require('../common');
 const utils = require('./utils.js');
-const config = require('./config.js');
+const { readConfigFile } = require('./config.js');
+const config = readConfigFile();
+
 const logger = require('./logger.js')(config);
 const dataAccess = require('./stores/dataAccess')(config, logger, utils);
 const routes = require('./routes/shared')(config, logger, utils);
@@ -15,7 +17,7 @@ const routes = require('./routes/shared')(config, logger, utils);
 logger.log(`Loaded configs`, config);
 
 const app = express();
-const port = process.env.PORT || common.DEFAULT_PORT;
+const port = config.port || process.env.PORT || common.DEFAULT_PORT;
 
 let server = null;
 
