@@ -7,6 +7,7 @@ function model {
   file="./data/$model.json"
   if [[ ! -f $file ]]; then
     touch $file
+    echo "{}" > $file
     echo "Created new model: $model"
   else
     echo "Model already exists: $model"
@@ -104,7 +105,7 @@ function client {
 
   plugin_dir="./client/src/plugins/${lower_model}"
   index_file="$plugin_dir/index.js"
-  view_file="$plugin_dir/view.vue"
+  view_file="$plugin_dir/$model.vue"
 
   if [[ ! -f $plugin_dir ]]; then
     mkdir $plugin_dir
@@ -115,10 +116,10 @@ function client {
     echo "const route = {
   path: '/${lower_model}',
   name: '${model}',
-  component: () => import('./view.vue')
+  component: () => import('./${model}.vue')
 }
 
-const usePlugin = (router) => {
+const usePlugin = (router, dataStore) => {
   router.addRoute(route)
   return route
 }
@@ -129,33 +130,22 @@ export default usePlugin" >> $index_file
   if [[ ! -f $view_file ]]; then
     touch $view_file
     echo "<script setup>
-import { onMounted, computed, ref } from 'vue'
-
-import useConfig from '@/config'
 import DataPage from '@/components/DataPage.vue'
 
-const config = useConfig()
+const fieldsLayout = [
+]
 
-const fieldsLayout = ref([
-])
-
-const dataFields = computed(() => {
-  return [
-  ]
-})
+const dataFields = [
+]
 
 const validations = {
 }
-
-onMounted(async () => {
-})
 </script>
 
 <template>
   <DataPage
+    model-class=\"${lower_model}\"
     data-type=\"${model}\"
-    url-base=\"api/${lower_model}\"
-    schemas-url-base=\"api/schemas/${lower_model}\"
     :fields-layout=\"fieldsLayout\"
     :data-fields=\"dataFields\"
     :validations=\"validations\"
