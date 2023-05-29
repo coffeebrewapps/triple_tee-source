@@ -56,16 +56,11 @@ export const useDataStore = defineStore('data', () => {
   async function initData(force = false) {
     if (!init.value || force) {
       console.log(`Init data start`);
-      const existingSchemas = localStorage.getItem('_schemas');
       const existingIndexes = localStorage.getItem('_indexes');
       const existingModelData = localStorage.getItem('data');
 
-      if (existingSchemas) {
-        schemaCache.value = JSON.parse(existingSchemas);
-      } else {
-        schemaCache.value = schemasData;
-        localStorage.setItem('_schemas', JSON.stringify(schemasData));
-      }
+      schemaCache.value = schemasData;
+      localStorage.setItem('_schemas', JSON.stringify(schemasData));
 
       if (existingIndexes) {
         indexCache.value = JSON.parse(existingIndexes);
@@ -79,22 +74,26 @@ export const useDataStore = defineStore('data', () => {
 
       if (existingModelData) {
         dataCache.value = JSON.parse(existingModelData);
-      } else {
-        const promises = Object.keys(schemasData).map((modelClass) => {
-          return importJsonData(modelClass);
-        });
-
-        Promise
-          .all(promises)
-          .then((results) => {
-            Object.keys(schemasData).forEach((modelClass, i) => {
-              dataCache.value[modelClass] = results[i].default
-              console.log(`Init data complete`, { modelClass, modelData: dataCache.value[modelClass] });
-            })
-
-            localStorage.setItem('data', JSON.stringify(dataCache.value));
-          })
       }
+
+      const missingModelData =  Object.keys(schemasData).filter((modelClass) => {
+        return !existingModelData[modelClass]
+      })
+
+      const promises = missingModelData.map((modelClass) => {
+        return importJsonData(modelClass);
+      });
+
+      Promise
+        .all(promises)
+        .then((results) => {
+          missingModelData.forEach((modelClass, i) => {
+            dataCache.value[modelClass] = results[i].default
+            console.log(`Init data complete`, { modelClass, modelData: dataCache.value[modelClass] });
+          })
+
+          localStorage.setItem('data', JSON.stringify(dataCache.value));
+        })
 
       init.value = true;
     }

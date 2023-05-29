@@ -7,7 +7,6 @@ import { useSystemConfigsStore } from '@/stores/systemConfigs'
 const systemConfigsStore = useSystemConfigsStore()
 const systemConfigs = systemConfigsStore.getSystemConfigs()
 
-console.log({ action: 'input.js', systemConfigs })
 import { useFormatter } from '@/utils/formatter'
 const {
   formatDate,
