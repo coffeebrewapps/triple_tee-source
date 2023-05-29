@@ -10,6 +10,9 @@ import { useInputHelper } from '@/utils/input'
 
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
+
+import { useValidations } from '@/utils/validations'
+const { isEmpty, notEmpty } = useValidations()
 /*** import:utils ***/
 
 /*** import:stores ***/
@@ -187,13 +190,13 @@ onMounted(async () => {
                 class="field-value"
               >
                 <span
-                  v-if="currentInvoice && currentInvoice[field]"
+                  v-if="notEmpty(currentInvoice) && notEmpty(currentInvoice[field])"
                 >
                   {{ inputValue(field, currentInvoice, includeKeys, dataFields) }}
                 </span>
 
                 <span
-                  v-if="!currentInvoice || !currentInvoice[field]"
+                  v-if="isEmpty(currentInvoice) || isEmpty(currentInvoice[field])"
                 >
                 --- no value ---
                 </span>

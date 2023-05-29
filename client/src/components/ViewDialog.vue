@@ -5,10 +5,13 @@ import { ref, computed, onMounted } from 'vue'
 
 /*** import:utils ***/
 import { useFormatter } from '../utils/formatter'
+import { useValidations } from '../utils/validations'
 import { useSystemConfigsStore } from '@/stores/systemConfigs'
 
 const systemConfigsStore = useSystemConfigsStore()
 const systemConfigs = systemConfigsStore.getSystemConfigs()
+
+const { isEmpty, notEmpty } = useValidations()
 
 const {
   formatTag,
@@ -170,13 +173,13 @@ onMounted(async () => {
             class="data-value"
           >
             <div
-              v-if="record[field]"
+              v-if="notEmpty(record[field])"
             >
               {{ inputValue(field, record, includeKeys, dataFields) }}
             </div>
 
             <div
-              v-if="!record[field]"
+              v-if="isEmpty(record[field])"
               class="no-value"
             >
               --- no value ---

@@ -79,9 +79,9 @@ export function useInputHelper(schemas) {
   function inputValue(field, record, includeKeys, schemas) {
     const referenceField = includeKeys.find(v => v === field)
     const fieldValue = record[field]
-    if (!fieldValue) { return }
+    if (isEmpty(fieldValue)) { return }
 
-    if (referenceField) {
+    if (notEmpty(referenceField)) {
       const includes = record.includes || {}
       const rawValue = [fieldValue].flat().filter(v => !!v)
 

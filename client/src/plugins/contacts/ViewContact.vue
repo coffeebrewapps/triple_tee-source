@@ -26,6 +26,9 @@ const {
 
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
+
+import { useValidations } from '@/utils/validations'
+const { isEmpty, notEmpty } = useValidations()
 /*** import:utils ***/
 
 /*** import:stores ***/
@@ -164,13 +167,13 @@ onMounted(async () => {
                 class="field-value"
               >
                 <span
-                  v-if="currentContact && currentContact[field]"
+                  v-if="notEmpty(currentContact) && notEmpty(currentContact[field])"
                 >
                   {{ inputValue(field, currentContact, includeKeys, dataFields) }}
                 </span>
 
                 <span
-                  v-if="!currentContact || !currentContact[field]"
+                  v-if="isEmpty(currentContact) || isEmpty(currentContact[field])"
                 >
                 --- no value ---
                 </span>

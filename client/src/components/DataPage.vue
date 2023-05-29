@@ -38,7 +38,7 @@ import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
 
 import { useValidations } from '@/utils/validations'
-const { notEmpty } = useValidations()
+const { isEmpty, notEmpty } = useValidations()
 /*** import:utils ***/
 
 /*** import:stores ***/
@@ -1013,13 +1013,13 @@ onMounted(async () => {
               v-if="!tagsField(header.key)"
             >
               <div
-                v-if="row[header.key]"
+                v-if="notEmpty(row[header.key])"
               >
                 {{ inputValue(header.key, row, includeKeys, combinedDataFields) }}
               </div>
 
               <div
-                v-if="!row[header.key]"
+                v-if="isEmpty(row[header.key])"
                 class="no-value"
               >
                 --- no value ---
