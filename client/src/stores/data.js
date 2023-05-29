@@ -56,34 +56,38 @@ export const useDataStore = defineStore('data', () => {
   async function initData(force = false) {
     if (!init.value || force) {
       console.log(`Init data start`);
-      const existingIndexes = localStorage.getItem('_indexes');
-      const existingModelData = localStorage.getItem('data');
+      const existingIndexes = JSON.parse(localStorage.getItem('_indexes') || '{}');
+      const existingModelData = JSON.parse(localStorage.getItem('data') || '{}');
 
       schemaCache.value = schemasData;
       localStorage.setItem('_schemas', JSON.stringify(schemasData));
 
-      if (existingIndexes) {
-        indexCache.value = JSON.parse(existingIndexes);
-      } else {
-        indexCache.value = indexesData;
-        localStorage.setItem('_indexes', JSON.stringify(indexesData));
+      if (!existingIndexes.unique) {
+        existingIndexes.unique = indexesData.unique
       }
+
+      if (!existingIndexes.foreign) {
+        existingIndexes.foreign = indexesData.foreign
+      }
+
+      if (!existingIndexes.filter) {
+        existingIndexes.filter = indexesData.filter
+      }
+
+      indexCache.value = existingIndexes;
+      localStorage.setItem('_indexes', JSON.stringify(indexesData));
 
       indexTypes.value = Object.keys(indexCache);
       console.log(`Init schema complete`);
 
-      if (existingModelData) {
-        dataCache.value = JSON.parse(existingModelData);
-      }
-
-      let modelDataToLoad = null
-      if (existingModelData) {
-        modelDataToLoad = Object.keys(schemasData).filter((modelClass) => {
-          return !existingModelData[modelClass]
-        })
-      } else {
-        modelDataToLoad = Object.keys(schemasData)
-      }
+      let modelDataToLoad = []
+      Object.keys(schemasData).forEach((modelClass) => {
+        if (existingModelData[modelClass] && Object.keys(existingModelData[modelClass]).length > 0) {
+          dataCache.value[modelClass] = existingModelData[modelClass]
+        } else {
+          modelDataToLoad.push(modelClass)
+        }
+      })
 
       const promises = modelDataToLoad.map((modelClass) => {
         return importJsonData(modelClass);
