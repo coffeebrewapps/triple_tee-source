@@ -146,6 +146,7 @@ module.exports = (config, logger, utils) => {
       const newRow = Object.assign({}, defaultValues, params, { id: newId, createdAt: now, updatedAt: now });
       cacheRecord(modelClass, newRow);
       cacheIndexes(modelClass, newRow);
+      writeData(indexes, indexCache);
 
       return {
         success: true,
@@ -194,6 +195,7 @@ module.exports = (config, logger, utils) => {
       cacheRecord(modelClass, updated);
       cacheIndexes(modelClass, updated);
       removeIndexes(modelClass, indexesToRemove);
+      writeData(indexes, indexCache);
 
       return {
         success: true,
@@ -224,6 +226,8 @@ module.exports = (config, logger, utils) => {
       delete data[id];
       cacheData(modelClass, data, data);
       removeIndexes(modelClass, record)
+      writeData(indexes, indexCache);
+
       return {
         success: true,
         record: record
@@ -393,7 +397,6 @@ module.exports = (config, logger, utils) => {
         cacheFilterIndexes(modelClass, record);
       }
     });
-    writeData(indexes, indexCache);
   }
 
   // indexCache.unique = {"tags":{"category|name":{"activity|implementation":"1"}}}
@@ -495,7 +498,6 @@ module.exports = (config, logger, utils) => {
       }
     });
     cleanupIndexes(modelClass, record);
-    writeData(indexes, indexCache);
   }
 
   function removeUniqueIndexes(modelClass, record) {

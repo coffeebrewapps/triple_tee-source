@@ -6,12 +6,6 @@ import {
   TButton
 } from 'coffeebrew-vue-components'
 
-import { useValidations } from '@/utils/validations'
-
-const {
-  notEarlierThan
-} = useValidations()
-
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
 
@@ -87,10 +81,8 @@ import { useInputHelper } from '@/utils/input'
 const {
   formatDataForShow,
   formatDataForSave,
+  formatErrorsForDisplay
 } = useInputHelper(dataFields.value)
-
-const validations = {
-}
 
 function initFormData() {
   return {
@@ -111,6 +103,7 @@ async function updateConfig() {
     })
     .catch((error) => {
       console.error(error)
+      errorMessages.value = formatErrorsForDisplay(error)
       showBanner(`Error updating config!`)
     })
 }
