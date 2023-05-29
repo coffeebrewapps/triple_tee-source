@@ -12,6 +12,16 @@ launchButton.addEventListener('click', () => {
   window.electronAPI.setAppConfig({ port, dataDir, logFile })
 })
 
+dataDirInput.addEventListener('click', async () => {
+  const filePath = await window.electronAPI.openDirDialog()
+  dataDirInput.value = filePath
+})
+
+logFileInput.addEventListener('click', async () => {
+  const filePath = await window.electronAPI.openFileDialog()
+  logFileInput.value = filePath
+})
+
 portInput.value = window.initAppConfigs.port
 currentDirInput.value = window.initAppConfigs.currentDir
 dataDirInput.value = window.initAppConfigs.dataDir

@@ -1,7 +1,21 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const common = require('./common');
+
+async function handleDirOpen() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+  if (!canceled) {
+    return filePaths[0]
+  }
+}
+
+async function handleFileOpen() {
+  const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openFile'] })
+  if (!canceled) {
+    return filePaths[0]
+  }
+}
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -49,6 +63,9 @@ const createWindow = () => {
 }
 
 app.whenReady().then(() => {
+  ipcMain.handle('dialog:openDir', handleDirOpen)
+  ipcMain.handle('dialog:openFile', handleFileOpen)
+
   createWindow()
 
   app.on('activate', () => {

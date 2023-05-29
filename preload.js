@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  openDirDialog: async () => ipcRenderer.invoke('dialog:openDir'),
+  openFileDialog: async () => ipcRenderer.invoke('dialog:openFile'),
   setAppConfig: ({ port, dataDir, logFile }) => ipcRenderer.send('set-app-config', { port, dataDir, logFile })
 })
 
