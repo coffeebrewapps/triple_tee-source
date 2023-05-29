@@ -4,17 +4,15 @@ import { defineStore } from 'pinia'
 import { useDataValidations } from '@/utils/dataValidations'
 
 import schemasData from '@/../../data/_schemas.json'
-import indexesData from '@/../../data/_indexes.json'
 
 export const useDataStore = defineStore('data', () => {
-  const indexes = '_indexes';
   const schemas = '_schemas';
 
   const validator = useDataValidations()
   const init = ref(false)
   const schemaCache = ref({});
   const dataCache = ref({});
-  const indexCache = ref({});
+  const indexCache = ref({ unique: {}, foreign: {}, filter: {} });
   const indexTypes = ref([]);
 
   const customFunctions = ref({});
@@ -56,28 +54,11 @@ export const useDataStore = defineStore('data', () => {
   async function initData(force = false) {
     if (!init.value || force) {
       console.log(`Init data start`);
-      const existingIndexes = JSON.parse(localStorage.getItem('_indexes') || '{}');
       const existingModelData = JSON.parse(localStorage.getItem('data') || '{}');
 
       schemaCache.value = schemasData;
       localStorage.setItem('_schemas', JSON.stringify(schemasData));
 
-      if (!existingIndexes.unique) {
-        existingIndexes.unique = indexesData.unique
-      }
-
-      if (!existingIndexes.foreign) {
-        existingIndexes.foreign = indexesData.foreign
-      }
-
-      if (!existingIndexes.filter) {
-        existingIndexes.filter = indexesData.filter
-      }
-
-      indexCache.value = existingIndexes;
-      localStorage.setItem('_indexes', JSON.stringify(indexesData));
-
-      indexTypes.value = Object.keys(indexCache);
       console.log(`Init schema complete`);
 
       let modelDataToLoad = []
@@ -109,13 +90,9 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function writeData(modelClass, data) {
-    if (modelClass === '_indexes') {
-      localStorage.setItem('_indexes', JSON.stringify(data));
-    } else {
-      const modelData = JSON.parse(localStorage.getItem('data'))
-      modelData[modelClass] = data;
-      localStorage.setItem('data', JSON.stringify(modelData));
-    }
+    const modelData = JSON.parse(localStorage.getItem('data'))
+    modelData[modelClass] = data;
+    localStorage.setItem('data', JSON.stringify(modelData));
   }
 
   function cacheRecord(modelClass, record) {
@@ -213,7 +190,6 @@ export const useDataStore = defineStore('data', () => {
       const defaultValues = defaultValuesForCreate(modelClass);
       const newRow = Object.assign({}, defaultValues, params, { id: newId, createdAt: now, updatedAt: now });
       cacheRecord(modelClass, newRow);
-      cacheIndexes(modelClass, newRow);
 
       return {
         success: true,
@@ -248,20 +224,7 @@ export const useDataStore = defineStore('data', () => {
       const now = new Date();
       const updated = Object.assign({}, existing.record, params, { updatedAt: now })
 
-      const indexesToRemove = Object.entries(existing.record).reduce((o, [field, value]) => {
-        if (validator.isEmpty(value)) { return o; }
-
-        const existingValues = wrapArray(value);
-        const newValues = wrapArray(updated[field]);
-
-        o[field] = existingValues.filter(ev => !newValues.includes(ev));
-        return o;
-      }, {});
-      indexesToRemove.id = id;
-
       cacheRecord(modelClass, updated);
-      cacheIndexes(modelClass, updated);
-      removeIndexes(modelClass, indexesToRemove);
 
       return {
         success: true,
@@ -291,7 +254,6 @@ export const useDataStore = defineStore('data', () => {
     if (!used) {
       delete data[id];
       cacheData(modelClass, data, data);
-      removeIndexes(modelClass, record)
       return {
         success: true,
         record: record
@@ -325,14 +287,11 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function downloadIndexes() {
-    const data = indexCache.value;
-    return { data };
+    return { data: {} };
   }
 
   function uploadIndexes(data) {
-    indexCache.value = data;
-    writeData(indexes, indexCache.value);
-    return { data };
+    return { data: {} };
   }
 
   function paginateData(data, filters) {
@@ -349,7 +308,7 @@ export const useDataStore = defineStore('data', () => {
   function filterData(modelClass, filters) {
     const modelData = dataCache.value[modelClass] || {};
     const filterIndexes = indexCache.value.filter[modelClass] || {};
-    const filterSchemas = (schemaCache.value[modelClass].indexes || {}).filter || {};
+    const filterSchemas = {};
 
     const filteredIds = [...filterFromIndexes(modelClass, modelData, filterIndexes, filterSchemas, filters)];
     return filteredIds.map(i => modelData[i]);
@@ -448,243 +407,6 @@ export const useDataStore = defineStore('data', () => {
       } else {
         return 0;
       }
-    });
-  }
-
-  function cacheIndexes(modelClass, record) {
-    indexTypes.value.forEach((indexType) => {
-      if (indexType === 'unique') {
-        cacheUniqueIndexes(modelClass, record);
-      } else if (indexType === 'foreign') {
-        cacheForeignIndexes(modelClass, record);
-      } else if (indexType === 'filter') {
-        cacheFilterIndexes(modelClass, record);
-      }
-    });
-    writeData(indexes, indexCache.value);
-  }
-
-  // indexCache.unique = {"tags":{"category|name":{"activity|implementation":"1"}}}
-  function cacheUniqueIndexes(modelClass, record) {
-    const uniqueIndexes = indexCache.value.unique;
-    if (!uniqueIndexes[modelClass]) {
-      uniqueIndexes[modelClass] = {};
-    }
-
-    const uniqueConstraints = schemaCache.value[modelClass].constraints.unique || [];
-    const newIndexes = uniqueConstraints.reduce((o, key) => {
-      const existingIndexes = uniqueIndexes[modelClass][key] || {};
-      const keys = key.split('|');
-      const values = keys.map(k => record[k]).join('|');
-      existingIndexes[values] = record.id;
-      o[key] = existingIndexes;
-      return o;
-    }, {});
-
-    uniqueIndexes[modelClass] = newIndexes;
-  }
-
-  // indexCache.foreign = {"tags":{"1":{"work_logs":["1"]}}}
-  function cacheForeignIndexes(modelClass, record) {
-    const foreignIndexes = indexCache.value.foreign;
-    const foreignConstraints = schemaCache.value[modelClass].constraints.foreign || {};
-
-    Object.keys(foreignConstraints).forEach((key) => {
-      const foreignModelClass = foreignConstraints[key].reference;
-      const existingIndexes = foreignIndexes[foreignModelClass] || {};
-      let foreignValues = record[key];
-
-      if (validator.isEmpty(foreignValues)) { return; }
-
-      if (!Array.isArray(foreignValues)) {
-        foreignValues = [foreignValues];
-      }
-
-      foreignValues.forEach((foreignValue) => {
-        const foreignValueAssocs = existingIndexes[foreignValue] || {};
-
-        if (!foreignValueAssocs[modelClass]) {
-          foreignValueAssocs[modelClass] = [];
-        }
-
-        const existing = foreignValueAssocs[modelClass].indexOf(record.id);
-
-        if (existing > -1) { return; }
-
-        foreignValueAssocs[modelClass].push(record.id);
-        existingIndexes[foreignValue] = foreignValueAssocs;
-        indexCache.value.foreign[foreignModelClass] = existingIndexes;
-      });
-    });
-  }
-
-  // indexCache.filter = {"tags":{"category":{"activity":["1","2","3","4"]}}}
-  function cacheFilterIndexes(modelClass, record) {
-    const filterIndexes = indexCache.value.filter;
-    if (!filterIndexes[modelClass]) {
-      filterIndexes[modelClass] = {};
-    }
-
-    if (validator.isEmpty(schemaCache.value[modelClass].indexes)) { return; }
-
-    const modelFilters = schemaCache.value[modelClass].indexes.filter || {};
-    Object.entries(modelFilters).forEach(([field, options]) => {
-      const fieldIndexes = filterIndexes[modelClass][field] || {};
-      let fieldValues = record[field];
-
-      if (validator.isEmpty(fieldValues)) { return; }
-
-      if (!Array.isArray(fieldValues)) {
-        fieldValues = [fieldValues];
-      }
-
-      fieldValues.forEach((fieldValue) => {
-        const existingIds = fieldIndexes[fieldValue] || [];
-
-        const found = existingIds.indexOf(record.id);
-
-        if (found > -1) { return; }
-
-        existingIds.push(record.id);
-        fieldIndexes[fieldValue] = existingIds;
-        filterIndexes[modelClass][field] = fieldIndexes;
-      });
-    });
-  }
-
-  function removeIndexes(modelClass, record) {
-    indexTypes.value.forEach((indexType) => {
-      if (indexType === 'unique') {
-        removeUniqueIndexes(modelClass, record);
-      } else if (indexType === 'foreign') {
-        removeForeignIndexes(modelClass, record);
-      } else if (indexType === 'filter') {
-        removeFilterIndexes(modelClass, record);
-      }
-    });
-    cleanupIndexes(modelClass, record);
-    writeData(indexes, indexCache.value);
-  }
-
-  function removeUniqueIndexes(modelClass, record) {
-    const uniqueIndexes = indexCache.value.unique;
-    if (!uniqueIndexes[modelClass]) {
-      return;
-    }
-
-    const uniqueConstraints = schemaCache.value[modelClass].constraints.unique || [];
-    uniqueConstraints.forEach((key) => {
-      const existingIndexes = uniqueIndexes[modelClass][key];
-      if (existingIndexes) {
-        const updatedIndexes = Object.keys(existingIndexes).reduce((o, index) => {
-          const id = existingIndexes[index];
-          if (id !== record.id) {
-            o[index] = id;
-          }
-          return o;
-        }, {});
-        uniqueIndexes[modelClass][key] = updatedIndexes;
-      }
-    });
-  }
-
-  function removeForeignIndexes(modelClass, record) {
-    const foreignIndexes = indexCache.value.foreign;
-    const foreignConstraints = schemaCache.value[modelClass].constraints.foreign;
-
-    if (validator.isEmpty(foreignConstraints)) { return; }
-
-    Object.keys(foreignConstraints).forEach((key) => {
-      const foreignModelClass = foreignConstraints[key].reference;
-      const existingIndexes = foreignIndexes[foreignModelClass];
-
-      if (validator.isEmpty(existingIndexes)) { return; }
-
-      let foreignValues = record[key];
-
-      if (validator.isEmpty(foreignValues)) { return; }
-
-      if (!Array.isArray(foreignValues)) {
-        foreignValues = [foreignValues]
-      }
-
-      foreignValues.forEach((foreignValue) => {
-        const foreignValueAssocs = existingIndexes[foreignValue];
-        const modelForeignAssocs = foreignValueAssocs[modelClass];
-
-        if (validator.isEmpty(modelForeignAssocs)) { return; }
-
-        const foundAssocIndex = modelForeignAssocs.indexOf(record.id);
-
-        if (foundAssocIndex < 0) { return; }
-
-        modelForeignAssocs.splice(foundAssocIndex, 1);
-        foreignValueAssocs[modelClass] = modelForeignAssocs;
-        existingIndexes[foreignValue] = foreignValueAssocs;
-        indexCache.value.foreign[foreignModelClass] = existingIndexes;
-      })
-    });
-  }
-
-  // {"work_logs":{"tags":{"3":["2"],"4":["3"],"10":["1","2","3"]}}}
-  function removeFilterIndexes(modelClass, record) {
-    const filterIndexes = indexCache.value.filter;
-
-    if (validator.isEmpty(filterIndexes[modelClass])) { return; }
-
-    if (validator.isEmpty(schemaCache.value[modelClass].indexes)) { return; }
-
-    const modelFilters = schemaCache.value[modelClass].indexes.filter || {};
-
-    Object.keys(modelFilters).forEach((field) => {
-      const fieldIndexes = filterIndexes[modelClass][field];
-
-      if (validator.isEmpty(fieldIndexes)) { return; }
-
-      let fieldValues = record[field];
-
-      if (!Array.isArray(fieldValues)) {
-        fieldValues = [fieldValues];
-      }
-
-      fieldValues.forEach((fieldValue) => {
-        const existingIds = fieldIndexes[fieldValue];
-
-        if (validator.isEmpty(existingIds)) { return; }
-
-        const foundIndex = existingIds.indexOf(record.id);
-
-        if (foundIndex < 0) { return; }
-
-        existingIds.splice(foundIndex, 1);
-        fieldIndexes[fieldValue] = existingIds;
-        filterIndexes[modelClass][field] = fieldIndexes;
-      });
-    });
-  }
-
-  function cleanupIndexes(modelClass, record) {
-    const foreignIndexes = indexCache.value.foreign;
-    if (validator.isEmpty(foreignIndexes[modelClass])) { return; }
-
-    delete foreignIndexes[modelClass][record.id];
-
-    const filterIndexes = indexCache.value.filter;
-    Object.entries(filterIndexes).forEach(([indexModel, indexedData]) => {
-      if (indexModel === modelClass) { return; }
-
-      Object.entries(indexedData).forEach(([key, modelClassData]) => {
-        const foreignConstraints = schemaCache.value[indexModel].constraints.foreign[key];
-
-        if (validator.isEmpty(foreignConstraints)) { return; }
-
-        const reference = foreignConstraints.reference;
-
-        if (reference !== modelClass) { return; }
-
-        const foreignPrimaryKey = foreignConstraints.primary;
-        delete modelClassData[record[foreignPrimaryKey]];
-      });
     });
   }
 
