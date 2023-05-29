@@ -32,10 +32,12 @@ const createWindow = () => {
       updatedConfig.logFile = logFile
     }
 
-    fs.writeFileSync(configFile, JSON.stringify(updatedConfig), { encoding: 'utf8' })
+    if (parsedResult.port !== updatedConfig.port || parsedResult.dataDir !== updatedConfig.dataDir || parsedResult.logFile !== updatedConfig.logFile) {
+      fs.writeFileSync(configFile, JSON.stringify(updatedConfig), { encoding: 'utf8' })
+    }
 
     const server = require('./dist/index');
-    const res = win.loadURL(`http://localhost:${port}`)
+    const res = win.loadURL(`http://localhost:${updatedConfig.port}`)
 
     res.then((data) => {
       console.log('Server started')
