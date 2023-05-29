@@ -45,12 +45,6 @@ export const useDataStore = defineStore('data', () => {
     }
   }
 
-  async function importJsonData(modelClass) {
-    return new Promise((resolve, reject) => {
-      resolve(import(`../../../data/${modelClass}.json`));
-    })
-  }
-
   async function initData(force = false) {
     if (!init.value || force) {
       console.log(`Init data start`);
@@ -61,29 +55,14 @@ export const useDataStore = defineStore('data', () => {
 
       console.log(`Init schema complete`);
 
-      let modelDataToLoad = []
       Object.keys(schemasData).forEach((modelClass) => {
         if (existingModelData[modelClass] && Object.keys(existingModelData[modelClass]).length > 0) {
           dataCache.value[modelClass] = existingModelData[modelClass]
         } else {
-          modelDataToLoad.push(modelClass)
+          dataCache.value[modelClass] = {}
         }
       })
-
-      const promises = modelDataToLoad.map((modelClass) => {
-        return importJsonData(modelClass);
-      });
-
-      Promise
-        .all(promises)
-        .then((results) => {
-          modelDataToLoad.forEach((modelClass, i) => {
-            dataCache.value[modelClass] = results[i].default
-            console.log(`Init data complete`, { modelClass, modelData: dataCache.value[modelClass] });
-          })
-
-          localStorage.setItem('data', JSON.stringify(dataCache.value));
-        })
+      localStorage.setItem('data', JSON.stringify(dataCache.value));
 
       init.value = true;
     }
