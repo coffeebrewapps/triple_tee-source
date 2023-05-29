@@ -701,6 +701,53 @@
       }
     }
   },
+  "system_configs": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "effectiveStart": {
+        "type": "date"
+      },
+      "effectiveEnd": {
+        "type": "date"
+      },
+      "tagFormat": {
+        "type": "text",
+        "default": "{{ category }}:{{ name }}"
+      },
+      "timezone": {
+        "type": "UTC"
+      },
+      "baseCurrencyId": {
+        "type": "text"
+      },
+      "baseContactId": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "baseCurrencyId": {
+          "reference": "currencies",
+          "primary": "id"
+        },
+        "baseContactId": {
+          "reference": "contacts",
+          "primary": "id"
+        }
+      },
+      "unique": ["effectiveStart|effectiveEnd"],
+      "required": ["effectiveStart", "baseCurrencyId", "baseContactId"]
+    }
+  },
   "tags": {
     "fields": {
       "id": {
