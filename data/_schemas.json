@@ -747,6 +747,12 @@
       },
       "unique": ["effectiveStart|effectiveEnd"],
       "required": ["effectiveStart", "baseCurrencyId", "baseContactId"]
+    },
+    "indexes": {
+      "filter": {
+        "baseCurrencyId": {},
+        "baseContactId": {}
+      }
     }
   },
   "tags": {
