@@ -23,7 +23,7 @@ module.exports = (dataAccess, logger, utils) => {
     return dataAccess.remove(modelClass, id);
   }
 
-  function prefillInvoice({ invoiceConfig, invoiceNumberSequence, billingContact, currency, invoiceLines }) {
+  function prefillInvoice({ invoiceConfig, invoiceNumberSequence, billingContact, currency, country, invoiceLines }) {
     const currentSequence = invoiceNumberSequence.lastUsedNumber + invoiceNumberSequence.incrementStep;
 
     const lastInvoice = dataAccess.list(
@@ -127,6 +127,35 @@ module.exports = (dataAccess, logger, utils) => {
     }
   }
 
+  function viewInvoiceConfigWithIncludes(invoiceConfigId) {
+    const invoiceConfig = dataAccess.view(
+      'invoice_configs',
+      invoiceConfigId,
+      { include: ['invoiceNumberSequenceId', 'invoiceTemplateId', 'currencyId'] }
+    ).record;
+
+    const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
+    const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
+    const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+
+    const billingContact = dataAccess.view(
+      'contacts',
+      invoiceConfig.billingContactId,
+      { include: ['country'] }
+    ).record;
+
+    const country = billingContact.includes.country[billingContact.country];
+
+    return {
+      invoiceConfig,
+      invoiceNumberSequence,
+      billingContact,
+      invoiceTemplate,
+      currency,
+      country
+    }
+  }
+
   function previewInvoice(params) {
     try {
       const invoiceConfigId = params.invoiceConfigId
@@ -134,16 +163,14 @@ module.exports = (dataAccess, logger, utils) => {
       const startTime = params.startTime
       const endTime = params.endTime
 
-      const invoiceConfig = dataAccess.view(
-        'invoice_configs',
-        invoiceConfigId,
-        { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId', 'currencyId'] }
-      ).record;
-
-      const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
-      const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
-      const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
-      const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+      const {
+        invoiceConfig,
+        invoiceNumberSequence,
+        billingContact,
+        invoiceTemplate,
+        currency,
+        country
+      } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const billingConfigs = dataAccess.list(
         'billing_configs',
@@ -182,7 +209,8 @@ module.exports = (dataAccess, logger, utils) => {
           invoiceNumberSequence,
           billingContact,
           invoiceTemplate,
-          currency
+          currency,
+          country
         }
       }
     } catch(error) {
@@ -244,16 +272,14 @@ module.exports = (dataAccess, logger, utils) => {
       const invoice = view(invoiceId, {}).record;
       const invoiceConfigId = invoice.invoiceConfigId;
 
-      const invoiceConfig = dataAccess.view(
-        'invoice_configs',
-        invoiceConfigId,
-        { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId', 'currencyId'] }
-      ).record;
-
-      const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
-      const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
-      const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
-      const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+      const {
+        invoiceConfig,
+        invoiceNumberSequence,
+        billingContact,
+        invoiceTemplate,
+        currency,
+        country
+      } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const invoiceLines = dataAccess.list(
         'invoice_lines',
@@ -269,7 +295,8 @@ module.exports = (dataAccess, logger, utils) => {
           invoiceNumberSequence,
           billingContact,
           invoiceTemplate,
-          currency
+          currency,
+          country
         }
       }
     } catch(error) {

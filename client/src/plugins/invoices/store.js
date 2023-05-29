@@ -7,6 +7,35 @@ export function useStore(dataStore) {
     return Object.is(value, undefined) || Object.is(value, null)
   }
 
+  function viewInvoiceConfigWithIncludes(invoiceConfigId) {
+    const invoiceConfig = dataAccess.view(
+      'invoice_configs',
+      invoiceConfigId,
+      { include: ['invoiceNumberSequenceId', 'invoiceTemplateId', 'currencyId'] }
+    ).record;
+
+    const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
+    const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
+    const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+
+    const billingContact = dataAccess.view(
+      'contacts',
+      invoiceConfig.billingContactId,
+      { include: ['country'] }
+    ).record;
+
+    const country = billingContact.includes.country[billingContact.country];
+
+    return {
+      invoiceConfig,
+      invoiceNumberSequence,
+      billingContact,
+      invoiceTemplate,
+      currency,
+      country
+    }
+  }
+
   function prefillInvoice({ invoiceConfig, invoiceNumberSequence, billingContact, currency, invoiceLines }) {
     const currentSequence = invoiceNumberSequence.lastUsedNumber + invoiceNumberSequence.incrementStep;
 
@@ -118,16 +147,14 @@ export function useStore(dataStore) {
       const startTime = params.startTime
       const endTime = params.endTime
 
-      const invoiceConfig = dataStore.view(
-        'invoice_configs',
-        invoiceConfigId,
-        { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId', 'currencyId'] }
-      ).record;
-
-      const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
-      const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
-      const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
-      const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+      const {
+        invoiceConfig,
+        invoiceNumberSequence,
+        billingContact,
+        invoiceTemplate,
+        currency,
+        country
+      } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const billingConfigs = dataStore.list(
         'billing_configs',
@@ -225,16 +252,14 @@ export function useStore(dataStore) {
       const invoice = dataStore.view('invoices', invoiceId, {}).record;
       const invoiceConfigId = invoice.invoiceConfigId;
 
-      const invoiceConfig = dataStore.view(
-        'invoice_configs',
-        invoiceConfigId,
-        { include: ['invoiceNumberSequenceId', 'billingContactId', 'invoiceTemplateId', 'currencyId'] }
-      ).record;
-
-      const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
-      const billingContact = invoiceConfig.includes.billingContactId[invoiceConfig.billingContactId]
-      const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
-      const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+      const {
+        invoiceConfig,
+        invoiceNumberSequence,
+        billingContact,
+        invoiceTemplate,
+        currency,
+        country
+      } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const invoiceLines = dataStore.list(
         'invoice_lines',
