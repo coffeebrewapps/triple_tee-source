@@ -8,7 +8,7 @@ export function useStore(dataStore) {
   }
 
   function viewInvoiceConfigWithIncludes(invoiceConfigId) {
-    const invoiceConfig = dataAccess.view(
+    const invoiceConfig = dataStore.view(
       'invoice_configs',
       invoiceConfigId,
       { include: ['invoiceNumberSequenceId', 'invoiceTemplateId', 'currencyId'] }
@@ -18,7 +18,7 @@ export function useStore(dataStore) {
     const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
     const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
 
-    const billingContact = dataAccess.view(
+    const billingContact = dataStore.view(
       'contacts',
       invoiceConfig.billingContactId,
       { include: ['country'] }
