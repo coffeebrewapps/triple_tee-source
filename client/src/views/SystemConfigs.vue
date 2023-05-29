@@ -108,18 +108,22 @@ async function updateConfig() {
     })
 }
 
-async function formatFormDataForShow() {
+async function formatFormDataForShow(record) {
   const promises = fieldKeys.value.map((key) => {
-    return formatDataForShow(key, formData.value)
+    return formatDataForShow(key, record)
   })
 
-  Promise.all(promises)
-    .then((results) => {
-      updatableKeys.value.forEach((field, i) => {
-        const key = field.key
-        formData.value[key] = results[i]
+  return new Promise((resolve, reject) => {
+    Promise.all(promises)
+      .then((results) => {
+        const formattedRecord = {}
+        updatableKeys.value.forEach((field, i) => {
+          const key = field.key
+          formattedRecord[key] = results[i]
+        })
+        resolve(formattedRecord)
       })
-    })
+  })
 }
 
 async function loadSystemConfigs() {
@@ -128,12 +132,7 @@ async function loadSystemConfigs() {
       .list('system_configs', {}, { path: 'latest' })
       .then((result) => {
         const latestConfig = result.record
-        if (latestConfig) {
-          formData.value = latestConfig
-        } else {
-          formData.value = initFormData()
-        }
-        resolve()
+        resolve(latestConfig)
       })
       .catch((error) => {
         reject(error)
@@ -154,8 +153,19 @@ function hideBanner() {
 
 onMounted(async () => {
   await loadSystemConfigs()
-    .then(() => {
-      formatFormDataForShow()
+    .then((result) => {
+      if (result) {
+        formatFormDataForShow(result)
+          .then((formattedResult) => {
+            formData.value = formattedResult
+          })
+      } else {
+        formData.value = initFormData()
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+      showBanner(`Error loading config!`)
     })
 })
 </script>

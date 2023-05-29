@@ -76,18 +76,23 @@ export const useDataStore = defineStore('data', () => {
         dataCache.value = JSON.parse(existingModelData);
       }
 
-      const missingModelData =  Object.keys(schemasData).filter((modelClass) => {
-        return !existingModelData[modelClass]
-      })
+      let modelDataToLoad = null
+      if (existingModelData) {
+        modelDataToLoad = Object.keys(schemasData).filter((modelClass) => {
+          return !existingModelData[modelClass]
+        })
+      } else {
+        modelDataToLoad = Object.keys(schemasData)
+      }
 
-      const promises = missingModelData.map((modelClass) => {
+      const promises = modelDataToLoad.map((modelClass) => {
         return importJsonData(modelClass);
       });
 
       Promise
         .all(promises)
         .then((results) => {
-          missingModelData.forEach((modelClass, i) => {
+          modelDataToLoad.forEach((modelClass, i) => {
             dataCache.value[modelClass] = results[i].default
             console.log(`Init data complete`, { modelClass, modelData: dataCache.value[modelClass] });
           })
