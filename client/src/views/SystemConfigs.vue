@@ -1,4 +1,5 @@
 <script setup>
+import { ref, computed, watch, onMounted } from 'vue'
 import DataPage from '@/components/DataPage.vue'
 import { useValidations } from '@/utils/validations'
 
@@ -7,47 +8,49 @@ const {
 } = useValidations()
 
 const fieldsLayout = [
-  { description: 'lg' },
   { effectiveStart: 'md', effectiveEnd: 'md' },
-  { includeTags: 'lg' },
-  { excludeTags: 'lg' }
+  { tagFormat: 'md', timezone: 'md' },
+  { baseCurrencyId: 'lg', baseContactId: 'lg' }
 ]
 
 function recordValue(record) {
   return record.id
 }
 
-function tagLabel(record) {
-  return `${record.category}:${record.name}`
+function currencyLabel(record) {
+  return `${record.code} (${record.symbol})`
+}
+
+function contactLabel(record) {
+  return record.name
 }
 
 const dataFields = [
-  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: false, creatable: false, updatable: false, sortable: true },
-  { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true, filterable: true },
+  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
   { key: 'effectiveStart', type: 'date', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
   { key: 'effectiveEnd', type: 'date', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
   {
-    key: 'includeTags', type: 'multiSelect', label: 'Include Tags', isTags: true,
-    reference: { label: tagLabel },
-    listable: true, viewable: true, creatable: true, updatable: true, filterable: true,
+    key: 'baseCurrencyId', type: 'singleSelect', label: 'Base Currency',
+    reference: { label: currencyLabel },
+    listable: true, viewable: true, creatable: true, updatable: true,
     options: {
       server: true,
       pagination: true,
-      modelClass: 'tags',
+      modelClass: 'currencies',
       value: recordValue,
-      label: tagLabel
+      label: currencyLabel
     }
   },
   {
-    key: 'excludeTags', type: 'multiSelect', label: 'Exclude Tags', isTags: true,
-    reference: { label: tagLabel },
-    listable: true, viewable: true, creatable: true, updatable: true, filterable: true,
+    key: 'baseContactId', type: 'singleSelect', label: 'Base Contact',
+    reference: { label: contactLabel },
+    listable: true, viewable: true, creatable: true, updatable: true,
     options: {
       server: true,
       pagination: true,
-      modelClass: 'tags',
+      modelClass: 'contacts',
       value: recordValue,
-      label: tagLabel
+      label: contactLabel
     }
   },
 ]
@@ -71,9 +74,6 @@ const validations = {
 
 const filters = {
   initData: {
-    description: null,
-    includeTags: [],
-    excludeTags: [],
     effectiveStart: {
       startDate: null,
       endDate: null
@@ -84,18 +84,19 @@ const filters = {
     }
   },
   layout: [
-    { description: 'lg' },
-    { includeTags: 'md', excludeTags: 'md' },
     { effectiveStart: 'md' },
     { effectiveEnd: 'md' }
   ]
 }
+
+onMounted(() => {
+})
 </script>
 
 <template>
   <DataPage
-    model-class="tax_tables"
-    data-type="Tax Tables"
+    model-class="system_configs"
+    data-type="System Configs"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :validations="validations"

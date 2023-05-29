@@ -1,19 +1,22 @@
 <script setup>
 /*** import:global ***/
-import { computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 /*** import:global ***/
 
 /*** import:utils ***/
 import { useFormatter } from '../utils/formatter'
+import { useSystemConfigsStore } from '@/stores/systemConfigs'
 
+const systemConfigsStore = useSystemConfigsStore()
 const {
   formatTag,
   tagStyle
-} = useFormatter()
+} = useFormatter(systemConfigsStore)
 
 import { useInputHelper } from '../utils/input'
 
 const {
+  tagsFields,
   tagsField
 } = useInputHelper(props.dataFields)
 /*** import:utils ***/
@@ -92,11 +95,64 @@ function closeDialog() {
   emit('update:modelValue', false)
 }
 /*** section:dialog ***/
+
+const formattedRecord = ref()
+
+async function asyncFormatTag(row, tags, key) {
+  const promises = tags.map((tag) => {
+    return new Promise((resolve, reject) => {
+      formatTag(row, tag, key)
+        .then((result) => {
+          resolve(result)
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  })
+
+  return new Promise((resolve, reject) => {
+    Promise.all(promises)
+      .then((results) => {
+        resolve({ key, formattedValue: results })
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+function formattedTag(record, field, i) {
+  if (formattedRecord.value[field]) {
+    return formattedRecord.value[field][i] 
+  } else {
+    return record[field][i]
+  }
+}
+
+onMounted(async () => {
+  const promises = tagsFields.value.map((key) => {
+    const value = props.record[key]
+    return asyncFormatTag(props.record, value, key)
+  })
+
+  Promise.all(promises)
+    .then((results) => {
+      formattedRecord.value = Object.assign({}, props.record)
+
+      results.forEach((result) => {
+        formattedRecord.value[result.key] = result.formattedValue
+      })
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+})
 </script>
 
 <template>
   <TDialog
-    v-if="record"
+    v-if="formattedRecord"
     v-model="dialog"
     :title="title"
   >
@@ -131,11 +187,11 @@ function closeDialog() {
             class="data-value tags"
           >
             <div
-              v-for="tag in record[field]"
+              v-for="(tag, i) in record[field]"
               class="tag"
               :style="tagStyle(record, tag, field)"
             >
-              {{ formatTag(record, tag, field) }}
+              {{ formattedTag(record, field, i) }}
             </div>
 
             <div

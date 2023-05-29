@@ -1,10 +1,12 @@
 <script setup>
 import DataPage from '@/components/DataPage.vue'
 import { useFormatter } from '@/utils/formatter'
+import { useSystemConfigsStore } from '@/stores/systemConfigs'
 
+const systemConfigsStore = useSystemConfigsStore()
 const {
   formatDate
-} = useFormatter()
+} = useFormatter(systemConfigsStore)
 
 const fieldsLayout = [
   { type: 'lg', transactionDate: 'md' },

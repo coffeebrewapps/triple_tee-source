@@ -1,33 +1,45 @@
-export function useFormatter() {
+import { Liquid } from 'liquidjs'
+const liquidEngine = new Liquid();
+
+export function useFormatter(systemConfigsStore) {
+  const systemConfigs = systemConfigsStore.getSystemConfigs()
+  const timeZone = systemConfigs.timezone || 'UTC'
+  const tagFormat = systemConfigs.tagFormat || '{{ category }}:{{ name }}'
+
   function formatDate(rawValue) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleDateString(locale)
+    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone })
   }
 
   function formatLongDate(rawValue) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleDateString(locale, { dateStyle: 'full' })
+    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone, dateStyle: 'full' })
   }
 
   function formatTimestamp(rawValue) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleString(locale)
+    return (new Date(rawValue)).toLocaleString(locale, { timeZone })
   }
 
   function formatShortTime(rawValue) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleTimeString(locale, { timeStyle: 'medium' })
+    return (new Date(rawValue)).toLocaleTimeString(locale, { timeZone, timeStyle: 'medium' })
   }
 
-  function formatTag(record, tag, field) {
+  async function parseTagFormat(formatString, tag) {
+    return liquidEngine.parseAndRender(formatString, tag);
+  }
+
+  async function formatTag(record, tag, field) {
     const includes = (record.includes || {})[field] || {}
     if (includes[tag]) {
       const value = includes[tag] || {}
-      return `${value.category}:${value.name}`
+      const formattedValue = await parseTagFormat(tagFormat, value)
+      return formattedValue
     } else {
       return tag
     }

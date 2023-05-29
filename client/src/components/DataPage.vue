@@ -20,6 +20,9 @@ const {
   initOptionsData
 } = useInputHelper(props.dataFields)
 
+import { useSystemConfigsStore } from '@/stores/systemConfigs'
+const systemConfigsStore = useSystemConfigsStore()
+
 import { useFormatter } from '@/utils/formatter'
 
 const {
@@ -27,7 +30,7 @@ const {
   formatTimestamp,
   formatTag,
   tagStyle
-} = useFormatter()
+} = useFormatter(systemConfigsStore)
 
 import { useErrors } from '@/utils/errors'
 const errorsMap = useErrors()
@@ -451,13 +454,71 @@ const listedHeaders = computed(() => {
   return props.dataFields.filter(h => h.listable)
 })
 
-const listedData = computed(() => {
-  return data.value || []
-})
+const listedData = ref([])
 
 async function updateOffsetAndReload(updated) {
   offset.value = updated
   await loadData()
+}
+
+async function asyncFormatTag(row, tags, key, i) {
+  const promises = tags.map((tag) => {
+    return new Promise((resolve, reject) => {
+      formatTag(row, tag, key)
+        .then((result) => {
+          resolve(result)
+        })
+        .catch((error) => {
+          reject(error)
+        })
+    })
+  })
+
+  return new Promise((resolve, reject) => {
+    Promise.all(promises)
+      .then((results) => {
+        resolve({ i, key, formattedValue: results })
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+function formattedTag(row, key, i) {
+  const formattedKey = `${key}Formatted`
+  if (row[formattedKey]) {
+    return row[formattedKey][i]
+  } else {
+    return row[key]
+  }
+}
+
+async function formatListedData() {
+  const promises = []
+  listedData.value = []
+
+  data.value.forEach((row, i) => {
+    listedData.value.push(Object.assign({}, row))
+    listedHeaders.value.forEach((field) => {
+      const key = field.key
+      const value = row[key]
+      if (tagsField(key)) {
+        promises.push(asyncFormatTag(row, value, key, i))
+      }
+    })
+  })
+
+  Promise.all(promises)
+    .then((results) => {
+      results.forEach((result) => {
+        const formattedKey = `${result.key}Formatted`
+        listedData.value[result.i][formattedKey] = result.formattedValue
+      })
+    })
+    .catch((error) => {
+      console.error(error)
+    })
 }
 /*** section:table ***/
 
@@ -518,6 +579,7 @@ async function loadData() {
     .list(props.modelClass, params)
     .then((result) => {
       data.value = result.data
+      formatListedData()
       totalData.value = result.total
       dataLoading.value = false
     })
@@ -970,11 +1032,11 @@ onMounted(async () => {
               v-if="tagsField(header.key)"
             >
               <div
-                v-for="tag in row[header.key]"
+                v-for="(tag, i) in row[header.key]"
                 class="tag"
                 :style="tagStyle(row, tag, header.key)"
               >
-                {{ formatTag(row, tag, header.key) }}
+                {{ formattedTag(row, header.key, i) }}
               </div>
 
               <div

@@ -3,13 +3,14 @@ import { computed } from 'vue'
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
 
+import { useSystemConfigsStore } from '@/stores/systemConfigs'
+const systemConfigsStore = useSystemConfigsStore()
+
 import { useFormatter } from '@/utils/formatter'
 const {
   formatDate,
-  formatTimestamp,
-  formatTag,
-  tagStyle
-} = useFormatter()
+  formatTimestamp
+} = useFormatter(systemConfigsStore)
 
 import { useValidations } from '@/utils/validations'
 const { isEmpty, notEmpty } = useValidations()

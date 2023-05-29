@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { useAlertsStore } from '../stores/alerts'
 import { useFormatter } from '../utils/formatter'
+import { useSystemConfigsStore } from '@/stores/systemConfigs'
 
 const alerts = useAlertsStore()
 
+const systemConfigsStore = useSystemConfigsStore()
 const {
   formatTimestamp
-} = useFormatter()
+} = useFormatter(systemConfigsStore)
 
 const showAlerts = computed(() => {
   return alerts.showAlert

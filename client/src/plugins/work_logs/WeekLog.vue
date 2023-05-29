@@ -12,10 +12,13 @@ const {
 import { useDataAccess } from '@/utils/dataAccess'
 const dataAccess = useDataAccess()
 
+import { useSystemConfigsStore } from '@/stores/systemConfigs'
+const systemConfigsStore = useSystemConfigsStore()
+
 import { useFormatter } from '@/utils/formatter'
 const {
   formatLongDate
-} = useFormatter()
+} = useFormatter(systemConfigsStore)
 
 import { useWorkLogUtils } from './utils'
 const {
