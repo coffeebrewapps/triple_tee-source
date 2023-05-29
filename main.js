@@ -20,6 +20,7 @@ const createWindow = () => {
     const result = fs.readFileSync(configFile, { encoding: 'utf8' })
     const parsedResult = JSON.parse(result)
     const updatedConfig = Object.assign({}, parsedResult)
+
     if (port) {
       updatedConfig.port = port
     }
