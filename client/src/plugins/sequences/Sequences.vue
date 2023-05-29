@@ -2,7 +2,7 @@
 import { useValidations } from '@/utils/validations'
 import DataPage from '@/components/DataPage.vue'
 
-const { greaterThan } = useValidations()
+const { greaterThan, greaterThanOrEqual } = useValidations()
 
 const fieldsLayout = [
   { name: 'md' },
@@ -22,7 +22,7 @@ const dataFields = [
 const validations = {
   create: {
     startingNumber: [
-      (record) => { return greaterThan(record, 'startingNumber', 0) }
+      (record) => { return greaterThanOrEqual(record, 'startingNumber', 0) }
     ],
     incrementStep: [
       (record) => { return greaterThan(record, 'incrementStep', 0) }
