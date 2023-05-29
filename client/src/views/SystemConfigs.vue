@@ -1,26 +1,40 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
+
 import Form from '@/components/Form.vue'
+import {
+  TButton
+} from 'coffeebrew-vue-components'
+
 import { useValidations } from '@/utils/validations'
 
 const {
   notEarlierThan
 } = useValidations()
 
+import { useDataAccess } from '@/utils/dataAccess'
+const dataAccess = useDataAccess()
+
 import { useSystemConfigsStore } from '@/stores/systemConfigs'
 const systemConfigsStore = useSystemConfigsStore()
+
+import { useBannerStore } from '@/stores/banner'
+const banner = useBannerStore()
 
 const formData = ref()
 const errorMessages = ref({})
 
-const fieldKeys = computed(() => {
+const updatableKeys = computed(() => {
   return dataFields.value.filter((field) => {
-    return field.creatable
-  }).map(f => f.key)
+    return field.updatable
+  })
+})
+
+const fieldKeys = computed(() => {
+  return updatableKeys.value.map(f => f.key)
 })
 
 const fieldsLayout = [
-  { effectiveStart: 'md', effectiveEnd: 'md' },
   { tagFormat: 'md', timezone: 'md' },
   { baseCurrencyId: 'lg', baseContactId: 'lg' }
 ]
@@ -42,8 +56,6 @@ const dataFields = computed(() => {
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
     { key: 'tagFormat', type: 'text', label: 'Tag Format', listable: false, viewable: true, creatable: true, updatable: true },
     { key: 'timezone', type: 'text', label: 'Timezone', listable: false, viewable: true, creatable: true, updatable: true },
-    { key: 'effectiveStart', type: 'date', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
-    { key: 'effectiveEnd', type: 'date', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
     {
       key: 'baseCurrencyId', type: 'singleSelect', label: 'Base Currency',
       reference: { label: currencyLabel },
@@ -71,58 +83,87 @@ const dataFields = computed(() => {
   ]
 })
 
-function validateEffectiveEnd(record) {
-  return notEarlierThan(record, 'effectiveEnd', 'effectiveStart')
-}
+import { useInputHelper } from '@/utils/input'
+const {
+  formatDataForShow,
+  formatDataForSave,
+} = useInputHelper(dataFields.value)
 
 const validations = {
-  create: {
-    effectiveEnd: [
-      validateEffectiveEnd
-    ]
-  },
-  update: {
-    effectiveEnd: [
-      validateEffectiveEnd
-    ]
-  }
-}
-
-const filters = {
-  initData: {
-    effectiveStart: {
-      startDate: null,
-      endDate: null
-    },
-    effectiveEnd: {
-      startDate: null,
-      endDate: null
-    }
-  },
-  layout: [
-    { effectiveStart: 'md' },
-    { effectiveEnd: 'md' }
-  ]
 }
 
 function initFormData() {
   return {
     tagFormat: '{{ category }}:{{ name }}',
     timezone: 'UTC',
-    effectiveStart: null,
-    effectiveEnd: null,
     baseCurrencyId: [],
     baseContactId: []
   }
 }
 
-onMounted(() => {
-  const systemConfigs = systemConfigsStore.getSystemConfigs()
-  if (Object.hasOwn(systemConfigs, 'id')) {
-    formData.value = systemConfigs
-  } else {
-    formData.value = initFormData()
-  }
+async function updateConfig() {
+  const params = formatDataForSave(Object.assign({}, formData.value))
+  await dataAccess
+    .create('system_configs', params, { path: 'replace' })
+    .then((result) => {
+      showBanner(`Updated config successfully!`)
+      systemConfigsStore.updateSystemConfigs(result)
+    })
+    .catch((error) => {
+      console.error(error)
+      showBanner(`Error updating config!`)
+    })
+}
+
+async function formatFormDataForShow() {
+  const promises = fieldKeys.value.map((key) => {
+    return formatDataForShow(key, formData.value)
+  })
+
+  Promise.all(promises)
+    .then((results) => {
+      updatableKeys.value.forEach((field, i) => {
+        const key = field.key
+        formData.value[key] = results[i]
+      })
+    })
+}
+
+async function loadSystemConfigs() {
+  return new Promise((resolve, reject) => {
+    dataAccess
+      .list('system_configs', {}, { path: 'latest' })
+      .then((result) => {
+        const latestConfig = result.record
+        if (latestConfig) {
+          formData.value = latestConfig
+        } else {
+          formData.value = initFormData()
+        }
+        resolve()
+      })
+      .catch((error) => {
+        reject(error)
+      })
+  })
+}
+
+/*** section:banner ***/
+function showBanner(message) {
+  banner.show(message)
+  setTimeout(hideBanner, 5000)
+}
+
+function hideBanner() {
+  banner.hide()
+}
+/*** section:banner ***/
+
+onMounted(async () => {
+  await loadSystemConfigs()
+    .then(() => {
+      formatFormDataForShow()
+    })
 })
 </script>
 
@@ -135,8 +176,24 @@ onMounted(() => {
       :data-fields="fieldKeys"
       :schemas="dataFields"
       :error-messages="errorMessages"
-      @submit=""
-      @cancel=""
+      :submittable="false"
     />
+
+    <div class="actions">
+      <TButton class="button" value="Update" icon="fa-solid fa-check" @click="updateConfig()"/>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.view-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+</style>

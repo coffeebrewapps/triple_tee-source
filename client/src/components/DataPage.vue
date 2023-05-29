@@ -22,15 +22,14 @@ const {
 
 import { useSystemConfigsStore } from '@/stores/systemConfigs'
 const systemConfigsStore = useSystemConfigsStore()
+const systemConfigs = systemConfigsStore.getSystemConfigs()
 
 import { useFormatter } from '@/utils/formatter'
 
 const {
-  formatDate,
-  formatTimestamp,
   formatTag,
   tagStyle
-} = useFormatter(systemConfigsStore)
+} = useFormatter()
 
 import { useErrors } from '@/utils/errors'
 const errorsMap = useErrors()
@@ -464,7 +463,7 @@ async function updateOffsetAndReload(updated) {
 async function asyncFormatTag(row, tags, key, i) {
   const promises = tags.map((tag) => {
     return new Promise((resolve, reject) => {
-      formatTag(row, tag, key)
+      formatTag(row, tag, key, systemConfigs.tagFormat)
         .then((result) => {
           resolve(result)
         })

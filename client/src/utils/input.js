@@ -5,12 +5,14 @@ const dataAccess = useDataAccess()
 
 import { useSystemConfigsStore } from '@/stores/systemConfigs'
 const systemConfigsStore = useSystemConfigsStore()
+const systemConfigs = systemConfigsStore.getSystemConfigs()
 
+console.log({ action: 'input.js', systemConfigs })
 import { useFormatter } from '@/utils/formatter'
 const {
   formatDate,
   formatTimestamp
-} = useFormatter(systemConfigsStore)
+} = useFormatter()
 
 import { useValidations } from '@/utils/validations'
 const { isEmpty, notEmpty } = useValidations()
@@ -99,9 +101,9 @@ export function useInputHelper(schemas) {
       const options = found.options
       return options.find(o => o.value === fieldValue).label
     } else if (inputType(field) === 'datetime') {
-      return formatTimestamp(fieldValue)
+      return formatTimestamp(fieldValue, systemConfigs.timezone)
     } else if (inputType(field) === 'date') {
-      return formatDate(fieldValue)
+      return formatDate(fieldValue, systemConfigs.timezone)
     } else {
       return fieldValue
     }

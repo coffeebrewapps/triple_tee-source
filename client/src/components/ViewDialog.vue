@@ -8,10 +8,12 @@ import { useFormatter } from '../utils/formatter'
 import { useSystemConfigsStore } from '@/stores/systemConfigs'
 
 const systemConfigsStore = useSystemConfigsStore()
+const systemConfigs = systemConfigsStore.getSystemConfigs()
+
 const {
   formatTag,
   tagStyle
-} = useFormatter(systemConfigsStore)
+} = useFormatter()
 
 import { useInputHelper } from '../utils/input'
 
@@ -101,7 +103,7 @@ const formattedRecord = ref()
 async function asyncFormatTag(row, tags, key) {
   const promises = tags.map((tag) => {
     return new Promise((resolve, reject) => {
-      formatTag(row, tag, key)
+      formatTag(row, tag, key, systemConfigs.tagFormat)
         .then((result) => {
           resolve(result)
         })

@@ -4,9 +4,11 @@ import { useFormatter } from '@/utils/formatter'
 import { useSystemConfigsStore } from '@/stores/systemConfigs'
 
 const systemConfigsStore = useSystemConfigsStore()
+const systemConfigs = systemConfigsStore.getSystemConfigs()
+
 const {
   formatDate
-} = useFormatter(systemConfigsStore)
+} = useFormatter()
 
 const fieldsLayout = [
   { type: 'lg', transactionDate: 'md' },
@@ -25,8 +27,8 @@ function tagLabel(record) {
 }
 
 function currencyLabel(record) {
-  const startDate = formatDate(record.effectiveStart)
-  const endDate = formatDate(record.effectiveEnd)
+  const startDate = formatDate(record.effectiveStart, systemConfigs.timezone)
+  const endDate = formatDate(record.effectiveEnd, systemConfigs.timezone)
 
   return `${record.code} (${startDate} - ${endDate})`
 }

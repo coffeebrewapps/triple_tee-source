@@ -28,6 +28,7 @@ const navigator = useNavStore()
 
 watch(router.currentRoute, (to, from) => {
   transitionName.value = 'fade'
+  loadSystemConfigs()
   navigator.hide()
 })
 /*** section:nav ***/
@@ -76,17 +77,16 @@ const dataAccess = useDataAccess()
 
 async function loadSystemConfigs() {
   dataAccess
-    .list('system_configs', { limit: 1, sort: { field: 'effectiveStart', order: 'desc' } })
+    .list('system_configs', {}, { path: 'latest' })
     .then((result) => {
-      const latestConfig = result.data[0] || {}
-      systemConfigsStore.updateSystemConfigs(result)
+      const latestConfig = result.record || {}
+      systemConfigsStore.updateSystemConfigs(latestConfig)
     })
 }
 /*** section:systemConfigs ***/
 
-onMounted(async () => {
+onMounted(() => {
   registerShortcutListener()
-  await loadSystemConfigs()
 })
 </script>
 

@@ -1,40 +1,40 @@
 import { Liquid } from 'liquidjs'
 const liquidEngine = new Liquid();
 
-export function useFormatter(systemConfigsStore) {
-  const systemConfigs = systemConfigsStore.getSystemConfigs()
-  const timeZone = systemConfigs.timezone || 'UTC'
-  const tagFormat = systemConfigs.tagFormat || '{{ category }}:{{ name }}'
-
-  function formatDate(rawValue) {
+export function useFormatter() {
+  function formatDate(rawValue, timeZone) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
     return (new Date(rawValue)).toLocaleDateString(locale, { timeZone })
   }
 
-  function formatLongDate(rawValue) {
+  function formatLongDate(rawValue, timeZone) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
     return (new Date(rawValue)).toLocaleDateString(locale, { timeZone, dateStyle: 'full' })
   }
 
-  function formatTimestamp(rawValue) {
+  function formatTimestamp(rawValue, timeZone) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
     return (new Date(rawValue)).toLocaleString(locale, { timeZone })
   }
 
-  function formatShortTime(rawValue) {
+  function formatShortTime(rawValue, timeZone) {
     const formatOptions = Intl.DateTimeFormat().resolvedOptions()
     const locale = formatOptions.locale
     return (new Date(rawValue)).toLocaleTimeString(locale, { timeZone, timeStyle: 'medium' })
   }
 
   async function parseTagFormat(formatString, tag) {
-    return liquidEngine.parseAndRender(formatString, tag);
+    if (formatString) {
+      return liquidEngine.parseAndRender(formatString, tag)
+    } else {
+      return tag
+    }
   }
 
-  async function formatTag(record, tag, field) {
+  async function formatTag(record, tag, field, tagFormat) {
     const includes = (record.includes || {})[field] || {}
     if (includes[tag]) {
       const value = includes[tag] || {}
