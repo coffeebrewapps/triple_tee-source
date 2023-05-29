@@ -1,5 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 import { useAlertsStore } from '../stores/alerts'
 
 import {
@@ -28,6 +31,16 @@ function toggleTheme() {
   document.body.classList.toggle('dark', theme.value)
   document.body.classList.toggle('light', !theme.value)
 }
+
+function openSystemConfigs() {
+  const route = {
+    path: '/system_configs',
+    name: 'System Configs',
+    component: () => import('@/views/SystemConfigs.vue')
+  }
+  router.addRoute(route)
+  router.push({ name: 'System Configs' })
+}
 </script>
 
 <template>
@@ -38,6 +51,10 @@ function toggleTheme() {
 
     <div class="theme-toggle">
       <TButton button-type="icon" :icon="themeIcon" @click="toggleTheme"/>
+    </div>
+
+    <div class="">
+      <TButton button-type="icon" icon="fa-solid fa-gears" @click="openSystemConfigs" />
     </div>
   </div>
 </template>

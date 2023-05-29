@@ -1,9 +1,6 @@
 'use strict'
 
-import { useDataStore } from '@/stores/data'
-const dataStore = useDataStore()
-
-export function useWebAccess() {
+export function useWebAccess(dataStore) {
   function formatErrors(error) {
     return [error].flat().filter(e => !!e)
   }

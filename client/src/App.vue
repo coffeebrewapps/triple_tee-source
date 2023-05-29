@@ -1,16 +1,26 @@
 <script setup>
+/*** import:global ***/
 import { ref, watch, onMounted } from 'vue'
 import { useRouter, RouterView } from 'vue-router'
+import { useDataAccess } from './utils/dataAccess'
+/*** import:global ***/
+
+/*** import:components ***/
 import Banner from './components/Banner.vue'
 import NavMenu from './components/NavMenu.vue'
 import TopNav from './components/TopNav.vue'
 import Alerts from './components/Alerts.vue'
 import Breadcrumbs from '@/components/Breadcrumbs.vue'
+/*** import:components ***/
 
+/*** import:stores ***/
 import { useNavStore } from './stores/nav'
 import { useEventsStore } from './stores/events'
 import { useShortcutsStore } from './stores/shortcuts'
+import { useSystemConfigsStore } from './stores/systemConfigs'
+/*** import:stores ***/
 
+/*** section:nav ***/
 const router = useRouter()
 const transitionName = ref('default')
 
@@ -20,13 +30,14 @@ watch(router.currentRoute, (to, from) => {
   transitionName.value = 'fade'
   navigator.hide()
 })
+/*** section:nav ***/
 
+/*** section:shortcuts ***/
 const events = useEventsStore()
 const shortcuts = useShortcutsStore()
-
 const modifier = ref(false)
 
-onMounted(() => {
+function registerShortcutListener() {
   document.addEventListener('keydown', (event) => {
     const route = router.currentRoute.value.path
     if (modifier.value) {
@@ -56,6 +67,26 @@ onMounted(() => {
       }
     }
   })
+}
+/*** section:shortcuts ***/
+
+/*** section:systemConfigs ***/
+const systemConfigsStore = useSystemConfigsStore()
+const dataAccess = useDataAccess()
+
+async function loadSystemConfigs() {
+  dataAccess
+    .list('system_configs', { limit: 1, sort: { field: 'effectiveStart', order: 'desc' } })
+    .then((result) => {
+      const latestConfig = result.data[0] || {}
+      systemConfigsStore.updateSystemConfigs(result)
+    })
+}
+/*** section:systemConfigs ***/
+
+onMounted(async () => {
+  registerShortcutListener()
+  await loadSystemConfigs()
 })
 </script>
 

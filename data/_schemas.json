@@ -717,7 +717,8 @@
         "default": "{{ category }}:{{ name }}"
       },
       "timezone": {
-        "type": "UTC"
+        "type": "text",
+        "default": "UTC"
       },
       "baseCurrencyId": {
         "type": "text"
