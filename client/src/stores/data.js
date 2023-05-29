@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 import { useDataValidations } from '@/utils/dataValidations'
 
-import schemasData from '@/../../data/_schemas.json'
+import schemasData from '@/../../_init/schemas.json'
 
 export const useDataStore = defineStore('data', () => {
   const schemas = '_schemas';

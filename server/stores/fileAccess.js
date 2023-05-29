@@ -5,6 +5,8 @@ module.exports = (config, logger, utils) => {
   const fs = require('fs');
   const fsPromises = require('fs').promises;
 
+  const schemasData = require('../../_init/schemas.json');
+
   function pathName(modelClass) {
     return path.join(config.dataDir, `${modelClass}.json`);
   }
@@ -48,12 +50,19 @@ module.exports = (config, logger, utils) => {
 
   async function loadSchemas(schemas) {
     return new Promise((resolve, reject) => {
-      readFromFile(schemas)
-        .then((result) => {
-          resolve(JSON.parse(result));
+      initFileIfNotExists(schemas, schemasData)
+        .then(() => {
+          readFromFile(schemas)
+            .then((result) => {
+              resolve(JSON.parse(result));
+            })
+            .catch((error) => {
+              logger.error(`Error schema file`, { schemas, error });
+              reject(error);
+            });
         })
         .catch((error) => {
-          logger.error(`Error schema file`, { schemas, error });
+          logger.error(`Error initializing schema file`, { schemas, error });
           reject(error);
         });
     });
@@ -61,12 +70,19 @@ module.exports = (config, logger, utils) => {
 
   async function loadIndexes(indexes) {
     return new Promise((resolve, reject) => {
-      readFromFile(indexes)
-        .then((result) => {
-          resolve({ indexes: JSON.parse(result) });
+      initFileIfNotExists(indexes, { unique: {}, foreign: {}, filter: {} })
+        .then(() => {
+          readFromFile(indexes)
+            .then((result) => {
+              resolve({ indexes: JSON.parse(result) });
+            })
+            .catch((error) => {
+              logger.error(`Error index file`, { indexes, error });
+              reject(error);
+            });
         })
         .catch((error) => {
-          logger.error(`Error index file`, { indexes, error });
+          logger.error(`Error creating index file`, { indexes, error });
           reject(error);
         });
     });
@@ -74,19 +90,43 @@ module.exports = (config, logger, utils) => {
 
   async function loadData(modelClass) {
     return new Promise((resolve, reject) => {
-      readFromFile(modelClass)
-        .then((result) => {
-          if (result) {
-            resolve({ modelClass: modelClass, data: JSON.parse(result) });
-          } else {
-            resolve({ modelClass: modelClass, data: {} });
-          }
+      initFileIfNotExists(modelClass)
+        .then(() => {
+          readFromFile(modelClass)
+            .then((result) => {
+              if (result) {
+                resolve({ modelClass: modelClass, data: JSON.parse(result) });
+              } else {
+                resolve({ modelClass: modelClass, data: {} });
+              }
+            })
+            .catch((error) => {
+              logger.error(`Error reading file`, { modelClass, error });
+              reject(error);
+            });
         })
         .catch((error) => {
-          logger.error(`Error reading file`, { modelClass, error });
+          logger.error(`Error initializing data file`, { modelClass, error });
           reject(error);
         });
     });
+  }
+
+  async function initFileIfNotExists(modelClass, initData = {}) {
+    return new Promise((resolve, reject) => {
+      if (!fs.existsSync(pathName(modelClass))) {
+        logger.log(`Data file not found, creating empty file...`, { modelClass });
+        writeToFile(modelClass, initData)
+          .then(() => {
+            resolve()
+          })
+          .catch((error) => {
+            reject(error)
+          })
+      } else {
+        resolve()
+      }
+    })
   }
 
   async function readFromFile(modelClass) {
