@@ -47,6 +47,7 @@ const usePlugin = (router, dataStore) => {
   router.addRoute(updateTemplateRoute);
 
   dataStore.registerFunction('invoice_templates', 'downloadStream', 'pdf', store.downloadPdf);
+  dataStore.registerFunction('receipt_templates', 'downloadStream', 'pdf', store.downloadPdf);
 
   return route;
 };
