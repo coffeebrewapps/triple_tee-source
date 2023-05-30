@@ -217,8 +217,8 @@ module.exports = (dataAccess, logger, utils) => {
 
   function createWithTransaction(params) {
     try {
-      const receiptNumberSequenceId = params.receiptNumberSequenceId;
       const receipt = Object.assign({}, params.receipt);
+      const receiptConfigId = params.receiptConfigId;
       const invoiceId = receipt.invoiceId;
 
       const {
@@ -239,14 +239,18 @@ module.exports = (dataAccess, logger, utils) => {
       }
 
       receipt.remainingAmount = parseFloat((billableAmount - paidAmount - receipt.paymentAmount).toFixed(2));
-      const lastUsedNumber = parseInt(receipt.receiptNumber);
+
+      const {
+        receiptNumberSequence
+      } = viewReceiptConfigWithIncludes(receiptConfigId);
+      const lastUsedNumber = receiptNumberSequence.lastUsedNumber + receiptNumberSequence.incrementStep;
 
       const { success, results } = dataAccess.atomic(
         [
           {
             id: 'updateNumberSequence',
             params: {
-              receiptNumberSequenceId,
+              receiptNumberSequenceId: receiptNumberSequence.id,
               lastUsedNumber
             },
             invoke: ({ receiptNumberSequenceId, lastUsedNumber }, pastResults) => {
@@ -255,7 +259,8 @@ module.exports = (dataAccess, logger, utils) => {
             rollback: (result) => {
               const updatedSequenceNumberId = result.record.id
               const updatedLastUsedNumber = result.record.lastUsedNumber
-              dataAccess.update('sequences', updatedSequenceNumberId, { lastUsedNumber: updatedLastUsedNumber - 1 })
+              const incrementStep = result.record.incrementStep
+              dataAccess.update('sequences', updatedSequenceNumberId, { lastUsedNumber: updatedLastUsedNumber - incrementStep })
             }
           },
           {

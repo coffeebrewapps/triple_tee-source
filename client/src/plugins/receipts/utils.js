@@ -13,7 +13,7 @@ const {
 
 export function useReceiptUtils() {
   const fieldsLayout = [
-    { receiptNumber: 'lg', receiptDate: 'md' },
+    { receiptNumber: 'md', receiptDate: 'md' },
     { billableAmount: 'md', paidAmount: 'md', paymentAmount: 'md', remainingAmount: 'md' },
     { customFields: 'lg' },
     { incomeReceiptConfigId: 'lg' },
@@ -26,7 +26,7 @@ export function useReceiptUtils() {
   function generateDataFields(invoiceId, contactId) {
     return [
       { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-      { key: 'receiptNumber', type: 'text', label: 'Receipt Number', listable: true, viewable: true, creatable: true, updatable: false, filterable: true, sortable: true },
+      { key: 'receiptNumber', type: 'text', label: 'Receipt Number', listable: true, viewable: true, creatable: false, updatable: false, filterable: true, sortable: true },
       { key: 'receiptDate', type: 'date', label: 'Receipt Date', listable: true, viewable: true, creatable: true, updatable: true, sortable: true },
       { key: 'billableAmount', type: 'number', label: 'Billable Amount', listable: true, viewable: true, creatable: true, updatable: true },
       { key: 'paidAmount', type: 'number', label: 'Paid Amount', listable: true, viewable: true, creatable: true, updatable: true },

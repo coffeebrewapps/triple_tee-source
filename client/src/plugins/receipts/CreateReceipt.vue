@@ -133,7 +133,13 @@ const filtersCancelButton = computed(() => {
 
 function resetReceiptData() {
   updatedReceipt.value = null
+  invoice.value = null
+  currency.value = null
+  billingContact.value = null
+  receiptConfig.value = null
+  receiptNumberSequence.value = null
   receiptTemplate.value = null
+  invoiceNumberSequence.value = null
 }
 
 async function formatReceipt(receipt) {
@@ -206,7 +212,8 @@ const receiptFieldKeys = computed(() => {
   return creatableReceiptFields.value.map(f => f.key)
 })
 
-const notUpdatableAmountFields = [
+const notUpdatableReceiptFields = [
+  'receiptNumber',
   'billableAmount',
   'paidAmount',
   'remainingAmount'
@@ -214,7 +221,7 @@ const notUpdatableAmountFields = [
 
 const creatableReceiptFields = computed(() => {
   return receiptDataFields.value.filter((field) => {
-    return !notUpdatableAmountFields.includes(field.key) && field.creatable
+    return !notUpdatableReceiptFields.includes(field.key) && field.creatable
   })
 })
 
@@ -307,7 +314,7 @@ async function createReceipt() {
     {},
     {
       receipt: receiptHelper.formatDataForSave(updatedReceipt.value),
-      receiptNumberSequenceId: receiptNumberSequence.value.id
+      receiptConfigId: receiptConfig.value.id
     }
   )
 
