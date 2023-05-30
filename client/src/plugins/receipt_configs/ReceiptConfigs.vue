@@ -13,6 +13,7 @@ const props = defineProps({
 })
 
 const fieldsLayout = [
+  { description: 'lg' },
   { customFields: 'lg' },
   { receiptNumberSequenceId: 'lg' },
   { billingContactId: 'lg' },
@@ -22,6 +23,7 @@ const fieldsLayout = [
 const dataFields = computed(() => {
   return [
     { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
+    { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
     { key: 'customFields', type: 'object', label: 'Custom Fields (JSON)', listable: false, viewable: true, creatable: true, updatable: true },
     {
       key: 'receiptNumberSequenceId', type: 'singleSelect', label: 'Sequence Number',

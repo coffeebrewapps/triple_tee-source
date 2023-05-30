@@ -84,7 +84,7 @@ const dataFields = [
 
 const filters = {
   initData: {
-    type: "",
+    type: null,
     currencyId: null,
     tags: [],
     transactionDate: {

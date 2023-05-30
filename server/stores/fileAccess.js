@@ -50,7 +50,7 @@ module.exports = (config, logger, utils) => {
 
   async function loadSchemas(schemas) {
     return new Promise((resolve, reject) => {
-      initFileIfNotExists(schemas, schemasData)
+      initSchemasFile(schemas, schemasData)
         .then(() => {
           readFromFile(schemas)
             .then((result) => {
@@ -126,6 +126,18 @@ module.exports = (config, logger, utils) => {
       } else {
         resolve()
       }
+    })
+  }
+
+  async function initSchemasFile(schemas, schemasData) {
+    return new Promise((resolve, reject) => {
+      writeToFile(schemas, schemasData)
+        .then(() => {
+          resolve()
+        })
+        .catch((error) => {
+          reject(error)
+        })
     })
   }
 

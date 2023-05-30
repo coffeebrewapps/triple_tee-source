@@ -26,6 +26,10 @@ export function useFormatter() {
     return (new Date(rawValue)).toLocaleTimeString(locale, { timeZone, timeStyle: 'medium' })
   }
 
+  function formatNumber(value, dp) {
+    return (value || 0).toFixed(dp)
+  }
+
   async function parseTagFormat(formatString, tag) {
     if (formatString) {
       return liquidEngine.parseAndRender(formatString, tag)
@@ -69,6 +73,7 @@ export function useFormatter() {
     formatLongDate,
     formatTimestamp,
     formatShortTime,
+    formatNumber,
     formatTag,
     tagStyle
   }

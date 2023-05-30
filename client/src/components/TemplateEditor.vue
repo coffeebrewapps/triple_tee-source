@@ -585,7 +585,6 @@ onMounted(async () => {
 .preview-content {
   padding: 1rem;
   width: 100%;
-  height: 100%;
   border: 1px solid var(--color-border);
   background-color: white;
   border-radius: 4px;

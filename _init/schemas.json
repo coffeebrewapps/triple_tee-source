@@ -559,9 +559,112 @@
       }
     }
   },
+  "income_receipts": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "receiptNumber": {
+        "type": "text"
+      },
+      "receiptDate": {
+        "type": "date"
+      },
+      "billableAmount": {
+        "type": "number"
+      },
+      "paidAmount": {
+        "type": "number"
+      },
+      "paymentAmount": {
+        "type": "number"
+      },
+      "remainingAmount": {
+        "type": "number"
+      },
+      "customFields": {
+        "type": "object",
+        "default": {}
+      },
+      "voided": {
+        "type": "boolean",
+        "default": false
+      },
+      "incomeReceiptConfigId": {
+        "type": "text"
+      },
+      "invoiceId": {
+        "type": "text"
+      },
+      "currencyId": {
+        "type": "text"
+      },
+      "incomeTransactionId": {
+        "type": "text"
+      },
+      "contactId": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "incomeReceiptConfigId": {
+          "reference": "receipt_configs",
+          "primary": "id"
+        },
+        "invoiceId": {
+          "reference": "invoices",
+          "primary": "id"
+        },
+        "currencyId": {
+          "reference": "currencies",
+          "primary": "id"
+        },
+        "incomeTransactionId": {
+          "reference": "transactions",
+          "primary": "id"
+        },
+        "contactId": {
+          "reference": "contacts",
+          "primary": "id"
+        }
+      },
+      "unique": ["receiptNumber"],
+      "required": [
+        "receiptNumber",
+        "receiptDate",
+        "billableAmount",
+        "paidAmount",
+        "paymentAmount",
+        "remainingAmount",
+        "customFields",
+        "voided",
+        "currencyId",
+        "incomeTransactionId",
+        "contactId"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "receiptNumber": { "match": true },
+        "invoiceId": {},
+        "contactId": {}
+      }
+    }
+  },
   "receipt_configs": {
     "fields": {
       "id": {
+        "type": "text"
+      },
+      "description": {
         "type": "text"
       },
       "customFields": {
@@ -602,6 +705,7 @@
       },
       "unique": [],
       "required": [
+        "description",
         "customFields",
         "receiptNumberSequenceId",
         "billingContactId",
@@ -610,7 +714,7 @@
     },
     "indexes": {
       "filter": {
-        "tags": {},
+        "description": { "match": true },
         "receiptNumberSequenceId": {},
         "billingContactId": {},
         "receiptTemplateId": {}

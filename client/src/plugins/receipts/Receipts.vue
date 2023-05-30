@@ -5,26 +5,30 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const props = defineProps({
+  invoiceId: {
+    type: String,
+    default: null
+  },
   contactId: {
     type: String,
     default: null
   }
 })
 
-import { useInvoiceUtils } from './utils'
+import { useReceiptUtils } from './utils'
 const {
   fieldsLayout,
   generateDataFields,
   validations,
   generateFilters
-} = useInvoiceUtils()
+} = useReceiptUtils()
 
 const dataFields = computed(() => {
-  return generateDataFields(props.contactId)
+  return generateDataFields(props.invoiceId, props.contactId)
 })
 
 const filters = computed(() => {
-  return generateFilters(props.contactId)
+  return generateFilters(props.invoiceId, props.contactId)
 })
 
 const actions = {
@@ -41,19 +45,18 @@ const actions = {
 }
 
 async function openViewPage(row) {
-  router.push({ name: 'View Invoice', params: { id: row.id }, query: { contactId: row.contactId } })
+  router.push({ name: 'View Receipt', params: { id: row.id }, query: { invoiceId: row.invoiceId, contactId: row.contactId } })
 }
 
 async function openCreatePage() {
-  router.push({ name: 'Create Invoice' })
+  router.push({ name: 'Create Receipt' })
 }
 </script>
 
 <template>
   <DataPage
-    model-class="invoices"
-    data-type="Invoices"
-    :fullscreen="true"
+    model-class="income_receipts"
+    data-type="Receipts"
     :fields-layout="fieldsLayout"
     :data-fields="dataFields"
     :validations="validations"
