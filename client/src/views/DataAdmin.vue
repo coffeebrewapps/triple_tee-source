@@ -96,12 +96,12 @@ async function fetchData() {
 
   if (!modelClass.value) { return; }
 
+  dataLoading.value = true
   await dataAccess
     .list(modelClass.value)
     .then((result) => {
       rawData.value = result.data
       dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
-      dataLoading.value = false
       showBanner(`Fetched ${modelClass.value} successfully!`)
     })
     .catch((error) => {
@@ -109,16 +109,28 @@ async function fetchData() {
       errorContent.value = JSON.stringify(error, false, 4)
       showBanner(`Error fetching ${modelClass.value} data!`)
     })
+    .finally(() => {
+      dataLoading.value = false
+    })
+}
+
+function formatModelData(data) {
+  return JSON.parse(data).reduce((o, record) => {
+    const toUpdate = Object.assign({}, record)
+    delete toUpdate.includes
+    o[record.id] = toUpdate
+    return o
+  }, {})
 }
 
 async function submitData() {
+  dataLoading.value = true
   if (modelClass.value === 'indexes') {
     await dataAccess
       .upload('indexes', JSON.parse(dataForUpdate.value))
       .then((result) => {
         rawData.value = result.data
         dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
-        dataLoading.value = false
         showBanner(`Updated indexes successfully!`)
       })
       .catch((error) => {
@@ -126,19 +138,23 @@ async function submitData() {
         errorContent.value = JSON.stringify(error, false, 4)
         showBanner(`Error updating indexes!`)
       })
+      .finally(() => {
+        dataLoading.value = false
+      })
   } else {
     await dataAccess
-      .upload(modelClass.value, JSON.parse(dataForUpdate.value))
+      .upload(modelClass.value, formatModelData(dataForUpdate.value))
       .then((result) => {
-        rawData.value = result.data
-        dataForUpdate.value = JSON.stringify(rawData.value, false, 4)
-        dataLoading.value = false
         showBanner(`Updated ${modelClass.value} data successfully!`)
+        fetchData()
       })
       .catch((error) => {
         errorAlert.value = true
         errorContent.value = JSON.stringify(error, false, 4)
         showBanner(`Error updating ${modelClass.value} data!`)
+      })
+      .finally(() => {
+        dataLoading.value = false
       })
   }
 }
