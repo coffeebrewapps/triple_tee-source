@@ -11,7 +11,6 @@ import TabContainer from '@/components/TabContainer.vue'
 
 import TodayLog from './TodayLog.vue'
 import WeekLog from './WeekLog.vue'
-import GenerateInvoice from './GenerateInvoice.vue'
 
 const {
   dataFields,
@@ -23,7 +22,6 @@ const {
 const tabs = [
   { label: 'Today', onchange: updateTodayLog },
   { label: 'Weekly', onchange: updateWeeklyLogs },
-  { label: 'Generate Invoice', onchange: () => {} },
   { label: 'All Logs', onchange: updateAllLogs }
 ]
 
@@ -61,10 +59,6 @@ function triggerTabEvent(i) {
       </template>
 
       <template #tab-2>
-        <GenerateInvoice />
-      </template>
-
-      <template #tab-3>
         <DataPage
           model-class="work_logs"
           data-type="Work Logs"
