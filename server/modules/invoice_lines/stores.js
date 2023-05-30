@@ -1,5 +1,3 @@
-'use strict'
-
 const modelClass = 'invoice_lines';
 
 module.exports = (dataAccess, logger) => {
@@ -29,6 +27,6 @@ module.exports = (dataAccess, logger) => {
     view,
     create,
     update,
-    remove
-  }
-}
+    remove,
+  };
+};

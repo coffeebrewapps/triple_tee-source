@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = (config, logger, utils) => {
   const fileAccess = require('./fileAccess')(config, logger, utils);
   const validator = require('./validator')(config, logger, utils);
@@ -64,7 +62,7 @@ module.exports = (config, logger, utils) => {
 
   function cacheData(modelClass, cacheable, writable) {
     dataCache[modelClass] = cacheable;
-    writeData(modelClass, writable)
+    writeData(modelClass, writable);
   }
 
   function listSchemas() {
@@ -90,7 +88,7 @@ module.exports = (config, logger, utils) => {
     }
 
     if (sortFilters.field) {
-      sortData(filteredData, sortFilters)
+      sortData(filteredData, sortFilters);
     }
 
     const total = filteredData.length;
@@ -99,13 +97,13 @@ module.exports = (config, logger, utils) => {
     filteredData = paginateData(filteredData, filters);
 
     filteredData = filteredData.map((record) => {
-      const combined = Object.assign({}, record, { includes: fetchIncludes(modelClass, record, include) })
-      return combined
+      const combined = Object.assign({}, record, { includes: fetchIncludes(modelClass, record, include) });
+      return combined;
     });
 
     return {
-      total: total,
-      data: filteredData
+      total,
+      data: filteredData,
     };
   }
 
@@ -116,7 +114,7 @@ module.exports = (config, logger, utils) => {
     const foreignRecords = fetchIncludes(modelClass, record, include);
 
     return {
-      record: Object.assign({}, record, { includes: foreignRecords })
+      record: Object.assign({}, record, { includes: foreignRecords }),
     };
   }
 
@@ -125,9 +123,9 @@ module.exports = (config, logger, utils) => {
 
     return Object.entries(fields).reduce((o, [field, schema]) => {
       if (utils.notEmpty(schema.default)) {
-        o[field] = schema.default
+        o[field] = schema.default;
       } else {
-        o[field] = null
+        o[field] = null;
       }
       return o;
     }, {});
@@ -138,7 +136,7 @@ module.exports = (config, logger, utils) => {
     const result = validator.validate(modelClass, params, schemaCache, indexCache, dataCache);
 
     if (result.valid) {
-      let data = dataCache[modelClass];
+      const data = dataCache[modelClass];
       const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
       const newId = (lastId + 1).toString();
       const now = new Date();
@@ -150,36 +148,39 @@ module.exports = (config, logger, utils) => {
 
       return {
         success: true,
-        record: newRow
+        record: newRow,
       };
     } else {
       return {
         success: false,
-        errors: result.errors
+        errors: result.errors,
       };
     }
   }
 
   // TODO: check exists
   function createIfNotExists(modelClass, params) {
-    return create(modelClass, params)
+    return create(modelClass, params);
   }
 
   function update(modelClass, id, params) {
-    let data = dataCache[modelClass];
     const existing = view(modelClass, id);
     if (!existing.record) {
       return {
         success: false,
-        errors: ['not exists']
+        errors: ['not exists'],
       };
     }
 
-    const result = validator.validate(modelClass, Object.assign({}, existing.record, params), schemaCache, indexCache, dataCache);
+    const result = validator.validate(
+      modelClass,
+      Object.assign({}, existing.record, params),
+      schemaCache, indexCache, dataCache
+    );
 
     if (result.valid) {
       const now = new Date();
-      const updated = Object.assign({}, existing.record, params, { updatedAt: now })
+      const updated = Object.assign({}, existing.record, params, { updatedAt: now });
 
       const indexesToRemove = Object.entries(existing.record).reduce((o, [field, value]) => {
         if (utils.isEmpty(value)) { return o; }
@@ -199,24 +200,24 @@ module.exports = (config, logger, utils) => {
 
       return {
         success: true,
-        record: updated
+        record: updated,
       };
     } else {
       return {
         success: false,
-        errors: result.errors
+        errors: result.errors,
       };
     }
   }
 
   function remove(modelClass, id) {
-    let data = dataCache[modelClass];
+    const data = dataCache[modelClass];
     const existing = view(modelClass, id);
     const record = existing.record;
     if (!record) {
       return {
         success: false,
-        errors: {}
+        errors: {},
       };
     }
 
@@ -225,26 +226,25 @@ module.exports = (config, logger, utils) => {
     if (!used) {
       delete data[id];
       cacheData(modelClass, data, data);
-      removeIndexes(modelClass, record)
+      removeIndexes(modelClass, record);
       writeData(indexes, indexCache);
 
       return {
         success: true,
-        record: record
+        record,
       };
     } else {
       return {
         success: false,
-        errors: ['isUsed']
+        errors: ['isUsed'],
       };
     }
   }
 
   function isUsed(modelClass, id) {
-    let data = dataCache[modelClass];
     const existing = view(modelClass, id);
     const record = existing.record;
-    if (!record) { return false }
+    if (!record) { return false; }
 
     return validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
   }
@@ -277,22 +277,22 @@ module.exports = (config, logger, utils) => {
       const result = step.invoke(step.params, pastResults);
       if (!result.success) {
         pastResults.forEach((pastResult) => {
-          pastResult.step.rollback(pastResult.result)
-        })
+          pastResult.step.rollback(pastResult.result);
+        });
         pastResults.unshift({ step, result });
-        return false
+        return false;
       }
       pastResults.unshift({ step, result });
-      return true
-    })
+      return true;
+    });
     return {
       success,
-      results: pastResults
-    }
+      results: pastResults,
+    };
   }
 
   function paginateData(data, filters) {
-    let filteredData = Array.from(data)
+    let filteredData = Array.from(data);
     if (utils.notEmpty(filters.offset) && utils.notEmpty(filters.limit) && filteredData.length > 0) {
       const offset = parseInt(filters.offset);
       const limit = parseInt(filters.limit);
@@ -318,20 +318,24 @@ module.exports = (config, logger, utils) => {
     const partialMatch = filterOptions.match && indexedValue.match(filterValue);
     const multiMatch = Array.isArray(filterValue) && filterValue.some(fv => fv === indexedValue);
     const exactMatch = !filterOptions.match && indexedValue === filterValue;
-    const dateRangeMatch = (Object.hasOwn(filterValue, 'startDate') || Object.hasOwn(filterValue, 'endDate') || Object.hasOwn(filterValue, 'startTime') || Object.hasOwn(filterValue, 'endTime')) && rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
+    const dateRangeMatch = (
+      Object.hasOwn(filterValue, 'startDate') ||
+      Object.hasOwn(filterValue, 'endDate') ||
+      Object.hasOwn(filterValue, 'startTime') ||
+      Object.hasOwn(filterValue, 'endTime')
+    ) && rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
 
     return partialMatch || multiMatch || exactMatch || dateRangeMatch;
   }
 
   function rangeMatch(rangeStart, rangeEnd, compareValue) {
     return (utils.isEmpty(rangeStart) || compareValue >= rangeStart) &&
-      (utils.isEmpty(rangeEnd) || compareValue <= rangeEnd)
+      (utils.isEmpty(rangeEnd) || compareValue <= rangeEnd);
   }
 
   function filterFromIndexes(modelClass, modelData, indexes, filterSchemas, filters) {
     return Object.entries(filters).reduce((filteredIds, [field, filterValue]) => {
       if (utils.notEmpty(indexes[field])) {
-        const filterOptions = filterSchemas[field] || {};
         const indexedIds = Object.entries(indexes[field]).reduce((arr, [indexedValue, ids]) => {
           if (filterValueMatch(filterSchemas, field, indexedValue, filterValue)) {
             arr = arr.concat(ids);
@@ -340,15 +344,15 @@ module.exports = (config, logger, utils) => {
         }, []);
 
         if (indexedIds.length > 0) {
-          logger.log(`Index hit`, { field, filterValue })
+          logger.log(`Index hit`, { field, filterValue });
           indexedIds.forEach(i => filteredIds.add(i));
         } else {
-          logger.log(`Index miss`, { field, filterValue })
+          logger.log(`Index miss`, { field, filterValue });
           const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
           idsFromData.forEach(i => filteredIds.add(i));
         }
       } else {
-        logger.log(`Index miss`, { field, filterValue })
+        logger.log(`Index miss`, { field, filterValue });
         const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
         idsFromData.forEach(i => filteredIds.add(i));
       }
@@ -357,14 +361,12 @@ module.exports = (config, logger, utils) => {
   }
 
   function filterIdsFromData(modelClass, modelData, schemas, field, filterValue) {
-    const filterOptions = schemas[field] || {};
-
     return Object.entries(modelData).reduce((arr, [id, record]) => {
       const recordValue = record[field];
       if (utils.notEmpty(recordValue) && filterValueMatch(schemas, field, recordValue, filterValue)) {
         arr.push(id);
       }
-      return arr
+      return arr;
     }, []);
   }
 
@@ -373,7 +375,6 @@ module.exports = (config, logger, utils) => {
     const foreignConstraints = schema.constraints.foreign;
 
     return include.reduce((records, foreignKey) => {
-      const foreignKeyType = schema.fields[foreignKey].type;
       const referenceValue = [record[foreignKey]].flat().filter(v => !!v);
 
       const constraint = foreignConstraints[foreignKey] || {};
@@ -559,7 +560,7 @@ module.exports = (config, logger, utils) => {
       if (utils.isEmpty(foreignValues)) { return; }
 
       if (!Array.isArray(foreignValues)) {
-        foreignValues = [foreignValues]
+        foreignValues = [foreignValues];
       }
 
       foreignValues.forEach((foreignValue) => {
@@ -576,7 +577,7 @@ module.exports = (config, logger, utils) => {
         foreignValueAssocs[modelClass] = modelForeignAssocs;
         existingIndexes[foreignValue] = foreignValueAssocs;
         indexCache.foreign[foreignModelClass] = existingIndexes;
-      })
+      });
     });
   }
 
@@ -657,6 +658,6 @@ module.exports = (config, logger, utils) => {
     upload,
     downloadIndexes,
     uploadIndexes,
-    atomic
-  }
-}
+    atomic,
+  };
+};

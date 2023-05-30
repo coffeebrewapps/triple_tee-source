@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = (routes, stores, logger, utils) => {
   function viewLatest(stores) {
     return function(req, res) {
@@ -10,7 +8,7 @@ module.exports = (routes, stores, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   }
 
   function replaceLatest(stores) {
@@ -23,7 +21,7 @@ module.exports = (routes, stores, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   }
 
   return {
@@ -36,7 +34,7 @@ module.exports = (routes, stores, logger, utils) => {
       { method: 'get', path: '/:id', handler: routes.view(stores) },
       { method: 'post', path: '/', handler: routes.create(stores) },
       { method: 'put', path: '/:id', handler: routes.update(stores) },
-      { method: 'delete', path: '/:id', handler: routes.remove(stores) }
-    ]
-  }
-}
+      { method: 'delete', path: '/:id', handler: routes.remove(stores) },
+    ],
+  };
+};

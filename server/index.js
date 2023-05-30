@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 const fsPromises = require('fs').promises;
 
 const cors = require('cors');
@@ -21,12 +20,12 @@ const port = config.port || process.env.PORT || common.DEFAULT_PORT;
 
 let server = null;
 
-let corsConfig = {}
+let corsConfig = {};
 
 if (process.env.NODE_ENV === 'development') {
   corsConfig = {
-    origin: 'http://localhost'
-  }
+    origin: 'http://localhost',
+  };
 }
 
 process.on('uncaughtException', (error, origin) => {
@@ -52,66 +51,66 @@ async function loadPlugins(app) {
     })
     .catch((err) => {
       logger.error(err);
-    })
+    });
 }
 
-/*** start:Middleware ***/
-app.use(express.json())
+/** * start:Middleware ***/
+app.use(express.json());
 app.use(cors(corsConfig));
 app.use(express.static(path.join(__dirname, 'public')));
-/*** end:Middleware ***/
+/** * end:Middleware ***/
 
-/*** start:Routes ***/
-app.get('/', function(req, res){
-  (async () => {
+/** * start:Routes ***/
+app.get('/', function(req, res) {
+  (async() => {
     await dataAccess.initData();
     logger.log(`Refreshed data`);
   })();
 });
 
-app.get('/api/schemas', function(req, res){
+app.get('/api/schemas', function(req, res) {
   res.send(dataAccess.listSchemas());
 });
 
-app.get('/api/schemas/:schema', function(req, res){
+app.get('/api/schemas/:schema', function(req, res) {
   const modelClass = req.params.schema;
   res.send(dataAccess.viewSchemas(modelClass));
 });
 
-app.get('/api/schemas/:schema/download', function(req, res){
+app.get('/api/schemas/:schema/download', function(req, res) {
   const modelClass = req.params.schema;
   res.send(dataAccess.download(modelClass));
 });
 
-app.put('/api/schemas/:schema/upload', function(req, res){
+app.put('/api/schemas/:schema/upload', function(req, res) {
   const modelClass = req.params.schema;
   const data = req.body;
   res.send(dataAccess.upload(modelClass, data));
 });
 
-app.get('/api/indexes', function(req, res){
+app.get('/api/indexes', function(req, res) {
   res.send(dataAccess.downloadIndexes());
 });
 
-app.put('/api/indexes', function(req, res){
+app.put('/api/indexes', function(req, res) {
   const data = req.body;
   res.send(dataAccess.uploadIndexes(data));
 });
 
-app.get('/api/countries', function(req, res){
+app.get('/api/countries', function(req, res) {
   const params = req.query;
   logger.log(`Requesting countries data`, params);
   res.send(dataAccess.list('countries', params));
 });
-/*** end:Routes ***/
+/** * end:Routes ***/
 
-(async () => {
+(async() => {
   await dataAccess.initData();
 
   await loadPlugins(app);
 
   // fallback
-  app.get('/*', function(req, res){
+  app.get('/*', function(req, res) {
     res.redirect('/');
   });
 
@@ -121,5 +120,5 @@ app.get('/api/countries', function(req, res){
 })();
 
 module.exports = {
-  server
+  server,
 };

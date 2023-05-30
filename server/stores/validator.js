@@ -1,7 +1,8 @@
-'use strict'
-
 module.exports = (config, logger, utils) => {
-  function validate(modelClass, record, schemas, indexes, data, check = { unique: true, required: true, foreign: true }) {
+  function validate(
+    modelClass, record, schemas, indexes, data,
+    check = { unique: true, required: true, foreign: true }
+  ) {
     const constraints = schemas[modelClass].constraints;
     const modelSchemas = schemas[modelClass].fields;
     const errors = {};
@@ -23,7 +24,7 @@ module.exports = (config, logger, utils) => {
 
     return {
       valid: Object.keys(errors).length === 0,
-      errors: errors
+      errors,
     };
   }
 
@@ -54,7 +55,7 @@ module.exports = (config, logger, utils) => {
 
   function validateRequired(modelClass, schemas, record, constraint, data, errors) {
     const errorFields = constraint.filter((field) => {
-      const fieldDefault = schemas[field].default
+      const fieldDefault = schemas[field].default;
       return utils.isEmpty(record[field]) && utils.isEmpty(fieldDefault);
     });
 
@@ -74,7 +75,7 @@ module.exports = (config, logger, utils) => {
       const referenceData = data[referenceModel] || {};
       return !foreignValue.reduce((check, value) => {
         return check && !!referenceData[value];
-      }, true)
+      }, true);
     });
 
     errorFields.forEach((field) => {
@@ -88,7 +89,7 @@ module.exports = (config, logger, utils) => {
     const foreignIndexes = indexes.foreign[modelClass];
     if (utils.isEmpty(foreignIndexes)) { return false; }
 
-    const associations = foreignIndexes[record.id]
+    const associations = foreignIndexes[record.id];
     if (utils.isEmpty(associations)) { return false; }
 
     const someAssociated = Object.values(associations).filter((associatedData) => {
@@ -100,6 +101,6 @@ module.exports = (config, logger, utils) => {
 
   return {
     validate,
-    isUsed
-  }
-}
+    isUsed,
+  };
+};

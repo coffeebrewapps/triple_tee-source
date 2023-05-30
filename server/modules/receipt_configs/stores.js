@@ -1,5 +1,3 @@
-'use strict'
-
 const modelClass = 'receipt_configs';
 
 module.exports = (dataAccess) => {
@@ -29,6 +27,6 @@ module.exports = (dataAccess) => {
     view,
     create,
     update,
-    remove
-  }
-}
+    remove,
+  };
+};

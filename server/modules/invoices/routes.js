@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = (routes, stores, logger, utils) => {
   function previewInvoice(stores) {
     return function(req, res) {
@@ -12,7 +10,7 @@ module.exports = (routes, stores, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   }
 
   function createWithLines(stores) {
@@ -26,7 +24,7 @@ module.exports = (routes, stores, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   }
 
   function viewTemplateData(stores) {
@@ -40,7 +38,7 @@ module.exports = (routes, stores, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   }
 
   return {
@@ -55,6 +53,6 @@ module.exports = (routes, stores, logger, utils) => {
       { method: 'post', path: '/preview_invoice', handler: previewInvoice(stores) },
       { method: 'post', path: '/generate_with_lines', handler: createWithLines(stores) },
       { method: 'get', path: '/:id/template_data', handler: viewTemplateData(stores) },
-    ]
-  }
-}
+    ],
+  };
+};

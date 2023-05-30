@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = (routes, stores, logger, utils) => {
   function previewReceipt(stores) {
     return function(req, res) {

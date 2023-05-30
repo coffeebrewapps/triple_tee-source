@@ -1,5 +1,3 @@
-'use strict'
-
 const name = 'invoice_lines';
 
 module.exports = (dataAccess, routes, logger) => {
@@ -9,6 +7,6 @@ module.exports = (dataAccess, routes, logger) => {
   return {
     name,
     stores,
-    router
-  }
-}
+    router,
+  };
+};

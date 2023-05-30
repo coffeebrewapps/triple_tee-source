@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require('path');
 const fs = require('fs');
 
 const rootDir = path.dirname(__filename);
@@ -10,21 +10,21 @@ function readConfigFile() {
 
   let dataDir = null;
   if (path.isAbsolute(parsedResult.dataDir)) {
-    dataDir = parsedResult.dataDir
+    dataDir = parsedResult.dataDir;
   } else {
     dataDir = path.join(rootDir, parsedResult.dataDir);
   }
 
   let logFile = null;
   if (path.isAbsolute(parsedResult.logFile)) {
-    logFile = parsedResult.logFile
+    logFile = parsedResult.logFile;
   } else {
     logFile = path.join(rootDir, parsedResult.logFile);
   }
 
   let modulesDir = null;
   if (path.isAbsolute(parsedResult.modulesDir)) {
-    modulesDir = parsedResult.modulesDir
+    modulesDir = parsedResult.modulesDir;
   } else {
     modulesDir = path.join(rootDir, parsedResult.modulesDir);
   }
@@ -35,11 +35,11 @@ function readConfigFile() {
     {
       dataDir,
       logFile,
-      modulesDir
+      modulesDir,
     }
-  )
+  );
 }
 
 module.exports = {
-  readConfigFile
-}
+  readConfigFile,
+};

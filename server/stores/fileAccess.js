@@ -1,7 +1,5 @@
-'use strict'
-
 module.exports = (config, logger, utils) => {
-  const path = require('path')
+  const path = require('path');
   const fs = require('fs');
 
   const schemasData = require('../../_init/schemas.json');
@@ -18,15 +16,15 @@ module.exports = (config, logger, utils) => {
 
     return new Promise((resolve, reject) => {
       Promise.all([loadSchemasAndData(schemas), loadIndexes(indexes)])
-      .then((result) => {
-        const allResults = result.reduce((o, r) => {
-          return Object.assign({}, o, r)
+        .then((result) => {
+          const allResults = result.reduce((o, r) => {
+            return Object.assign({}, o, r);
+          });
+          resolve(allResults);
+        })
+        .catch((error) => {
+          reject(error);
         });
-        resolve(allResults);
-      })
-      .catch((error) => {
-        reject(error);
-      })
     });
   }
 
@@ -45,12 +43,12 @@ module.exports = (config, logger, utils) => {
             })
             .catch((error) => {
               reject(error);
-            })
+            });
         })
         .catch((error) => {
           reject(error);
         });
-    })
+    });
   }
 
   async function loadSchemas(schemas) {
@@ -100,9 +98,9 @@ module.exports = (config, logger, utils) => {
           readFromFile(modelClass)
             .then((result) => {
               if (result) {
-                resolve({ modelClass: modelClass, data: JSON.parse(result) });
+                resolve({ modelClass, data: JSON.parse(result) });
               } else {
-                resolve({ modelClass: modelClass, data: {} });
+                resolve({ modelClass, data: {} });
               }
             })
             .catch((error) => {
@@ -123,27 +121,27 @@ module.exports = (config, logger, utils) => {
         logger.log(`Data file not found, creating empty file...`, { modelClass });
         writeToFile(modelClass, initData)
           .then(() => {
-            resolve()
+            resolve();
           })
           .catch((error) => {
-            reject(error)
-          })
+            reject(error);
+          });
       } else {
-        resolve()
+        resolve();
       }
-    })
+    });
   }
 
   async function initSchemasFile(schemas, schemasData) {
     return new Promise((resolve, reject) => {
       writeToFile(schemas, schemasData)
         .then(() => {
-          resolve()
+          resolve();
         })
         .catch((error) => {
-          reject(error)
-        })
-    })
+          reject(error);
+        });
+    });
   }
 
   async function readFromFile(modelClass) {
@@ -156,7 +154,7 @@ module.exports = (config, logger, utils) => {
   }
 
   async function executeWriteToFileQueue(modelClass) {
-    if (writeToFileQueue[modelClass].length === 0) { return }
+    if (writeToFileQueue[modelClass].length === 0) { return; }
 
     const data = writeToFileQueue[modelClass].shift();
 
@@ -165,8 +163,8 @@ module.exports = (config, logger, utils) => {
       fs.writeFileSync(pathName(modelClass), JSON.stringify(data));
       logger.log(`Data written to file`, { modelClass });
       executeWriteToFileQueue(modelClass);
-    } catch(error) {
-      logger.error(`Error writing to file`, { modelClass, error })
+    } catch (error) {
+      logger.error(`Error writing to file`, { modelClass, error });
     }
   }
 
@@ -175,6 +173,6 @@ module.exports = (config, logger, utils) => {
     loadSchemas,
     loadData,
     readFromFile,
-    writeToFile
-  }
-}
+    writeToFile,
+  };
+};

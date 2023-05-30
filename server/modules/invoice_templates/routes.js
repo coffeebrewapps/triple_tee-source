@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = (routes, stores) => {
   return {
     prefix: '/api/invoice_templates',
@@ -10,7 +8,7 @@ module.exports = (routes, stores) => {
       { method: 'post', path: '/', handler: routes.create(stores) },
       { method: 'put', path: '/:id', handler: routes.update(stores) },
       { method: 'delete', path: '/:id', handler: routes.remove(stores) },
-      { method: 'post', path: '/:id/pdf', handler: routes.downloadPdf('invoice_templates', stores) }
-    ]
-  }
-}
+      { method: 'post', path: '/:id/pdf', handler: routes.downloadPdf('invoice_templates', stores) },
+    ],
+  };
+};

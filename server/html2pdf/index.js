@@ -1,5 +1,4 @@
 // Reference: https://github.com/hyfi06/node-convertToPdf
-'use strict'
 
 const puppeteer = require('puppeteer');
 const { Duplex } = require('stream');
@@ -19,7 +18,7 @@ module.exports = (logger) => {
       args: launchArgs || [
         '--disable-file-system',
         '--no-sandbox',
-      ]
+      ],
     });
     logger.log(`Launched puppeteer browser`);
 
@@ -83,13 +82,13 @@ module.exports = (logger) => {
 
     content.push(`</html>`);
 
-    const htmlString = content.join('')
+    const htmlString = content.join('');
 
     return liquidEngine.parseAndRender(htmlString, params);
   }
 
   return {
     convertToPdf,
-    createHtmlString
-  }
-}
+    createHtmlString,
+  };
+};

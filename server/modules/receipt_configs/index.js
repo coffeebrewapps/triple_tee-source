@@ -1,5 +1,3 @@
-'use strict'
-
 const name = 'receipt_configs';
 
 module.exports = (dataAccess, routes) => {
@@ -9,6 +7,6 @@ module.exports = (dataAccess, routes) => {
   return {
     name,
     stores,
-    router
-  }
-}
+    router,
+  };
+};

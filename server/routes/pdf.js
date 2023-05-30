@@ -1,5 +1,3 @@
-'use strict'
-
 module.exports = (templateType, stores, logger) => {
   const html2pdf = require('../html2pdf/index')(logger);
 
@@ -11,7 +9,7 @@ module.exports = (templateType, stores, logger) => {
     const pdfStream = await html2pdf.convertToPdf(htmlString);
 
     pdfStream.pipe(res);
-    pdfStream.on('end', function () {
+    pdfStream.on('end', function() {
       res.end();
     });
   }
@@ -35,13 +33,12 @@ module.exports = (templateType, stores, logger) => {
       })
       .catch((error) => {
         logger.log(`Error parsing template!`, error);
-        return
       });
 
     await createResponse(res, htmlString, filename);
   }
 
   return {
-    downloadPdf
-  }
-}
+    downloadPdf,
+  };
+};

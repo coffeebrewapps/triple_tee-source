@@ -1,5 +1,3 @@
-'use strict'
-
 const modelClass = 'work_logs';
 
 module.exports = (dataAccess, logger, utils) => {
@@ -29,6 +27,6 @@ module.exports = (dataAccess, logger, utils) => {
     view,
     create,
     update,
-    remove
-  }
-}
+    remove,
+  };
+};

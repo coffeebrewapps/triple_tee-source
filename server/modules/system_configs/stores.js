@@ -1,5 +1,3 @@
-'use strict'
-
 const modelClass = 'system_configs';
 
 module.exports = (dataAccess, logger, utils) => {
@@ -28,8 +26,8 @@ module.exports = (dataAccess, logger, utils) => {
     if (utils.isEmpty(found)) {
       return {
         success: false,
-        errors: ['not exists']
-      }
+        errors: ['not exists'],
+      };
     }
 
     const updated = Object.assign({}, found, { effectiveEnd });
@@ -40,16 +38,16 @@ module.exports = (dataAccess, logger, utils) => {
     const filters = {
       sort: {
         field: 'effectiveStart',
-        order: 'desc'
+        order: 'desc',
       },
       include: ['baseCurrencyId', 'baseContactId'],
-      limit: 1
-    }
+      limit: 1,
+    };
     const latest = list(filters).data[0];
     return {
       success: true,
-      record: latest
-    }
+      record: latest,
+    };
   }
 
   function replaceLatest(params) {
@@ -72,6 +70,6 @@ module.exports = (dataAccess, logger, utils) => {
     update,
     remove,
     viewLatest,
-    replaceLatest
-  }
-}
+    replaceLatest,
+  };
+};

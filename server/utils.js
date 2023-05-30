@@ -17,5 +17,5 @@ function wrapArray(val) {
 module.exports = {
   isEmpty,
   notEmpty,
-  wrapArray
-}
+  wrapArray,
+};

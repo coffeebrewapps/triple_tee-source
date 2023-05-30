@@ -1,19 +1,17 @@
-'use strict'
-
 module.exports = (config, logger, utils) => {
   function list(store) {
     return function(req, res) {
       const params = req.query;
       logger.log(`Requesting all data`, params);
       res.send(store.list(params));
-    }
+    };
   };
 
   function create(store) {
     return function(req, res) {
       const params = req.body;
 
-      logger.log(`Creating record`, params)
+      logger.log(`Creating record`, params);
       const result = store.create(params);
 
       if (result.success) {
@@ -21,7 +19,7 @@ module.exports = (config, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   };
 
   function view(store) {
@@ -31,7 +29,7 @@ module.exports = (config, logger, utils) => {
       logger.log(`Viewing record`, { id, params });
 
       res.send(store.view(id, params));
-    }
+    };
   };
 
   function update(store) {
@@ -39,7 +37,7 @@ module.exports = (config, logger, utils) => {
       const params = req.body;
       const id = req.params.id;
 
-      logger.log(`Updating record`, { id, params })
+      logger.log(`Updating record`, { id, params });
       const result = store.update(id, params);
 
       if (result.success) {
@@ -47,7 +45,7 @@ module.exports = (config, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   };
 
   function remove(store) {
@@ -62,7 +60,7 @@ module.exports = (config, logger, utils) => {
       } else {
         res.status(400).send(result);
       }
-    }
+    };
   };
 
   function download(store) {
@@ -72,10 +70,10 @@ module.exports = (config, logger, utils) => {
       const data = store.list(params);
       const filename = `${store.modelClass}.json`;
       res.send({
-        filename: filename,
-        data: JSON.stringify(data)
+        filename,
+        data: JSON.stringify(data),
       });
-    }
+    };
   };
 
   function downloadPdf(templateType, store) {
@@ -90,6 +88,6 @@ module.exports = (config, logger, utils) => {
     update,
     remove,
     download,
-    downloadPdf
-  }
-}
+    downloadPdf,
+  };
+};

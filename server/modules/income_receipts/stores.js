@@ -1,5 +1,3 @@
-'use strict';
-
 const modelClass = 'income_receipts';
 
 module.exports = (dataAccess, logger, utils) => {
@@ -60,7 +58,7 @@ module.exports = (dataAccess, logger, utils) => {
       invoiceId: invoice.id,
       currencyId: currency.id,
       contactId: billingContact.id,
-      includes: receiptIncludes
+      includes: receiptIncludes,
     };
   }
 
@@ -70,8 +68,8 @@ module.exports = (dataAccess, logger, utils) => {
       invoiceId,
       {
         include: [
-          'currencyId'
-        ]
+          'currencyId',
+        ],
       }
     ).record;
 
@@ -82,8 +80,8 @@ module.exports = (dataAccess, logger, utils) => {
       invoice.contactId,
       {
         include: [
-          'country'
-        ]
+          'country',
+        ],
       }
     ).record;
     const country = billingContact.includes.country[billingContact.country];
@@ -91,7 +89,7 @@ module.exports = (dataAccess, logger, utils) => {
     const pastReceipts = list(
       {
         filters: { invoiceId },
-        sort: { field: 'receiptDate', order: 'desc' }
+        sort: { field: 'receiptDate', order: 'desc' },
       }
     ).data;
 
@@ -100,8 +98,8 @@ module.exports = (dataAccess, logger, utils) => {
       invoice.invoiceConfigId,
       {
         include: [
-          'invoiceNumberSequenceId'
-        ]
+          'invoiceNumberSequenceId',
+        ],
       }
     ).record;
     const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId];
@@ -112,7 +110,7 @@ module.exports = (dataAccess, logger, utils) => {
       currency,
       country,
       pastReceipts,
-      invoiceNumberSequence
+      invoiceNumberSequence,
     };
   }
 
@@ -125,7 +123,7 @@ module.exports = (dataAccess, logger, utils) => {
     }
 
     const {
-      receiptNumberSequence
+      receiptNumberSequence,
     } = viewReceiptConfigWithIncludes(receipt.incomeReceiptConfigId);
 
     const {
@@ -134,9 +132,8 @@ module.exports = (dataAccess, logger, utils) => {
       currency,
       country,
       pastReceipts,
-      invoiceNumberSequence
+      invoiceNumberSequence,
     } = viewInvoiceWithIncludes(receipt.invoiceId);
-
 
     return {
       receipt,
@@ -147,7 +144,7 @@ module.exports = (dataAccess, logger, utils) => {
       country,
       pastReceipts,
       receiptNumberSequence,
-      invoiceNumberSequence
+      invoiceNumberSequence,
     };
   }
 
@@ -158,8 +155,8 @@ module.exports = (dataAccess, logger, utils) => {
       {
         include: [
           'receiptNumberSequenceId',
-          'receiptTemplateId'
-        ]
+          'receiptTemplateId',
+        ],
       }
     ).record;
 
@@ -169,7 +166,7 @@ module.exports = (dataAccess, logger, utils) => {
     return {
       receiptConfig,
       receiptNumberSequence,
-      receiptTemplate
+      receiptTemplate,
     };
   }
 
@@ -183,16 +180,18 @@ module.exports = (dataAccess, logger, utils) => {
         billingContact,
         currency,
         pastReceipts,
-        invoiceNumberSequence
+        invoiceNumberSequence,
       } = viewInvoiceWithIncludes(invoiceId);
 
       const {
         receiptConfig,
         receiptNumberSequence,
-        receiptTemplate
+        receiptTemplate,
       } = viewReceiptConfigWithIncludes(receiptConfigId);
 
-      const receipt = prefillReceipt({ invoice, pastReceipts, receiptConfig, receiptNumberSequence, billingContact, currency });
+      const receipt = prefillReceipt({
+        invoice, pastReceipts, receiptConfig, receiptNumberSequence, billingContact, currency,
+      });
 
       return {
         success: true,
@@ -204,13 +203,13 @@ module.exports = (dataAccess, logger, utils) => {
           receiptConfig,
           receiptNumberSequence,
           receiptTemplate,
-          invoiceNumberSequence
-        }
+          invoiceNumberSequence,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        errors: error
+        errors: error,
       };
     }
   }
@@ -223,7 +222,7 @@ module.exports = (dataAccess, logger, utils) => {
 
       const {
         invoice,
-        pastReceipts
+        pastReceipts,
       } = viewInvoiceWithIncludes(invoiceId);
 
       const paidAmount = pastReceipts.reduce((sum, pastReceipt) => {
@@ -234,14 +233,14 @@ module.exports = (dataAccess, logger, utils) => {
       if (receipt.paymentAmount > (billableAmount - paidAmount)) {
         return {
           success: false,
-          errors: ['lessThanOrEqual']
+          errors: ['lessThanOrEqual'],
         };
       }
 
       receipt.remainingAmount = parseFloat((billableAmount - paidAmount - receipt.paymentAmount).toFixed(2));
 
       const {
-        receiptNumberSequence
+        receiptNumberSequence,
       } = viewReceiptConfigWithIncludes(receiptConfigId);
       const lastUsedNumber = receiptNumberSequence.lastUsedNumber + receiptNumberSequence.incrementStep;
 
@@ -251,17 +250,21 @@ module.exports = (dataAccess, logger, utils) => {
             id: 'updateNumberSequence',
             params: {
               receiptNumberSequenceId: receiptNumberSequence.id,
-              lastUsedNumber
+              lastUsedNumber,
             },
             invoke: ({ receiptNumberSequenceId, lastUsedNumber }, pastResults) => {
               return dataAccess.update('sequences', receiptNumberSequenceId, { lastUsedNumber });
             },
             rollback: (result) => {
-              const updatedSequenceNumberId = result.record.id
-              const updatedLastUsedNumber = result.record.lastUsedNumber
-              const incrementStep = result.record.incrementStep
-              dataAccess.update('sequences', updatedSequenceNumberId, { lastUsedNumber: updatedLastUsedNumber - incrementStep })
-            }
+              const updatedSequenceNumberId = result.record.id;
+              const updatedLastUsedNumber = result.record.lastUsedNumber;
+              const incrementStep = result.record.incrementStep;
+              dataAccess.update(
+                'sequences',
+                updatedSequenceNumberId,
+                { lastUsedNumber: updatedLastUsedNumber - incrementStep }
+              );
+            },
           },
           {
             id: 'createTransaction',
@@ -272,51 +275,54 @@ module.exports = (dataAccess, logger, utils) => {
               amount: receipt.paymentAmount,
               homeCurrencyAmount: receipt.paymentAmount,
               tags: [],
-              currencyId: receipt.currencyId
+              currencyId: receipt.currencyId,
             },
             invoke: (params, pastResults) => {
               return dataAccess.create('transactions', params);
             },
             rollback: (result) => {
-              const transactionId = result.record.id
-              dataAccess.remove('transactions', transactionId)
-            }
+              const transactionId = result.record.id;
+              dataAccess.remove('transactions', transactionId);
+            },
           },
           {
             id: 'createReceipt',
             params: receipt,
             invoke: (params, pastResults) => {
               const createdTransaction = pastResults[0].result.record;
-              return dataAccess.create('income_receipts', Object.assign({}, params, { incomeTransactionId: createdTransaction.id }));
+              return dataAccess.create(
+                'income_receipts',
+                Object.assign({}, params, { incomeTransactionId: createdTransaction.id })
+              );
             },
             rollback: (result) => {
               const receiptId = result.record.id;
               dataAccess.remove('income_receipts', receiptId);
-            }
-          }
+            },
+          },
         ]
-      )
+      );
 
       if (success) {
-        const createdReceipt = results[2].record
-        const transaction = results[1].record
+        const createdReceipt = results[2].record;
+        const transaction = results[1].record;
         return {
           success: true,
           record: Object.assign(
             {},
             createdReceipt,
             { transaction }
-          )
-        }
+          ),
+        };
       } else {
-        return results[0].result
+        return results[0].result;
       }
     } catch (error) {
-      logger.error(error)
+      logger.error(error);
       return {
         success: false,
-        errors: error
-      }
+        errors: error,
+      };
     }
   }
 
@@ -330,14 +336,14 @@ module.exports = (dataAccess, logger, utils) => {
         transaction,
         billingContact,
         country,
-        invoiceNumberSequence
+        invoiceNumberSequence,
       } = viewReceiptWithIncludes(receiptId);
 
       const receiptConfigId = receipt.incomeReceiptConfigId;
       const {
         receiptConfig,
         receiptNumberSequence,
-        receiptTemplate
+        receiptTemplate,
       } = viewReceiptConfigWithIncludes(receiptConfigId);
 
       return {
@@ -352,13 +358,13 @@ module.exports = (dataAccess, logger, utils) => {
           receiptConfig,
           receiptNumberSequence,
           receiptTemplate,
-          invoiceNumberSequence
-        }
+          invoiceNumberSequence,
+        },
       };
     } catch (error) {
       return {
         success: false,
-        errors: error
+        errors: error,
       };
     }
   }
@@ -372,6 +378,6 @@ module.exports = (dataAccess, logger, utils) => {
     remove,
     createWithTransaction,
     previewReceipt,
-    viewTemplateData
+    viewTemplateData,
   };
 };

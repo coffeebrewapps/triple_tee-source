@@ -1,5 +1,3 @@
-'use strict'
-
 const name = 'tax_tables';
 
 module.exports = (dataAccess, routes, logger, utils) => {
@@ -9,6 +7,6 @@ module.exports = (dataAccess, routes, logger, utils) => {
   return {
     name,
     stores,
-    router
-  }
-}
+    router,
+  };
+};

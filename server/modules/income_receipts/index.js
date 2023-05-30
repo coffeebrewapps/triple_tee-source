@@ -1,5 +1,3 @@
-'use strict';
-
 const name = 'receipts';
 
 module.exports = (dataAccess, routes, logger, utils) => {

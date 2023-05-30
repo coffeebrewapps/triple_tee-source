@@ -1,5 +1,3 @@
-'use strict'
-
 const name = 'currencies';
 
 module.exports = (dataAccess, routes) => {
@@ -9,6 +7,6 @@ module.exports = (dataAccess, routes) => {
   return {
     name,
     stores,
-    router
-  }
-}
+    router,
+  };
+};
