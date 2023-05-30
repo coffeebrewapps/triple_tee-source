@@ -25,9 +25,7 @@ function module {
   module_file="$module_dir/index.js"
   if [[ ! -f $module_file ]]; then
     touch $module_file
-    echo "'use strict'
-
-const name = '$model';
+    echo "const name = '$model';
 
 module.exports = (dataAccess, routes, logger, utils) => {
   const stores = require('./stores')(dataAccess, logger, utils);
@@ -36,16 +34,14 @@ module.exports = (dataAccess, routes, logger, utils) => {
   return {
     name,
     stores,
-    router
-  }
-}" >> $module_file
+    router,
+  };
+};" >> $module_file
   fi
 
   route_file="$module_dir/routes.js"
   if [[ ! -f $route_file ]]; then
-    echo "'use strict'
-
-module.exports = (routes, stores, logger, utils) => {
+    echo "module.exports = (routes, stores, logger, utils) => {
   return {
     prefix: '/api/${model}',
     routes: [
@@ -54,17 +50,15 @@ module.exports = (routes, stores, logger, utils) => {
       { method: 'get', path: '/:id', handler: routes.view(stores) },
       { method: 'post', path: '/', handler: routes.create(stores) },
       { method: 'put', path: '/:id', handler: routes.update(stores) },
-      { method: 'delete', path: '/:id', handler: routes.remove(stores) }
-    ]
-  }
-}" >> $route_file
+      { method: 'delete', path: '/:id', handler: routes.remove(stores) },
+    ],
+  };
+};" >> $route_file
   fi
 
   store_file="$module_dir/stores.js"
   if [[ ! -f $store_file ]]; then
-    echo "'use strict'
-
-const modelClass = '$model';
+    echo "const modelClass = '$model';
 
 module.exports = (dataAccess, logger, utils) => {
   function list(filters = {}) {
@@ -93,9 +87,9 @@ module.exports = (dataAccess, logger, utils) => {
     view,
     create,
     update,
-    remove
-  }
-}" >> $store_file
+    remove,
+  };
+};" >> $store_file
   fi
 }
 
@@ -116,30 +110,30 @@ function client {
     echo "const route = {
   path: '/${lower_model}',
   name: '${model}',
-  component: () => import('./${model}.vue')
+  component: () => import('./${model}.vue'),
 }
 
 const usePlugin = (router, dataStore) => {
-  router.addRoute(route)
-  return route
-}
+  router.addRoute(route);
+  return route;
+};
 
-export default usePlugin" >> $index_file
+export default usePlugin;" >> $index_file
   fi
 
   if [[ ! -f $view_file ]]; then
     touch $view_file
     echo "<script setup>
-import DataPage from '@/components/DataPage.vue'
+import DataPage from '@/components/DataPage.vue';
 
 const fieldsLayout = [
-]
+];
 
 const dataFields = [
-]
+];
 
 const validations = {
-}
+};
 </script>
 
 <template>
