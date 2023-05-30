@@ -1,418 +1,407 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:utils ***/
-import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
+/** import:utils **/
+import { useValidations } from '@/utils/validations';
+import { useDataAccess } from '@/utils/dataAccess';
+import { useInputHelper } from '@/utils/input';
+import { useInvoiceUtils } from './utils';
+/** import:utils **/
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+/** import:stores **/
+import { useBannerStore } from '@/stores/banner';
+/** import:stores **/
 
-import { useInvoiceUtils } from './utils'
-import { useInputHelper } from '@/utils/input'
-/*** import:utils ***/
-
-/*** import:stores ***/
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-/*** import:stores ***/
-
-/*** import:components ***/
+/** import:components **/
 import {
-  TButton,
   TInput,
   TSelect,
   TTable
-} from 'coffeebrew-vue-components'
+} from 'coffeebrew-vue-components';
 
-import WorkflowContainer from '@/components/WorkflowContainer.vue'
-import Form from '@/components/Form.vue'
-import TemplateEditor from '@/components/TemplateEditor.vue'
-/*** import:components ***/
+import WorkflowContainer from '@/components/WorkflowContainer.vue';
+import DataForm from '@/components/DataForm.vue';
+import TemplateEditor from '@/components/TemplateEditor.vue';
+/** import:components **/
 
-/*** section:global ***/
-const currentRoute = Object.assign({}, router.currentRoute.value)
+/** section:utils **/
+const router = useRouter();
+const { isEmpty, notEmpty } = useValidations();
+const dataAccess = useDataAccess();
+const banner = useBannerStore();
+/** section:utils **/
+
+/** section:global **/
+const currentRoute = Object.assign({}, router.currentRoute.value);
 const contactId = computed(() => {
-  return currentRoute.query.contactId
-})
+  return currentRoute.query.contactId;
+});
 
 const {
   generateDataFields,
   recordValue,
   tagLabel,
   contactLabel,
-  currencyLabel,
-  invoiceConfigLabel
-} = useInvoiceUtils()
-/*** section:global ***/
+  invoiceConfigLabel,
+} = useInvoiceUtils();
+/** section:global **/
 
-/*** section:filters ***/
-function configLabel(record) {
-  return `Every ${record.invoiceCycleDurationValue} ${record.invoiceCycleDurationUnit}, due in ${record.dueDateCycleValue} ${record.dueDateCycleUnit}`
-}
-
+/** section:filters **/
 const filtersData = ref({
   tags: [],
   invoiceConfigId: [],
   startTime: {
     startTime: null,
-    endTime: null
+    endTime: null,
   },
   endTime: {
     startTime: null,
-    endTime: null
-  }
-})
+    endTime: null,
+  },
+});
 
 if (notEmpty(contactId.value)) {
-  filtersData.value.invoiceConfigId = [{ value: contactId.value }]
+  filtersData.value.invoiceConfigId = [{ value: contactId.value }];
 }
 
 const filtersDataFields = computed(() => {
   return [
     {
-      key: 'contactId', type: 'singleSelect', label: 'Contact',
+      key: 'contactId',
+      type: 'singleSelect',
+      label: 'Contact',
       reference: { label: contactLabel },
-      listable: false, viewable: true, creatable: true, updatable: true,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'contacts',
         value: recordValue,
-        label: contactLabel
-      }
+        label: contactLabel,
+      },
     },
     {
-      key: 'invoiceConfigId', type: 'singleSelect', label: 'Invoice Config',
+      key: 'invoiceConfigId',
+      type: 'singleSelect',
+      label: 'Invoice Config',
       reference: { label: invoiceConfigLabel },
-      listable: false, viewable: true, creatable: true, updatable: true,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'invoice_configs',
         value: recordValue,
-        label: invoiceConfigLabel
-      }
+        label: invoiceConfigLabel,
+      },
     },
     {
-      key: 'tags', type: 'multiSelect', label: 'Tags',
+      key: 'tags',
+      type: 'multiSelect',
+      label: 'Tags',
       reference: { label: tagLabel },
-      listable: true, viewable: true, creatable: true, updatable: true, filterable: true,
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+      filterable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'tags',
         value: recordValue,
-        label: tagLabel
-      }
+        label: tagLabel,
+      },
     },
-    { key: 'startTime', type: 'datetimerange', label: 'Start Time', defaultValue: () => { return new Date() }, listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
-    { key: 'endTime', type: 'datetimerange', label: 'End Time', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true }
-  ]
-})
+    {
+      key: 'startTime',
+      type: 'datetimerange',
+      label: 'Start Time',
+      defaultValue: () => { return new Date(); },
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      key: 'endTime',
+      type: 'datetimerange',
+      label: 'End Time',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+      filterable: true,
+      sortable: true,
+    },
+  ];
+});
 
-const filtersInputHelper = useInputHelper(filtersDataFields.value)
+const filtersInputHelper = useInputHelper(filtersDataFields.value);
 
 const filtersLayout = computed(() => {
   return [
     { contactId: 'lg', invoiceConfigId: 'lg' },
     { tags: 'lg' },
     { startTime: 'md' },
-    { endTime: 'md' }
-  ]
-})
+    { endTime: 'md' },
+  ];
+});
 
 const filterableKeys = computed(() => {
-  return filtersDataFields.value.map(f => f.key)
-})
+  return filtersDataFields.value.map(f => f.key);
+});
 
-const filtersErrorMessages = ref({})
-
-const filtersConfirmButton = computed(() => {
-  return {
-    type: 'text',
-    value: 'Filter',
-    icon: 'fa-solid fa-check'
-  }
-})
-
-const filtersCancelButton = computed(() => {
-  return {
-    type: 'text',
-    value: 'Cancel',
-    icon: 'fa-solid fa-xmark'
-  }
-})
+const filtersErrorMessages = ref({});
 
 function resetInvoiceData() {
-  updatedInvoice.value = null
-  updatedInvoiceLines.value = []
-  invoiceTemplate.value = null
+  updatedInvoice.value = null;
+  updatedInvoiceLines.value = [];
+  invoiceTemplate.value = null;
 }
 
 async function formatInvoice(invoice) {
   const promises = invoiceKeys.value.map((key) => {
-    return invoiceHelper.formatDataForShow(key, invoice)
-  })
+    return invoiceHelper.formatDataForShow(key, invoice);
+  });
 
   Promise
     .all(promises)
     .then((results) => {
-      updatedInvoice.value = {}
+      updatedInvoice.value = {};
       invoiceKeys.value.forEach((key, i) => {
-        updatedInvoice.value[key] = results[i]
-      })
-      updatedInvoice.value.totalAmount = invoiceTotalAmount.value
+        updatedInvoice.value[key] = results[i];
+      });
+      updatedInvoice.value.totalAmount = invoiceTotalAmount.value;
     })
     .catch((error) => {
-      showBanner(`Error generating invoice!`)
-      console.error(error)
-    })
+      showBanner(`Error generating invoice!`);
+      console.error(error);
+    });
 }
 
 async function updateInvoiceData(result) {
-  await formatInvoice(Object.assign({}, result.invoice))
+  await formatInvoice(Object.assign({}, result.invoice));
 
   updatedInvoiceLines.value = result.invoiceLines.map((line) => {
-    return formatInvoiceLine(line)
-  })
+    return formatInvoiceLine(line);
+  });
 
-  invoiceConfig.value = Object.assign({}, result.invoiceConfig)
-  invoiceNumberSequence.value = Object.assign({}, result.invoiceNumberSequence)
-  billingContact.value = Object.assign({}, result.billingContact)
-  currency.value = Object.assign({}, result.currency)
-  invoiceTemplate.value = Object.assign({}, result.invoiceTemplate)
+  invoiceConfig.value = Object.assign({}, result.invoiceConfig);
+  invoiceNumberSequence.value = Object.assign({}, result.invoiceNumberSequence);
+  billingContact.value = Object.assign({}, result.billingContact);
+  currency.value = Object.assign({}, result.currency);
+  invoiceTemplate.value = Object.assign({}, result.invoiceTemplate);
 }
 
 async function submitFilters() {
-  resetInvoiceData()
-  invoiceLinesLoading.value = true
+  resetInvoiceData();
+  invoiceLinesLoading.value = true;
 
-  const params = filtersInputHelper.formatFilters(filtersData.value)
+  const params = filtersInputHelper.formatFilters(filtersData.value);
   dataAccess
     .create('invoices', params, { path: 'preview_invoice' })
     .then((result) => {
-      updateInvoiceData(result)
-      invoiceLinesLoading.value = false
+      updateInvoiceData(result);
+      invoiceLinesLoading.value = false;
     })
     .catch((error) => {
-      console.error(error)
-      showBanner(`Error previewing invoice!`)
-    })
+      console.error(error);
+      showBanner(`Error previewing invoice!`);
+    });
 }
 
 function resetFilters() {
-  resetInvoiceData()
+  resetInvoiceData();
 
   filtersData.value = {
     tags: [],
     invoiceConfigId: [],
     startTime: {
       startTime: null,
-      endTime: null
+      endTime: null,
     },
     endTime: {
       startTime: null,
-      endTime: null
-    }
-  }
+      endTime: null,
+    },
+  };
 }
-/*** section:filters ***/
+/** section:filters **/
 
-/*** section:invoiceLines ***/
+/** section:invoiceLines **/
 const invoiceLineHeaders = [
   { key: 'description', type: 'text', label: 'Description', listable: true, creatable: true, updatable: true },
   { key: 'unitValue', type: 'number', label: 'Unit Value', listable: true, creatable: true, updatable: true },
   { key: 'unitCost', type: 'number', label: 'Unit Cost', listable: true, creatable: true, updatable: true },
   { key: 'unit', type: 'enum', label: 'Unit', listable: true, creatable: true, updatable: true },
-  { key: 'subtotal', type: 'number', label: 'Subtotal', listable: true, creatable: true, updatable: true }
-]
+  { key: 'subtotal', type: 'number', label: 'Subtotal', listable: true, creatable: true, updatable: true },
+];
 
-const invoiceLineHelper = useInputHelper(invoiceLineHeaders)
+const invoiceLineHelper = useInputHelper(invoiceLineHeaders);
 
-const updatedInvoiceLines = ref([])
+const updatedInvoiceLines = ref([]);
 
 const invoiceLineTableActions = [
   {
     name: 'Create',
     icon: 'fa-solid fa-circle-plus fa-xl',
     click: async function(data) {
-      await addInvoiceLine()
-    }
-  }
-]
+      await addInvoiceLine();
+    },
+  },
+];
 
 const invoiceLineRowActions = [
   {
     name: 'Calculate',
     icon: 'fa-solid fa-calculator',
     click: async function(row, index) {
-      await calculateSubtotal(row)
-    }
+      await calculateSubtotal(row);
+    },
   },
   {
     name: 'Delete',
     icon: 'fa-solid fa-trash-can',
     click: async function(row, index) {
-      await removeInvoiceLine(index)
-    }
-  }
-]
+      await removeInvoiceLine(index);
+    },
+  },
+];
 
-const invoiceLinesLoading = ref(false)
+const invoiceLinesLoading = ref(false);
 
 const invoiceLineUnitOptions = computed(() => {
   return [
     { value: 'hour', label: 'Hour' },
     { value: 'minute', label: 'Minute' },
     { value: 'count', label: 'Count' },
-    { value: 'fixed', label: 'Fixed' }
-  ]
-})
+    { value: 'fixed', label: 'Fixed' },
+  ];
+});
 
 function addInvoiceLine() {
-  invoiceLinesLoading.value = true
+  invoiceLinesLoading.value = true;
   updatedInvoiceLines.value.push({
     description: null,
     unitCost: null,
     unit: null,
     unitValue: null,
-    subtotal: null
-  })
-  invoiceLinesLoading.value = false
+    subtotal: null,
+  });
+  invoiceLinesLoading.value = false;
 }
 
 function removeInvoiceLine(index) {
-  invoiceLinesLoading.value = true
-  updatedInvoiceLines.value.splice(index, 1)
-  invoiceLinesLoading.value = false
+  invoiceLinesLoading.value = true;
+  updatedInvoiceLines.value.splice(index, 1);
+  invoiceLinesLoading.value = false;
 }
 
 function formatInvoiceLine(line) {
-  const formattedLine = {}
-  formattedLine.description = line.description
-  formattedLine.unit = line.unit
-  formattedLine.unitCost = formatNumber(line.unitCost)
-  formattedLine.unitValue = formatNumber(line.unitValue)
+  const formattedLine = {};
+  formattedLine.description = line.description;
+  formattedLine.unit = line.unit;
+  formattedLine.unitCost = formatNumber(line.unitCost);
+  formattedLine.unitValue = formatNumber(line.unitValue);
 
   if (isEmpty(line.subtotal)) {
-    calculateSubtotal(formattedLine)
+    calculateSubtotal(formattedLine);
   } else {
-    formattedLine.subtotal = formatNumber(line.subtotal)
+    formattedLine.subtotal = formatNumber(line.subtotal);
   }
 
-  return formattedLine
+  return formattedLine;
 }
 
 function formatNumber(value) {
-  return (value || 0).toFixed(2)
+  return (value || 0).toFixed(2);
 }
 
 function calculateSubtotal(line) {
-  const unitCost = line.unitCost
-  const unitValue = line.unitValue
+  const unitCost = line.unitCost;
+  const unitValue = line.unitValue;
 
   if (notEmpty(unitCost) && notEmpty(unitValue)) {
-    line.subtotal = formatNumber(parseFloat(unitCost) * parseFloat(unitValue))
+    line.subtotal = formatNumber(parseFloat(unitCost) * parseFloat(unitValue));
   } else {
-    line.subtotal = formatNumber(0)
+    line.subtotal = formatNumber(0);
   }
 
-  updatedInvoice.value.totalAmount = invoiceTotalAmount.value
+  updatedInvoice.value.totalAmount = invoiceTotalAmount.value;
 }
 
-const invoiceLineErrorMessages = ref([])
+const invoiceLineErrorMessages = ref([]);
 
 function invoiceLineErrorMessage(index, field) {
   if (invoiceLineErrorMessages[index]) {
-    return invoiceLineErrorMessage[index][field]
+    return invoiceLineErrorMessage[index][field];
   } else {
-    return ``
+    return ``;
   }
 }
-/*** section:invoiceLines ***/
+/** section:invoiceLines **/
 
-/*** section:invoice ***/
-const updatedInvoice = ref()
+/** section:invoice **/
+const updatedInvoice = ref();
 
 const invoiceFieldsLayout = [
   { invoiceNumber: 'lg', contactId: 'lg' },
   { invoiceDate: 'md', dueDate: 'md', totalAmount: 'md' },
   { customFields: 'md' },
   { invoiceConfigId: 'lg' },
-  { currencyId: 'lg' }
-]
+  { currencyId: 'lg' },
+];
 
 const invoiceFieldKeys = computed(() => {
   return invoiceFieldsLayout.reduce((keys, fields) => {
     Object.keys(fields).forEach((key) => {
-      keys.push(key)
-    })
-    return keys
-  }, [])
-})
+      keys.push(key);
+    });
+    return keys;
+  }, []);
+});
 
 const invoiceDataFields = computed(() => {
-  return generateDataFields(contactId.value)
-})
+  return generateDataFields(contactId.value);
+});
 
 const invoiceKeys = computed(() => {
-  return invoiceDataFields.value.map(f => f.key)
-})
+  return invoiceDataFields.value.map(f => f.key);
+});
 
-const invoiceHelper = useInputHelper(invoiceDataFields.value)
-
-const invoiceNumber = computed(() => {
-  const parts = []
-
-  if (notEmpty(invoiceNumberSequence.value.prefix)) {
-    parts.push(invoiceNumberSequence.value.prefix)
-  }
-
-  parts.push(invoiceNumberSequence.value.currentSequence)
-
-  if (notEmpty(invoiceNumberSequence.value.suffix)) {
-    parts.push(invoiceNumberSequence.value.suffix)
-  }
-
-  return parts.join('-')
-})
+const invoiceHelper = useInputHelper(invoiceDataFields.value);
 
 const invoiceTotalAmount = computed(() => {
   const total = updatedInvoiceLines.value.reduce((sum, line) => {
     if (notEmpty(line.subtotal)) {
-      return sum + parseFloat(line.subtotal)
+      return sum + parseFloat(line.subtotal);
     } else {
-      return sum
+      return sum;
     }
-  }, 0)
-  return formatNumber(total)
-})
+  }, 0);
+  return formatNumber(total);
+});
 
-const invoiceErrorMessages = ref({})
-const invoiceConfirmButton = {
-  type: 'text',
-  value: 'Generate Invoice',
-  icon: 'fa-solid fa-check'
-}
+const invoiceErrorMessages = ref({});
+/** section:invoice **/
 
-const invoiceCancelButton = {
-  type: 'text',
-  value: 'Cancel',
-  icon: 'fa-solid fa-xmark'
-}
-/*** section:invoice ***/
-
-/*** section:template ***/
-const invoiceTemplate = ref()
-const invoiceConfig = ref()
-const invoiceNumberSequence = ref()
-const billingContact = ref()
-const currency = ref()
+/** section:template **/
+const invoiceTemplate = ref();
+const invoiceConfig = ref();
+const invoiceNumberSequence = ref();
+const billingContact = ref();
+const currency = ref();
 
 const templateData = computed(() => {
   return {
@@ -421,26 +410,26 @@ const templateData = computed(() => {
     invoiceConfig: invoiceConfig.value,
     invoiceNumberSequence: invoiceNumberSequence.value,
     billingContact: billingContact.value,
-    currency: currency.value
-  }
-})
-/*** section:template ***/
+    currency: currency.value,
+  };
+});
+/** section:template **/
 
-/*** section:action ***/
+/** section:action **/
 async function formatInvoiceLines() {
   return new Promise((resolve, reject) => {
     const promises = updatedInvoiceLines.value.map((line) => {
-      return invoiceLineHelper.formatDataForSave(line)
-    })
+      return invoiceLineHelper.formatDataForSave(line);
+    });
 
     Promise.all(promises)
       .then((results) => {
-        resolve(results)
+        resolve(results);
       })
       .catch((error) => {
-        reject(error)
-      })
-  })
+        reject(error);
+      });
+  });
 }
 
 async function createInvoice() {
@@ -451,51 +440,48 @@ async function createInvoice() {
         {
           invoice: invoiceHelper.formatDataForSave(updatedInvoice.value),
           invoiceNumberSequence: invoiceNumberSequence.value,
-          invoiceLines: results
+          invoiceLines: results,
         }
-      )
+      );
 
       dataAccess
         .create('invoices', params, { path: 'generate_with_lines' })
         .then((result) => {
-          updatedInvoice.value.id = result.id
-          updatedInvoiceLines.value = result.invoiceLines
-          showBanner(`Invoice created successfully!`)
+          updatedInvoice.value.id = result.id;
+          updatedInvoiceLines.value = result.invoiceLines;
+          showBanner(`Invoice created successfully!`);
         })
         .catch((error) => {
-          showBanner(`Error creating invoice!`)
-          console.error(error)
-        })
+          showBanner(`Error creating invoice!`);
+          console.error(error);
+        });
     })
     .catch((error) => {
-      showBanner(`Error formatting invoice for save!`)
-      console.error(error)
-    })
+      showBanner(`Error formatting invoice for save!`);
+      console.error(error);
+    });
 }
+/** section:action **/
 
-function resetInvoice() {
-}
-/*** section:action ***/
-
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:steps ***/
+/** section:steps **/
 const steps = computed(() => {
   return [
     { title: 'Filter Work Logs' },
     { title: 'Fill Invoice and Lines' },
-    { title: 'Preview Invoice' }
-  ]
-})
+    { title: 'Preview Invoice' },
+  ];
+});
 
 async function prevStep(currentStep) {
   if (currentStep === 0) { // filter
@@ -505,25 +491,27 @@ async function prevStep(currentStep) {
 
 async function nextStep(currentStep) {
   if (currentStep === 1) { // fill invoice
-    await submitFilters()
+    await submitFilters();
   } else if (currentStep === 2) { // preview invoice
-    await createInvoice()
+    await createInvoice();
   }
 }
 
 async function submit() {
-  await createInvoice()
+  await createInvoice();
 }
-/*** section:steps ***/
+/** section:steps **/
 
 onMounted(() => {
-  resetFilters()
-})
+  resetFilters();
+});
 </script>
 
 <template>
   <div class="page-container">
-    <h3 class="heading">Create Invoice</h3>
+    <h3 class="heading">
+      Create Invoice
+    </h3>
 
     <WorkflowContainer
       :steps="steps"
@@ -532,7 +520,7 @@ onMounted(() => {
       @submit="submit"
     >
       <template #step-0>
-        <Form
+        <DataForm
           v-model="filtersData"
           :fields-layout="filtersLayout"
           :data-fields="filterableKeys"
@@ -543,7 +531,7 @@ onMounted(() => {
       </template> <!-- step-0:filter worklogs -->
 
       <template #step-1>
-        <Form
+        <DataForm
           v-if="updatedInvoice"
           v-model="updatedInvoice"
           :fields-layout="invoiceFieldsLayout"
@@ -563,7 +551,7 @@ onMounted(() => {
           :loading="invoiceLinesLoading"
           :pagination="{ offset: 0, limit: updatedInvoiceLines.length, client: true }"
         >
-          <template #data-col.description="{ headers, row, i }">
+          <template #[`data-col.description`]="{ row, i }">
             <div class="data-col">
               <TInput
                 v-model="row.description"
@@ -575,7 +563,7 @@ onMounted(() => {
             </div>
           </template>
 
-          <template #data-col.unitCost="{ headers, row, i }">
+          <template #[`data-col.unitCost`]="{ row, i }">
             <div class="data-col">
               <TInput
                 v-model="row.unitCost"
@@ -587,7 +575,7 @@ onMounted(() => {
             </div>
           </template>
 
-          <template #data-col.unit="{ headers, row, i }">
+          <template #[`data-col.unit`]="{ row, i }">
             <div class="data-col">
               <TSelect
                 v-model="row.unit"
@@ -600,7 +588,7 @@ onMounted(() => {
             </div>
           </template>
 
-          <template #data-col.unitValue="{ headers, row, i }">
+          <template #[`data-col.unitValue`]="{ row, i }">
             <div class="data-col">
               <TInput
                 v-model="row.unitValue"
@@ -612,7 +600,7 @@ onMounted(() => {
             </div>
           </template>
 
-          <template #data-col.subtotal="{ headers, row, i }">
+          <template #[`data-col.subtotal`]="{ row, i }">
             <div class="data-col">
               <TInput
                 v-model="row.subtotal"
@@ -633,8 +621,8 @@ onMounted(() => {
       <template #step-2>
         <TemplateEditor
           v-if="invoiceTemplate"
-          template-type="invoice_templates"
           :id="invoiceTemplate.id"
+          template-type="invoice_templates"
           :content-markup="invoiceTemplate.contentMarkup"
           :content-styles="invoiceTemplate.contentStyles"
           :data="templateData"

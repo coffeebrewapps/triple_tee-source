@@ -1,158 +1,161 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+/** import:global **/
 
-/*** import:utils ***/
-import { useFormatter } from '../utils/formatter'
-import { useValidations } from '../utils/validations'
-import { useSystemConfigsStore } from '@/stores/systemConfigs'
+/** import:utils **/
+import { useFormatter } from '@/utils/formatter';
+import { useValidations } from '@/utils/validations';
+import { useInputHelper } from '@/utils/input';
+/** import:utils **/
 
-const systemConfigsStore = useSystemConfigsStore()
-const systemConfigs = systemConfigsStore.getSystemConfigs()
+/** import:stores **/
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
+/** import:stores **/
 
-const { isEmpty, notEmpty } = useValidations()
-
-const {
-  formatTag,
-  tagStyle
-} = useFormatter()
-
-import { useInputHelper } from '../utils/input'
-
-const {
-  tagsFields,
-  tagsField
-} = useInputHelper(props.dataFields)
-/*** import:utils ***/
-
-/*** import:components ***/
+/** import:components **/
 import {
   TDialog,
   TButton
-} from 'coffeebrew-vue-components'
-/*** import:components ***/
+} from 'coffeebrew-vue-components';
+/** import:components **/
 
-/*** section:props ***/
+/** section:props **/
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    default: false
+    default: false,
   },
   keys: {
     type: Array,
     default() {
-      return []
-    }
+      return [];
+    },
   },
   record: {
     type: Object,
     default() {
-      return {}
-    }
+      return {};
+    },
   },
   dataFields: {
     type: Array,
     default() {
-      return []
-    }
+      return [];
+    },
   },
   title: {
     type: String,
-    default: 'View'
+    default: 'View',
   },
   inputLabel: {
     type: Function,
     default(f) {
-      return f
-    }
+      return f;
+    },
   },
   inputValue: {
     type: Function,
     default(f, r) {
-      return r[f]
-    }
+      return r[f];
+    },
   },
   includeKeys: {
     type: Array,
     default() {
-      return []
-    }
-  }
-})
-/*** section:props ***/
+      return [];
+    },
+  },
+});
+/** section:props **/
 
-/*** section:emit ***/
-const emit = defineEmits(['update:modelValue'])
-/*** section:emit ***/
+/** section:utils **/
+const {
+  tagsFields,
+  tagsField,
+} = useInputHelper(props.dataFields);
 
-/*** section:dialog ***/
+const {
+  formatTag,
+  tagStyle,
+} = useFormatter();
+
+const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
+const { isEmpty, notEmpty } = useValidations();
+/** section:utils **/
+
+/** section:emit **/
+const emit = defineEmits(['update:modelValue']);
+/** section:emit **/
+
+/** section:dialog **/
 const dialog = computed({
   get: () => {
-    return props.modelValue
+    return props.modelValue;
   },
   set: (val) => {
-    emit('update:modelValue', val)
-  }
-})
+    emit('update:modelValue', val);
+  },
+});
 
 function closeDialog() {
-  emit('update:modelValue', false)
+  emit('update:modelValue', false);
 }
-/*** section:dialog ***/
+/** section:dialog **/
 
-const formattedRecord = ref()
+const formattedRecord = ref();
 
 async function asyncFormatTag(row, tags, key) {
   const promises = tags.map((tag) => {
     return new Promise((resolve, reject) => {
       formatTag(row, tag, key, systemConfigs.tagFormat)
         .then((result) => {
-          resolve(result)
+          resolve(result);
         })
         .catch((error) => {
-          reject(error)
-        })
-    })
-  })
+          reject(error);
+        });
+    });
+  });
 
   return new Promise((resolve, reject) => {
     Promise.all(promises)
       .then((results) => {
-        resolve({ key, formattedValue: results })
+        resolve({ key, formattedValue: results });
       })
       .catch((error) => {
-        reject(error)
-      })
-  })
+        reject(error);
+      });
+  });
 }
 
 function formattedTag(record, field, i) {
   if (formattedRecord.value[field]) {
-    return formattedRecord.value[field][i] 
+    return formattedRecord.value[field][i];
   } else {
-    return record[field][i]
+    return record[field][i];
   }
 }
 
-onMounted(async () => {
+onMounted(async() => {
   const promises = tagsFields.value.map((key) => {
-    const value = props.record[key]
-    return asyncFormatTag(props.record, value, key)
-  })
+    const value = props.record[key];
+    return asyncFormatTag(props.record, value, key);
+  });
 
   Promise.all(promises)
     .then((results) => {
-      formattedRecord.value = Object.assign({}, props.record)
+      formattedRecord.value = Object.assign({}, props.record);
 
       results.forEach((result) => {
-        formattedRecord.value[result.key] = result.formattedValue
-      })
+        formattedRecord.value[result.key] = result.formattedValue;
+      });
     })
     .catch((error) => {
-      console.error(error)
-    })
-})
+      console.error(error);
+    });
+});
 </script>
 
 <template>
@@ -164,10 +167,13 @@ onMounted(async () => {
     <template #body>
       <div class="data-row">
         <div
+          v-for="(field, i) in keys"
+          :key="i"
           class="data-col"
-          v-for="field in keys"
         >
-          <div class="data-label">{{ inputLabel(field) }}</div>
+          <div class="data-label">
+            {{ inputLabel(field) }}
+          </div>
           <div
             v-if="!tagsField(field)"
             class="data-value"
@@ -192,11 +198,12 @@ onMounted(async () => {
             class="data-value tags"
           >
             <div
-              v-for="(tag, i) in record[field]"
+              v-for="(tag, j) in record[field]"
+              :key="j"
               class="tag"
               :style="tagStyle(record, tag, field)"
             >
-              {{ formattedTag(record, field, i) }}
+              {{ formattedTag(record, field, j) }}
             </div>
 
             <div
@@ -211,7 +218,12 @@ onMounted(async () => {
     </template>
 
     <template #actions>
-      <TButton button-type="text" value="Close" icon="fa-solid fa-xmark" @click="closeDialog()"/>
+      <TButton
+        button-type="text"
+        value="Close"
+        icon="fa-solid fa-xmark"
+        @click="closeDialog()"
+      />
     </template>
   </TDialog>
 </template>

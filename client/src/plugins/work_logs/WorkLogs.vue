@@ -1,50 +1,51 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { useEventsStore } from '@/stores/events';
 
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
+import { useWorkLogUtils } from './utils';
 
-import { useWorkLogUtils } from './utils'
+import DataPage from '@/components/DataPage.vue';
+import TabContainer from '@/components/TabContainer.vue';
 
-import DataPage from '@/components/DataPage.vue'
-import TabContainer from '@/components/TabContainer.vue'
+import TodayLog from './TodayLog.vue';
+import WeekLog from './WeekLog.vue';
 
-import TodayLog from './TodayLog.vue'
-import WeekLog from './WeekLog.vue'
+const events = useEventsStore();
 
 const {
   dataFields,
   fieldsLayout,
   filters,
-  validations
-} = useWorkLogUtils()
+  validations,
+} = useWorkLogUtils();
 
 const tabs = [
   { label: 'Today', onchange: updateTodayLog },
   { label: 'Weekly', onchange: updateWeeklyLogs },
-  { label: 'All Logs', onchange: updateAllLogs }
-]
+  { label: 'All Logs', onchange: updateAllLogs },
+];
 
 function updateTodayLog() {
-  events.emitEvent('loadTodayLogs', {})
+  events.emitEvent('loadTodayLogs', {});
 }
 
 function updateWeeklyLogs() {
-  events.emitEvent('loadWeeklyLogs', {})
+  events.emitEvent('loadWeeklyLogs', {});
 }
 
 function updateAllLogs() {
-  events.emitEvent('loadData', { dataType: 'Work Logs' })
+  events.emitEvent('loadData', { dataType: 'Work Logs' });
 }
 
 function triggerTabEvent(i) {
-  tabs[i].onchange()
+  tabs[i].onchange();
 }
 </script>
 
 <template>
   <div class="view-container">
-    <h2 class="heading">Time Tracking</h2>
+    <h2 class="heading">
+      Time Tracking
+    </h2>
 
     <TabContainer
       :tabs="tabs"

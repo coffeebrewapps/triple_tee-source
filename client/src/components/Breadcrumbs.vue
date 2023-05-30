@@ -1,35 +1,35 @@
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
-const router = useRouter()
-const currentRoute = ref(router.currentRoute)
+const router = useRouter();
+const currentRoute = ref(router.currentRoute);
 
 function findParentRoute(thisRoute) {
   return router.getRoutes().find((route) => {
-    if (!thisRoute.meta) { return false }
-    if (!thisRoute.meta.parentRoute) { return false }
+    if (!thisRoute.meta) { return false; }
+    if (!thisRoute.meta.parentRoute) { return false; }
 
-    return route.name === thisRoute.meta.parentRoute.name
-  })
+    return route.name === thisRoute.meta.parentRoute.name;
+  });
 }
 
 function buildHierarchy(stack, thisRoute) {
-  const myParent = findParentRoute(thisRoute)
+  const myParent = findParentRoute(thisRoute);
   if (myParent) {
-    buildHierarchy(stack, myParent)
+    buildHierarchy(stack, myParent);
   }
-  stack.push(thisRoute)
+  stack.push(thisRoute);
 }
 
 const navs = computed(() => {
-  const routes = []
-  buildHierarchy(routes, currentRoute.value)
-  return routes
-})
+  const routes = [];
+  buildHierarchy(routes, currentRoute.value);
+  return routes;
+});
 
 function goToNav(nav) {
-  router.push(nav)
+  router.push(nav);
 }
 </script>
 
@@ -38,12 +38,15 @@ function goToNav(nav) {
     class="breadcrumbs"
   >
     <div
-      v-for="nav in navs"
+      v-for="(nav, i) in navs"
+      :key="i"
       class="nav"
       @click="goToNav(nav)"
     >
-      <i class="fa-solid fa-caret-right"></i>
-      <div class="name">{{ nav.name }}</div>
+      <i class="fa-solid fa-caret-right" />
+      <div class="name">
+        {{ nav.name }}
+      </div>
     </div>
   </div>
 </template>

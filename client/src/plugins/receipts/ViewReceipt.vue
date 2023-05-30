@@ -1,152 +1,151 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:utils ***/
-import { useInputHelper } from '@/utils/input'
+/** import:utils **/
+import { useInputHelper } from '@/utils/input';
+import { useDataAccess } from '@/utils/dataAccess';
+import { useValidations } from '@/utils/validations';
+import { useReceiptUtils } from './utils';
+/** import:utils **/
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+/** import:stores **/
+import { useBannerStore } from '@/stores/banner';
+/** import:stores **/
 
-import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
-/*** import:utils ***/
-
-/*** import:stores ***/
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
-
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-/*** import:stores ***/
-
-/*** import:components ***/
+/** import:components **/
 import {
   TProgressBar
-} from 'coffeebrew-vue-components'
+} from 'coffeebrew-vue-components';
 
-import TabContainer from '@/components/TabContainer.vue'
-import TemplateEditor from '@/components/TemplateEditor.vue'
-/*** import:components ***/
+import TabContainer from '@/components/TabContainer.vue';
+import TemplateEditor from '@/components/TemplateEditor.vue';
+/** import:components **/
 
-/*** section:global ***/
-const currentRoute = Object.assign({}, router.currentRoute.value)
+/** section:utils **/
+const router = useRouter();
+const dataAccess = useDataAccess();
+const { isEmpty, notEmpty } = useValidations();
+const banner = useBannerStore();
+/** section:utils **/
+
+/** section:global **/
+const currentRoute = Object.assign({}, router.currentRoute.value);
 
 const receiptId = computed(() => {
-  return currentRoute.params.id
-})
+  return currentRoute.params.id;
+});
 
 const invoiceId = computed(() => {
-  return currentRoute.query.invoiceId
-})
+  return currentRoute.query.invoiceId;
+});
 
 const contactId = computed(() => {
-  return currentRoute.query.contactId
-})
-
-import { useReceiptUtils } from './utils'
+  return currentRoute.query.contactId;
+});
 const {
   fieldsLayout,
-  generateDataFields
-} = useReceiptUtils()
+  generateDataFields,
+} = useReceiptUtils();
 
 const dataFields = computed(() => {
-  return generateDataFields(invoiceId.value, contactId.value)
-})
+  return generateDataFields(invoiceId.value, contactId.value);
+});
 
 const {
   inputLabel,
   inputValue,
-  includeKeys
-} = useInputHelper(dataFields.value)
+  includeKeys,
+} = useInputHelper(dataFields.value);
 
-const currentReceipt = ref()
-const receiptTemplate = ref()
-const templateData = ref()
+const currentReceipt = ref();
+const receiptTemplate = ref();
+const templateData = ref();
 
 const heading = computed(() => {
   if (currentReceipt.value) {
-    return `Receipt: ${currentReceipt.value.receiptNumber}`
+    return `Receipt: ${currentReceipt.value.receiptNumber}`;
   } else {
-    return `Loading Receipt...`
+    return `Loading Receipt...`;
   }
-})
+});
 
 async function loadReceipt() {
-  currentReceipt.value = null
-  const params = { include: includeKeys.value }
+  currentReceipt.value = null;
+  const params = { include: includeKeys.value };
 
   await dataAccess
     .view('income_receipts', receiptId.value, params)
     .then((result) => {
-      currentReceipt.value = result
+      currentReceipt.value = result;
       showBanner(`Loaded receipt successfully!`);
     })
     .catch((error) => {
-      console.error(error)
+      console.error(error);
       showBanner(`Error loading receipt!`);
-    })
+    });
 }
 
 async function loadTemplateData() {
-  receiptTemplate.value = null
+  receiptTemplate.value = null;
 
   dataAccess
     .view('income_receipts', currentReceipt.value.id, {}, { path: 'template_data' })
     .then((result) => {
-      receiptTemplate.value = result.receiptTemplate
-      const country = result.country
-      const billingContact = Object.assign({}, result.billingContact, { country: country.countryName })
+      receiptTemplate.value = result.receiptTemplate;
+      const country = result.country;
+      const billingContact = Object.assign({}, result.billingContact, { country: country.countryName });
 
       templateData.value = Object.assign(
         {},
         result,
         {
-          billingContact
+          billingContact,
         }
-      )
+      );
       showBanner(`Loaded template data successfully!`);
     })
     .catch((error) => {
-      console.error(error)
+      console.error(error);
       showBanner(`Error loading template data!`);
-    })
+    });
 }
-/*** section:global ***/
+/** section:global **/
 
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:tabs ***/
+/** section:tabs **/
 const tabs = [
   { label: 'Details', onchange: loadReceipt },
-  { label: 'View Receipt PDF', onchange: loadTemplateData }
-]
+  { label: 'View Receipt PDF', onchange: loadTemplateData },
+];
 
 function triggerTabEvent(i) {
-  tabs[i].onchange()
+  tabs[i].onchange();
 }
-/*** section:tabs ***/
+/** section:tabs **/
 
-onMounted(async () => {
-  await loadReceipt()
-})
+onMounted(async() => {
+  await loadReceipt();
+});
 </script>
 
 <template>
   <div class="page-container">
-    <h2 class="heading">{{ heading }}</h2>
+    <h2 class="heading">
+      {{ heading }}
+    </h2>
 
     <TProgressBar
       v-if="!currentReceipt"
@@ -157,17 +156,18 @@ onMounted(async () => {
       :tabs="tabs"
       @tab-change="triggerTabEvent"
     >
-
       <template #tab-0>
         <div
           class="details-container"
         >
           <div
-            v-for="row in fieldsLayout"
+            v-for="(row, i) in fieldsLayout"
+            :key="i"
             class="data-row"
           >
             <div
-              v-for="field in Object.keys(row)"
+              v-for="(field, j) in Object.keys(row)"
+              :key="j"
               class="data-field"
             >
               <div
@@ -188,11 +188,10 @@ onMounted(async () => {
                 <span
                   v-if="isEmpty(currentReceipt) || isEmpty(currentReceipt[field])"
                 >
-                --- no value ---
+                  --- no value ---
                 </span>
               </div> <!-- field-value -->
             </div> <!-- data-field -->
-
           </div> <!-- data-row -->
         </div> <!-- details-container -->
       </template> <!-- template-0 -->
@@ -200,8 +199,8 @@ onMounted(async () => {
       <template #tab-1>
         <TemplateEditor
           v-if="receiptTemplate"
-          template-type="receipt_templates"
           :id="receiptTemplate.id"
+          template-type="receipt_templates"
           :content-markup="receiptTemplate.contentMarkup"
           :content-styles="receiptTemplate.contentStyles"
           :data="templateData"

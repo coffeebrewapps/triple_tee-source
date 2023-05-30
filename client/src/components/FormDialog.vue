@@ -1,92 +1,100 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref, computed } from 'vue';
+/** import:global **/
 
-/*** import:components ***/
+/** import:components **/
 import {
   TAlert,
   TDialog
-} from 'coffeebrew-vue-components'
+} from 'coffeebrew-vue-components';
 
-import Form from './Form.vue'
-/*** import:components ***/
+import DataForm from './DataForm.vue';
+/** import:components **/
 
-/*** section:props ***/
+/** section:props **/
 const props = defineProps({
   modelValue: {
     type: Boolean,
-    default: false
+    default: false,
   },
   fieldsLayout: {
     type: Array,
-    default: []
+    default() {
+      return [];
+    },
   },
   dataFields: {
     type: Array,
-    default: []
+    default() {
+      return [];
+    },
   },
   data: {
     type: Object,
-    default: {}
+    default() {
+      return {};
+    },
   },
   schemas: {
     type: Object,
-    default: {}
+    default() {
+      return {};
+    },
   },
   dialogTitle: {
     type: String,
-    default: ``
+    default: ``,
   },
   fullscreen: {
     type: Boolean,
-    default: false
+    default: false,
   },
   errorMessages: {
     type: Object,
     default() {
-      return {}
-    }
-  }
-})
-/*** section:props ***/
+      return {};
+    },
+  },
+});
+/** section:props **/
 
-/*** section:emit ***/
-const emit = defineEmits(['update:modelValue', 'submit'])
-/*** section:emit ***/
+/** section:emit **/
+const emit = defineEmits(['update:modelValue', 'submit']);
+/** section:emit **/
 
-/*** section:error ***/
-const errorAlert = ref(false)
-const errorContent = ref('')
-/*** section:error ***/
+/** section:error **/
+const errorAlert = ref(false);
+const errorContent = ref('');
+/** section:error **/
 
-/*** section:dialog ***/
+/** section:dialog **/
 const dialog = computed({
   get: () => {
-    return props.modelValue
+    return props.modelValue;
   },
   set: (val) => {
-    emit('update:modelValue', val)
-  }
-})
-/*** section:dialog ***/
+    emit('update:modelValue', val);
+  },
+});
+/** section:dialog **/
 
-/*** section:form ***/
+/** section:form **/
 const formData = computed(() => {
-  return props.data
-})
-/*** section:form ***/
+  return props.data;
+});
+/** section:form **/
 
-/*** section:action ***/
+/** section:action **/
 function submitData(data) {
-  emit('submit', data)
+  emit('submit', data);
 }
 
 function closeDialog() {
-  dialog.value = false
-  emit('update:modelValue', false)
+  dialog.value = false;
+  emit('update:modelValue', false);
 }
-/*** section:action ***/
+/** section:action **/
 </script>
 
 <template>
@@ -97,7 +105,7 @@ function closeDialog() {
     class="form-dialog"
   >
     <template #body>
-      <Form
+      <DataForm
         v-model="formData"
         :fields-layout="fieldsLayout"
         :data-fields="dataFields"
@@ -110,10 +118,10 @@ function closeDialog() {
   </TDialog>
 
   <TAlert
+    v-model="errorAlert"
     title="Error"
     :content="errorContent"
     :width="400"
     :height="250"
-    v-model="errorAlert"
   />
 </template>

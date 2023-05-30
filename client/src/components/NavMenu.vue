@@ -1,35 +1,35 @@
 <script setup>
-import { reactive, computed, ref } from 'vue'
-import { useRouter, RouterLink } from 'vue-router'
+import { reactive, computed } from 'vue';
+import { useRouter, RouterLink } from 'vue-router';
 
-import { useNavStore } from '../stores/nav'
+import { useNavStore } from '@/stores/nav';
 
-const router = useRouter()
-const routes = reactive(router.getRoutes())
+const router = useRouter();
+const routes = reactive(router.getRoutes());
 
-const navigator = useNavStore()
+const navigator = useNavStore();
 
 const renderedRoutes = computed(() => {
   return routes.filter((route) => {
-    return route && (!route.meta || !route.meta.hidden)
-  })
-})
+    return route && (!route.meta || !route.meta.hidden);
+  });
+});
 
 const showNav = computed(() => {
-  return navigator.nav
-})
+  return navigator.nav;
+});
 
 function toggleNav() {
-  navigator.toggle()
+  navigator.toggle();
 }
 
 const navContainerClass = computed(() => {
   if (showNav.value) {
-    return `nav-container show`
+    return `nav-container show`;
   } else {
-    return `nav-container hide`
+    return `nav-container hide`;
   }
-})
+});
 </script>
 
 <template>
@@ -40,9 +40,9 @@ const navContainerClass = computed(() => {
       class="nav"
     >
       <RouterLink
-        class="nav-item"
         v-for="route in renderedRoutes"
         :key="route.name"
+        class="nav-item"
         :to="route.path"
         active-class="active"
       >
@@ -54,8 +54,8 @@ const navContainerClass = computed(() => {
       class="nav-toggle"
       @click="toggleNav"
     >
-      <i class="fa-solid fa-caret-left"></i>
-      <i class="fa-solid fa-caret-right"></i>
+      <i class="fa-solid fa-caret-left" />
+      <i class="fa-solid fa-caret-right" />
     </div>
   </div>
 </template>

@@ -1,131 +1,129 @@
-import { computed } from 'vue'
+import { computed } from 'vue';
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+import { useDataAccess } from '@/utils/dataAccess';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
+import { useFormatter } from '@/utils/formatter';
+import { useValidations } from '@/utils/validations';
 
-import { useSystemConfigsStore } from '@/stores/systemConfigs'
-const systemConfigsStore = useSystemConfigsStore()
-const systemConfigs = systemConfigsStore.getSystemConfigs()
-
-import { useFormatter } from '@/utils/formatter'
+const dataAccess = useDataAccess();
+const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 const {
   formatDate,
-  formatTimestamp
-} = useFormatter()
-
-import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
+  formatTimestamp,
+} = useFormatter();
+const { isEmpty, notEmpty } = useValidations();
 
 export function useInputHelper(schemas) {
   const schemasMap = computed(() => {
     return schemas.reduce((o, s) => {
-      o[s.key] = s
-      return o
-    }, {})
-  })
+      o[s.key] = s;
+      return o;
+    }, {});
+  });
 
   const clientOptionsFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => clientOptionsField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => clientOptionsField(f));
+  });
 
   const serverOptionsFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => serverOptionsField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => serverOptionsField(f));
+  });
 
   const selectableKeys = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => selectableField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => selectableField(f));
+  });
 
   const multiSelectableFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => multiSelectableField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => multiSelectableField(f));
+  });
 
   const singleSelectableFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => singleSelectableField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => singleSelectableField(f));
+  });
 
   const nullToggleableFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => nullToggleableField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => nullToggleableField(f));
+  });
 
   const tagsFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => tagsField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => tagsField(f));
+  });
 
   const objectFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => objectField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => objectField(f));
+  });
 
   const numberFields = computed(() => {
-    return Object.keys(schemasMap.value).filter(f => numberField(f))
-  })
+    return Object.keys(schemasMap.value).filter(f => numberField(f));
+  });
 
   const include = computed(() => {
-    return schemas.filter(h => h.reference)
-  })
+    return schemas.filter(h => h.reference);
+  });
 
   const includeKeys = computed(() => {
-    return include.value.map(h => h.key)
-  })
+    return include.value.map(h => h.key);
+  });
 
   function inputType(field) {
-    return (schemasMap.value[field] || {}).type
+    return (schemasMap.value[field] || {}).type;
   }
 
   function inputLabel(field) {
-    return (schemasMap.value[field] || {}).label
+    return (schemasMap.value[field] || {}).label;
   }
 
   function inputValue(field, record, includeKeys, schemas) {
-    const referenceField = includeKeys.find(v => v === field)
-    const fieldValue = record[field]
-    if (isEmpty(fieldValue)) { return }
+    const referenceField = includeKeys.find(v => v === field);
+    const fieldValue = record[field];
+    if (isEmpty(fieldValue)) { return; }
 
     if (notEmpty(referenceField)) {
-      const includes = record.includes || {}
-      const rawValue = [fieldValue].flat().filter(v => !!v)
+      const includes = record.includes || {};
+      const rawValue = [fieldValue].flat().filter(v => !!v);
 
       const mapped = rawValue.map((value) => {
-        const foreignValue = includes[field][value]
-        return schemasMap.value[field].reference.label(foreignValue)
-      })
+        const foreignValue = includes[field][value];
+        return schemasMap.value[field].reference.label(foreignValue);
+      });
 
       if (multiSelectableField(field)) {
-        return mapped
+        return mapped;
       } else {
-        return mapped[0]
+        return mapped[0];
       }
     } else if (inputType(field) === 'enum' || inputType(field) === 'select') {
-      const found = schemas.find(f => f.key === field)
-      const options = found.options
-      return options.find(o => o.value === fieldValue).label
+      const found = schemas.find(f => f.key === field);
+      const options = found.options;
+      return options.find(o => o.value === fieldValue).label;
     } else if (inputType(field) === 'datetime') {
-      return formatTimestamp(fieldValue, systemConfigs.timezone)
+      return formatTimestamp(fieldValue, systemConfigs.timezone);
     } else if (inputType(field) === 'date') {
-      return formatDate(fieldValue, systemConfigs.timezone)
+      return formatDate(fieldValue, systemConfigs.timezone);
     } else {
-      return fieldValue
+      return fieldValue;
     }
   }
 
   function inputableField(field) {
-    return inputType(field) === 'text' || inputType(field) === 'number'
+    return inputType(field) === 'text' || inputType(field) === 'number';
   }
 
   function multiInputableField(field) {
-    return inputType(field) === 'textarea'
+    return inputType(field) === 'textarea';
   }
 
   function multiSelectableField(field) {
-    return inputType(field) === 'multiSelect'
+    return inputType(field) === 'multiSelect';
   }
 
   function singleSelectableField(field) {
-    return inputType(field) === 'singleSelect'
+    return inputType(field) === 'singleSelect';
   }
 
   function clientOptionsField(field) {
-    return inputType(field) === 'select' || inputType(field) === 'enum'
+    return inputType(field) === 'select' || inputType(field) === 'enum';
   }
 
   function selectableField(field) {
@@ -134,27 +132,27 @@ export function useInputHelper(schemas) {
       inputType(field) === 'multiSelect' ||
       inputType(field) === 'singleSelect' ||
       inputType(field) === 'enum'
-    )
+    );
   }
 
   function serverOptionsField(field) {
-    return selectableField(field) && schemasMap.value[field].options && schemasMap.value[field].options.server
+    return selectableField(field) && schemasMap.value[field].options && schemasMap.value[field].options.server;
   }
 
   function nullToggleableField(field) {
-    return schemasMap.value[field].nullToggleable
+    return schemasMap.value[field].nullToggleable;
   }
 
   function tagsField(field) {
-    return field === 'tags' || Object.is(schemasMap.value[field].isTags, true)
+    return field === 'tags' || Object.is(schemasMap.value[field].isTags, true);
   }
 
   function objectField(field) {
-    return inputType(field) === 'object'
+    return inputType(field) === 'object';
   }
 
   function numberField(field) {
-    return inputType(field) === 'number'
+    return inputType(field) === 'number';
   }
 
   function formatInputOptionsData(field, offset, limit, dataFromServer) {
@@ -162,190 +160,194 @@ export function useInputHelper(schemas) {
       {},
       {
         loading: false,
-        pagination: { offset, limit, client: false }
+        pagination: { offset, limit, client: false },
       },
       dataFromServer
-    )
+    );
   }
 
   function formatDataFields(fields) {
     return schemas.map((field) => {
       if (field.type === 'enum') {
-        const enums = fields[field.key].enums
+        const enums = fields[field.key].enums;
         const options = Object.keys(enums).map((e) => {
-          return { value: e, label: enums[e] }
-        })
-        const combined = Object.assign({}, field, { options })
-        return combined
+          return { value: e, label: enums[e] };
+        });
+        const combined = Object.assign({}, field, { options });
+        return combined;
       } else {
-        return field
+        return field;
       }
-    })
+    });
   }
 
   function validateParams(validations, params) {
     return Object.keys(validations).reduce((errors, field) => {
-      const validators = validations[field]
+      const validators = validations[field];
       const fieldErrors = validators.map((validator) => {
-        return validator(params)
-      }).filter(e => !!e)
+        return validator(params);
+      }).filter(e => !!e);
 
       if (fieldErrors.length > 0) {
-        errors[field] = fieldErrors
+        errors[field] = fieldErrors;
       }
-      return errors
-    }, {})
+      return errors;
+    }, {});
   }
 
   async function loadForeignModelAsOption(modelClass, id) {
-    return dataAccess.view(modelClass, id, {})
+    return dataAccess.view(modelClass, id, {});
   }
 
   async function loadIncludesFromServer(field, fieldValue) {
-    const options = schemasMap.value[field].options
-    const foreignModelClass = options.modelClass
+    const options = schemasMap.value[field].options;
+    const foreignModelClass = options.modelClass;
 
     const promises = fieldValue.map((v) => {
-      return loadForeignModelAsOption(foreignModelClass, v)
-    })
+      return loadForeignModelAsOption(foreignModelClass, v);
+    });
 
     return new Promise((resolve, reject) => {
       Promise.all(promises)
         .then((results) => {
           const formattedOptions = results.map((result) => {
-            const value = options.value(result)
-            const label = options.label(result)
-            return { value, label }
-          })
-          resolve(formattedOptions)
+            const value = options.value(result);
+            const label = options.label(result);
+            return { value, label };
+          });
+          resolve(formattedOptions);
         })
         .catch((error) => {
-          console.error(error)
-          reject(error)
-        })
-    })
+          console.error(error);
+          reject(error);
+        });
+    });
   }
 
   function setDefaultValue(field, record) {
-    const fieldValue = record[field]
-    if (notEmpty(fieldValue)) { return fieldValue }
+    const fieldValue = record[field];
+    if (notEmpty(fieldValue)) { return fieldValue; }
 
-    const defaultValue = schemasMap.value[field].defaultValue
+    const defaultValue = schemasMap.value[field].defaultValue;
     if (notEmpty(defaultValue)) {
-      return defaultValue()
+      return defaultValue();
     } else {
-      return fieldValue
+      return fieldValue;
     }
   }
 
   async function formatDataForShow(field, record) {
     return new Promise((resolve, reject) => {
-      const fieldValue = setDefaultValue(field, record)
+      const fieldValue = setDefaultValue(field, record);
 
       if (isEmpty(fieldValue)) {
-        resolve(fieldValue)
-        return
+        resolve(fieldValue);
+        return;
       }
 
       if (objectField(field)) {
         if (notEmpty(fieldValue)) {
-          resolve(JSON.stringify(fieldValue, false, 4))
+          resolve(JSON.stringify(fieldValue, false, 4));
         } else {
-          resolve(fieldValue)
+          resolve(fieldValue);
         }
-        return
+        return;
       }
 
       if (
         inputType(field) !== 'date' && inputType(field) !== 'datetime' &&
         !multiSelectableField(field) && !singleSelectableField(field)
       ) {
-        resolve(fieldValue)
-        return
+        resolve(fieldValue);
+        return;
       }
 
       if (inputType(field) === 'date' || inputType(field) === 'datetime') {
         let formattedValue;
         if (fieldValue instanceof Date || typeof fieldValue === 'string') {
-          formattedValue = new Date(fieldValue)
+          formattedValue = new Date(fieldValue);
         } else {
           formattedValue = Object.entries(fieldValue).reduce((o, [k, v]) => {
             if (notEmpty(v)) {
-              o[k] = new Date(v)
+              o[k] = new Date(v);
             } else {
-              o[k] = v
+              o[k] = v;
             }
-            return o
-          }, {})
+            return o;
+          }, {});
         }
-        resolve(formattedValue)
-        return
+        resolve(formattedValue);
+        return;
       }
 
-      const fieldIncludeValues = [fieldValue].flat()
+      const fieldIncludeValues = [fieldValue].flat();
 
-      if (notEmpty(record.includes) && notEmpty(record.includes[field]) && Object.keys(record.includes[field]).length > 0) {
-        const includes = record.includes[field]
+      if (
+        notEmpty(record.includes) &&
+        notEmpty(record.includes[field]) &&
+        Object.keys(record.includes[field]).length > 0
+      ) {
+        const includes = record.includes[field];
         const formattedOptions = fieldIncludeValues.map((v) => {
-          const include = includes[v]
-          const options = schemasMap.value[field].options
-          const value = options.value(include)
-          const label = options.label(include)
-          return { value, label }
-        })
-        resolve(formattedOptions)
+          const include = includes[v];
+          const options = schemasMap.value[field].options;
+          const value = options.value(include);
+          const label = options.label(include);
+          return { value, label };
+        });
+        resolve(formattedOptions);
       } else {
-        const options = schemasMap.value[field].options
         loadIncludesFromServer(field, fieldIncludeValues)
           .then((formattedOptions) => {
-            resolve(formattedOptions)
+            resolve(formattedOptions);
           })
           .catch((error) => {
-            const formattedOptions = []
+            console.error(error);
+            const formattedOptions = [];
             fieldIncludeValues.forEach((v) => {
               if (notEmpty(v)) {
-                formattedOptions.push({ value: v, label: v })
+                formattedOptions.push({ value: v, label: v });
               }
-            })
-            resolve(formattedOptions)
-          })
+            });
+            resolve(formattedOptions);
+          });
       }
-    })
+    });
   }
 
   function formatDataForSave(params) {
-    const data = Object.assign({}, params)
+    const data = Object.assign({}, params);
 
     multiSelectableFields.value.forEach((field) => {
-      const values = (data[field] || [])
-      data[field] = values.map(v => v.value)
-    })
+      const values = (data[field] || []);
+      data[field] = values.map(v => v.value);
+    });
 
     singleSelectableFields.value.forEach((field) => {
-      const values = (data[field] || [])
-      data[field] = (values[0] || {}).value
-    })
+      const values = (data[field] || []);
+      data[field] = (values[0] || {}).value;
+    });
 
     clientOptionsFields.value.forEach((field) => {
-      const value = data[field]
+      const value = data[field];
       if (isEmpty(value) || value.length === 0) {
-        delete data[field]
+        delete data[field];
       }
-    })
+    });
 
     objectFields.value.forEach((field) => {
       if (notEmpty(data[field]) && data[field].length > 0) {
-        data[field] = JSON.parse(data[field])
+        data[field] = JSON.parse(data[field]);
       }
-    })
+    });
 
     numberFields.value.forEach((field) => {
       if (notEmpty(data[field])) {
-        data[field] = parseFloat(data[field])
+        data[field] = parseFloat(data[field]);
       }
-    })
+    });
 
-    return data
+    return data;
   }
 
   function formatErrorsForDisplay(error) {
@@ -353,50 +355,50 @@ export function useInputHelper(schemas) {
       errors[field] = fieldErrors.map((errorName) => {
         return {
           name: errorName,
-          params: {}
-        }
-      })
-      return errors
-    }, {})
+          params: {},
+        };
+      });
+      return errors;
+    }, {});
   }
 
   function formatFilters(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
       if (notEmpty(value) && value !== '') {
         if (singleSelectableField(field)) {
-          o[field] = value[0].value
+          o[field] = value[0].value;
         } else if (multiSelectableField(field)) {
-          o[field] = value.map(v => v.value)
+          o[field] = value.map(v => v.value);
         } else {
-          o[field] = value
+          o[field] = value;
         }
       }
-      return o
-    }, {})
+      return o;
+    }, {});
   }
 
   async function fetchOptions(field, offset) {
-    const options = schemasMap.value[field].options || {}
+    const options = schemasMap.value[field].options || {};
     if (options.server) {
-      const limit = options.limit || 5
+      const limit = options.limit || 5;
       return new Promise((resolve, reject) => {
         dataAccess
           .list(options.modelClass, { offset, limit })
           .then((result) => {
-            const data = result.data
-            const total = result.total
+            const data = result.data;
+            const total = result.total;
             const dataFromServer = {
               total,
               data: data.map((row) => {
                 return {
                   value: options.value(row),
-                  label: options.label(row)
-                }
-              })
-            }
-            resolve(formatInputOptionsData(field, offset, limit, dataFromServer))
-          })
-      })
+                  label: options.label(row),
+                };
+              }),
+            };
+            resolve(formatInputOptionsData(field, offset, limit, dataFromServer));
+          });
+      });
     } else {
       return new Promise((resolve, reject) => {
         resolve(Object.assign(
@@ -405,31 +407,31 @@ export function useInputHelper(schemas) {
             data: options,
             total: options.length,
             loading: false,
-            pagination: { offset: 0, limit: 5, client: true }
+            pagination: { offset: 0, limit: 5, client: true },
           }
-        ))
-      })
+        ));
+      });
     }
   }
 
   async function initOptionsData() {
     return new Promise((resolve, reject) => {
       Promise.all(serverOptionsFields.value.map((field) => {
-        const offset = schemasMap.value[field].offset || 0
-        return fetchOptions(field, offset)
+        const offset = schemasMap.value[field].offset || 0;
+        return fetchOptions(field, offset);
       }))
-      .then((values) => {
-        const data = {}
-        values.forEach((value, i) => {
-          const field = serverOptionsFields.value[i]
-          data[field] = value
+        .then((values) => {
+          const data = {};
+          values.forEach((value, i) => {
+            const field = serverOptionsFields.value[i];
+            data[field] = value;
+          });
+          resolve(data);
         })
-        resolve(data)
-      })
-      .catch((err) => {
-        reject(err)
-      })
-    })
+        .catch((err) => {
+          reject(err);
+        });
+    });
   }
 
   return {
@@ -466,6 +468,6 @@ export function useInputHelper(schemas) {
     formatFilters,
     validateParams,
     fetchOptions,
-    initOptionsData
-  }
+    initOptionsData,
+  };
 }

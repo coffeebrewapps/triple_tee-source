@@ -1,7 +1,7 @@
-import { Liquid } from 'liquidjs'
-const liquidEngine = new Liquid();
+import { Liquid } from 'liquidjs';
 
-import html2pdf from 'html2pdf.js'
+import html2pdf from 'html2pdf.js';
+const liquidEngine = new Liquid();
 
 export function useStore(dataStore) {
   async function createHtmlString(template, params) {
@@ -39,31 +39,31 @@ export function useStore(dataStore) {
 
     content.push(`</html>`);
 
-    const htmlString = content.join('')
+    const htmlString = content.join('');
 
     return liquidEngine.parseAndRender(htmlString, params);
   }
 
   async function downloadPdf(modelClass, id, params) {
-    const template = dataStore.view(modelClass, id, {}).record
-    const htmlString = await createHtmlString(template, params)
+    const template = dataStore.view(modelClass, id, {}).record;
+    const htmlString = await createHtmlString(template, params);
 
     return new Promise((resolve, reject) => {
       html2pdf().from(htmlString).outputPdf('arraybuffer')
         .then((result) => {
           console.log(`Parsing complete!`);
           resolve({
-            data: result
-          })
+            data: result,
+          });
         })
         .catch((error) => {
           console.log(`Error parsing template!`, error);
-          reject(error)
+          reject(error);
         });
-    })
+    });
   }
 
   return {
-    downloadPdf
-  }
+    downloadPdf,
+  };
 }

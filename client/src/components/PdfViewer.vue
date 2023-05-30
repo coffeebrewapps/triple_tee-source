@@ -1,42 +1,47 @@
 <script setup>
-/*** import:global ***/
-import { ref } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref } from 'vue';
+/** import:global **/
 
-/*** import:components ***/
+/** import:components **/
 import {
   TButton,
   TProgressBar
-} from 'coffeebrew-vue-components'
-/*** import:components ***/
+} from 'coffeebrew-vue-components';
+/** import:components **/
 
-/*** section:props ***/
-const props = defineProps({
+/** section:props **/
+defineProps({
   templatePdfData: {
-    default: null
+    type: Object,
+    default: null,
   },
   downloadLink: {
-    default: null
+    type: String,
+    default: null,
   },
   downloadFile: {
-    default: null
-  }
-})
-/*** section:props ***/
+    type: String,
+    default: null,
+  },
+});
+/** section:props **/
 
-/*** section:actions ***/
-const downloadAnchor = ref('downloadAnchor')
+/** section:actions **/
+const downloadAnchor = ref('downloadAnchor');
 
 function downloadPdf() {
-  downloadAnchor.value.click()
+  downloadAnchor.value.click();
 }
-/*** section:actions ***/
+/** section:actions **/
 </script>
 
 <template>
   <div class="viewer-container">
     <div class="viewer-header">
-      <h2 class="heading">View PDF</h2>
+      <h2 class="heading">
+        View PDF
+      </h2>
 
       <div class="actions">
         <TButton
@@ -45,7 +50,13 @@ function downloadPdf() {
           @click="downloadPdf"
         />
 
-        <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
+        <a
+          ref="downloadAnchor"
+          class="hidden"
+          rel="noreferrer"
+          :download="downloadFile"
+          :href="downloadLink"
+        />
       </div>
     </div>
 
@@ -58,8 +69,7 @@ function downloadPdf() {
         v-if="templatePdfData"
         class="preview-panel"
         :src="templatePdfData"
-      >
-      </iframe>
+      />
     </div>
   </div>
 </template>

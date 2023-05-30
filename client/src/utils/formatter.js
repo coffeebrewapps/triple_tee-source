@@ -1,70 +1,70 @@
-import { Liquid } from 'liquidjs'
+import { Liquid } from 'liquidjs';
 const liquidEngine = new Liquid();
 
 export function useFormatter() {
   function formatDate(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
-    const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone })
+    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+    const locale = formatOptions.locale;
+    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone });
   }
 
   function formatLongDate(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
-    const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone, dateStyle: 'full' })
+    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+    const locale = formatOptions.locale;
+    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone, dateStyle: 'full' });
   }
 
   function formatTimestamp(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
-    const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleString(locale, { timeZone })
+    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+    const locale = formatOptions.locale;
+    return (new Date(rawValue)).toLocaleString(locale, { timeZone });
   }
 
   function formatShortTime(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions()
-    const locale = formatOptions.locale
-    return (new Date(rawValue)).toLocaleTimeString(locale, { timeZone, timeStyle: 'medium' })
+    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+    const locale = formatOptions.locale;
+    return (new Date(rawValue)).toLocaleTimeString(locale, { timeZone, timeStyle: 'medium' });
   }
 
   function formatNumber(value, dp) {
-    return (value || 0).toFixed(dp)
+    return (value || 0).toFixed(dp);
   }
 
   async function parseTagFormat(formatString, tag) {
     if (formatString) {
-      return liquidEngine.parseAndRender(formatString, tag)
+      return liquidEngine.parseAndRender(formatString, tag);
     } else {
-      return tag
+      return tag;
     }
   }
 
   async function formatTag(record, tag, field, tagFormat) {
-    const includes = (record.includes || {})[field] || {}
+    const includes = (record.includes || {})[field] || {};
     if (includes[tag]) {
-      const value = includes[tag] || {}
-      const formattedValue = await parseTagFormat(tagFormat, value)
-      return formattedValue
+      const value = includes[tag] || {};
+      const formattedValue = await parseTagFormat(tagFormat, value);
+      return formattedValue;
     } else {
-      return tag
+      return tag;
     }
   }
 
   function tagStyle(record, tag, field) {
-    const includes = (record.includes || {})[field] || {}
+    const includes = (record.includes || {})[field] || {};
     if (includes[tag]) {
-      const color = includes[tag].textColor
-      const background = includes[tag].backgroundColor
-      const styles = []
+      const color = includes[tag].textColor;
+      const background = includes[tag].backgroundColor;
+      const styles = [];
       if (color) {
-        styles.push(`color: ${color} !important;`)
+        styles.push(`color: ${color} !important;`);
       }
       if (background) {
-        styles.push(`background-color: ${background} !important;`)
+        styles.push(`background-color: ${background} !important;`);
       }
 
-      return styles.join('')
+      return styles.join('');
     } else {
-      return ``
+      return ``;
     }
   }
 
@@ -75,6 +75,6 @@ export function useFormatter() {
     formatShortTime,
     formatNumber,
     formatTag,
-    tagStyle
-  }
+    tagStyle,
+  };
 }

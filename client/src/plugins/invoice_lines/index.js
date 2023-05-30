@@ -1,12 +1,12 @@
 const route = {
   path: '/invoice_lines',
   name: 'Invoice Lines',
-  component: () => import('./InvoiceLines.vue')
-}
+  component: () => import('./InvoiceLines.vue'),
+};
 
 const usePlugin = (router) => {
-  router.addRoute(route)
-  return route
-}
+  router.addRoute(route);
+  return route;
+};
 
-export default usePlugin
+export default usePlugin;

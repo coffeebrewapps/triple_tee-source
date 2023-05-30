@@ -1,12 +1,12 @@
 const route = {
   path: '/transactions',
   name: 'Transactions',
-  component: () => import('./Transactions.vue')
-}
+  component: () => import('./TransactionsPage.vue'),
+};
 
 const usePlugin = (router) => {
-  router.addRoute(route)
-  return route
-}
+  router.addRoute(route);
+  return route;
+};
 
-export default usePlugin
+export default usePlugin;

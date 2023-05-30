@@ -1,139 +1,135 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:utils ***/
-import { useContactUtils } from './utils'
+/** import:utils **/
+import { useInputHelper } from '@/utils/input';
+import { useDataAccess } from '@/utils/dataAccess';
+import { useValidations } from '@/utils/validations';
+import { useContactUtils } from './utils';
+/** import:utils **/
+
+/** import:stores **/
+import { useEventsStore } from '@/stores/events';
+import { useBannerStore } from '@/stores/banner';
+/** import:stores **/
+
+/** import:components **/
+import {
+  TProgressBar
+} from 'coffeebrew-vue-components';
+
+import TabContainer from '@/components/TabContainer.vue';
+import InvoiceConfigs from '@/plugins/invoice_configs/InvoiceConfigs.vue';
+import ReceiptConfigs from '@/plugins/receipt_configs/ReceiptConfigs.vue';
+import BillingConfigs from '@/plugins/billing_configs/BillingConfigs.vue';
+import Invoices from '@/plugins/invoices/Invoices.vue';
+/** import:components **/
+
+/** section:utils **/
+const router = useRouter();
 const {
   fieldsLayout,
   dataFields,
-  filters,
-  validations,
   includeKeys,
-  countryValue,
-  countryLabel
-} = useContactUtils()
-
-import { useInputHelper } from '@/utils/input'
+} = useContactUtils();
 const {
-  schemasMap,
   inputLabel,
-  inputValue
-} = useInputHelper(dataFields)
+  inputValue,
+} = useInputHelper(dataFields);
+const dataAccess = useDataAccess();
+const { isEmpty, notEmpty } = useValidations();
+const events = useEventsStore();
+const banner = useBannerStore();
+/** section:utils **/
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
-
-import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
-/*** import:utils ***/
-
-/*** import:stores ***/
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
-
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-/*** import:stores ***/
-
-/*** import:components ***/
-import {
-  TProgressBar
-} from 'coffeebrew-vue-components'
-
-import TabContainer from '@/components/TabContainer.vue'
-import InvoiceConfigs from '@/plugins/invoice_configs/InvoiceConfigs.vue'
-import ReceiptConfigs from '@/plugins/receipt_configs/ReceiptConfigs.vue'
-import BillingConfigs from '@/plugins/billing_configs/BillingConfigs.vue'
-import Invoices from '@/plugins/invoices/Invoices.vue'
-/*** import:components ***/
-
-/*** section:global ***/
-const currentRoute = Object.assign({}, router.currentRoute.value)
+/** section:global **/
+const currentRoute = Object.assign({}, router.currentRoute.value);
 
 const contactId = computed(() => {
-  return currentRoute.params.id
-})
+  return currentRoute.params.id;
+});
 
-const currentContact = ref()
+const currentContact = ref();
 
 const heading = computed(() => {
   if (currentContact.value) {
-    return `Contact: ${currentContact.value.name}`
+    return `Contact: ${currentContact.value.name}`;
   } else {
-    return `Loading Contact...`
+    return `Loading Contact...`;
   }
-})
+});
 
 async function loadContact() {
-  currentContact.value = null
-  const params = { include: includeKeys.value }
+  currentContact.value = null;
+  const params = { include: includeKeys.value };
 
   await dataAccess
     .view(`contacts`, contactId.value, params)
     .then((result) => {
-      currentContact.value = result
+      currentContact.value = result;
       showBanner(`Loaded contact successfully!`);
     })
     .catch((error) => {
-      console.log(error)
+      console.log(error);
       showBanner(`Error loading contact!`);
-    })
+    });
 }
-/*** section:global ***/
+/** section:global **/
 
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:tabs ***/
+/** section:tabs **/
 const tabs = [
   { label: 'Details', onchange: loadContact },
   { label: 'Invoice Configs', onchange: loadInvoiceConfig },
   { label: 'Receipt Configs', onchange: loadReceiptConfig },
   { label: 'Billing Configs', onchange: loadBillingConfig },
-  { label: 'Invoices', onchange: loadInvoices }
-]
+  { label: 'Invoices', onchange: loadInvoices },
+];
 
 async function loadInvoiceConfig() {
-  events.emitEvent('loadData', { dataType: 'Invoice Configs' })
+  events.emitEvent('loadData', { dataType: 'Invoice Configs' });
 }
 
 async function loadReceiptConfig() {
-  events.emitEvent('loadData', { dataType: 'Receipt Configs' })
+  events.emitEvent('loadData', { dataType: 'Receipt Configs' });
 }
 
 async function loadBillingConfig() {
-  events.emitEvent('loadData', { dataType: 'Billing Configs' })
+  events.emitEvent('loadData', { dataType: 'Billing Configs' });
 }
 
 async function loadInvoices() {
-  events.emitEvent('loadData', { dataType: 'Invoices' })
+  events.emitEvent('loadData', { dataType: 'Invoices' });
 }
 
 function triggerTabEvent(i) {
-  tabs[i].onchange()
+  tabs[i].onchange();
 }
-/*** section:tabs ***/
+/** section:tabs **/
 
-onMounted(async () => {
-  await loadContact()
-})
+onMounted(async() => {
+  await loadContact();
+});
 </script>
 
 <template>
   <div class="page-container">
-    <h2 class="heading">{{ heading }}</h2>
+    <h2 class="heading">
+      {{ heading }}
+    </h2>
 
     <TProgressBar
       v-if="!currentContact"
@@ -144,17 +140,18 @@ onMounted(async () => {
       :tabs="tabs"
       @tab-change="triggerTabEvent"
     >
-
       <template #tab-0>
         <div
           class="contact-container"
         >
           <div
-            v-for="row in fieldsLayout"
+            v-for="(row, i) in fieldsLayout"
+            :key="i"
             class="data-row"
           >
             <div
-              v-for="field in Object.keys(row)"
+              v-for="(field, j) in Object.keys(row)"
+              :key="j"
               class="data-field"
             >
               <div
@@ -175,11 +172,10 @@ onMounted(async () => {
                 <span
                   v-if="isEmpty(currentContact) || isEmpty(currentContact[field])"
                 >
-                --- no value ---
+                  --- no value ---
                 </span>
               </div> <!-- field-value -->
             </div> <!-- data-field -->
-
           </div> <!-- data-row -->
         </div> <!-- contact-container -->
       </template> <!-- template-0 -->

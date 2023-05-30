@@ -1,11 +1,105 @@
 <script setup>
-/*** import:global ***/
-import { onMounted, ref, computed } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { onMounted, ref, computed } from 'vue';
+/** import:global **/
 
-/*** import:utils ***/
-import { useInputHelper } from '../utils/input'
+/** import:utils **/
+import { useInputHelper } from '@/utils/input';
+import { useErrors } from '@/utils/errors';
+/** import:utils **/
 
+/** import:components **/
+import {
+  TCheckbox,
+  TDatePicker,
+  TDateRange,
+  TDateTimePicker,
+  TDateTimeRange,
+  TInput,
+  TSelect,
+  TSelectTable,
+  TTextarea,
+  TButton
+} from 'coffeebrew-vue-components';
+/** import:components **/
+
+/** section:props **/
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    default() {
+      return {};
+    },
+  },
+  fieldsLayout: {
+    type: Array,
+    default() {
+      return [];
+    },
+  },
+  dataFields: {
+    type: Array,
+    default() {
+      return [];
+    },
+  },
+  schemas: {
+    type: Object,
+    default() {
+      return {};
+    },
+  },
+  errorMessages: {
+    type: Object,
+    default() {
+      return {};
+    },
+  },
+  compact: {
+    type: Boolean,
+    default: false,
+  },
+  submittable: {
+    type: Boolean,
+    default: true,
+  },
+  confirmButton: {
+    type: Object,
+    default() {
+      return {
+        type: 'text',
+        icon: 'fa-solid fa-check',
+        value: 'Confirm',
+      };
+    },
+  },
+  cancelButton: {
+    type: Object,
+    default() {
+      return {
+        type: 'text',
+        icon: 'fa-solid fa-xmark',
+        value: 'Cancel',
+      };
+    },
+  },
+});
+
+const data = computed({
+  get: () => {
+    return props.modelValue;
+  },
+  set: (val) => {
+    emit('update:modelValue', val);
+  },
+});
+/** section:props **/
+
+/** section:emit **/
+const emit = defineEmits(['update:modelValue', 'submit', 'cancel']);
+/** section:emit **/
+
+/** section:inputUtils **/
 const {
   schemasMap,
   serverOptionsFields,
@@ -20,225 +114,138 @@ const {
   objectField,
   formatInputOptionsData,
   fetchOptions,
-  initOptionsData
-} = useInputHelper(props.schemas)
+  initOptionsData,
+} = useInputHelper(props.schemas);
 
-import { useErrors } from '../utils/errors'
-const errorsMap = useErrors()
-/*** import:utils ***/
+const errorsMap = useErrors();
 
-/*** import:components ***/
-import {
-  TCheckbox,
-  TDatePicker,
-  TDateRange,
-  TDateTimePicker,
-  TDateTimeRange,
-  TInput,
-  TSelect,
-  TSelectTable,
-  TTextarea,
-  TButton
-} from 'coffeebrew-vue-components'
-/*** import:components ***/
-
-/*** section:props ***/
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    default: {}
-  },
-  fieldsLayout: {
-    type: Array,
-    default: []
-  },
-  dataFields: {
-    type: Array,
-    default: []
-  },
-  schemas: {
-    type: Object,
-    default: {}
-  },
-  errorMessages: {
-    type: Object,
-    default() {
-      return {}
-    }
-  },
-  compact: {
-    type: Boolean,
-    default: false
-  },
-  submittable: {
-    type: Boolean,
-    default: true
-  },
-  confirmButton: {
-    type: Object,
-    default() {
-      return {
-        type: 'text',
-        icon: 'fa-solid fa-check',
-        value: 'Confirm'
-      }
-    }
-  },
-  cancelButton: {
-    type: Object,
-    default() {
-      return {
-        type: 'text',
-        icon: 'fa-solid fa-xmark',
-        value: 'Cancel'
-      }
-    }
-  }
-})
-
-const data = computed({
-  get: () => {
-    return props.modelValue
-  },
-  set: (val) => {
-    emit('update:modelValue', val)
-  }
-})
-/*** section:props ***/
-
-/*** section:emit ***/
-const emit = defineEmits(['update:modelValue', 'submit', 'cancel'])
-/*** section:emit ***/
-
-/*** section:inputUtils ***/
 const fieldToggles = ref(nullToggleableFields.value.reduce((o, f) => {
-  o[f] = false
-  return o
-}, {}))
+  o[f] = false;
+  return o;
+}, {}));
 
 function showField(field) {
-  return !nullToggleableField(field) || fieldToggles.value[field]
+  return !nullToggleableField(field) || fieldToggles.value[field];
 }
 
 function showInput(field) {
-  return showField(field) && inputableField(field)
+  return showField(field) && inputableField(field);
 }
 
 function showTextarea(field) {
-  return showField(field) && (multiInputableField(field) || objectField(field))
+  return showField(field) && (multiInputableField(field) || objectField(field));
 }
 
 function showDatePicker(field) {
-  return showField(field) && inputType(field) === 'date'
+  return showField(field) && inputType(field) === 'date';
 }
 
 function showDateTimePicker(field) {
-  return showField(field) && inputType(field) === 'datetime'
+  return showField(field) && inputType(field) === 'datetime';
 }
 
 function showSelect(field) {
-  return showField(field) && (inputType(field) === 'enum' || inputType(field) === 'select')
+  return showField(field) && (inputType(field) === 'enum' || inputType(field) === 'select');
 }
 
 function showDateRange(field) {
-  return showField(field) && inputType(field) === 'daterange'
+  return showField(field) && inputType(field) === 'daterange';
 }
 
 function showDateTimeRange(field) {
-  return showField(field) && inputType(field) === 'datetimerange'
+  return showField(field) && inputType(field) === 'datetimerange';
 }
 
 function showCheckbox(field) {
-  return showField(field) && inputType(field) === 'boolean'
+  return showField(field) && inputType(field) === 'boolean';
 }
 
 function fieldUpdatable(field) {
-  return props.dataFields.find(f => f === field)
+  return props.dataFields.find(f => f === field);
 }
 
 function fieldToggleLabel(field) {
-  return `Has ${inputLabel(field)}`
+  return `Has ${inputLabel(field)}`;
 }
 
 function fieldErrorMessage(field) {
-  if (!props.errorMessages) { return `` }
-  if (!props.errorMessages[field]) { return `` }
+  if (!props.errorMessages) { return ``; }
+  if (!props.errorMessages[field]) { return ``; }
 
   return props.errorMessages[field].map((error) => {
-    return errorsMap[error.name](error.params)
-  }).join(', ')
+    return errorsMap[error.name](error.params);
+  }).join(', ');
 }
-/*** section:inputUtils ***/
+/** section:inputUtils **/
 
-/*** section:selectTableUtils ***/
-const inputOptionsData = ref({})
+/** section:selectTableUtils **/
+const inputOptionsData = ref({});
 
 function inputOptions(field) {
-  return inputOptionsData.value[field]
+  return inputOptionsData.value[field];
 }
 
 function showSingleSelect(field) {
-  return showField(field) && singleSelectableField(field) && !!inputOptions(field)
+  return showField(field) && singleSelectableField(field) && !!inputOptions(field);
 }
 
 function showMultiSelect(field) {
-  return showField(field) && multiSelectableField(field) && !!inputOptions(field)
+  return showField(field) && multiSelectableField(field) && !!inputOptions(field);
 }
 
 const fieldOffsetChange = computed(() => {
   return serverOptionsFields.value.reduce((o, k) => {
-    o[k] = (offset) => { offsetChange(k, offset) }
-    return o
-  }, {})
-})
+    o[k] = (offset) => { offsetChange(k, offset); };
+    return o;
+  }, {});
+});
 
 async function offsetChange(field, newOffset) {
-  const limit = schemasMap.value[field].limit || 5
+  const limit = schemasMap.value[field].limit || 5;
   await fetchOptions(field, newOffset)
     .then((result) => {
-      inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
-    })
+      inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result);
+    });
 }
-/*** section:selectTableUtils ***/
+/** section:selectTableUtils **/
 
-/*** section:styles ***/
+/** section:styles **/
 const formClass = computed(() => {
   if (props.compact) {
-    return `form compact`
+    return `form compact`;
   } else {
-    return `form`
+    return `form`;
   }
-})
+});
 
 function dataFieldClass(field) {
   if (nullToggleableField(field)) {
-    return `data-field toggleable`
+    return `data-field toggleable`;
   } else {
-    return `data-field`
+    return `data-field`;
   }
 }
-/*** section:styles ***/
+/** section:styles **/
 
-/*** section:action ***/
+/** section:action **/
 function submitData() {
-  emit('submit', data.value)
+  emit('submit', data.value);
 }
 
 function cancel() {
-  emit('cancel')
+  emit('cancel');
 }
-/*** section:action ***/
+/** section:action **/
 
-onMounted(async () => {
+onMounted(async() => {
   await initOptionsData()
     .then((result) => {
-      inputOptionsData.value = result
+      inputOptionsData.value = result;
     })
     .catch((error) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error)
-    })
-})
+      console.error(error);
+    });
+});
 </script>
 
 <template>
@@ -247,11 +254,13 @@ onMounted(async () => {
   >
     <div class="body">
       <div
-        v-for="row in fieldsLayout"
+        v-for="(row, i) in fieldsLayout"
+        :key="i"
         class="data-row"
       >
         <slot
-          v-for="field in Object.keys(row)"
+          v-for="(field, j) in Object.keys(row)"
+          :key="j"
           :name="`form-col.${field}`"
           v-bind="{ field: field, type: inputType(field), label: inputLabel(field) }"
         >
@@ -300,10 +309,10 @@ onMounted(async () => {
 
               <TSelect
                 v-if="showSelect(field)"
+                :id="field"
                 v-model="data[field]"
                 :label="inputLabel(field)"
                 :name="field"
-                :id="field"
                 :options="schemasMap[field].options"
                 :size="row[field]"
                 :disabled="!fieldUpdatable(field)"
@@ -372,12 +381,13 @@ onMounted(async () => {
               v-if="nullToggleableField(field)"
               class="field-toggle"
             >
-              <TCheckbox v-model="fieldToggles[field]" :label="fieldToggleLabel(field)"/>
+              <TCheckbox
+                v-model="fieldToggles[field]"
+                :label="fieldToggleLabel(field)"
+              />
             </div>
-
           </div> <!-- data-field -->
         </slot>
-
       </div> <!-- data-row -->
     </div> <!-- body -->
 
@@ -385,8 +395,20 @@ onMounted(async () => {
       v-if="submittable"
       class="actions"
     >
-      <TButton class="button" :button-type="confirmButton.type" :value="confirmButton.value" :icon="confirmButton.icon" @click="submitData()"/>
-      <TButton class="button" :button-type="cancelButton.type" :value="cancelButton.value" :icon="cancelButton.icon" @click="cancel()"/>
+      <TButton
+        class="button"
+        :button-type="confirmButton.type"
+        :value="confirmButton.value"
+        :icon="confirmButton.icon"
+        @click="submitData()"
+      />
+      <TButton
+        class="button"
+        :button-type="cancelButton.type"
+        :value="cancelButton.value"
+        :icon="cancelButton.icon"
+        @click="cancel()"
+      />
     </div>
   </div> <!-- form -->
 </template>

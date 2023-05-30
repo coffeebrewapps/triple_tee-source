@@ -1,281 +1,287 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:utils ***/
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+/** import:utils **/
+import { useDataAccess } from '@/utils/dataAccess';
+import { Liquid } from 'liquidjs';
+/** import:utils **/
 
-import { Liquid } from 'liquidjs'
-const liquidEngine = new Liquid();
-/*** import:utils ***/
-
-/*** import:components ***/
+/** import:components **/
 import {
   TButton,
   TDialog,
-  TInput,
   TProgressBar
-} from 'coffeebrew-vue-components'
+} from 'coffeebrew-vue-components';
 
-import TabContainer from './TabContainer.vue'
-/*** import:components ***/
+import TabContainer from './TabContainer.vue';
+/** import:components **/
 
-/*** section:props ***/
+/** section:props **/
 const props = defineProps({
   id: {
     type: String,
-    default: null
+    default: null,
   },
   contentMarkup: {
     type: String,
-    default: ''
+    default: '',
   },
   contentStyles: {
     type: String,
-    default: ''
+    default: '',
   },
   disabled: {
     type: Boolean,
-    default: false
+    default: false,
   },
   data: {
     type: Object,
-    default: {}
+    default() {
+      return {};
+    },
   },
   errorMessages: {
     type: Object,
-    default: {}
+    default() {
+      return {};
+    },
   },
   enableGenerate: {
     type: Boolean,
-    default: true
+    default: true,
   },
   templateType: {
     type: String,
-    default: null
-  }
-})
-/*** section:props ***/
+    default: null,
+  },
+});
+/** section:props **/
 
-/*** section:emit ***/
-const emit = defineEmits(['contentMarkupChange', 'contentStylesChange', 'dataChange'])
-/*** section:emit ***/
+/** section:emit **/
+const emit = defineEmits(['contentMarkupChange', 'contentStylesChange', 'dataChange']);
+/** section:emit **/
 
-/*** section:global ***/
+/** section:utils **/
+const router = useRouter();
+const dataAccess = useDataAccess();
+const liquidEngine = new Liquid();
+/** section:utils **/
+
+/** section:global **/
+const styleComponentName = ref('style');
 const template = computed(() => {
   return {
     contentMarkup: props.contentMarkup,
-    contentStyles: props.contentStyles
-  }
-})
+    contentStyles: props.contentStyles,
+  };
+});
 
 const editorTabs = [
   { label: 'Markup' },
   { label: 'Styles' },
-  { label: 'Data' }
-]
-/*** section:global ***/
+  { label: 'Data' },
+];
+/** section:global **/
 
-/*** section:editor ***/
-const markupEditor = ref('markupEditor')
-const stylesEditor = ref('stylesEditor')
-const sampleDataEditor = ref('sampleDataEditor')
+/** section:editor **/
+const markupEditor = ref('markupEditor');
+const stylesEditor = ref('stylesEditor');
+const sampleDataEditor = ref('sampleDataEditor');
 
-const markupEditable = ref(false)
-const stylesEditable = ref(false)
-const sampleDataEditable = ref(false)
+const markupEditable = ref(false);
+const stylesEditable = ref(false);
+const sampleDataEditable = ref(false);
 
 const markupEditorStyleClass = computed(() => {
-  const classNames = []
+  const classNames = [];
 
-  classNames.push(`editor`)
+  classNames.push(`editor`);
 
   if (markupEditable.value) {
-    classNames.push(`editable`)
+    classNames.push(`editable`);
   }
 
   if (props.disabled) {
-    classNames.push(`disabled`)
+    classNames.push(`disabled`);
   }
 
-  return classNames.join(' ')
-})
+  return classNames.join(' ');
+});
 
 const stylesEditorStyleClass = computed(() => {
-  const classNames = []
+  const classNames = [];
 
-  classNames.push(`editor`)
+  classNames.push(`editor`);
 
   if (stylesEditable.value) {
-    classNames.push(`editable`)
+    classNames.push(`editable`);
   }
 
   if (props.disabled) {
-    classNames.push(`disabled`)
+    classNames.push(`disabled`);
   }
 
-  return classNames.join(' ')
-})
+  return classNames.join(' ');
+});
 
 const sampleDataEditorStyleClass = computed(() => {
-  const classNames = []
+  const classNames = [];
 
-  classNames.push(`editor`)
+  classNames.push(`editor`);
 
   if (sampleDataEditable.value) {
-    classNames.push(`editable`)
+    classNames.push(`editable`);
   }
 
   if (props.disabled) {
-    classNames.push(`disabled`)
+    classNames.push(`disabled`);
   }
 
-  return classNames.join(' ')
-})
+  return classNames.join(' ');
+});
 
 function toggleMarkupEditor() {
-  markupEditable.value = true
+  markupEditable.value = true;
 }
 
 async function confirmMarkupEdit() {
-  previewError.value = false
+  previewError.value = false;
 
   await renderPreview()
     .then((result) => {
-      updateMarkup()
+      updateMarkup();
     })
     .catch((error) => {
-      previewError.value = true
-      parsedMarkup.value = `Markup error`
-      console.log(error)
+      previewError.value = true;
+      parsedMarkup.value = `Markup error`;
+      console.log(error);
     })
     .finally(() => {
-      markupEditable.value = false
-    })
+      markupEditable.value = false;
+    });
 }
 
 function toggleStylesEditor() {
-  stylesEditable.value = true
+  stylesEditable.value = true;
 }
 
 function confirmStylesEdit() {
-  updateStyles()
-  stylesEditable.value = false
+  updateStyles();
+  stylesEditable.value = false;
 }
 
 function toggleSampleDataEditor() {
-  sampleDataEditable.value = true
+  sampleDataEditable.value = true;
 }
 
 async function confirmSampleDataEdit() {
-  previewError.value = false
+  previewError.value = false;
 
   await renderPreview()
     .then((result) => {
-      updateData()
+      updateData();
     })
     .catch((error) => {
-      previewError.value = true
-      parsedMarkup.value = `Sample data error`
-      console.log(error)
+      previewError.value = true;
+      parsedMarkup.value = `Sample data error`;
+      console.log(error);
     })
     .finally(() => {
-      sampleDataEditable.value = false
-    })
+      sampleDataEditable.value = false;
+    });
 }
 
 function cancelMarkupEdit() {
-  markupEditable.value = !markupEditable.value
+  markupEditable.value = !markupEditable.value;
 }
 
 function cancelStylesEdit() {
-  stylesEditable.value = !stylesEditable.value
+  stylesEditable.value = !stylesEditable.value;
 }
 
 function cancelSampleDataEdit() {
-  sampleDataEditable.value = !sampleDataEditable.value
+  sampleDataEditable.value = !sampleDataEditable.value;
 }
 
 function updateMarkup() {
-  emit('contentMarkupChange', markupEditor.value.innerText)
+  emit('contentMarkupChange', markupEditor.value.innerText);
 }
 
 function updateStyles() {
-  emit('contentStylesChange', stylesEditor.value.innerText)
+  emit('contentStylesChange', stylesEditor.value.innerText);
 }
 
 function updateData() {
-  emit('dataChange', JSON.parse(sampleDataEditor.value.innerText))
+  emit('dataChange', JSON.parse(sampleDataEditor.value.innerText));
 }
 
-/*** section:editor ***/
+/** section:editor **/
 
-/*** section:preview ***/
+/** section:preview **/
 const samplePdfData = computed(() => {
-  return props.data
-})
+  return props.data;
+});
 
 const previewContentStyles = computed(() => {
   if (previewError.value) {
-    return `preview-content error`
+    return `preview-content error`;
   } else {
-    return `preview-content`
+    return `preview-content`;
   }
-})
+});
 
-const parsedMarkup = ref()
-const previewError = ref(false)
+const parsedMarkup = ref();
+const previewError = ref(false);
 
 async function renderPreview() {
   return new Promise((resolve, reject) => {
-    parsedMarkup.value = null
+    parsedMarkup.value = null;
     liquidEngine
       .parseAndRender(markupEditor.value.innerText, JSON.parse(sampleDataEditor.value.innerText))
       .then((result) => {
-        parsedMarkup.value = result
-        resolve(result)
+        parsedMarkup.value = result;
+        resolve(result);
       })
       .catch((error) => {
-        reject(error)
-      })
-  })
+        reject(error);
+      });
+  });
 }
-/*** section:preview ***/
+/** section:preview **/
 
-/*** section:generate ***/
-const previewPdfDialog = ref(false)
-const templatePdfData = ref()
-const downloadLink = ref()
-const downloadFile = ref()
+/** section:generate **/
+const previewPdfDialog = ref(false);
+const templatePdfData = ref();
+const downloadLink = ref();
+const downloadFile = ref();
 
 async function generateTemplate() {
-  templatePdfData.value = null
-  previewPdfDialog.value = true
+  templatePdfData.value = null;
+  previewPdfDialog.value = true;
 
   await dataAccess
     .downloadStream(props.templateType, props.id, samplePdfData.value, { path: 'pdf' })
     .then((result) => {
-      const blob = new Blob([result.data], { type: 'application/pdf' })
-      const url = window.URL.createObjectURL(blob)
-      downloadLink.value = url
-      downloadFile.value = `${props.templateType}_${props.id}.pdf`
-      templatePdfData.value = url
-      viewPdf()
+      const blob = new Blob([result.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      downloadLink.value = url;
+      downloadFile.value = `${props.templateType}_${props.id}.pdf`;
+      templatePdfData.value = url;
+      viewPdf();
     })
     .catch((error) => {
-      console.log(error)
+      console.log(error);
     })
     .finally(() => {
-      closePreviewDialog()
-    })
+      closePreviewDialog();
+    });
 }
 
 function viewPdf() {
-  const currentRoute = Object.assign({}, router.currentRoute.value)
+  const currentRoute = Object.assign({}, router.currentRoute.value);
   const viewPdfRoute = {
     path: '/document_templates/:templateType/:id/pdf',
     name: 'View Pdf',
@@ -283,25 +289,25 @@ function viewPdf() {
     props: {
       templatePdfData: templatePdfData.value,
       downloadLink: downloadLink.value,
-      downloadFile: downloadFile.value
+      downloadFile: downloadFile.value,
     },
     meta: {
       parentRoute: { name: currentRoute.name },
-      hidden: true
-    }
-  }
-  router.addRoute(viewPdfRoute)
-  router.push({ name: 'View Pdf', params: { templateType: props.templateType, id: props.id } })
+      hidden: true,
+    },
+  };
+  router.addRoute(viewPdfRoute);
+  router.push({ name: 'View Pdf', params: { templateType: props.templateType, id: props.id } });
 }
 
 function closePreviewDialog() {
-  previewPdfDialog.value = false
+  previewPdfDialog.value = false;
 }
-/*** section:generate ***/
+/** section:generate **/
 
-onMounted(async () => {
-  await renderPreview()
-})
+onMounted(async() => {
+  await renderPreview();
+});
 </script>
 
 <template>
@@ -318,7 +324,7 @@ onMounted(async () => {
               class="editor-button cancel"
               @click="cancelMarkupEdit"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <i class="fa-solid fa-xmark" />
             </div>
 
             <div
@@ -333,14 +339,14 @@ onMounted(async () => {
               class="editor-button edit"
               @click="toggleMarkupEditor"
             >
-              <i class="fa-solid fa-pencil"></i>
+              <i class="fa-solid fa-pencil" />
             </div>
 
             <div
               class="editor-button confirm"
               @click="confirmMarkupEdit"
             >
-              <i class="fa-solid fa-check"></i>
+              <i class="fa-solid fa-check" />
             </div>
           </div>
 
@@ -360,7 +366,7 @@ onMounted(async () => {
               class="editor-button cancel"
               @click="cancelStylesEdit"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <i class="fa-solid fa-xmark" />
             </div>
 
             <div
@@ -375,14 +381,14 @@ onMounted(async () => {
               class="editor-button edit"
               @click="toggleStylesEditor"
             >
-              <i class="fa-solid fa-pencil"></i>
+              <i class="fa-solid fa-pencil" />
             </div>
 
             <div
               class="editor-button confirm"
               @click="confirmStylesEdit"
             >
-              <i class="fa-solid fa-check"></i>
+              <i class="fa-solid fa-check" />
             </div>
           </div>
 
@@ -402,7 +408,7 @@ onMounted(async () => {
               class="editor-button cancel"
               @click="cancelSampleDataEdit"
             >
-              <i class="fa-solid fa-xmark"></i>
+              <i class="fa-solid fa-xmark" />
             </div>
 
             <div
@@ -417,14 +423,14 @@ onMounted(async () => {
               class="editor-button edit"
               @click="toggleSampleDataEditor"
             >
-              <i class="fa-solid fa-pencil"></i>
+              <i class="fa-solid fa-pencil" />
             </div>
 
             <div
               class="editor-button confirm"
               @click="confirmSampleDataEdit"
             >
-              <i class="fa-solid fa-check"></i>
+              <i class="fa-solid fa-check" />
             </div>
           </div>
         </template> <!-- template-2 -->
@@ -432,19 +438,20 @@ onMounted(async () => {
     </div> <!-- template-editor -->
 
     <div class="preview-container">
-      <h3 class="heading">Preview</h3>
+      <h3 class="heading">
+        Preview
+      </h3>
 
       <div
         :class="previewContentStyles"
         v-html="parsedMarkup"
-      >
-      </div>
+      />
 
       <component
+        :is="styleComponentName"
         v-if="contentStyles"
-        is="style"
-        v-html="contentStyles"
       >
+        {{ contentStyles }}
       </component>
 
       <div class="buttons">
@@ -458,8 +465,8 @@ onMounted(async () => {
     </div> <!-- preview-container -->
 
     <TDialog
-      class="generate-dialog"
       v-model="previewPdfDialog"
+      class="generate-dialog"
       title="Generating PDF"
       :width="400"
       :height="250"
@@ -469,7 +476,9 @@ onMounted(async () => {
           v-if="!templatePdfData"
         />
 
-        <div class="message">Generating PDF...</div>
+        <div class="message">
+          Generating PDF...
+        </div>
       </template>
     </TDialog>
   </div> <!-- preview-template -->

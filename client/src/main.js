@@ -1,21 +1,21 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
-import { useDataStore } from '@/stores/data'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import { useDataStore } from '@/stores/data';
 
-import App from './App.vue'
-import router from './router'
+import App from './App.vue';
+import router from './router';
 
-import './assets/main.css'
+import './assets/main.css';
 
-const app = createApp(App)
-const pinia = createPinia()
+import { initPlugins } from '@/utils/plugins';
 
-app.use(pinia)
-app.use(router)
+const app = createApp(App);
+const pinia = createPinia();
 
-const dataStore = useDataStore()
+app.use(pinia);
+app.use(router);
 
-import { initPlugins } from '@/utils/plugins'
-initPlugins(router, dataStore)
+const dataStore = useDataStore();
+initPlugins(router, dataStore);
 
-app.mount('#app')
+app.mount('#app');

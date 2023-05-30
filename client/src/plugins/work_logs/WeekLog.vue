@@ -1,282 +1,262 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, watch, onMounted } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+/** import:global **/
 
-/*** import:utils ***/
-import { useValidations } from '@/utils/validations'
-const {
-  isEmpty
-} = useValidations()
+/** import:utils **/
+import { useDataAccess } from '@/utils/dataAccess';
+import { useFormatter } from '@/utils/formatter';
+import { useWorkLogUtils } from './utils';
+/** import:utils **/
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+/** import:stores **/
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
+import { useBannerStore } from '@/stores/banner';
+import { useEventsStore } from '@/stores/events';
+/** import:stores **/
 
-import { useSystemConfigsStore } from '@/stores/systemConfigs'
-const systemConfigsStore = useSystemConfigsStore()
-
-import { useFormatter } from '@/utils/formatter'
-const {
-  formatLongDate
-} = useFormatter(systemConfigsStore)
-
-import { useWorkLogUtils } from './utils'
-const {
-  formatDuration,
-  calculateDuration
-} = useWorkLogUtils()
-/*** import:utils ***/
-
-/*** import:stores ***/
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
-/*** import:stores ***/
-
-/*** section:props ***/
-const props = defineProps({
+/** section:props **/
+defineProps({
   loadData: {
     type: Boolean,
-    default: false
-  }
-})
-/*** section:props ***/
+    default: false,
+  },
+});
+/** section:props **/
 
-/*** section:global ***/
-const selectedWeek = ref('this')
-const weeklyData = ref({})
-const currentWeek = ref(0)
-const prevWeekTab = ref('prevWeekTab')
-const thisWeekTab = ref('thisWeekTab')
-const nextWeekTab = ref('nextWeekTab')
+/** section:utils **/
+const dataAccess = useDataAccess();
+const systemConfigsStore = useSystemConfigsStore();
+const {
+  formatLongDate,
+} = useFormatter(systemConfigsStore);
+const {
+  formatDuration,
+  calculateDuration,
+} = useWorkLogUtils();
+const banner = useBannerStore();
+const events = useEventsStore();
+/** section:utils **/
+
+/** section:global **/
+const selectedWeek = ref('this');
+const weeklyData = ref({});
+const currentWeek = ref(0);
+const prevWeekTab = ref('prevWeekTab');
+const thisWeekTab = ref('thisWeekTab');
+const nextWeekTab = ref('nextWeekTab');
 
 const weekStart = computed(() => {
-  const today = new Date()
-  const date = new Date()
-  const offset = currentWeek.value * 7
+  const today = new Date();
+  const date = new Date();
+  const offset = currentWeek.value * 7;
 
   if (selectedWeek.value === 'prev') {
-    date.setDate(date.getDate() + offset)
-    date.setDate(date.getDate() - today.getDay())
+    date.setDate(date.getDate() + offset);
+    date.setDate(date.getDate() - today.getDay());
   } else if (selectedWeek.value === 'next') {
-    date.setDate(date.getDate() + offset)
-    date.setDate(date.getDate() - today.getDay())
+    date.setDate(date.getDate() + offset);
+    date.setDate(date.getDate() - today.getDay());
   } else { // this week
-    date.setDate(date.getDate() - today.getDay())
+    date.setDate(date.getDate() - today.getDay());
   }
 
-  date.setHours(0)
-  date.setMinutes(0)
-  date.setSeconds(0)
+  date.setHours(0);
+  date.setMinutes(0);
+  date.setSeconds(0);
 
-  return date
-})
+  return date;
+});
 
 const weekEnd = computed(() => {
-  const date = new Date()
-  date.setDate(weekStart.value.getDate() + 6)
-  date.setHours(23)
-  date.setMinutes(59)
-  date.setSeconds(59)
-  return date
-})
+  const date = new Date();
+  date.setDate(weekStart.value.getDate() + 6);
+  date.setHours(23);
+  date.setMinutes(59);
+  date.setSeconds(59);
+  return date;
+});
 
 const weekDays = computed(() => {
   return Array.from(Array(7)).map((_, i) => {
-    const date = new Date(weekStart.value)
-    date.setDate(weekStart.value.getDate() + i)
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    return date
-  })
-})
+    const date = new Date(weekStart.value);
+    date.setDate(weekStart.value.getDate() + i);
+    date.setHours(0);
+    date.setMinutes(0);
+    date.setSeconds(0);
+    return date;
+  });
+});
 
 const weeklyFilters = computed(() => {
   return {
     startTime: {
       startDate: weekStart.value,
-      endDate: weekEnd.value
-    }
-  }
-})
+      endDate: weekEnd.value,
+    },
+  };
+});
 
 const weeklyTotalDuration = computed(() => {
   return Object.entries(weeklyData.value).reduce((weekTotal, [date, { total }]) => {
-    return weekTotal + total
-  }, 0)
-})
-
-function dailyTotalDuration(entries) {
-  return entries.reduce((total, entry) => {
-    return entry.duration + total
-  }, 0)
-}
+    return weekTotal + total;
+  }, 0);
+});
 
 function dayEntries(day) {
   if (weeklyData.value[day]) {
-    return weeklyData.value[day]
+    return weeklyData.value[day];
   } else {
     return {
       total: 0,
-      entries: []
-    }
+      entries: [],
+    };
   }
-}
-
-function formatDayEntries(entries) {
-  return entries.map((entry) => {
-    const totaled = Object.assign({}, entry)
-    totaled.duration = calculateDuration(entry)
-    return totaled
-  })
 }
 
 function formatWeeklyData(data) {
   const days = weekDays.value.reduce((o, day) => {
     o[day] = {
       entries: [],
-      total: 0
-    }
-    return o
-  }, {})
+      total: 0,
+    };
+    return o;
+  }, {});
 
   data.forEach((worklog) => {
-    const time = new Date(worklog.startTime)
-    const startOfDay = (new Date(time.getFullYear(), time.getMonth(), time.getDate(), 0, 0, 0))
-    const duration = calculateDuration(worklog)
-    days[startOfDay].entries.push(Object.assign({}, worklog, { duration: duration }))
-    days[startOfDay].total = days[startOfDay].total + duration
-  })
+    const time = new Date(worklog.startTime);
+    const startOfDay = (new Date(time.getFullYear(), time.getMonth(), time.getDate(), 0, 0, 0));
+    const duration = calculateDuration(worklog);
+    days[startOfDay].entries.push(Object.assign({}, worklog, { duration }));
+    days[startOfDay].total = days[startOfDay].total + duration;
+  });
 
-  return days
+  return days;
 }
-/*** section:global ***/
+/** section:global **/
 
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:events ***/
+/** section:events **/
 events.registerListener(
   'loadWeeklyLogs',
   {
     id: 'WeekLog',
     invoke: (payload) => {
-      loadWeekly()
-    }
+      loadWeekly();
+    },
   }
-)
-/*** section:events ***/
+);
+/** section:events **/
 
-/*** section:styles ***/
+/** section:styles **/
 const prevWeekTabStyle = computed(() => {
   if (selectedWeek.value === 'prev') {
-    return `weekly-tab active`
+    return `weekly-tab active`;
   } else {
-    return `weekly-tab`
+    return `weekly-tab`;
   }
-})
+});
 
 const thisWeekTabStyle = computed(() => {
   if (selectedWeek.value === 'this') {
-    return `weekly-tab active`
+    return `weekly-tab active`;
   } else {
-    return `weekly-tab`
+    return `weekly-tab`;
   }
-})
+});
 
 const nextWeekTabStyle = computed(() => {
   if (selectedWeek.value === 'next') {
-    return `weekly-tab active`
+    return `weekly-tab active`;
   } else {
-    return `weekly-tab`
+    return `weekly-tab`;
   }
-})
-/*** section:styles ***/
+});
+/** section:styles **/
 
-/*** section:actions ***/
+/** section:actions **/
 async function prevWeek() {
-  currentWeek.value = currentWeek.value - 1
-  selectedWeek.value = 'prev'
-  prevWeekTab.value.blur()
-  await loadWeekly()
+  currentWeek.value = currentWeek.value - 1;
+  selectedWeek.value = 'prev';
+  prevWeekTab.value.blur();
+  await loadWeekly();
 }
 
 async function thisWeek() {
-  currentWeek.value = 0
-  selectedWeek.value = 'this'
-  thisWeekTab.value.blur()
-  await loadWeekly()
+  currentWeek.value = 0;
+  selectedWeek.value = 'this';
+  thisWeekTab.value.blur();
+  await loadWeekly();
 }
 
 async function nextWeek() {
-  currentWeek.value = currentWeek.value + 1
-  selectedWeek.value = 'next'
-  nextWeekTab.value.blur()
-  await loadWeekly()
+  currentWeek.value = currentWeek.value + 1;
+  selectedWeek.value = 'next';
+  nextWeekTab.value.blur();
+  await loadWeekly();
 }
 
 function selectWeekTab(tab) {
   if (tab === 'prev') {
-    prevWeekTab.value.focus()
+    prevWeekTab.value.focus();
   } else if (tab === 'next') {
-    nextWeekTab.value.focus()
+    nextWeekTab.value.focus();
   } else {
-    thisWeekTab.value.focus()
+    thisWeekTab.value.focus();
   }
 }
-/*** section:actions ***/
+/** section:actions **/
 
 async function loadWeekly() {
   const params = {
-    filters: weeklyFilters.value
-  }
+    filters: weeklyFilters.value,
+  };
 
   await dataAccess
     .list('work_logs', params)
     .then((result) => {
-      weeklyData.value = formatWeeklyData(result.data)
+      weeklyData.value = formatWeeklyData(result.data);
     })
     .catch((error) => {
-      showBanner(`Error loading work logs!`)
-      console.log(error)
-    })
+      showBanner(`Error loading work logs!`);
+      console.log(error);
+    });
 }
 
-onMounted(async () => {
-  await loadWeekly()
-})
+onMounted(async() => {
+  await loadWeekly();
+});
 </script>
 
 <template>
   <div class="weekly-tab-container">
     <div class="weekly-tabs">
       <div
+        ref="prevWeekTab"
         :class="prevWeekTabStyle"
         tabindex="0"
-        ref="prevWeekTab"
         @click="prevWeek"
         @keydown.enter="prevWeek"
         @keydown.arrow-right="selectWeekTab('this')"
       >
-        <i class="fa-solid fa-angle-left"></i>
+        <i class="fa-solid fa-angle-left" />
         Prev Week
       </div>
 
       <div
+        ref="thisWeekTab"
         :class="thisWeekTabStyle"
         tabindex="0"
-        ref="thisWeekTab"
         @click="thisWeek"
         @keydown.enter="thisWeek"
         @keydown.arrow-left="selectWeekTab('prev')"
@@ -286,15 +266,15 @@ onMounted(async () => {
       </div>
 
       <div
+        ref="nextWeekTab"
         :class="nextWeekTabStyle"
         tabindex="0"
-        ref="nextWeekTab"
         @click="nextWeek"
         @keydown.enter="nextWeek"
         @keydown.arrow-left="selectWeekTab('this')"
       >
         Next Week
-        <i class="fa-solid fa-angle-right"></i>
+        <i class="fa-solid fa-angle-right" />
       </div>
     </div> <!-- weekly-tabs -->
 
@@ -317,11 +297,11 @@ onMounted(async () => {
 
       <div class="timeline">
         <div
-          v-for="day in weekDays"
+          v-for="(day, d) in weekDays"
+          :key="d"
           class="day"
         >
-          <div class="divider">
-          </div>
+          <div class="divider" />
 
           <div class="heading">
             <div class="date">
@@ -351,7 +331,8 @@ onMounted(async () => {
             </div>
 
             <div
-              v-for="entry in dayEntries(day).entries"
+              v-for="(entry, e) in dayEntries(day).entries"
+              :key="e"
               class="entry"
             >
               <div class="description">

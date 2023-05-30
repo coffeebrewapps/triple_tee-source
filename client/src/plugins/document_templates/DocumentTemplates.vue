@@ -1,143 +1,168 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:stores ***/
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
+/** import:stores **/
+import { useEventsStore } from '@/stores/events';
+/** import:stores **/
 
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
-/*** import:stores ***/
+/** import:components **/
+import DataPage from '@/components/DataPage.vue';
+import TabContainer from '@/components/TabContainer.vue';
+/** import:components **/
 
-/*** import:components ***/
-import DataPage from '@/components/DataPage.vue'
-import TabContainer from '@/components/TabContainer.vue'
-/*** import:components ***/
+/** section:utils **/
+const router = useRouter();
+const events = useEventsStore();
+/** section:utils **/
 
-/*** section:banner ***/
-function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
-}
-
-function hideBanner() {
-  banner.hide()
-}
-/*** section:banner ***/
-
-/*** section:global ***/
-const currentRoute = Object.assign({}, router.currentRoute.value)
-const templateType = ref()
+/** section:global **/
+const templateType = ref();
 
 const fieldsLayout = [
   { name: 'lg' },
   { contentMarkup: 'lg' },
-  { contentStyles: 'lg' }
-]
+  { contentStyles: 'lg' },
+];
 
 const dataFields = [
-  { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-  { key: 'name', type: 'text', label: 'Name', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
-  { key: 'contentMarkup', type: 'textarea', label: 'Content Markup', listable: false, viewable: true, creatable: true, updatable: true },
-  { key: 'contentStyles', type: 'textarea', label: 'Content Styles', listable: false, viewable: true, creatable: true, updatable: true }
-]
+  {
+    key: 'id',
+    type: 'text',
+    label: 'ID',
+    listable: true,
+    viewable: true,
+    creatable: false,
+    updatable: false,
+    sortable: true,
+  },
+  {
+    key: 'name',
+    type: 'text',
+    label: 'Name',
+    listable: true,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+    filterable: true,
+    sortable: true,
+  },
+  {
+    key: 'contentMarkup',
+    type: 'textarea',
+    label: 'Content Markup',
+    listable: false,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+  },
+  {
+    key: 'contentStyles',
+    type: 'textarea',
+    label: 'Content Styles',
+    listable: false,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+  },
+];
 
 const validations = {
-}
+};
 
 const filters = {
   initData: {},
   layout: [
-    { name: 'lg' }
-  ]
-}
-/*** section:global ***/
+    { name: 'lg' },
+  ],
+};
+/** section:global **/
 
-/*** section:tab ***/
+/** section:tab **/
 const tabs = [
   { label: 'Invoice', onchange: updateInvoiceTemplates },
-  { label: 'Receipt', onchange: updateReceiptTemplates }
-]
+  { label: 'Receipt', onchange: updateReceiptTemplates },
+];
 
 function updateInvoiceTemplates() {
-  templateType.value = 'invoice_templates'
-  events.emitEvent('loadData', { dataType: 'Invoice Templates' })
+  templateType.value = 'invoice_templates';
+  events.emitEvent('loadData', { dataType: 'Invoice Templates' });
 }
 
 function updateReceiptTemplates() {
-  templateType.value = 'receipt_templates'
-  events.emitEvent('loadData', { dataType: 'Receipt Templates' })
+  templateType.value = 'receipt_templates';
+  events.emitEvent('loadData', { dataType: 'Receipt Templates' });
 }
 
 function triggerTabEvent(i) {
-  tabs[i].onchange()
+  tabs[i].onchange();
 }
-/*** section:tab ***/
+/** section:tab **/
 
-/*** section:dataPage ***/
+/** section:dataPage **/
 const invoiceActions = {
   create: {
     click: async function(data) {
-      templateType.value = 'invoice_templates'
-      await openCreatePage()
-    }
+      templateType.value = 'invoice_templates';
+      await openCreatePage();
+    },
   },
   view: {
     click: async function(row, index) {
-      templateType.value = 'invoice_templates'
-      await openViewPage(row.id)
-    }
+      templateType.value = 'invoice_templates';
+      await openViewPage(row.id);
+    },
   },
   update: {
     click: async function(row, index) {
-      templateType.value = 'invoice_templates'
-      await openUpdatePage(row.id)
-    }
-  }
-}
+      templateType.value = 'invoice_templates';
+      await openUpdatePage(row.id);
+    },
+  },
+};
 
 const receiptActions = {
   create: {
     click: async function(data) {
-      templateType.value = 'receipt_templates'
-      await openCreatePage()
-    }
+      templateType.value = 'receipt_templates';
+      await openCreatePage();
+    },
   },
   view: {
     click: async function(row, index) {
-      templateType.value = 'receipt_templates'
-      await openViewPage(row.id)
-    }
+      templateType.value = 'receipt_templates';
+      await openViewPage(row.id);
+    },
   },
   update: {
     click: async function(row, index) {
-      templateType.value = 'receipt_templates'
-      await openUpdatePage(row.id)
-    }
-  }
-}
+      templateType.value = 'receipt_templates';
+      await openUpdatePage(row.id);
+    },
+  },
+};
 
 async function openCreatePage() {
-  router.push({ name: 'Create Template', params: { templateType: templateType.value } })
+  router.push({ name: 'Create Template', params: { templateType: templateType.value } });
 }
 
 async function openViewPage(id) {
-  router.push({ name: 'View Template', params: { id, templateType: templateType.value } })
+  router.push({ name: 'View Template', params: { id, templateType: templateType.value } });
 }
 
 async function openUpdatePage(id) {
-  router.push({ name: 'Update Template', params: { id, templateType: templateType.value } })
+  router.push({ name: 'Update Template', params: { id, templateType: templateType.value } });
 }
-/*** section:dataPage ***/
+/** section:dataPage **/
 </script>
 
 <template>
   <div class="view-container">
-    <h2 class="heading">Document Templates</h2>
+    <h2 class="heading">
+      Document Templates
+    </h2>
 
     <TabContainer
       :tabs="tabs"

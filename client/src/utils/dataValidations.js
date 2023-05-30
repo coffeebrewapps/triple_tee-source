@@ -1,10 +1,10 @@
 export function useDataValidations() {
   function notEmpty(value) {
-    return !isEmpty(value)
+    return !isEmpty(value);
   }
 
   function isEmpty(value) {
-    return Object.is(value, undefined) || Object.is(value, null)
+    return Object.is(value, undefined) || Object.is(value, null);
   }
 
   function validateUnique(modelClass, indexes, record, constraint, data, errors) {
@@ -34,7 +34,7 @@ export function useDataValidations() {
 
   function validateRequired(modelClass, schemas, record, constraint, data, errors) {
     const errorFields = constraint.filter((field) => {
-      const fieldDefault = schemas[field].default
+      const fieldDefault = schemas[field].default;
       return isEmpty(record[field]) && isEmpty(fieldDefault);
     });
 
@@ -54,7 +54,7 @@ export function useDataValidations() {
       const referenceData = data[referenceModel] || {};
       return !foreignValue.reduce((check, value) => {
         return check && !!referenceData[value];
-      }, true)
+      }, true);
     });
 
     errorFields.forEach((field) => {
@@ -64,7 +64,10 @@ export function useDataValidations() {
     });
   }
 
-  function validate(modelClass, record, schemas, indexes, data, check = { unique: true, required: true, foreign: true }) {
+  function validate(
+    modelClass, record, schemas, indexes, data,
+    check = { unique: true, required: true, foreign: true }
+  ) {
     const constraints = schemas[modelClass].constraints;
     const modelSchemas = schemas[modelClass].fields;
     const errors = {};
@@ -86,7 +89,7 @@ export function useDataValidations() {
 
     return {
       valid: Object.keys(errors).length === 0,
-      errors: errors
+      errors,
     };
   }
 
@@ -94,7 +97,7 @@ export function useDataValidations() {
     const foreignIndexes = indexes.foreign[modelClass];
     if (isEmpty(foreignIndexes)) { return false; }
 
-    const associations = foreignIndexes[record.id]
+    const associations = foreignIndexes[record.id];
     if (isEmpty(associations)) { return false; }
 
     const someAssociated = Object.values(associations).filter((associatedData) => {
@@ -108,6 +111,6 @@ export function useDataValidations() {
     notEmpty,
     isEmpty,
     validate,
-    isUsed
-  }
+    isUsed,
+  };
 }

@@ -1,20 +1,20 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
 
 export const useNavStore = defineStore('nav', () => {
-  const nav = ref(false)
+  const nav = ref(false);
 
   function show() {
-    nav.value = true
+    nav.value = true;
   }
 
   function hide() {
-    nav.value = false
+    nav.value = false;
   }
 
   function toggle() {
-    nav.value = !nav.value
+    nav.value = !nav.value;
   }
 
-  return { nav, show, hide, toggle }
-})
+  return { nav, show, hide, toggle };
+});

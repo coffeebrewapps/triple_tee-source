@@ -1,100 +1,182 @@
 <script setup>
-import { computed } from 'vue'
-import { useValidations } from '@/utils/validations'
-import DataPage from '@/components/DataPage.vue'
+import { computed } from 'vue';
+import { useValidations } from '@/utils/validations';
+import DataPage from '@/components/DataPage.vue';
 
-const { notEarlierThan, greaterThanOrEqual } = useValidations()
+const { notEarlierThan, greaterThanOrEqual } = useValidations();
 
 const props = defineProps({
   contactId: {
     type: String,
-    default: null
-  }
-})
+    default: null,
+  },
+});
 
 const fieldsLayout = [
   { description: 'lg' },
   { effectiveStart: 'md', effectiveEnd: 'md' },
   { rateType: 'md', unitCost: 'md', unit: 'md' },
   { includeTags: 'lg', excludeTags: 'lg' },
-  { contactId: 'lg' }
-]
+  { contactId: 'lg' },
+];
 
 const dataFields = computed(() => {
   return [
-    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-    { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
-    { key: 'effectiveStart', type: 'datetime', label: 'Effective Start', listable: true, viewable: true, creatable: true, updatable: false, filterable: true, sortable: true },
-    { key: 'effectiveEnd', type: 'datetime', label: 'Effective End', listable: true, viewable: true, creatable: true, updatable: true, filterable: true, sortable: true },
-    { key: 'rateType', type: 'enum', label: 'Rate Type', listable: true, viewable: true, creatable: true, updatable: false },
-    { key: 'unit', type: 'enum', label: 'Unit', listable: true, viewable: true, creatable: true, updatable: false },
-    { key: 'unitCost', type: 'number', label: 'Unit Cost', listable: true, viewable: true, creatable: true, updatable: false },
     {
-      key: 'includeTags', type: 'multiSelect', label: 'Include Tags', isTags: true,
+      key: 'id',
+      type: 'text',
+      label: 'ID',
+      listable: true,
+      viewable: true,
+      creatable: false,
+      updatable: false,
+      sortable: true,
+    },
+    {
+      key: 'description',
+      type: 'text',
+      label: 'Description',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+    },
+    {
+      key: 'effectiveStart',
+      type: 'datetime',
+      label: 'Effective Start',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: false,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      key: 'effectiveEnd',
+      type: 'datetime',
+      label: 'Effective End',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+      filterable: true,
+      sortable: true,
+    },
+    {
+      key: 'rateType',
+      type: 'enum',
+      label: 'Rate Type',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: false,
+    },
+    {
+      key: 'unit',
+      type: 'enum',
+      label: 'Unit',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: false,
+    },
+    {
+      key: 'unitCost',
+      type: 'number',
+      label: 'Unit Cost',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: false,
+    },
+    {
+      key: 'includeTags',
+      type: 'multiSelect',
+      label: 'Include Tags',
+      isTags: true,
       reference: { label: tagLabel },
-      listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+      filterable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'tags',
         value: recordValue,
-        label: tagLabel
-      }
+        label: tagLabel,
+      },
     },
     {
-      key: 'excludeTags', type: 'multiSelect', label: 'Exclude Tags', isTags: true,
+      key: 'excludeTags',
+      type: 'multiSelect',
+      label: 'Exclude Tags',
+      isTags: true,
       reference: { label: tagLabel },
-      listable: false, viewable: true, creatable: true, updatable: true, filterable: true,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+      filterable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'tags',
         value: recordValue,
-        label: tagLabel
-      }
+        label: tagLabel,
+      },
     },
     {
-      key: 'contactId', type: 'singleSelect', label: 'Contact',
-      reference: { label: contactLabel }, defaultValue: () => { return props.contactId },
-      listable: true, viewable: true, creatable: true, updatable: false, filterable: true,
+      key: 'contactId',
+      type: 'singleSelect',
+      label: 'Contact',
+      reference: { label: contactLabel },
+      defaultValue: () => { return props.contactId; },
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: false,
+      filterable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'contacts',
         value: recordValue,
-        label: contactLabel
-      }
+        label: contactLabel,
+      },
     },
-  ]
-})
+  ];
+});
 
 const validations = {
   create: {
     unitCost: [
-      (record) => { return greaterThanOrEqual(record, 'unitCost', 0) }
+      (record) => { return greaterThanOrEqual(record, 'unitCost', 0); },
     ],
     effectiveEnd: [
-      validateEffectiveEnd
-    ]
-  }
-}
+      validateEffectiveEnd,
+    ],
+  },
+};
 
 const filters = computed(() => {
-  const initData = {}
+  const initData = {};
 
   if (props.contactId) {
-    initData.contactId = [{ value: props.contactId }]
+    initData.contactId = [{ value: props.contactId }];
   }
 
   initData.effectiveStart = {
     startTime: null,
-    endTime: null
-  }
+    endTime: null,
+  };
 
   initData.effectiveEnd = {
     startTime: null,
-    endTime: null
-  }
+    endTime: null,
+  };
 
   return {
     initData,
@@ -102,25 +184,25 @@ const filters = computed(() => {
       { effectiveStart: 'md' },
       { effectiveEnd: 'md' },
       { includeTags: 'lg', excludeTags: 'lg' },
-      { contactId: 'lg' }
-    ]
-  }
-})
+      { contactId: 'lg' },
+    ],
+  };
+});
 
 function validateEffectiveEnd(record) {
-  return notEarlierThan(record, 'effectiveEnd', 'effectiveStart')
+  return notEarlierThan(record, 'effectiveEnd', 'effectiveStart');
 }
 
 function recordValue(record) {
-  return record.id
+  return record.id;
 }
 
 function tagLabel(record) {
-  return `${record.category}:${record.name}`
+  return `${record.category}:${record.name}`;
 }
 
 function contactLabel(record) {
-  return record.name
+  return record.name;
 }
 </script>
 

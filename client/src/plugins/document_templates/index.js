@@ -1,10 +1,10 @@
-import { useStore } from './store'
+import { useStore } from './store';
 
 const route = {
   path: '/document_templates',
   name: 'Document Templates',
-  component: () => import('./DocumentTemplates.vue')
-}
+  component: () => import('./DocumentTemplates.vue'),
+};
 
 const createTemplateRoute = {
   path: '/document_templates/:templateType',
@@ -12,9 +12,9 @@ const createTemplateRoute = {
   component: () => import('./NewTemplate.vue'),
   meta: {
     parentRoute: { name: 'Document Templates' },
-    hidden: true
-  }
-}
+    hidden: true,
+  },
+};
 
 const viewTemplateRoute = {
   path: '/document_templates/:templateType/:id',
@@ -23,9 +23,9 @@ const viewTemplateRoute = {
   props: { disabled: true },
   meta: {
     parentRoute: { name: 'Document Templates' },
-    hidden: true
-  }
-}
+    hidden: true,
+  },
+};
 
 const updateTemplateRoute = {
   path: '/document_templates/:templateType/:id',
@@ -34,21 +34,21 @@ const updateTemplateRoute = {
   props: { disabled: false },
   meta: {
     parentRoute: { name: 'Document Templates' },
-    hidden: true
-  }
-}
+    hidden: true,
+  },
+};
 
 const usePlugin = (router, dataStore) => {
-  const store = useStore(dataStore)
+  const store = useStore(dataStore);
 
-  router.addRoute(route)
-  router.addRoute(createTemplateRoute)
-  router.addRoute(viewTemplateRoute)
-  router.addRoute(updateTemplateRoute)
+  router.addRoute(route);
+  router.addRoute(createTemplateRoute);
+  router.addRoute(viewTemplateRoute);
+  router.addRoute(updateTemplateRoute);
 
-  dataStore.registerFunction('invoice_templates', 'downloadStream', 'pdf', store.downloadPdf)
+  dataStore.registerFunction('invoice_templates', 'downloadStream', 'pdf', store.downloadPdf);
 
-  return route
-}
+  return route;
+};
 
-export default usePlugin
+export default usePlugin;

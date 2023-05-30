@@ -1,51 +1,51 @@
 <script setup>
-import { computed } from 'vue'
-import DataPage from '@/components/DataPage.vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
+import { computed } from 'vue';
+import DataPage from '@/components/DataPage.vue';
+import { useRouter } from 'vue-router';
+
+import { useInvoiceUtils } from './utils';
+const router = useRouter();
 
 const props = defineProps({
   contactId: {
     type: String,
-    default: null
-  }
-})
-
-import { useInvoiceUtils } from './utils'
+    default: null,
+  },
+});
 const {
   fieldsLayout,
   generateDataFields,
   validations,
-  generateFilters
-} = useInvoiceUtils()
+  generateFilters,
+} = useInvoiceUtils();
 
 const dataFields = computed(() => {
-  return generateDataFields(props.contactId)
-})
+  return generateDataFields(props.contactId);
+});
 
 const filters = computed(() => {
-  return generateFilters(props.contactId)
-})
+  return generateFilters(props.contactId);
+});
 
 const actions = {
   view: {
     click: async function(row, index) {
-      await openViewPage(row)
-    }
+      await openViewPage(row);
+    },
   },
   create: {
     click: async function() {
-      await openCreatePage()
-    }
-  }
-}
+      await openCreatePage();
+    },
+  },
+};
 
 async function openViewPage(row) {
-  router.push({ name: 'View Invoice', params: { id: row.id }, query: { contactId: row.contactId } })
+  router.push({ name: 'View Invoice', params: { id: row.id }, query: { contactId: row.contactId } });
 }
 
 async function openCreatePage() {
-  router.push({ name: 'Create Invoice' })
+  router.push({ name: 'Create Invoice' });
 }
 </script>
 

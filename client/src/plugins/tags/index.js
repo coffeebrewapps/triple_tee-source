@@ -1,12 +1,12 @@
 const route = {
   path: '/tags',
   name: 'Tags',
-  component: () => import('./Tags.vue')
-}
+  component: () => import('./TagsPage.vue'),
+};
 
 const usePlugin = (router) => {
-  router.addRoute(route)
-  return route
-}
+  router.addRoute(route);
+  return route;
+};
 
-export default usePlugin
+export default usePlugin;

@@ -1,48 +1,39 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
 
-import { useDataValidations } from '@/utils/dataValidations'
+import { useDataValidations } from '@/utils/dataValidations';
 
-import schemasData from '@/../../_init/schemas.json'
+import schemasData from '@/../../_init/schemas.json';
 
 export const useDataStore = defineStore('data', () => {
   const schemas = '_schemas';
 
-  const validator = useDataValidations()
-  const init = ref(false)
+  const validator = useDataValidations();
+  const init = ref(false);
   const schemaCache = ref({});
   const dataCache = ref({});
   const indexCache = ref({ unique: {}, foreign: {}, filter: {} });
-  const indexTypes = ref([]);
 
   const customFunctions = ref({});
 
   function registerFunction(modelClass, fnType, fnName, fn) {
     if (!customFunctions.value[modelClass]) {
-      customFunctions.value[modelClass] = {}
+      customFunctions.value[modelClass] = {};
     }
 
     if (!customFunctions.value[modelClass][fnType]) {
-      customFunctions.value[modelClass][fnType] = {}
+      customFunctions.value[modelClass][fnType] = {};
     }
 
-    customFunctions.value[modelClass][fnType][fnName] = fn
+    customFunctions.value[modelClass][fnType][fnName] = fn;
   }
 
   function customFunctionsForModel(modelClass, fnType) {
-    return (customFunctions.value[modelClass] || {})[fnType]
+    return (customFunctions.value[modelClass] || {})[fnType];
   }
 
   function listCustomFunctions() {
-    return customFunctions.value
-  }
-
-  function wrapArray(val) {
-    if (Array.isArray(val)) {
-      return val;
-    } else {
-      return [val];
-    }
+    return customFunctions.value;
   }
 
   async function initData(force = false) {
@@ -51,17 +42,17 @@ export const useDataStore = defineStore('data', () => {
       const existingModelData = JSON.parse(localStorage.getItem('data') || '{}');
 
       schemaCache.value = schemasData;
-      localStorage.setItem('_schemas', JSON.stringify(schemasData));
+      localStorage.setItem(schemas, JSON.stringify(schemasData));
 
       console.log(`Init schema complete`);
 
       Object.keys(schemasData).forEach((modelClass) => {
         if (existingModelData[modelClass] && Object.keys(existingModelData[modelClass]).length > 0) {
-          dataCache.value[modelClass] = existingModelData[modelClass]
+          dataCache.value[modelClass] = existingModelData[modelClass];
         } else {
-          dataCache.value[modelClass] = {}
+          dataCache.value[modelClass] = {};
         }
-      })
+      });
       localStorage.setItem('data', JSON.stringify(dataCache.value));
 
       init.value = true;
@@ -69,7 +60,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function writeData(modelClass, data) {
-    const modelData = JSON.parse(localStorage.getItem('data'))
+    const modelData = JSON.parse(localStorage.getItem('data'));
     modelData[modelClass] = data;
     localStorage.setItem('data', JSON.stringify(modelData));
   }
@@ -88,7 +79,7 @@ export const useDataStore = defineStore('data', () => {
 
   function cacheData(modelClass, cacheable, writable) {
     dataCache.value[modelClass] = cacheable;
-    writeData(modelClass, writable)
+    writeData(modelClass, writable);
   }
 
   function listSchemas() {
@@ -114,7 +105,7 @@ export const useDataStore = defineStore('data', () => {
     }
 
     if (sortFilters.field) {
-      sortData(filteredData, sortFilters)
+      sortData(filteredData, sortFilters);
     }
 
     const total = filteredData.length;
@@ -123,13 +114,13 @@ export const useDataStore = defineStore('data', () => {
     filteredData = paginateData(filteredData, filters);
 
     filteredData = filteredData.map((record) => {
-      const combined = Object.assign({}, record, { includes: fetchIncludes(modelClass, record, include) })
-      return combined
+      const combined = Object.assign({}, record, { includes: fetchIncludes(modelClass, record, include) });
+      return combined;
     });
 
     return {
-      total: total,
-      data: filteredData
+      total,
+      data: filteredData,
     };
   }
 
@@ -140,7 +131,7 @@ export const useDataStore = defineStore('data', () => {
     const foreignRecords = fetchIncludes(modelClass, record, include);
 
     return {
-      record: Object.assign({}, record, { includes: foreignRecords })
+      record: Object.assign({}, record, { includes: foreignRecords }),
     };
   }
 
@@ -149,9 +140,9 @@ export const useDataStore = defineStore('data', () => {
 
     return Object.entries(fields).reduce((o, [field, schema]) => {
       if (validator.notEmpty(schema.default)) {
-        o[field] = schema.default
+        o[field] = schema.default;
       } else {
-        o[field] = null
+        o[field] = null;
       }
       return o;
     }, {});
@@ -162,7 +153,7 @@ export const useDataStore = defineStore('data', () => {
     const result = validator.validate(modelClass, params, schemaCache.value, indexCache.value, dataCache.value);
 
     if (result.valid) {
-      let data = dataCache.value[modelClass];
+      const data = dataCache.value[modelClass];
       const lastId = parseInt(Array.from(Object.keys(data)).reverse()[0] || 0);
       const newId = (lastId + 1).toString();
       const now = new Date();
@@ -172,28 +163,27 @@ export const useDataStore = defineStore('data', () => {
 
       return {
         success: true,
-        record: newRow
+        record: newRow,
       };
     } else {
       return {
         success: false,
-        errors: result.errors
+        errors: result.errors,
       };
     }
   }
 
   // TODO: check exists
   function createIfNotExists(modelClass, params) {
-    return create(modelClass, params)
+    return create(modelClass, params);
   }
 
   function update(modelClass, id, params) {
-    let data = dataCache.value[modelClass];
     const existing = view(modelClass, id);
     if (!existing.record) {
       return {
         success: false,
-        errors: ['not exists']
+        errors: ['not exists'],
       };
     }
 
@@ -201,30 +191,30 @@ export const useDataStore = defineStore('data', () => {
 
     if (result.valid) {
       const now = new Date();
-      const updated = Object.assign({}, existing.record, params, { updatedAt: now })
+      const updated = Object.assign({}, existing.record, params, { updatedAt: now });
 
       cacheRecord(modelClass, updated);
 
       return {
         success: true,
-        record: updated
+        record: updated,
       };
     } else {
       return {
         success: false,
-        errors: result.errors
+        errors: result.errors,
       };
     }
   }
 
   function remove(modelClass, id) {
-    let data = dataCache.value[modelClass];
+    const data = dataCache.value[modelClass];
     const existing = view(modelClass, id);
     const record = existing.record;
     if (!record) {
       return {
         success: false,
-        errors: {}
+        errors: {},
       };
     }
 
@@ -235,21 +225,20 @@ export const useDataStore = defineStore('data', () => {
       cacheData(modelClass, data, data);
       return {
         success: true,
-        record: record
+        record,
       };
     } else {
       return {
         success: false,
-        errors: ['isUsed']
+        errors: ['isUsed'],
       };
     }
   }
 
   function isUsed(modelClass, id) {
-    let data = dataCache.value[modelClass];
     const existing = view(modelClass, id);
     const record = existing.record;
-    if (!record) { return false }
+    if (!record) { return false; }
 
     return validator.isUsed(modelClass, record, schemaCache.value, indexCache.value, dataCache.value);
   }
@@ -274,7 +263,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function paginateData(data, filters) {
-    let filteredData = Array.from(data)
+    let filteredData = Array.from(data);
     if (validator.notEmpty(filters.offset) && validator.notEmpty(filters.limit) && filteredData.length > 0) {
       const offset = parseInt(filters.offset);
       const limit = parseInt(filters.limit);
@@ -300,20 +289,24 @@ export const useDataStore = defineStore('data', () => {
     const partialMatch = filterOptions.match && indexedValue.match(filterValue);
     const multiMatch = Array.isArray(filterValue) && filterValue.some(fv => fv === indexedValue);
     const exactMatch = !filterOptions.match && indexedValue === filterValue;
-    const dateRangeMatch = (Object.hasOwn(filterValue, 'startDate') || Object.hasOwn(filterValue, 'endDate') || Object.hasOwn(filterValue, 'startTime') || Object.hasOwn(filterValue, 'endTime')) && rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
+    const dateRangeMatch = (
+      Object.hasOwn(filterValue, 'startDate') ||
+      Object.hasOwn(filterValue, 'endDate') ||
+      Object.hasOwn(filterValue, 'startTime') ||
+      Object.hasOwn(filterValue, 'endTime')
+    ) && rangeMatch(filterValue.startDate, filterValue.endDate, indexedValue);
 
     return partialMatch || multiMatch || exactMatch || dateRangeMatch;
   }
 
   function rangeMatch(rangeStart, rangeEnd, compareValue) {
     return (validator.isEmpty(rangeStart) || compareValue >= rangeStart) &&
-      (validator.isEmpty(rangeEnd) || compareValue <= rangeEnd)
+      (validator.isEmpty(rangeEnd) || compareValue <= rangeEnd);
   }
 
   function filterFromIndexes(modelClass, modelData, indexes, filterSchemas, filters) {
     return Object.entries(filters).reduce((filteredIds, [field, filterValue]) => {
       if (validator.notEmpty(indexes[field])) {
-        const filterOptions = filterSchemas[field] || {};
         const indexedIds = Object.entries(indexes[field]).reduce((arr, [indexedValue, ids]) => {
           if (filterValueMatch(filterSchemas, field, indexedValue, filterValue)) {
             arr = arr.concat(ids);
@@ -322,15 +315,15 @@ export const useDataStore = defineStore('data', () => {
         }, []);
 
         if (indexedIds.length > 0) {
-          console.log(`Index hit`, { field, filterValue })
+          console.log(`Index hit`, { field, filterValue });
           indexedIds.forEach(i => filteredIds.add(i));
         } else {
-          console.log(`Index miss`, { field, filterValue })
+          console.log(`Index miss`, { field, filterValue });
           const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
           idsFromData.forEach(i => filteredIds.add(i));
         }
       } else {
-        console.log(`Index miss`, { field, filterValue })
+        console.log(`Index miss`, { field, filterValue });
         const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
         idsFromData.forEach(i => filteredIds.add(i));
       }
@@ -339,14 +332,12 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function filterIdsFromData(modelClass, modelData, schemas, field, filterValue) {
-    const filterOptions = schemas[field] || {};
-
     return Object.entries(modelData).reduce((arr, [id, record]) => {
       const recordValue = record[field];
       if (validator.notEmpty(recordValue) && filterValueMatch(schemas, field, recordValue, filterValue)) {
         arr.push(id);
       }
-      return arr
+      return arr;
     }, []);
   }
 
@@ -355,7 +346,6 @@ export const useDataStore = defineStore('data', () => {
     const foreignConstraints = schema.constraints.foreign;
 
     return include.reduce((records, foreignKey) => {
-      const foreignKeyType = schema.fields[foreignKey].type;
       const referenceValue = [record[foreignKey]].flat().filter(v => !!v);
 
       const constraint = foreignConstraints[foreignKey] || {};
@@ -406,6 +396,6 @@ export const useDataStore = defineStore('data', () => {
     download,
     upload,
     downloadIndexes,
-    uploadIndexes
-  }
-})
+    uploadIndexes,
+  };
+});

@@ -1,158 +1,158 @@
-import axios from 'axios'
+import axios from 'axios';
 
-import useConfig from '@/config'
-const config = useConfig()
+import useConfig from '@/config';
+const config = useConfig();
 
 export function useApiAccess() {
   function formatUrl(modelClass, id = null, suffix) {
-    const parts = []
-    parts.push(config.baseUrl)
-    parts.push('api')
-    parts.push(modelClass)
+    const parts = [];
+    parts.push(config.baseUrl);
+    parts.push('api');
+    parts.push(modelClass);
 
     if (id) {
-      parts.push(id)
+      parts.push(id);
     }
 
     if (suffix) {
-      parts.push(suffix.path)
+      parts.push(suffix.path);
     }
 
-    return parts.join('/')
+    return parts.join('/');
   }
 
   function formatErrors(error) {
-    return [error].flat().filter(e => !!e)
+    return [error].flat().filter(e => !!e);
   }
 
   async function schemas(modelClass = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl('schemas', modelClass)
+      const url = formatUrl('schemas', modelClass);
       axios
         .get(url)
         .then((res) => {
-          resolve(res.data)
+          resolve(res.data);
         })
         .catch((error) => {
-          reject(formatErrors(error))
-        })
-    })
+          reject(formatErrors(error));
+        });
+    });
   }
 
   async function list(modelClass, params, suffix = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, null, suffix)
+      const url = formatUrl(modelClass, null, suffix);
       axios
         .get(url, { params })
         .then((res) => {
-          resolve(res.data)
+          resolve(res.data);
         })
         .catch((error) => {
-          reject(formatErrors(error))
-        })
-    })
+          reject(formatErrors(error));
+        });
+    });
   }
 
   async function view(modelClass, id, params, suffix = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, id, suffix)
+      const url = formatUrl(modelClass, id, suffix);
       axios
         .get(url, { params })
         .then((res) => {
-          resolve(res.data.record)
+          resolve(res.data.record);
         })
         .catch((error) => {
-          reject(formatErrors(error))
-        })
-    })
+          reject(formatErrors(error));
+        });
+    });
   }
 
   async function create(modelClass, params, suffix = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, null, suffix)
+      const url = formatUrl(modelClass, null, suffix);
       axios
         .post(url, params)
         .then((res) => {
-          resolve(res.data.record)
+          resolve(res.data.record);
         })
         .catch(({ response }) => {
-          reject(response.data.errors)
-        })
-    })
+          reject(response.data.errors);
+        });
+    });
   }
 
   async function update(modelClass, id, params, suffix = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, id, suffix)
+      const url = formatUrl(modelClass, id, suffix);
       axios
         .put(url, params)
         .then((res) => {
-          resolve(res.data.record)
+          resolve(res.data.record);
         })
         .catch(({ response }) => {
-          reject(response.data.errors)
-        })
-    })
+          reject(response.data.errors);
+        });
+    });
   }
 
   async function remove(modelClass, id, suffix = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, id, suffix)
+      const url = formatUrl(modelClass, id, suffix);
       axios
         .delete(url)
         .then((res) => {
-          resolve(res.data.record)
+          resolve(res.data.record);
         })
         .catch(({ response }) => {
-          reject(response.data.errors)
-        })
-    })
+          reject(response.data.errors);
+        });
+    });
   }
 
   async function upload(modelClass, params) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl('schemas', modelClass, { path: 'upload' })
+      const url = formatUrl('schemas', modelClass, { path: 'upload' });
       axios
         .put(url, params)
         .then((res) => {
-          resolve(res.data)
+          resolve(res.data);
         })
         .catch(({ response }) => {
-          reject(response.data.errors)
-        })
-    })
+          reject(response.data.errors);
+        });
+    });
   }
 
   async function download(modelClass) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, null, { path: 'download' })
+      const url = formatUrl(modelClass, null, { path: 'download' });
       axios
         .get(url)
         .then((res) => {
-          resolve(res.data)
+          resolve(res.data);
         })
         .catch((error) => {
-          reject(formatErrors(error))
-        })
-    })
+          reject(formatErrors(error));
+        });
+    });
   }
 
   async function downloadStream(modelClass, id, params, suffix = null) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl(modelClass, id, suffix)
+      const url = formatUrl(modelClass, id, suffix);
       axios({
         method: 'post',
-        url: url,
+        url,
         responseType: 'blob',
-        data: params
+        data: params,
       })
-      .then((res) => {
-        resolve(res)
-      })
-      .catch((error) => {
-        reject(formatErrors(error))
-      })
-    })
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((error) => {
+          reject(formatErrors(error));
+        });
+    });
   }
 
   return {
@@ -164,6 +164,6 @@ export function useApiAccess() {
     remove,
     upload,
     download,
-    downloadStream
-  }
+    downloadStream,
+  };
 }

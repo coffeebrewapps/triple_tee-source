@@ -1,384 +1,379 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, watch, onMounted } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, watch, onMounted } from 'vue';
+/** import:global **/
 
-/*** import:utils ***/
-import { useValidations } from '@/utils/validations'
+/** import:utils **/
+import { useValidations } from '@/utils/validations';
+import { useDataAccess } from '@/utils/dataAccess';
+import { useFormatter } from '@/utils/formatter';
+import { useInputHelper } from '@/utils/input';
+import { useWorkLogUtils } from './utils';
+/** import:utils **/
+
+/** import:stores **/
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
+import { useBannerStore } from '@/stores/banner';
+import { useEventsStore } from '@/stores/events';
+import { useShortcutsStore } from '@/stores/shortcuts';
+/** import:stores **/
+
+/** import:components **/
+import FormDialog from '@/components/FormDialog.vue';
+/** import:components **/
+
+/** section:utils **/
 const {
   isEmpty,
-  notEmpty
-} = useValidations()
-
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
-
-import { useSystemConfigsStore } from '@/stores/systemConfigs'
-const systemConfigsStore = useSystemConfigsStore()
-
-import { useFormatter } from '@/utils/formatter'
+  notEmpty,
+} = useValidations();
+const dataAccess = useDataAccess();
+const systemConfigsStore = useSystemConfigsStore();
 const {
-  formatShortTime
-} = useFormatter(systemConfigsStore)
-
-import { useWorkLogUtils } from './utils'
+  formatShortTime,
+} = useFormatter(systemConfigsStore);
 const {
   dataFields,
   fieldsLayout,
-  filters,
   validations,
   formatDuration,
   calculateDuration,
-  includeKeys
-} = useWorkLogUtils()
-
-import { useInputHelper } from '@/utils/input'
+  includeKeys,
+} = useWorkLogUtils();
 const {
   formatDataFields,
   validateParams,
   formatDataForShow,
   formatDataForSave,
-  fetchOptions,
-  initOptionsData
-} = useInputHelper(dataFields)
-/*** import:utils ***/
+} = useInputHelper(dataFields);
+const banner = useBannerStore();
+const events = useEventsStore();
+const shortcuts = useShortcutsStore();
+/** section:utils **/
 
-/*** import:stores ***/
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
-
-import { useShortcutsStore } from '@/stores/shortcuts'
-const shortcuts = useShortcutsStore()
-/*** import:stores ***/
-
-/*** import:components ***/
-import FormDialog from '@/components/FormDialog.vue'
-/*** import:components ***/
-
-/*** section:global ***/
-const combinedDataFields = ref([])
+/** section:global **/
+const combinedDataFields = ref([]);
 
 const creatableKeys = computed(() => {
-  return dataFields.map(f => f.key)
-})
-/*** section:global ***/
+  return dataFields.map(f => f.key);
+});
+/** section:global **/
 
-/*** section:data ***/
-const currentTask = ref({})
+/** section:data **/
+const currentTask = ref({});
 
 const startOfToday = computed(() => {
-  const today = new Date()
-  today.setHours(0)
-  today.setMinutes(0)
-  today.setSeconds(0)
-  return today
-})
+  const today = new Date();
+  today.setHours(0);
+  today.setMinutes(0);
+  today.setSeconds(0);
+  return today;
+});
 
 const endOfToday = computed(() => {
-  const today = new Date()
-  today.setHours(23)
-  today.setMinutes(59)
-  today.setSeconds(59)
-  return today
-})
+  const today = new Date();
+  today.setHours(23);
+  today.setMinutes(59);
+  today.setSeconds(59);
+  return today;
+});
 
-const todayLogs = ref([])
+const todayLogs = ref([]);
 
 const openTask = computed(() => {
-  if (todayLogs.value.length === 0) { return false }
+  if (todayLogs.value.length === 0) { return false; }
 
-  return isEmpty(currentTask.value.endTime) && taskStarted.value
-})
+  return isEmpty(currentTask.value.endTime) && taskStarted.value;
+});
 
 const todayTotalDuration = computed(() => {
   return todayLogs.value.reduce((total, log) => {
-    return total + log.duration
-  }, 0)
-})
+    return total + log.duration;
+  }, 0);
+});
 
 function formatWorkLogs(data) {
   return data.map((record) => {
-    record.duration = calculateDuration(record)
-    return record
-  })
+    record.duration = calculateDuration(record);
+    return record;
+  });
 }
 
 function formatExistingTask(record) {
-  if (isEmpty(record)) { return {} }
+  if (isEmpty(record)) { return {}; }
 
-  record.duration = calculateDuration(record)
-  return record
+  record.duration = calculateDuration(record);
+  return record;
 }
-/*** section:data ***/
+/** section:data **/
 
-/*** section:startTask ***/
-const startTaskDialog = ref(false)
-const taskStarted = ref(false)
+/** section:startTask **/
+const startTaskDialog = ref(false);
+const taskStarted = ref(false);
 
 function formatNewTask() {
   return dataFields.reduce((o, field) => {
-    const key = field.key
-    const defaultValue = field.defaultValue
+    const key = field.key;
+    const defaultValue = field.defaultValue;
 
     if (notEmpty(defaultValue)) {
-      o[key] = defaultValue()
+      o[key] = defaultValue();
     } else {
-      o[key] = null
+      o[key] = null;
     }
 
-    return o
-  }, {})
+    return o;
+  }, {});
 }
 
 function startTask() {
-  currentTask.value = formatNewTask()
-  startNew.value = ''
-  startTaskDialog.value = true
+  currentTask.value = formatNewTask();
+  startNew.value = '';
+  startTaskDialog.value = true;
 }
 
 async function quickStartTask() {
-  currentTask.value = formatNewTask()
-  startNew.value = ''
-  await submitNewTask()
+  currentTask.value = formatNewTask();
+  startNew.value = '';
+  await submitNewTask();
 }
 
 function closeStartTaskDialog() {
-  startTaskDialog.value = false
+  startTaskDialog.value = false;
 }
 
 async function submitNewTask() {
-  const errors = validateParams(validations.create, currentTask.value)
+  const errors = validateParams(validations.create, currentTask.value);
 
   if (Object.keys(errors).length > 0) {
-    showBanner(`Error submitting task!`)
-    return
+    showBanner(`Error submitting task!`);
+    return;
   }
 
-  const params = formatDataForSave(currentTask.value)
+  const params = formatDataForSave(currentTask.value);
 
   await dataAccess
     .create('work_logs', params)
     .then((result) => {
-      showBanner(`Started task successfully!`)
-      loadToday()
-      closeStartTaskDialog()
+      showBanner(`Started task successfully!`);
+      loadToday();
+      closeStartTaskDialog();
     })
     .catch((error) => {
-      showBanner(`Error creating data!`)
-    })
+      console.error(error);
+      showBanner(`Error creating data!`);
+    });
 }
-/*** section:startTask ***/
+/** section:startTask **/
 
-/*** section:endTask ***/
-const endTaskDialog = ref(false)
-const startNew = ref('')
-const currentTaskForUpdate = ref({})
+/** section:endTask **/
+const endTaskDialog = ref(false);
+const startNew = ref('');
+const currentTaskForUpdate = ref({});
 
 watch(endTaskDialog, (newVal, oldVal) => {
   if (!newVal) {
-    currentTaskForUpdate.value = {}
+    currentTaskForUpdate.value = {};
   }
-})
+});
 
 async function updateTask() {
-  const errors = validateParams(validations.update, currentTaskForUpdate.value)
+  const errors = validateParams(validations.update, currentTaskForUpdate.value);
 
   if (Object.keys(errors).length > 0) {
-    showBanner(`Error submitting task!`)
-    return
+    showBanner(`Error submitting task!`);
+    return;
   }
 
-  const params = formatDataForSave(currentTaskForUpdate.value)
+  const params = formatDataForSave(currentTaskForUpdate.value);
 
   await dataAccess
     .update('work_logs', currentTaskForUpdate.value.id, params)
     .then((result) => {
-      showBanner(`Ended task successfully!`)
-      loadToday()
-      closeEndTaskDialog()
+      showBanner(`Ended task successfully!`);
+      loadToday();
+      closeEndTaskDialog();
 
       if (startNew.value === 'quick') {
-        quickStartTask()
+        quickStartTask();
       } else if (startNew.value === 'input') {
-        setTimeout(startTask, 1000)
+        setTimeout(startTask, 1000);
       }
     })
     .catch((error) => {
-      showBanner(`Error submiting task!`)
-    })
+      console.error(error);
+      showBanner(`Error submiting task!`);
+    });
 }
 
 async function endTask() {
-  currentTaskForUpdate.value = Object.assign({}, currentTask.value)
+  currentTaskForUpdate.value = Object.assign({}, currentTask.value);
 
   await formatDataForShow('startTime', currentTaskForUpdate.value)
     .then((result) => {
-      currentTaskForUpdate.value.startTime = result
-    })
+      currentTaskForUpdate.value.startTime = result;
+    });
 
   await formatDataForShow('tags', currentTaskForUpdate.value)
     .then((result) => {
-      currentTaskForUpdate.value.tags = result
-    })
+      currentTaskForUpdate.value.tags = result;
+    });
 
-  currentTaskForUpdate.value.endTime = new Date()
-  endTaskDialog.value = true
+  currentTaskForUpdate.value.endTime = new Date();
+  endTaskDialog.value = true;
 }
 
 function endTaskAndStartTask() {
-  endTask()
-  startNew.value = 'input'
+  endTask();
+  startNew.value = 'input';
 }
 
 function endTaskAndQuickStartTask() {
-  endTask()
-  startNew.value = 'quick'
+  endTask();
+  startNew.value = 'quick';
 }
 
 function closeEndTaskDialog() {
-  currentTaskForUpdate.value = {}
-  endTaskDialog.value = false
+  currentTaskForUpdate.value = {};
+  endTaskDialog.value = false;
 }
-/*** section:endTask ***/
+/** section:endTask **/
 
-/*** section:shortcuts ***/
-const showShortcuts = ref(false)
+/** section:shortcuts **/
+const showShortcuts = ref(false);
 
 const shortcutStyles = computed(() => {
   if (showShortcuts.value) {
-    return `shortcut show`
+    return `shortcut show`;
   } else {
-    return `shortcut hide`
+    return `shortcut hide`;
   }
-})
+});
 
 shortcuts.registerListener(
   {
     route: '/work_logs',
-    eventType: 'ctrl-n'
+    eventType: 'ctrl-n',
   },
   {
     id: 'TodayStartTask',
     invoke: (payload) => {
-      startTask()
-    }
+      startTask();
+    },
   }
-)
+);
 
 shortcuts.registerListener(
   {
     route: '/work_logs',
-    eventType: 'ctrl-q'
+    eventType: 'ctrl-q',
   },
   {
     id: 'TodayQuickStartTask',
     invoke: (payload) => {
-      quickStartTask()
-    }
+      quickStartTask();
+    },
   }
-)
+);
 
 shortcuts.registerListener(
   {
     route: '/work_logs',
-    eventType: 'ctrl-e'
+    eventType: 'ctrl-e',
   },
   {
     id: 'TodayEndTask',
     invoke: (payload) => {
-      endTask()
-    }
+      endTask();
+    },
   }
-)
+);
 
 shortcuts.registerListener(
   {
     route: '/work_logs',
-    eventType: 'ctrl-g'
+    eventType: 'ctrl-g',
   },
   {
     id: 'TodayEndTaskAndStartTask',
     invoke: (payload) => {
-      endTaskAndStartTask()
-    }
+      endTaskAndStartTask();
+    },
   }
-)
+);
 
 shortcuts.registerListener(
   {
     route: '/work_logs',
-    eventType: 'ctrl-f'
+    eventType: 'ctrl-f',
   },
   {
     id: 'TodayEndTaskAndQuickStartTask',
     invoke: (payload) => {
-      endTaskAndQuickStartTask()
-    }
+      endTaskAndQuickStartTask();
+    },
   }
-)
+);
 
 shortcuts.registerListener(
   {
     route: '/work_logs',
-    eventType: 'keydown-Escape'
+    eventType: 'keydown-Escape',
   },
   {
     id: 'CloseTodayLogDialogs',
     invoke: (payload) => {
-      if (startTaskDialog.value) { startTaskDialog.value = false }
-      if (endTaskDialog.value) { endTaskDialog.value = false }
-    }
+      if (startTaskDialog.value) { startTaskDialog.value = false; }
+      if (endTaskDialog.value) { endTaskDialog.value = false; }
+    },
   }
-)
-/*** section:shortcuts ***/
+);
+/** section:shortcuts **/
 
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:events ***/
+/** section:events **/
 events.registerListener(
   'loadTodayLogs',
   {
     id: 'TodayLog',
     invoke: (payload) => {
-      loadToday()
-    }
+      loadToday();
+    },
   }
-)
+);
 
 events.registerListener(
   'toggleShortcut',
   {
     id: 'ToggleTodayLogShortcut',
     invoke: (payload) => {
-      showShortcuts.value = !showShortcuts.value
-    }
+      showShortcuts.value = !showShortcuts.value;
+    },
   }
-)
-/*** section:events ***/
+);
+/** section:events **/
 
 async function loadSchemas() {
   await dataAccess
     .schemas('work_logs')
     .then((result) => {
-      const fields = result.fields
-      combinedDataFields.value = formatDataFields(fields)
+      const fields = result.fields;
+      combinedDataFields.value = formatDataFields(fields);
     })
     .catch((error) => {
-      showBanner(`Error loading schemas!`)
-      console.log(error)
-    })
+      showBanner(`Error loading schemas!`);
+      console.log(error);
+    });
 }
 
 async function loadToday() {
@@ -387,32 +382,32 @@ async function loadToday() {
     filters: {
       startTime: {
         startDate: startOfToday.value,
-        endDate: endOfToday.value
-      }
+        endDate: endOfToday.value,
+      },
     },
     sort: {
       field: 'startTime',
-      order: 'desc'
-    }
-  }
+      order: 'desc',
+    },
+  };
 
   await dataAccess
     .list('work_logs', params)
     .then((result) => {
-      todayLogs.value = formatWorkLogs(result.data)
-      currentTask.value = formatExistingTask(todayLogs.value[0])
-      if (notEmpty(currentTask.value.startTime)) { taskStarted.value = true }
+      todayLogs.value = formatWorkLogs(result.data);
+      currentTask.value = formatExistingTask(todayLogs.value[0]);
+      if (notEmpty(currentTask.value.startTime)) { taskStarted.value = true; }
     })
     .catch((error) => {
-      showBanner(`Error loading work logs!`)
-      console.log(error)
-    })
+      showBanner(`Error loading work logs!`);
+      console.log(error);
+    });
 }
 
-onMounted(async () => {
-  await loadToday()
-  await loadSchemas()
-})
+onMounted(async() => {
+  await loadToday();
+  await loadSchemas();
+});
 </script>
 
 <template>
@@ -426,7 +421,9 @@ onMounted(async () => {
         @keydown.enter="startTask"
       >
         Start New Task
-        <div :class="shortcutStyles">N</div>
+        <div :class="shortcutStyles">
+          N
+        </div>
       </div>
 
       <div
@@ -437,7 +434,9 @@ onMounted(async () => {
         @keydown.enter="quickStartTask"
       >
         Quick Start New Task
-        <div :class="shortcutStyles">Q</div>
+        <div :class="shortcutStyles">
+          Q
+        </div>
       </div>
 
       <div
@@ -448,7 +447,9 @@ onMounted(async () => {
         @keydown.enter="endTask"
       >
         End Current Task
-        <div :class="shortcutStyles">E</div>
+        <div :class="shortcutStyles">
+          E
+        </div>
       </div>
 
       <div
@@ -459,7 +460,9 @@ onMounted(async () => {
         @keydown.enter="endTaskAndStartTask"
       >
         End and Start New
-        <div :class="shortcutStyles">G</div>
+        <div :class="shortcutStyles">
+          G
+        </div>
       </div>
 
       <div
@@ -470,7 +473,9 @@ onMounted(async () => {
         @keydown.enter="endTaskAndQuickStartTask"
       >
         End and Quick Start
-        <div :class="shortcutStyles">F</div>
+        <div :class="shortcutStyles">
+          F
+        </div>
       </div>
     </div> <!-- controls -->
 
@@ -482,13 +487,16 @@ onMounted(async () => {
       </div>
 
       <div
-        v-for="log in todayLogs"
+        v-for="(log, l) in todayLogs"
+        :key="l"
         class="log"
       >
-        <div class="divider"></div>
+        <div class="divider" />
 
         <div class="duration">
-          <div class="start-time">{{ formatShortTime(log.startTime) }}</div>
+          <div class="start-time">
+            {{ formatShortTime(log.startTime) }}
+          </div>
 
           <div
             v-if="notEmpty(log.endTime)"

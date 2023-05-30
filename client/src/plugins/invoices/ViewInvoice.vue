@@ -1,110 +1,109 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:utils ***/
-import { useInputHelper } from '@/utils/input'
+/** import:utils **/
+import { useInputHelper } from '@/utils/input';
+import { useDataAccess } from '@/utils/dataAccess';
+import { useValidations } from '@/utils/validations';
+import { useInvoiceUtils } from './utils';
+/** import:utils **/
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+/** import:stores **/
+import { useEventsStore } from '@/stores/events';
+import { useBannerStore } from '@/stores/banner';
+/** import:stores **/
 
-import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
-/*** import:utils ***/
-
-/*** import:stores ***/
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
-
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-/*** import:stores ***/
-
-/*** import:components ***/
+/** import:components **/
 import {
   TProgressBar
-} from 'coffeebrew-vue-components'
+} from 'coffeebrew-vue-components';
 
-import TabContainer from '@/components/TabContainer.vue'
-import InvoiceLines from '@/plugins/invoice_lines/InvoiceLines.vue'
-import TemplateEditor from '@/components/TemplateEditor.vue'
-/*** import:components ***/
+import TabContainer from '@/components/TabContainer.vue';
+import InvoiceLines from '@/plugins/invoice_lines/InvoiceLines.vue';
+import TemplateEditor from '@/components/TemplateEditor.vue';
+/** import:components **/
 
-/*** section:global ***/
-const currentRoute = Object.assign({}, router.currentRoute.value)
+/** section:utils **/
+const router = useRouter();
+const dataAccess = useDataAccess();
+const { isEmpty, notEmpty } = useValidations();
+const events = useEventsStore();
+const banner = useBannerStore();
+/** section:utils **/
+
+/** section:global **/
+const currentRoute = Object.assign({}, router.currentRoute.value);
 
 const invoiceId = computed(() => {
-  return currentRoute.params.id
-})
+  return currentRoute.params.id;
+});
 
 const contactId = computed(() => {
-  return currentRoute.query.contactId
-})
-
-import { useInvoiceUtils } from './utils'
+  return currentRoute.query.contactId;
+});
 const {
   fieldsLayout,
-  generateDataFields
-} = useInvoiceUtils()
+  generateDataFields,
+} = useInvoiceUtils();
 
 const dataFields = computed(() => {
-  return generateDataFields(contactId.value)
-})
+  return generateDataFields(contactId.value);
+});
 
 const {
   inputLabel,
   inputValue,
-  includeKeys
-} = useInputHelper(dataFields.value)
+  includeKeys,
+} = useInputHelper(dataFields.value);
 
-const currentInvoice = ref()
-const invoiceLines = ref()
-const invoiceConfig = ref()
-const invoiceTemplate = ref()
-const templateData = ref()
+const currentInvoice = ref();
+const invoiceLines = ref();
+const invoiceConfig = ref();
+const invoiceTemplate = ref();
+const templateData = ref();
 
 const heading = computed(() => {
   if (currentInvoice.value) {
-    return `Invoice: ${currentInvoice.value.invoiceNumber}`
+    return `Invoice: ${currentInvoice.value.invoiceNumber}`;
   } else {
-    return `Loading Invoice...`
+    return `Loading Invoice...`;
   }
-})
+});
 
 async function loadInvoice() {
-  currentInvoice.value = null
-  const params = { include: includeKeys.value }
+  currentInvoice.value = null;
+  const params = { include: includeKeys.value };
 
   await dataAccess
     .view('invoices', invoiceId.value, params)
     .then((result) => {
-      currentInvoice.value = result
+      currentInvoice.value = result;
       showBanner(`Loaded invoice successfully!`);
     })
     .catch((error) => {
-      console.error(error)
+      console.error(error);
       showBanner(`Error loading invoice!`);
-    })
+    });
 }
 
 async function loadTemplateData() {
-  invoiceLines.value = null
-  invoiceConfig.value = null
-  invoiceTemplate.value = null
+  invoiceLines.value = null;
+  invoiceConfig.value = null;
+  invoiceTemplate.value = null;
 
   dataAccess
     .view('invoices', currentInvoice.value.id, {}, { path: 'template_data' })
     .then((result) => {
-      invoiceLines.value = result.invoiceLines
-      invoiceConfig.value = result.invoiceConfig
-      invoiceTemplate.value = invoiceConfig.value.includes.invoiceTemplateId[invoiceConfig.value.invoiceTemplateId]
-      const invoiceNumberSequence = invoiceConfig.value.includes.invoiceNumberSequenceId[invoiceConfig.value.invoiceNumberSequenceId]
-      const currency = invoiceConfig.value.includes.currencyId[invoiceConfig.value.currencyId]
-      const billingContact = result.billingContact
-      const country = billingContact.includes.country[billingContact.country]
+      invoiceLines.value = result.invoiceLines;
+      invoiceConfig.value = result.invoiceConfig;
+      invoiceTemplate.value = result.invoiceTemplate;
+      const invoiceNumberSequence = result.invoiceNumberSequence;
+      const currency = result.currency;
+      const billingContact = result.billingContact;
+      const country = result.country;
 
       templateData.value = {
         invoice: currentInvoice.value,
@@ -113,52 +112,54 @@ async function loadTemplateData() {
         invoiceNumberSequence,
         billingContact: Object.assign({}, billingContact, { country: country.countryName }),
         currency,
-        country
-      }
+        country,
+      };
       showBanner(`Loaded template data successfully!`);
     })
     .catch((error) => {
-      console.error(error)
+      console.error(error);
       showBanner(`Error loading template data!`);
-    })
+    });
 }
-/*** section:global ***/
+/** section:global **/
 
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:tabs ***/
+/** section:tabs **/
 const tabs = [
   { label: 'Details', onchange: loadInvoice },
   { label: 'Invoice Lines', onchange: loadInvoiceLines },
-  { label: 'View Invoice PDF', onchange: loadTemplateData }
-]
+  { label: 'View Invoice PDF', onchange: loadTemplateData },
+];
 
 async function loadInvoiceLines() {
-  events.emitEvent('loadData', { dataType: 'Invoice Lines' })
+  events.emitEvent('loadData', { dataType: 'Invoice Lines' });
 }
 
 function triggerTabEvent(i) {
-  tabs[i].onchange()
+  tabs[i].onchange();
 }
-/*** section:tabs ***/
+/** section:tabs **/
 
-onMounted(async () => {
-  await loadInvoice()
-})
+onMounted(async() => {
+  await loadInvoice();
+});
 </script>
 
 <template>
   <div class="page-container">
-    <h2 class="heading">{{ heading }}</h2>
+    <h2 class="heading">
+      {{ heading }}
+    </h2>
 
     <TProgressBar
       v-if="!currentInvoice"
@@ -169,17 +170,18 @@ onMounted(async () => {
       :tabs="tabs"
       @tab-change="triggerTabEvent"
     >
-
       <template #tab-0>
         <div
           class="details-container"
         >
           <div
-            v-for="row in fieldsLayout"
+            v-for="(row, i) in fieldsLayout"
+            :key="i"
             class="data-row"
           >
             <div
-              v-for="field in Object.keys(row)"
+              v-for="(field, j) in Object.keys(row)"
+              :key="j"
               class="data-field"
             >
               <div
@@ -200,11 +202,10 @@ onMounted(async () => {
                 <span
                   v-if="isEmpty(currentInvoice) || isEmpty(currentInvoice[field])"
                 >
-                --- no value ---
+                  --- no value ---
                 </span>
               </div> <!-- field-value -->
             </div> <!-- data-field -->
-
           </div> <!-- data-row -->
         </div> <!-- details-container -->
       </template> <!-- template-0 -->
@@ -218,8 +219,8 @@ onMounted(async () => {
       <template #tab-2>
         <TemplateEditor
           v-if="invoiceTemplate"
-          template-type="invoice_templates"
           :id="invoiceTemplate.id"
+          template-type="invoice_templates"
           :content-markup="invoiceTemplate.contentMarkup"
           :content-styles="invoiceTemplate.contentStyles"
           :data="templateData"

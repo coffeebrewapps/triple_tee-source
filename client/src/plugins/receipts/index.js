@@ -1,8 +1,8 @@
 const route = {
   path: '/receipts',
   name: 'Receipts',
-  component: () => import('./Receipts.vue')
-}
+  component: () => import('./ReceiptsPage.vue'),
+};
 
 const viewReceiptRoute = {
   path: '/receipts/:id',
@@ -10,9 +10,9 @@ const viewReceiptRoute = {
   component: () => import('./ViewReceipt.vue'),
   meta: {
     parentRoute: { name: 'Receipts' },
-    hidden: true
-  }
-}
+    hidden: true,
+  },
+};
 
 const createReceiptRoute = {
   path: '/receipts',
@@ -20,16 +20,16 @@ const createReceiptRoute = {
   component: () => import('./CreateReceipt.vue'),
   meta: {
     parentRoute: { name: 'Receipts' },
-    hidden: true
-  }
-}
+    hidden: true,
+  },
+};
 
 const usePlugin = (router, dataStore) => {
-  router.addRoute(route)
-  router.addRoute(viewReceiptRoute)
-  router.addRoute(createReceiptRoute)
+  router.addRoute(route);
+  router.addRoute(viewReceiptRoute);
+  router.addRoute(createReceiptRoute);
 
-  return route
-}
+  return route;
+};
 
-export default usePlugin
+export default usePlugin;

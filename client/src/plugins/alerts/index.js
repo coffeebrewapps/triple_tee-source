@@ -1,12 +1,12 @@
 const route = {
   path: '/alerts',
   name: 'Alerts',
-  component: () => import('./Alerts.vue')
-}
+  component: () => import('./AlertsPage.vue'),
+};
 
 const usePlugin = (router) => {
-  router.addRoute(route)
-  return route
-}
+  router.addRoute(route);
+  return route;
+};
 
-export default usePlugin
+export default usePlugin;

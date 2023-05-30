@@ -1,10 +1,10 @@
 export function useStore(dataStore) {
   function notEmpty(value) {
-    return !isEmpty(value)
+    return !isEmpty(value);
   }
 
   function isEmpty(value) {
-    return Object.is(value, undefined) || Object.is(value, null)
+    return Object.is(value, undefined) || Object.is(value, null);
   }
 
   function viewInvoiceConfigWithIncludes(invoiceConfigId) {
@@ -14,9 +14,9 @@ export function useStore(dataStore) {
       { include: ['invoiceNumberSequenceId', 'invoiceTemplateId', 'currencyId'] }
     ).record;
 
-    const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId]
-    const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId]
-    const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId]
+    const invoiceNumberSequence = invoiceConfig.includes.invoiceNumberSequenceId[invoiceConfig.invoiceNumberSequenceId];
+    const invoiceTemplate = invoiceConfig.includes.invoiceTemplateId[invoiceConfig.invoiceTemplateId];
+    const currency = invoiceConfig.includes.currencyId[invoiceConfig.currencyId];
 
     const billingContact = dataStore.view(
       'contacts',
@@ -32,8 +32,8 @@ export function useStore(dataStore) {
       billingContact,
       invoiceTemplate,
       currency,
-      country
-    }
+      country,
+    };
   }
 
   function prefillInvoice({ invoiceConfig, invoiceNumberSequence, billingContact, currency, invoiceLines }) {
@@ -46,46 +46,46 @@ export function useStore(dataStore) {
 
     let invoiceDate = new Date();
     if (notEmpty(lastInvoice) && Object.keys(lastInvoice).length > 0) {
-      invoiceDate = new Date(lastInvoice.invoiceDate)
-      const invoiceDurationValue = invoiceConfig.invoiceCycleDurationValue
-      const invoiceDurationUnit = invoiceConfig.invoiceCycleDurationUnit
+      invoiceDate = new Date(lastInvoice.invoiceDate);
+      const invoiceDurationValue = invoiceConfig.invoiceCycleDurationValue;
+      const invoiceDurationUnit = invoiceConfig.invoiceCycleDurationUnit;
 
       if (invoiceDurationUnit === 'month') {
-        invoiceDate.setMonth(invoiceDate.getMonth() + invoiceDurationValue)
+        invoiceDate.setMonth(invoiceDate.getMonth() + invoiceDurationValue);
       } else if (invoiceDurationUnit === 'week') {
-        for (let i=0; i<invoiceDurationValue; i++) {
-          invoiceDate.setDate(invoiceDate.getDate() + 7)
+        for (let i = 0; i < invoiceDurationValue; i++) {
+          invoiceDate.setDate(invoiceDate.getDate() + 7);
         }
       } else { // unit = 'day'
-        invoiceDate.setDate(invoiceDate.getDate() + invoiceDurationValue)
+        invoiceDate.setDate(invoiceDate.getDate() + invoiceDurationValue);
       }
     }
 
-    let dueDate = new Date(invoiceDate)
-    const dueDurationValue = invoiceConfig.dueDateCycleValue
-    const dueDurationUnit = invoiceConfig.dueDurationUnit
+    const dueDate = new Date(invoiceDate);
+    const dueDurationValue = invoiceConfig.dueDateCycleValue;
+    const dueDurationUnit = invoiceConfig.dueDurationUnit;
 
     if (dueDurationUnit === 'month') {
-      dueDate.setMonth(dueDate.getMonth() + dueDurationValue)
+      dueDate.setMonth(dueDate.getMonth() + dueDurationValue);
     } else if (dueDurationUnit === 'week') {
-      for (let i=0; i<dueDurationValue; i++) {
-        dueDate.setDate(dueDate.getDate() + 7)
+      for (let i = 0; i < dueDurationValue; i++) {
+        dueDate.setDate(dueDate.getDate() + 7);
       }
     } else { // unit = 'day'
-      dueDate.setDate(dueDate.getDate() + dueDurationValue)
+      dueDate.setDate(dueDate.getDate() + dueDurationValue);
     }
 
     const totalAmount = invoiceLines.reduce((sum, line) => {
       return sum + line.subtotal;
     }, 0);
 
-    const invoiceIncludes = {}
-    invoiceIncludes.currencyId = {}
-    invoiceIncludes.currencyId[currency.id] = currency
-    invoiceIncludes.contactId = {}
-    invoiceIncludes.contactId[billingContact.id] = billingContact
-    invoiceIncludes.invoiceConfigId = {}
-    invoiceIncludes.invoiceConfigId[invoiceConfig.id] = invoiceConfig
+    const invoiceIncludes = {};
+    invoiceIncludes.currencyId = {};
+    invoiceIncludes.currencyId[currency.id] = currency;
+    invoiceIncludes.contactId = {};
+    invoiceIncludes.contactId[billingContact.id] = billingContact;
+    invoiceIncludes.invoiceConfigId = {};
+    invoiceIncludes.invoiceConfigId[invoiceConfig.id] = invoiceConfig;
 
     return {
       invoiceNumber: currentSequence,
@@ -95,8 +95,8 @@ export function useStore(dataStore) {
       currencyId: currency.id,
       invoiceConfigId: invoiceConfig.id,
       contactId: billingContact.id,
-      includes: invoiceIncludes
-    }
+      includes: invoiceIncludes,
+    };
   }
 
   function calculateDuration(startTime, endTime) {
@@ -115,7 +115,7 @@ export function useStore(dataStore) {
 
     if (config.rateType === 'duration') {
       const totalDuration = logs.reduce((duration, log) => {
-        return duration + calculateDuration(log.startTime, log.endTime)
+        return duration + calculateDuration(log.startTime, log.endTime);
       }, 0);
 
       if (config.unit === 'hour') {
@@ -136,16 +136,16 @@ export function useStore(dataStore) {
       unit,
       unitCost,
       unitValue,
-      subtotal
-    }
+      subtotal,
+    };
   }
 
   function previewInvoice(modelClass, params) {
     try {
-      const invoiceConfigId = params.invoiceConfigId
-      const tags = params.tags
-      const startTime = params.startTime
-      const endTime = params.endTime
+      const invoiceConfigId = params.invoiceConfigId;
+      const tags = params.tags;
+      const startTime = params.startTime;
+      const endTime = params.endTime;
 
       const {
         invoiceConfig,
@@ -153,36 +153,35 @@ export function useStore(dataStore) {
         billingContact,
         invoiceTemplate,
         currency,
-        country
       } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const billingConfigs = dataStore.list(
         'billing_configs',
         {
           filters: { contactId: billingContact.id, includeTags: tags },
-          include: ['includeTags']
+          include: ['includeTags'],
         }
-      ).data
+      ).data;
 
       const workLogs = dataStore.list(
         'work_logs',
         {
           filters: {
-            tags: tags,
+            tags,
             startTime,
-            endTime
-          }
+            endTime,
+          },
         }
       ).data;
 
       const invoiceLines = billingConfigs.map((config) => {
         const logs = workLogs.filter((log) => {
-          return config.includeTags.some(tag => log.tags.includes(tag))
-        })
+          return config.includeTags.some(tag => log.tags.includes(tag));
+        });
         return prefillInvoiceLine(config, logs);
       });
 
-      const invoice = prefillInvoice({ invoiceConfig, invoiceNumberSequence, billingContact, currency, invoiceLines })
+      const invoice = prefillInvoice({ invoiceConfig, invoiceNumberSequence, billingContact, currency, invoiceLines });
 
       return {
         success: true,
@@ -193,15 +192,15 @@ export function useStore(dataStore) {
           invoiceNumberSequence,
           billingContact,
           invoiceTemplate,
-          currency
-        }
-      }
-    } catch(error) {
+          currency,
+        },
+      };
+    } catch (error) {
       console.error(`previewInvoice`, { error });
       return {
         success: false,
-        errors: error
-      }
+        errors: error,
+      };
     }
   }
 
@@ -218,7 +217,7 @@ export function useStore(dataStore) {
       );
 
       if (!invoiceNumberSequenceResult.success) {
-        return invoiceNumberSequenceResult
+        return invoiceNumberSequenceResult;
       }
 
       const createdInvoice = dataStore.create('invoices', invoice).record;
@@ -236,13 +235,13 @@ export function useStore(dataStore) {
           {},
           createdInvoice,
           { invoiceLines: createdLines }
-        )
+        ),
       };
-    } catch(error) {
+    } catch (error) {
       return {
         success: false,
-        errors: error
-      }
+        errors: error,
+      };
     }
   }
 
@@ -258,7 +257,7 @@ export function useStore(dataStore) {
         billingContact,
         invoiceTemplate,
         currency,
-        country
+        country,
       } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const invoiceLines = dataStore.list(
@@ -275,20 +274,21 @@ export function useStore(dataStore) {
           invoiceNumberSequence,
           billingContact,
           invoiceTemplate,
-          currency
-        }
-      }
-    } catch(error) {
+          currency,
+          country,
+        },
+      };
+    } catch (error) {
       return {
         success: false,
-        errors: error
-      }
+        errors: error,
+      };
     }
   }
 
   return {
     createWithLines,
     previewInvoice,
-    viewTemplateData
-  }
+    viewTemplateData,
+  };
 }

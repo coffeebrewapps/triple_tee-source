@@ -1,464 +1,448 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, watch, onMounted } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, watch, onMounted } from 'vue';
+/** import:global **/
 
-/*** import:utils ***/
-import { useInputHelper } from '@/utils/input'
+/** import:utils **/
+import { useInputHelper } from '@/utils/input';
+import { useFormatter } from '@/utils/formatter';
+import { useErrors } from '@/utils/errors';
+import { useDataAccess } from '@/utils/dataAccess';
+import { useValidations } from '@/utils/validations';
+/** import:utils **/
 
-const {
-  schemasMap,
-  inputLabel,
-  inputValue,
-  tagsField,
-  formatInputOptionsData,
-  formatDataForShow,
-  formatDataForSave,
-  formatErrorsForDisplay,
-  formatFilters,
-  fetchOptions,
-  initOptionsData
-} = useInputHelper(props.dataFields)
+/** import:stores **/
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
+import { useBannerStore } from '@/stores/banner';
+import { useEventsStore } from '@/stores/events';
+/** import:stores **/
 
-import { useSystemConfigsStore } from '@/stores/systemConfigs'
-const systemConfigsStore = useSystemConfigsStore()
-const systemConfigs = systemConfigsStore.getSystemConfigs()
-
-import { useFormatter } from '@/utils/formatter'
-
-const {
-  formatTag,
-  tagStyle
-} = useFormatter()
-
-import { useErrors } from '@/utils/errors'
-const errorsMap = useErrors()
-
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
-
-import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
-/*** import:utils ***/
-
-/*** import:stores ***/
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-
-import { useEventsStore } from '@/stores/events'
-const events = useEventsStore()
-/*** import:stores ***/
-
-/*** import:components ***/
+/** import:components **/
 import {
   TTable,
   TAlert,
   TConfirmDialog,
   TDialog,
-  TDatePicker,
-  TInput,
-  TSelect,
   TButton
-} from 'coffeebrew-vue-components'
+} from 'coffeebrew-vue-components';
 
-import Form from '@/components/Form.vue'
-import FormDialog from '@/components/FormDialog.vue'
-import ViewDialog from '@/components/ViewDialog.vue'
-/*** import:components ***/
+import DataForm from '@/components/DataForm.vue';
+import FormDialog from '@/components/FormDialog.vue';
+import ViewDialog from '@/components/ViewDialog.vue';
+/** import:components **/
 
-/*** section:props ***/
+/** section:props **/
 const props = defineProps({
   dataType: {
     type: String,
-    default: ''
+    default: '',
   },
   modelClass: {
     type: String,
-    default: null
+    default: null,
   },
   filters: {
     type: Object,
-    default: {}
+    default() {
+      return {};
+    },
   },
   dataFields: {
     type: Array,
-    default: []
+    default() {
+      return [];
+    },
   },
   fieldsLayout: {
     type: Array,
-    default: []
+    default() {
+      return [];
+    },
   },
   validations: {
     type: Object,
-    default: {}
+    default() {
+      return {};
+    },
   },
   fullscreen: {
     type: Boolean,
-    default: false
+    default: false,
   },
   createDialogTitle: {
     type: Function,
     default: function(dataType) {
-      return `Create ${dataType}`
-    }
+      return `Create ${dataType}`;
+    },
   },
   viewDialogTitle: {
     type: Function,
     default: function(dataType, row) {
-      return `View ${dataType} ${row.id}`
-    }
+      return `View ${dataType} ${row.id}`;
+    },
   },
   updateDialogTitle: {
     type: Function,
     default: function(dataType, row) {
-      if (!row) { return `` }
-      return `Update ${dataType} ${row.id}`
-    }
+      if (!row) { return ``; }
+      return `Update ${dataType} ${row.id}`;
+    },
   },
   deleteDialogTitle: {
     type: Function,
     default: function(dataType, row) {
-      if (!row) { return `` }
-      return `Delete ${dataType} ${row.id}`
-    }
+      if (!row) { return ``; }
+      return `Delete ${dataType} ${row.id}`;
+    },
   },
   deleteDialogPrimaryText: {
     type: Function,
     default: function(dataType, row) {
-      if (!row) { return `` }
-      return `Are you sure you want to delete ${dataType} ${row.id}?`
-    }
+      if (!row) { return ``; }
+      return `Are you sure you want to delete ${dataType} ${row.id}?`;
+    },
   },
   deleteDialogSecondaryText: {
     type: Function,
     default: function(dataType, row) {
-      if (!row) { return `` }
-      return JSON.stringify(row, false, 2)
-    }
+      if (!row) { return ``; }
+      return JSON.stringify(row, false, 2);
+    },
   },
   actions: {
     type: Object,
-    default: {}
-  }
-})
-/*** section:props ***/
+    default() {
+      return {};
+    },
+  },
+});
+/** section:props **/
 
-/*** section:global ***/
+/** section:global **/
+const {
+  inputLabel,
+  inputValue,
+  tagsField,
+  formatDataForShow,
+  formatDataForSave,
+  formatErrorsForDisplay,
+  formatFilters,
+  initOptionsData,
+} = useInputHelper(props.dataFields);
+const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
+
+const {
+  formatTag,
+  tagStyle,
+} = useFormatter();
+const errorsMap = useErrors();
+const dataAccess = useDataAccess();
+const { isEmpty, notEmpty } = useValidations();
+const banner = useBannerStore();
+const events = useEventsStore();
+
+const inputOptionsData = ref({});
+
 const include = computed(() => {
-  return props.dataFields.filter(h => h.reference)
-})
+  return props.dataFields.filter(h => h.reference);
+});
 
 const includeKeys = computed(() => {
-  return include.value.map(h => h.key)
-})
+  return include.value.map(h => h.key);
+});
 
-const combinedDataFields = ref(Array.from(props.dataFields))
+const combinedDataFields = ref(Array.from(props.dataFields));
 
-const schemasLoaded = ref(false)
-const filtersLoaded = ref(false)
+const schemasLoaded = ref(false);
+const filtersLoaded = ref(false);
 
 function validateParams(validations, params) {
   return Object.keys(validations).reduce((errors, field) => {
-    const validators = validations[field]
+    const validators = validations[field];
     const fieldErrors = validators.map((validator) => {
-      return validator(params)
-    }).filter(e => !!e)
+      return validator(params);
+    }).filter(e => !!e);
 
     if (fieldErrors.length > 0) {
-      errors[field] = fieldErrors
+      errors[field] = fieldErrors;
     }
-    return errors
-  }, {})
+    return errors;
+  }, {});
 }
 
 function formatDataFields(fields) {
   combinedDataFields.value = combinedDataFields.value.map((field) => {
     if (field.type === 'enum') {
-      const enums = fields[field.key].enums
+      const enums = fields[field.key].enums;
       const options = Object.keys(enums).map((e) => {
-        return { value: e, label: enums[e] }
-      })
-      const combined = Object.assign({}, field, { options })
-      return combined
+        return { value: e, label: enums[e] };
+      });
+      const combined = Object.assign({}, field, { options });
+      return combined;
     } else {
-      return field
+      return field;
     }
-  })
+  });
 }
-/*** section:global ***/
+/** section:global **/
 
-/*** section:filter ***/
-const filtersEnabled = ref(props.filters.layout)
+/** section:filter **/
+const filtersEnabled = ref(props.filters.layout);
 
-const filtersState = ref(false)
+const filtersState = ref(false);
 
-const filtersData = ref({})
+const filtersData = ref({});
 
-const filtersDataFields = ref(Array.from(props.dataFields))
+const filtersDataFields = ref(Array.from(props.dataFields));
 
-const filtersErrorMessages = ref({})
+const filtersErrorMessages = ref({});
 
 const filtersConfirmButton = computed(() => {
   return {
     type: 'icon',
-    icon: 'fa-solid fa-check'
-  }
-})
+    icon: 'fa-solid fa-check',
+  };
+});
 
 const filtersCancelButton = computed(() => {
   return {
     type: 'icon',
-    icon: 'fa-solid fa-filter-circle-xmark'
-  }
-})
+    icon: 'fa-solid fa-filter-circle-xmark',
+  };
+});
 
 const filterableFields = computed(() => {
   return props.dataFields.filter(h => h.filterable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
+    o[h.key] = h;
+    return o;
+  }, {});
+});
 
 const filterableKeys = computed(() => {
-  return Object.keys(filterableFields.value)
-})
+  return Object.keys(filterableFields.value);
+});
 
 const showFilters = computed(() => {
-  return filtersEnabled.value && schemasLoaded.value && filtersLoaded.value
-})
+  return filtersEnabled.value && schemasLoaded.value && filtersLoaded.value;
+});
 
 const filtersLayout = computed(() => {
-  return props.filters.layout
-})
+  return props.filters.layout;
+});
 
 const filtersStyleClass = computed(() => {
   if (filtersState.value) {
-    return `filters expanded`
+    return `filters expanded`;
   } else {
-    return `filters collapsed`
+    return `filters collapsed`;
   }
-})
-
-function copyFiltersInitData() {
-  return Object.entries(props.filters.initData).reduce((o, [key, value]) => {
-    if (typeof value === 'object') {
-      if (Array.isArray(value)) {
-        o[key] = Array.from(value)
-      } else {
-        o[key] = Object.assign({}, value)
-      }
-    } else {
-      o[key] = value
-    }
-
-    return o
-  }, {})
-}
+});
 
 async function submitFilters(updatedFilters) {
-  offset.value = 0
-  await loadData()
+  offset.value = 0;
+  await loadData();
 }
 
 async function resetFilters() {
-  filtersLoaded.value = false
-  filtersData.value = formatFilters(Object.assign({}, props.filters.initData))
+  filtersLoaded.value = false;
+  filtersData.value = formatFilters(Object.assign({}, props.filters.initData));
 
   const promises = filterableKeys.value.map((key) => {
-    return formatDataForShow(key, filtersData.value)
-  })
+    return formatDataForShow(key, filtersData.value);
+  });
 
   Promise.all(promises)
     .then((results) => {
       filterableKeys.value.forEach((key, i) => {
-        filtersData.value[key] = results[i]
-      })
-      filtersLoaded.value = true
-      offset.value = 0
-      loadData()
-    })
+        filtersData.value[key] = results[i];
+      });
+      filtersLoaded.value = true;
+      offset.value = 0;
+      loadData();
+    });
 }
 
 function toggleFilters() {
-  filtersState.value = !filtersState.value
+  filtersState.value = !filtersState.value;
 }
 
 function formatFiltersFields() {
   filtersDataFields.value = Array.from(combinedDataFields.value).map((field) => {
-    const filterField = Object.assign({}, field)
-    if (!filterField.filterable) { return filterField }
+    const filterField = Object.assign({}, field);
+    if (!filterField.filterable) { return filterField; }
 
     if (filterField.type === 'date') {
-      filterField.type = 'daterange'
+      filterField.type = 'daterange';
     } else if (filterField.type === 'datetime') {
-      filterField.type = 'datetimerange'
+      filterField.type = 'datetimerange';
     } else if (filterField.type === 'number') {
-      filterField.type = 'numberrange'
+      filterField.type = 'numberrange';
     }
 
-    return filterField
-  }).filter(f => f.filterable)
+    return filterField;
+  }).filter(f => f.filterable);
 }
-/*** section:filter ***/
+/** section:filter **/
 
-/*** section:sort ***/
-const currentSortField = ref('id')
-const currentSortOrder = ref(true) // true = asc, false = desc
+/** section:sort **/
+const currentSortField = ref('id');
+const currentSortOrder = ref(true); // true = asc, false = desc
 
 const sortFilters = computed(() => {
   return {
     field: currentSortField.value,
-    order: currentSortOrder.value ? 'asc' : 'desc'
-  }
-})
+    order: currentSortOrder.value ? 'asc' : 'desc',
+  };
+});
 
 const sortableFields = computed(() => {
   return props.dataFields.filter(h => h.sortable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
+    o[h.key] = h;
+    return o;
+  }, {});
+});
 
 const sortableKeys = computed(() => {
-  return Object.keys(sortableFields.value)
-})
+  return Object.keys(sortableFields.value);
+});
 
 function sortableField(field) {
-  return sortableKeys.value.includes(field)
+  return sortableKeys.value.includes(field);
 }
 
 const sortHeaderStyles = computed(() => {
   return props.dataFields.reduce((o, field) => {
-    const key = field.key
+    const key = field.key;
     if (sortableField(key) && key === currentSortField.value) {
       if (currentSortOrder.value) {
-        o[key] = `header-field sort down`
+        o[key] = `header-field sort down`;
       } else {
-        o[key] = `header-field sort up`
+        o[key] = `header-field sort up`;
       }
     } else if (sortableField(key)) {
-      o[key] = `header-field sort reset`
+      o[key] = `header-field sort reset`;
     } else {
-      o[key] = `header-field nosort`
+      o[key] = `header-field nosort`;
     }
-    return o
-  }, {})
-})
+    return o;
+  }, {});
+});
 
 async function toggleSort(field) {
-  if (!sortableField(field)) { return }
+  if (!sortableField(field)) { return; }
 
   if (field === currentSortField.value) {
-    currentSortOrder.value = !currentSortOrder.value
+    currentSortOrder.value = !currentSortOrder.value;
   } else {
-    currentSortField.value = field
-    currentSortOrder.value = true
+    currentSortField.value = field;
+    currentSortOrder.value = true;
   }
 
-  offset.value = 0
-  await loadData()
+  offset.value = 0;
+  await loadData();
 }
-/*** section:sort ***/
+/** section:sort **/
 
-/*** section:table ***/
+/** section:table **/
 const tableActions = computed(() => {
   const defaultCreateAction = {
     name: 'Create',
     icon: 'fa-solid fa-circle-plus fa-xl',
     click: async function(data) {
-      await openCreateDialog()
-    }
-  }
-  const createOverride = props.actions.create || {}
-  const createAction = Object.assign({}, defaultCreateAction, createOverride)
+      await openCreateDialog();
+    },
+  };
+  const createOverride = props.actions.create || {};
+  const createAction = Object.assign({}, defaultCreateAction, createOverride);
 
   const defaultExportAction = {
     name: 'Export',
     icon: 'fa-solid fa-file-export',
     click: async function(data) {
-      await openDownloadDialog()
-    }
-  }
-  const exportOverride = props.actions.export || {}
-  const exportAction = Object.assign({}, defaultExportAction, exportOverride)
+      await openDownloadDialog();
+    },
+  };
+  const exportOverride = props.actions.export || {};
+  const exportAction = Object.assign({}, defaultExportAction, exportOverride);
 
   const defaultFilterAction = {
     name: 'Filter',
     icon: 'fa-solid fa-filter',
     click: async function() {
-      toggleFilters()
-    }
-  }
-  const filterOverride = props.actions.filter || {}
-  const filterAction = Object.assign({}, defaultFilterAction, filterOverride)
+      toggleFilters();
+    },
+  };
+  const filterOverride = props.actions.filter || {};
+  const filterAction = Object.assign({}, defaultFilterAction, filterOverride);
 
   const initialActions = [
     createAction,
-    exportAction
-  ]
+    exportAction,
+  ];
 
   if (showFilters.value) {
-    initialActions.unshift(filterAction)
+    initialActions.unshift(filterAction);
   }
 
-  return initialActions
-})
+  return initialActions;
+});
 
-const actions = computed(() => {
+const rowActions = computed(() => {
   const defaultViewAction = {
     name: 'View',
     icon: 'fa-solid fa-magnifying-glass',
     click: async function(row, index) {
-      await openViewDialog(row.id)
-    }
-  }
-  const viewOverride = props.actions.view || {}
-  const viewAction = Object.assign({}, defaultViewAction, viewOverride)
+      await openViewDialog(row.id);
+    },
+  };
+  const viewOverride = props.actions.view || {};
+  const viewAction = Object.assign({}, defaultViewAction, viewOverride);
 
   const defaultUpdateAction = {
     name: 'Update',
     icon: 'fa-solid fa-pen-to-square',
     click: async function(row, index) {
-      await openUpdateDialog(row.id)
-    }
-  }
-  const updateOverride = props.actions.update || {}
-  const updateAction = Object.assign({}, defaultUpdateAction, updateOverride)
+      await openUpdateDialog(row.id);
+    },
+  };
+  const updateOverride = props.actions.update || {};
+  const updateAction = Object.assign({}, defaultUpdateAction, updateOverride);
 
   const defaultRemoveAction = {
     name: 'Delete',
     icon: 'fa-solid fa-trash-can',
     click: async function(row, index) {
-      await openDeleteDialog(row.id)
-    }
-  }
-  const removeOverride = props.actions.remove || {}
-  const removeAction = Object.assign({}, defaultRemoveAction, removeOverride)
+      await openDeleteDialog(row.id);
+    },
+  };
+  const removeOverride = props.actions.remove || {};
+  const removeAction = Object.assign({}, defaultRemoveAction, removeOverride);
 
   return [
     viewAction,
     updateAction,
-    removeAction
-  ]
-})
+    removeAction,
+  ];
+});
 
-const data = ref([])
-const totalData = ref(0)
+const data = ref([]);
+const totalData = ref(0);
 
-const offset = ref(0)
-const limit = ref(5)
+const offset = ref(0);
+const limit = ref(5);
 
-const dataLoading = ref(false)
+const dataLoading = ref(false);
 
 const listedHeaders = computed(() => {
-  return props.dataFields.filter(h => h.listable)
-})
+  return props.dataFields.filter(h => h.listable);
+});
 
-const listedData = ref([])
+const listedData = ref([]);
 
 async function updateOffsetAndReload(updated) {
-  offset.value = updated
-  await loadData()
+  offset.value = updated;
+  await loadData();
 }
 
 async function asyncFormatTag(row, tags, key, i) {
@@ -466,102 +450,90 @@ async function asyncFormatTag(row, tags, key, i) {
     return new Promise((resolve, reject) => {
       formatTag(row, tag, key, systemConfigs.tagFormat)
         .then((result) => {
-          resolve(result)
+          resolve(result);
         })
         .catch((error) => {
-          reject(error)
-        })
-    })
-  })
+          reject(error);
+        });
+    });
+  });
 
   return new Promise((resolve, reject) => {
     Promise.all(promises)
       .then((results) => {
-        resolve({ i, key, formattedValue: results })
+        resolve({ i, key, formattedValue: results });
       })
       .catch((error) => {
-        reject(error)
-      })
-  })
+        reject(error);
+      });
+  });
 }
 
 function formattedTag(row, key, i) {
-  const formattedKey = `${key}Formatted`
+  const formattedKey = `${key}Formatted`;
   if (row[formattedKey]) {
-    return row[formattedKey][i]
+    return row[formattedKey][i];
   } else {
-    return row[key]
+    return row[key];
   }
 }
 
 async function formatListedData() {
-  const promises = []
-  listedData.value = []
+  const promises = [];
+  listedData.value = [];
 
   data.value.forEach((row, i) => {
-    listedData.value.push(Object.assign({}, row))
+    listedData.value.push(Object.assign({}, row));
     listedHeaders.value.forEach((field) => {
-      const key = field.key
-      const value = row[key]
+      const key = field.key;
+      const value = row[key];
       if (tagsField(key)) {
-        promises.push(asyncFormatTag(row, value, key, i))
+        promises.push(asyncFormatTag(row, value, key, i));
       }
-    })
-  })
+    });
+  });
 
   Promise.all(promises)
     .then((results) => {
       results.forEach((result) => {
-        const formattedKey = `${result.key}Formatted`
-        listedData.value[result.i][formattedKey] = result.formattedValue
-      })
+        const formattedKey = `${result.key}Formatted`;
+        listedData.value[result.i][formattedKey] = result.formattedValue;
+      });
     })
     .catch((error) => {
-      console.error(error)
-    })
+      console.error(error);
+    });
 }
-/*** section:table ***/
+/** section:table **/
 
-/*** section:inputOptions ***/
-const inputOptionsData = ref({})
-
-async function optionsOffsetChange(field, newOffset) {
-  const limit = schemasMap.value[field].limit || 5
-  await fetchOptions(field, newOffset)
-    .then((result) => {
-      inputOptionsData.value[field] = formatInputOptionsData(field, newOffset, limit, result)
-    })
-}
-/*** section:inputOptions ***/
-
-/*** section:events ***/
+/** section:events **/
 events.registerListener(
   'loadData',
   {
     id: `DataPage-${props.dataType}`,
     invoke: (payload) => {
       if (payload.dataType === props.dataType) {
-        loadData()
+        loadData();
       }
-    }
+    },
   }
-)
-/*** section:events ***/
+);
+/** section:events **/
 
-/*** section:dataAccess ***/
+/** section:dataAccess **/
 async function loadSchemas() {
   await dataAccess
     .schemas(props.modelClass)
     .then((result) => {
-      const fields = result.fields
-      formatDataFields(fields)
-      formatFiltersFields()
-      schemasLoaded.value = true
+      const fields = result.fields;
+      formatDataFields(fields);
+      formatFiltersFields();
+      schemasLoaded.value = true;
     })
     .catch((error) => {
-      console.error(error)
-      showBanner(`Error loading schemas!`)
-    })
+      console.error(error);
+      showBanner(`Error loading schemas!`);
+    });
 }
 
 async function loadData() {
@@ -570,388 +542,392 @@ async function loadData() {
     offset: offset.value,
     limit: limit.value,
     filters: formatFilters(filtersData.value),
-    sort: sortFilters.value
-  }
+    sort: sortFilters.value,
+  };
 
-  dataLoading.value = true
+  dataLoading.value = true;
 
   await dataAccess
     .list(props.modelClass, params)
     .then((result) => {
-      data.value = result.data
-      formatListedData()
-      totalData.value = result.total
-      dataLoading.value = false
+      data.value = result.data;
+      formatListedData();
+      totalData.value = result.total;
+      dataLoading.value = false;
     })
     .catch((error) => {
-      dataLoading.value = false
-      console.error(error)
-      showBanner(`Error loading data!`)
-    })
+      dataLoading.value = false;
+      console.error(error);
+      showBanner(`Error loading data!`);
+    });
 }
 
 async function viewData(id, resolve, reject) {
-  const params = { include: includeKeys.value }
+  const params = { include: includeKeys.value };
 
   await dataAccess
     .view(props.modelClass, id, params)
     .then((result) => {
-      resolve(result)
+      resolve(result);
     })
     .catch((error) => {
-      reject(error)
-    })
+      reject(error);
+    });
 }
-/*** section:dataAccess ***/
+/** section:dataAccess **/
 
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:error ***/
-const errorAlert = ref(false)
-const errorContent = ref('')
+/** section:error **/
+const errorAlert = ref(false);
+const errorContent = ref('');
 
 const errorAlertFitContent = computed(() => {
   if (!!errorContent.value && errorContent.value.length > 0) {
-    return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n')
+    return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n');
   } else {
-    return ``
+    return ``;
   }
-})
+});
 
 const errorAlertSize = computed(() => {
   return {
     width: 800,
-    height: 400
-  }
-})
-/*** section:error ***/
+    height: 400,
+  };
+});
+/** section:error **/
 
-/*** section:view ***/
-const viewDialog = ref(false)
-const currentRow = ref()
+/** section:view **/
+const viewDialog = ref(false);
+const currentRow = ref();
 
 const viewableFields = computed(() => {
   return props.dataFields.filter(h => h.viewable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
+    o[h.key] = h;
+    return o;
+  }, {});
+});
 
 const viewableKeys = computed(() => {
-  return Object.keys(viewableFields.value)
-})
+  return Object.keys(viewableFields.value);
+});
 
 async function openViewDialog(id) {
   viewData(
     id,
     (record) => {
-      currentRow.value = record
-      viewDialog.value = true
+      currentRow.value = record;
+      viewDialog.value = true;
     },
     (error) => {
-      currentRow.value = null
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
+      currentRow.value = null;
+      errorAlert.value = true;
+      errorContent.value = JSON.stringify(error, false, 4);
     }
-  )
+  );
 }
-/*** section:view ***/
+/** section:view **/
 
-/*** section:create ***/
-const createDialog = ref(false)
-const newRow = ref()
-const createErrors = ref({})
+/** section:create **/
+const createDialog = ref(false);
+const newRow = ref();
+const createErrors = ref({});
 
 const creatableFields = computed(() => {
   return props.dataFields.filter(h => h.creatable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
+    o[h.key] = h;
+    return o;
+  }, {});
+});
 
 const creatableKeys = computed(() => {
-  return Object.keys(creatableFields.value)
-})
+  return Object.keys(creatableFields.value);
+});
 
 const createValidations = computed(() => {
-  return props.validations.create || []
-})
+  return props.validations.create || [];
+});
 
 watch(createDialog, (newVal, oldVal) => {
-  if (!newVal) { createErrors.value = {} }
-})
+  if (!newVal) { createErrors.value = {}; }
+});
 
 async function openCreateDialog(id) {
-  newRow.value = {}
+  newRow.value = {};
   const promises = creatableKeys.value.map((key) => {
-    return formatDataForShow(key, {})
-  })
+    return formatDataForShow(key, {});
+  });
 
   Promise.all(promises)
     .then((results) => {
       creatableKeys.value.forEach((key, i) => {
-        newRow.value[key] = results[i]
-        createDialog.value = true
-      })
-    })
+        newRow.value[key] = results[i];
+        createDialog.value = true;
+      });
+    });
 }
 
 async function createDataAndCloseDialog(rawParams) {
-  const errors = validateCreateParams(rawParams)
+  const errors = validateCreateParams(rawParams);
 
   if (Object.keys(errors).length > 0) {
-    createErrors.value = errors
-    showBanner(`Error creating data!`)
-    return
+    createErrors.value = errors;
+    showBanner(`Error creating data!`);
+    return;
   }
 
-  const params = formatDataForSave(rawParams)
+  const params = formatDataForSave(rawParams);
 
   await dataAccess
     .create(props.modelClass, params)
     .then((result) => {
-      showBanner(`Data created successfully!`)
-      resetFilters()
-      closeCreateDialog()
+      showBanner(`Data created successfully!`);
+      resetFilters();
+      closeCreateDialog();
     })
     .catch((error) => {
-      createErrors.value = formatErrorsForDisplay(error)
-      showBanner(`Error creating data!`)
-    })
+      createErrors.value = formatErrorsForDisplay(error);
+      showBanner(`Error creating data!`);
+    });
 }
 
 function validateCreateParams(params) {
-  return validateParams(createValidations.value, params)
+  return validateParams(createValidations.value, params);
 }
 
 function closeCreateDialog() {
-  createDialog.value = false
-  resetNewRow()
+  createDialog.value = false;
+  resetNewRow();
 }
 
 function resetNewRow() {
-  newRow.value = null
+  newRow.value = null;
 }
 
-/*** section:create ***/
+/** section:create **/
 
-/*** section:update ***/
-const updateDialog = ref(false)
-const currentRowForUpdate = ref()
-const updateErrors = ref({})
+/** section:update **/
+const updateDialog = ref(false);
+const currentRowForUpdate = ref();
+const updateErrors = ref({});
 
 const updatableFields = computed(() => {
   return props.dataFields.filter(h => h.updatable).reduce((o, h) => {
-    o[h.key] = h
-    return o
-  }, {})
-})
+    o[h.key] = h;
+    return o;
+  }, {});
+});
 
 const updatableKeys = computed(() => {
-  return Object.keys(updatableFields.value)
-})
+  return Object.keys(updatableFields.value);
+});
 
 const updateValidations = computed(() => {
-  return props.validations.update || []
-})
+  return props.validations.update || [];
+});
 
 watch(updateDialog, (newVal, oldVal) => {
-  if (!newVal) { updateErrors.value = {} }
-})
+  if (!newVal) { updateErrors.value = {}; }
+});
 
 async function openUpdateDialog(id) {
   viewData(
     id,
     (record) => {
-      formatCurrentRowForUpdate(record)
-      updateDialog.value = true
+      formatCurrentRowForUpdate(record);
+      updateDialog.value = true;
     },
     (error) => {
-      resetCurrentRowForUpdate()
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
+      resetCurrentRowForUpdate();
+      errorAlert.value = true;
+      errorContent.value = JSON.stringify(error, false, 4);
     }
-  )
+  );
 }
 
 async function updateDataAndCloseDialog(rawParams) {
-  const errors = validateUpdateParams(rawParams)
+  const errors = validateUpdateParams(rawParams);
 
   if (Object.keys(errors).length > 0) {
-    updateErrors.value = errors
-    showBanner(`Error updating data!`)
-    return
+    updateErrors.value = errors;
+    showBanner(`Error updating data!`);
+    return;
   }
 
-  const id = rawParams.id
-  const params = formatDataForSave(rawParams)
+  const id = rawParams.id;
+  const params = formatDataForSave(rawParams);
 
   await dataAccess
     .update(props.modelClass, id, params)
     .then((record) => {
-      showBanner(`Data updated successfully!`)
-      resetFilters()
-      closeUpdateDialog()
+      showBanner(`Data updated successfully!`);
+      resetFilters();
+      closeUpdateDialog();
     })
     .catch((error) => {
-      updateErrors.value = formatErrorsForDisplay(error)
-      showBanner(`Error updating data!`)
-    })
+      updateErrors.value = formatErrorsForDisplay(error);
+      showBanner(`Error updating data!`);
+    });
 }
 
 function validateUpdateParams(params) {
-  return validateParams(updateValidations.value, params)
+  return validateParams(updateValidations.value, params);
 }
 
 function closeUpdateDialog() {
-  updateDialog.value = false
-  resetCurrentRowForUpdate()
+  updateDialog.value = false;
+  resetCurrentRowForUpdate();
 }
 
 async function formatCurrentRowForUpdate(record) {
-  currentRowForUpdate.value = {}
+  currentRowForUpdate.value = {};
 
   const promises = props.dataFields.map((field) => {
-    const key = field.key
-    return formatDataForShow(key, record)
-  })
+    const key = field.key;
+    return formatDataForShow(key, record);
+  });
 
   Promise.all(promises)
     .then((results) => {
       props.dataFields.forEach((field, i) => {
-        const key = field.key
-        currentRowForUpdate.value[key] = results[i]
-      })
-    })
+        const key = field.key;
+        currentRowForUpdate.value[key] = results[i];
+      });
+    });
 }
 
 function resetCurrentRowForUpdate() {
-  currentRowForUpdate.value = null
+  currentRowForUpdate.value = null;
 }
-/*** section:update ***/
+/** section:update **/
 
-/*** section:delete ***/
-const deleteDialog = ref(false)
-const currentRowForDelete = ref()
-const deleteErrors = ref({})
+/** section:delete **/
+const deleteDialog = ref(false);
+const currentRowForDelete = ref();
+const deleteErrors = ref({});
 
 watch(deleteDialog, (newVal, oldVal) => {
-  if (!newVal) { deleteErrors.value = {} }
-})
+  if (!newVal) { deleteErrors.value = {}; }
+});
 
 async function openDeleteDialog(id) {
   viewData(
     id,
     (record) => {
-      currentRowForDelete.value = record
-      deleteDialog.value = true
+      currentRowForDelete.value = record;
+      deleteDialog.value = true;
     },
     (error) => {
-      resetCurrentRowForDelete()
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
+      resetCurrentRowForDelete();
+      errorAlert.value = true;
+      errorContent.value = JSON.stringify(error, false, 4);
     }
-  )
+  );
 }
 
 async function deleteDataAndCloseDialog() {
-  const params = currentRowForDelete.value
-  const id = params.id
+  const params = currentRowForDelete.value;
+  const id = params.id;
 
   await dataAccess
     .remove(props.modelClass, id)
     .then((record) => {
-      showBanner(`Data deleted successfully!`)
-      resetFilters()
+      showBanner(`Data deleted successfully!`);
+      resetFilters();
     })
     .catch((error) => {
-      errorAlert.value = true
+      errorAlert.value = true;
       errorContent.value = error.map((type) => {
-        return errorsMap[type]()
-      }).join(', ')
+        return errorsMap[type]();
+      }).join(', ');
     })
     .finally(() => {
-      closeDeleteDialog()
-    })
+      closeDeleteDialog();
+    });
 }
 
 function closeDeleteDialog() {
-  deleteDialog.value = false
-  resetCurrentRowForDelete()
+  deleteDialog.value = false;
+  resetCurrentRowForDelete();
 }
 
 function resetCurrentRowForDelete() {
-  currentRowForDelete.value = null
+  currentRowForDelete.value = null;
 }
-/*** section:delete ***/
+/** section:delete **/
 
-/*** section:download ***/
-const downloadDialog = ref(false)
-const downloadLink = ref()
-const downloadFile = ref()
-const downloadAnchor = ref('downloadAnchor')
+/** section:download **/
+const downloadDialog = ref(false);
+const downloadLink = ref();
+const downloadFile = ref();
+const downloadAnchor = ref('downloadAnchor');
 
 async function openDownloadDialog() {
   await dataAccess
     .download(props.modelClass)
     .then((result) => {
-      const url = window.URL.createObjectURL(new Blob([result.data]))
-      downloadLink.value = url
-      downloadFile.value = result.filename
-      downloadDialog.value = true
+      const url = window.URL.createObjectURL(new Blob([result.data]));
+      downloadLink.value = url;
+      downloadFile.value = result.filename;
+      downloadDialog.value = true;
     })
     .catch((error) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(result.error, false, 4)
-    })
+      errorAlert.value = true;
+      errorContent.value = JSON.stringify(error, false, 4);
+    });
 }
 
 function downloadDataAsFile() {
-  downloadAnchor.value.click()
-  closeDownloadDialog()
+  downloadAnchor.value.click();
+  closeDownloadDialog();
 }
 
 function closeDownloadDialog() {
-  downloadDialog.value = false
-  downloadLink.value = null
-  downloadFile.value = null
+  downloadDialog.value = false;
+  downloadLink.value = null;
+  downloadFile.value = null;
 }
-/*** section:download ***/
+/** section:download **/
 
-onMounted(async () => {
-  await loadSchemas()
-  await loadData()
+onMounted(async() => {
+  await loadSchemas();
+  await loadData();
   await initOptionsData()
     .then((result) => {
-      inputOptionsData.value = result
+      inputOptionsData.value = result;
     })
     .catch((error) => {
-      errorAlert.value = true
-      errorContent.value = JSON.stringify(error, false, 4)
-    })
-  await resetFilters()
-})
+      errorAlert.value = true;
+      errorContent.value = JSON.stringify(error, false, 4);
+    });
+  await resetFilters();
+});
 </script>
 
 <template>
   <div class="page-container">
-    <h2 class="heading">{{ dataType }}</h2>
+    <h2 class="heading">
+      {{ dataType }}
+    </h2>
 
     <div
-      :class="filtersStyleClass"
       v-if="showFilters"
+      :class="filtersStyleClass"
     >
-      <h3 class="heading">Filters</h3>
-      <Form
+      <h3 class="heading">
+        Filters
+      </h3>
+      <DataForm
         v-model="filtersData"
         :fields-layout="filtersLayout"
         :data-fields="filterableKeys"
@@ -970,16 +946,16 @@ onMounted(async () => {
       :headers="listedHeaders"
       :data="listedData"
       :table-actions="tableActions"
-      :actions="actions"
+      :actions="rowActions"
       :loading="dataLoading"
       :pagination="{ offset, limit, client: false }"
       :total-data="totalData"
       @offset-change="updateOffsetAndReload"
     >
-
       <template #header-row="{ headers, actions }">
         <th
           v-for="(header, i) in headers"
+          :key="i"
           class="col"
           @click="toggleSort(header.key)"
         >
@@ -988,22 +964,22 @@ onMounted(async () => {
           >
             {{ header.label }}
 
-            <i class="fa-solid fa-sort"></i>
-            <i class="fa-solid fa-sort-up"></i>
-            <i class="fa-solid fa-sort-down"></i>
+            <i class="fa-solid fa-sort" />
+            <i class="fa-solid fa-sort-up" />
+            <i class="fa-solid fa-sort-down" />
           </div>
         </th>
 
         <th
           v-if="actions.length > 0"
           class="col"
-        >
-        </th>
+        />
       </template>
 
       <template #data-content="{ headers, row, i }">
         <td
-          v-for="header in headers"
+          v-for="(header, h) in headers"
+          :key="h"
           class="col"
         >
           <slot
@@ -1032,11 +1008,12 @@ onMounted(async () => {
               v-if="tagsField(header.key)"
             >
               <div
-                v-for="(tag, i) in row[header.key]"
+                v-for="(tag, j) in row[header.key]"
+                :key="j"
                 class="tag"
                 :style="tagStyle(row, tag, header.key)"
               >
-                {{ formattedTag(row, header.key, i) }}
+                {{ formattedTag(row, header.key, j) }}
               </div>
 
               <div
@@ -1053,12 +1030,12 @@ onMounted(async () => {
 
     <TAlert
       v-if="errorContent.length > 0"
+      v-model="errorAlert"
       title="Error"
       class="error-alert"
       :content="errorAlertFitContent"
       :width="errorAlertSize.width"
       :height="errorAlertSize.height"
-      v-model="errorAlert"
     />
 
     <FormDialog
@@ -1074,7 +1051,10 @@ onMounted(async () => {
       @submit="createDataAndCloseDialog"
     />
 
-    <slot name="updateDialog" v-bind="{ row: currentRowForUpdate }">
+    <slot
+      name="updateDialog"
+      v-bind="{ row: currentRowForUpdate }"
+    >
       <FormDialog
         v-if="currentRowForUpdate"
         v-model="updateDialog"
@@ -1110,9 +1090,9 @@ onMounted(async () => {
       :secondary-text="deleteDialogSecondaryText(dataType, currentRowForDelete)"
       :width="500"
       :height="350"
+      class="delete-dialog"
       @confirm="deleteDataAndCloseDialog"
       @cancel="closeDeleteDialog"
-      class="delete-dialog"
     />
 
     <TDialog
@@ -1127,9 +1107,25 @@ onMounted(async () => {
       </template>
 
       <template #actions>
-        <a class="hidden" ref="downloadAnchor" rel="noreferrer" :download="downloadFile" :href="downloadLink"></a>
-        <TButton button-type="text" value="Download" icon="fa-solid fa-file-arrow-down" @click="downloadDataAsFile()"/>
-        <TButton button-type="text" value="Cancel" icon="fa-solid fa-xmark" @click="closeDownloadDialog()"/>
+        <a
+          ref="downloadAnchor"
+          class="hidden"
+          rel="noreferrer"
+          :download="downloadFile"
+          :href="downloadLink"
+        />
+        <TButton
+          button-type="text"
+          value="Download"
+          icon="fa-solid fa-file-arrow-down"
+          @click="downloadDataAsFile()"
+        />
+        <TButton
+          button-type="text"
+          value="Cancel"
+          icon="fa-solid fa-xmark"
+          @click="closeDownloadDialog()"
+        />
       </template>
     </TDialog>
   </div>

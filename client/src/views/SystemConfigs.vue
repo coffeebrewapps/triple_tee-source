@@ -1,129 +1,165 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue';
 
-import Form from '@/components/Form.vue'
+import DataForm from '@/components/DataForm.vue';
 import {
   TButton
-} from 'coffeebrew-vue-components'
+} from 'coffeebrew-vue-components';
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+import { useDataAccess } from '@/utils/dataAccess';
 
-import { useSystemConfigsStore } from '@/stores/systemConfigs'
-const systemConfigsStore = useSystemConfigsStore()
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
+import { useBannerStore } from '@/stores/banner';
 
-const formData = ref()
-const errorMessages = ref({})
+import { useInputHelper } from '@/utils/input';
+
+const dataAccess = useDataAccess();
+const systemConfigsStore = useSystemConfigsStore();
+const banner = useBannerStore();
+
+const formData = ref();
+const errorMessages = ref({});
 
 const updatableKeys = computed(() => {
   return dataFields.value.filter((field) => {
-    return field.updatable
-  })
-})
+    return field.updatable;
+  });
+});
 
 const fieldKeys = computed(() => {
-  return updatableKeys.value.map(f => f.key)
-})
+  return updatableKeys.value.map(f => f.key);
+});
 
 const fieldsLayout = [
   { tagFormat: 'md', timezone: 'md' },
-  { baseCurrencyId: 'lg', baseContactId: 'lg' }
-]
+  { baseCurrencyId: 'lg', baseContactId: 'lg' },
+];
 
 function recordValue(record) {
-  return record.id
+  return record.id;
 }
 
 function currencyLabel(record) {
-  return `${record.code} (${record.symbol})`
+  return `${record.code} (${record.symbol})`;
 }
 
 function contactLabel(record) {
-  return record.name
+  return record.name;
 }
 
 const dataFields = computed(() => {
   return [
-    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-    { key: 'tagFormat', type: 'text', label: 'Tag Format', listable: false, viewable: true, creatable: true, updatable: true },
-    { key: 'timezone', type: 'text', label: 'Timezone', listable: false, viewable: true, creatable: true, updatable: true },
     {
-      key: 'baseCurrencyId', type: 'singleSelect', label: 'Base Currency',
+      key: 'id',
+      type: 'text',
+      label: 'ID',
+      listable: true,
+      viewable: true,
+      creatable: false,
+      updatable: false,
+      sortable: true,
+    },
+    {
+      key: 'tagFormat',
+      type: 'text',
+      label: 'Tag Format',
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+    },
+    {
+      key: 'timezone',
+      type: 'text',
+      label: 'Timezone',
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+    },
+    {
+      key: 'baseCurrencyId',
+      type: 'singleSelect',
+      label: 'Base Currency',
       reference: { label: currencyLabel },
-      listable: true, viewable: true, creatable: true, updatable: true,
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'currencies',
         value: recordValue,
-        label: currencyLabel
-      }
+        label: currencyLabel,
+      },
     },
     {
-      key: 'baseContactId', type: 'singleSelect', label: 'Base Contact',
+      key: 'baseContactId',
+      type: 'singleSelect',
+      label: 'Base Contact',
       reference: { label: contactLabel },
-      listable: true, viewable: true, creatable: true, updatable: true,
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'contacts',
         value: recordValue,
-        label: contactLabel
-      }
+        label: contactLabel,
+      },
     },
-  ]
-})
-
-import { useInputHelper } from '@/utils/input'
+  ];
+});
 const {
   formatDataForShow,
   formatDataForSave,
-  formatErrorsForDisplay
-} = useInputHelper(dataFields.value)
+  formatErrorsForDisplay,
+} = useInputHelper(dataFields.value);
 
 function initFormData() {
   return {
     tagFormat: '{{ category }}:{{ name }}',
     timezone: 'UTC',
     baseCurrencyId: [],
-    baseContactId: []
-  }
+    baseContactId: [],
+  };
 }
 
 async function updateConfig() {
-  const params = formatDataForSave(Object.assign({}, formData.value))
+  const params = formatDataForSave(Object.assign({}, formData.value));
   await dataAccess
     .create('system_configs', params, { path: 'replace' })
     .then((result) => {
-      showBanner(`Updated config successfully!`)
-      systemConfigsStore.updateSystemConfigs(result)
+      showBanner(`Updated config successfully!`);
+      systemConfigsStore.updateSystemConfigs(result);
     })
     .catch((error) => {
-      console.error(error)
-      errorMessages.value = formatErrorsForDisplay(error)
-      showBanner(`Error updating config!`)
-    })
+      console.error(error);
+      errorMessages.value = formatErrorsForDisplay(error);
+      showBanner(`Error updating config!`);
+    });
 }
 
 async function formatFormDataForShow(record) {
   const promises = fieldKeys.value.map((key) => {
-    return formatDataForShow(key, record)
-  })
+    return formatDataForShow(key, record);
+  });
 
   return new Promise((resolve, reject) => {
     Promise.all(promises)
       .then((results) => {
-        const formattedRecord = {}
+        const formattedRecord = {};
         updatableKeys.value.forEach((field, i) => {
-          const key = field.key
-          formattedRecord[key] = results[i]
-        })
-        resolve(formattedRecord)
-      })
-  })
+          const key = field.key;
+          formattedRecord[key] = results[i];
+        });
+        resolve(formattedRecord);
+      });
+  });
 }
 
 async function loadSystemConfigs() {
@@ -131,48 +167,48 @@ async function loadSystemConfigs() {
     dataAccess
       .list('system_configs', {}, { path: 'latest' })
       .then((result) => {
-        const latestConfig = result.record
-        resolve(latestConfig)
+        const latestConfig = result.record;
+        resolve(latestConfig);
       })
       .catch((error) => {
-        reject(error)
-      })
-  })
+        reject(error);
+      });
+  });
 }
 
-/*** section:banner ***/
+/** * section:banner ***/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** * section:banner ***/
 
-onMounted(async () => {
+onMounted(async() => {
   await loadSystemConfigs()
     .then((result) => {
       if (result) {
         formatFormDataForShow(result)
           .then((formattedResult) => {
-            formData.value = formattedResult
-          })
+            formData.value = formattedResult;
+          });
       } else {
-        formData.value = initFormData()
+        formData.value = initFormData();
       }
     })
     .catch((error) => {
-      console.error(error)
-      showBanner(`Error loading config!`)
-    })
-})
+      console.error(error);
+      showBanner(`Error loading config!`);
+    });
+});
 </script>
 
 <template>
   <div class="view-container">
-    <Form
+    <DataForm
       v-if="formData"
       v-model="formData"
       :fields-layout="fieldsLayout"
@@ -183,7 +219,12 @@ onMounted(async () => {
     />
 
     <div class="actions">
-      <TButton class="button" value="Update" icon="fa-solid fa-check" @click="updateConfig()"/>
+      <TButton
+        class="button"
+        value="Update"
+        icon="fa-solid fa-check"
+        @click="updateConfig()"
+      />
     </div>
   </div>
 </template>

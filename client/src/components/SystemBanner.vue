@@ -1,24 +1,24 @@
 <script setup>
-import { computed } from 'vue'
-import { useBannerStore } from '../stores/banner'
+import { computed } from 'vue';
+import { useBannerStore } from '@/stores/banner';
 
-const banner = useBannerStore()
+const banner = useBannerStore();
 
 const showBanner = computed(() => {
-  return banner.banner
-})
+  return banner.banner;
+});
 
 const message = computed(() => {
-  return banner.bannerMessage
-})
+  return banner.bannerMessage;
+});
 
 const bannerContainerClass = computed(() => {
   if (showBanner.value) {
-    return `banner-container show`
+    return `banner-container show`;
   } else {
-    return `banner-container hide`
+    return `banner-container hide`;
   }
-})
+});
 </script>
 
 <template>

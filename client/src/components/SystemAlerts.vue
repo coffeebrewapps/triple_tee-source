@@ -1,34 +1,34 @@
 <script setup>
-import { computed } from 'vue'
-import { useAlertsStore } from '../stores/alerts'
-import { useFormatter } from '../utils/formatter'
-import { useSystemConfigsStore } from '@/stores/systemConfigs'
+import { computed } from 'vue';
+import { useAlertsStore } from '@/stores/alerts';
+import { useFormatter } from '@/utils/formatter';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 
-const alerts = useAlertsStore()
+const alerts = useAlertsStore();
 
-const systemConfigsStore = useSystemConfigsStore()
+const systemConfigsStore = useSystemConfigsStore();
 const {
-  formatTimestamp
-} = useFormatter(systemConfigsStore)
+  formatTimestamp,
+} = useFormatter(systemConfigsStore);
 
 const showAlerts = computed(() => {
-  return alerts.showAlert
-})
+  return alerts.showAlert;
+});
 
 const messages = computed(() => {
-  return alerts.alerts
-})
+  return alerts.alerts;
+});
 
 const alertsContainerClass = computed(() => {
   if (showAlerts.value) {
-    return `alerts-container show`
+    return `alerts-container show`;
   } else {
-    return `alerts-container hide`
+    return `alerts-container hide`;
   }
-})
+});
 
 function toggle() {
-  alerts.toggle()
+  alerts.toggle();
 }
 </script>
 
@@ -40,16 +40,23 @@ function toggle() {
       class="toggle"
       @click="toggle"
     >
-      <i class="fa-sharp fa-solid fa-xmark"></i>
+      <i class="fa-sharp fa-solid fa-xmark" />
     </div>
 
     <div
-      v-for="{ heading, message, timestamp } in messages"
+      v-for="({ heading, message, timestamp }, i) in messages"
+      :key="i"
       class="message-container"
     >
-      <div class="heading">{{ heading }}</div>
-      <div class="content">{{ message }}</div>
-      <div class="timestamp">{{ formatTimestamp(timestamp) }}</div>
+      <div class="heading">
+        {{ heading }}
+      </div>
+      <div class="content">
+        {{ message }}
+      </div>
+      <div class="timestamp">
+        {{ formatTimestamp(timestamp) }}
+      </div>
     </div>
   </div>
 </template>

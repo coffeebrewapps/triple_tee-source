@@ -1,8 +1,8 @@
 const route = {
   path: '/contacts',
   name: 'Contacts',
-  component: () => import('./Contacts.vue')
-}
+  component: () => import('./ContactsPage.vue'),
+};
 
 const viewContactRoute = {
   path: '/contacts/:id',
@@ -10,14 +10,14 @@ const viewContactRoute = {
   component: () => import('./ViewContact.vue'),
   meta: {
     parentRoute: { name: 'Contacts' },
-    hidden: true
-  }
-}
+    hidden: true,
+  },
+};
 
 const usePlugin = (router) => {
-  router.addRoute(route)
-  router.addRoute(viewContactRoute)
-  return route
-}
+  router.addRoute(route);
+  router.addRoute(viewContactRoute);
+  return route;
+};
 
-export default usePlugin
+export default usePlugin;

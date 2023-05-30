@@ -1,71 +1,68 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, watch, onMounted } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref } from 'vue';
+/** import:global **/
 
-/*** section:props ***/
+/** section:props **/
 const props = defineProps({
   tabs: {
     type: Array,
     default() {
-      return []
-    }
-  }
-})
-/*** section:props ***/
+      return [];
+    },
+  },
+});
+/** section:props **/
 
-/*** section:emit ***/
-const emit = defineEmits(['tabChange'])
-/*** section:emit ***/
+/** section:emit **/
+const emit = defineEmits(['tabChange']);
+/** section:emit **/
 
-/*** section:global ***/
-const tabRefs = ref([])
-const selectedTab = ref(0)
-
-function isActive(i) {
-  return selectedTab.value === i
-}
+/** section:global **/
+const tabRefs = ref([]);
+const selectedTab = ref(0);
 
 function selectTab(tab) {
-  selectedTab.value = tab
-  tabRefs.value[tab].blur()
-  emit('tabChange', tab)
+  selectedTab.value = tab;
+  tabRefs.value[tab].blur();
+  emit('tabChange', tab);
 }
 
 function navigateTab(tab) {
-  if (tab < 0) { return }
-  if (tab > props.tabs.length - 1) { return }
+  if (tab < 0) { return; }
+  if (tab > props.tabs.length - 1) { return; }
 
-  tabRefs.value[tab].focus()
+  tabRefs.value[tab].focus();
 }
-/*** section:global ***/
+/** section:global **/
 
-/*** section:style ***/
+/** section:style **/
 function tabStyle(i) {
   if (i === selectedTab.value) {
-    return `tab active`
+    return `tab active`;
   } else {
-    return `tab`
+    return `tab`;
   }
 }
 
 function tabContentStyle(i) {
   if (i === selectedTab.value) {
-    return `tab-content active`
+    return `tab-content active`;
   } else {
-    return `tab-content`
+    return `tab-content`;
   }
 }
-/*** section:style ***/
+/** section:style **/
 </script>
 
 <template>
   <div class="tab-container">
     <div class="tabs">
       <div
-        :class="tabStyle(i)"
-        ref="tabRefs"
         v-for="(tab, i) in tabs"
+        :key="i"
+        ref="tabRefs"
+        :class="tabStyle(i)"
         tabindex="0"
         @click="selectTab(i)"
         @keydown.enter="selectTab(i)"
@@ -78,13 +75,13 @@ function tabContentStyle(i) {
 
     <div
       v-for="(tab, i) in tabs"
+      :key="i"
       :class="tabContentStyle(i)"
     >
       <slot
         v-bind="{ tab, i }"
         :name="`tab-${i}`"
-      >
-      </slot>
+      />
     </div>
   </div>
 </template>

@@ -1,29 +1,29 @@
-import { ref, computed } from 'vue'
-import { defineStore } from 'pinia'
+import { ref } from 'vue';
+import { defineStore } from 'pinia';
 
 export const useAlertsStore = defineStore('alerts', () => {
-  const alerts = ref([])
-  const showAlert = ref(false)
+  const alerts = ref([]);
+  const showAlert = ref(false);
 
   function show() {
-    showAlert.value = true
+    showAlert.value = true;
   }
 
   function hide() {
-    showAlert.value = false
+    showAlert.value = false;
   }
 
   function toggle() {
-    showAlert.value = !showAlert.value
+    showAlert.value = !showAlert.value;
   }
 
   function addAlert({ heading, message }) {
-    alerts.value.unshift({ heading, message, timestamp: (new Date()) })
+    alerts.value.unshift({ heading, message, timestamp: (new Date()) });
   }
 
   function clearAlerts() {
-    alerts.value = []
+    alerts.value = [];
   }
 
-  return { alerts, showAlert, show, hide, toggle, addAlert, clearAlerts }
-})
+  return { alerts, showAlert, show, hide, toggle, addAlert, clearAlerts };
+});

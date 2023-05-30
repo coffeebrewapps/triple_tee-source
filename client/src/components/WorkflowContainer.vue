@@ -1,81 +1,78 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-/*** import:global ***/
+/** import:global **/
+import { ref, computed } from 'vue';
+/** import:global **/
 
-/*** import:components ***/
+/** import:components **/
 import {
   TButton
-} from 'coffeebrew-vue-components'
-/*** import:components ***/
+} from 'coffeebrew-vue-components';
+/** import:components **/
 
-/*** section:props ***/
+/** section:props **/
 const props = defineProps({
   steps: {
     type: Array,
     default() {
-      return []
-    }
-  }
-})
-/*** section:props ***/
+      return [];
+    },
+  },
+});
+/** section:props **/
 
-/*** section:emit ***/
-const emit = defineEmits(['prevStep', 'nextStep', 'submit'])
-/*** section:emit ***/
+/** section:emit **/
+const emit = defineEmits(['prevStep', 'nextStep', 'submit']);
+/** section:emit **/
 
-/*** section:global ***/
-const currentStepNumber = ref(0)
-const currentStep = computed(() => {
-  return props.steps[currentStepNumber.value]
-})
+/** section:global **/
+const currentStepNumber = ref(0);
 
 const hasPrevStep = computed(() => {
-  return currentStepNumber.value < props.steps.length - 1 && currentStepNumber.value > 0
-})
+  return currentStepNumber.value < props.steps.length - 1 && currentStepNumber.value > 0;
+});
 
 const hasNextStep = computed(() => {
-  return currentStepNumber.value < props.steps.length - 1
-})
+  return currentStepNumber.value < props.steps.length - 1;
+});
 
 const submitStep = computed(() => {
   if (props.steps.length === 1) {
-    return true
+    return true;
   } else {
-    currentStepNumber.value === props.steps.length - 2
+    return currentStepNumber.value === props.steps.length - 2;
   }
-})
-/*** section:global ***/
+});
+/** section:global **/
 
-/*** section:action ***/
+/** section:action **/
 function prevStep() {
   if (currentStepNumber.value > 0) {
-    currentStepNumber.value = currentStepNumber.value - 1
-    emit('prevStep', currentStepNumber.value)
+    currentStepNumber.value = currentStepNumber.value - 1;
+    emit('prevStep', currentStepNumber.value);
   }
 }
 
 function nextStep() {
   if (currentStepNumber.value < props.steps.length - 1) {
-    currentStepNumber.value = currentStepNumber.value + 1
-    emit('nextStep', currentStepNumber.value)
+    currentStepNumber.value = currentStepNumber.value + 1;
+    emit('nextStep', currentStepNumber.value);
   }
 }
 
 function submit() {
-  emit('submit')
+  emit('submit');
 }
-/*** section:action ***/
+/** section:action **/
 
-/*** section:styles ***/
+/** section:styles **/
 function breadcrumbStyle(i) {
   if (currentStepNumber.value === i) {
-    return `step-breadcrumb active`
+    return `step-breadcrumb active`;
   } else {
-    return `step-breadcrumb`
+    return `step-breadcrumb`;
   }
 }
-/*** section:styles ***/
+/** section:styles **/
 </script>
 
 <template>
@@ -83,32 +80,50 @@ function breadcrumbStyle(i) {
     <div class="step-breadcrumbs">
       <div
         v-for="(step, i) in steps"
+        :key="i"
         :class="breadcrumbStyle(i)"
       >
-        <div class="title">{{ step.title }}</div>
+        <div class="title">
+          {{ step.title }}
+        </div>
         <i
           v-if="i !== steps.length - 1"
           class="fa-solid fa-caret-right"
-        ></i>
+        />
       </div> <!-- step-breadcrumb -->
     </div> <!-- step-breadcrumbs -->
 
     <div
       v-for="(step, i) in steps"
       v-show="currentStepNumber === i"
+      :key="i"
       class="step-container"
     >
       <slot
         v-bind="{ step, i }"
         :name="`step-${i}`"
-      >
-      </slot>
+      />
     </div> <!-- step-container -->
 
     <div class="actions">
-      <TButton v-if="hasPrevStep" value="Prev Step" icon="fa-solid fa-arrow-left" @click="prevStep()"/>
-      <TButton v-if="hasNextStep" value="Next Step" icon="fa-solid fa-arrow-right" @click="nextStep()"/>
-      <TButton v-if="submitStep" value="Submit" icon="fa-solid fa-check" @click="submit()"/>
+      <TButton
+        v-if="hasPrevStep"
+        value="Prev Step"
+        icon="fa-solid fa-arrow-left"
+        @click="prevStep()"
+      />
+      <TButton
+        v-if="hasNextStep"
+        value="Next Step"
+        icon="fa-solid fa-arrow-right"
+        @click="nextStep()"
+      />
+      <TButton
+        v-if="submitStep"
+        value="Submit"
+        icon="fa-solid fa-check"
+        @click="submit()"
+      />
     </div> <!-- actions -->
   </div> <!-- workflow-container -->
 </template>

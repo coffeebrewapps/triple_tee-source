@@ -1,53 +1,46 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:utils ***/
-import { useValidations } from '@/utils/validations'
-const { isEmpty, notEmpty } = useValidations()
+/** import:utils **/
+import { useValidations } from '@/utils/validations';
+import { useDataAccess } from '@/utils/dataAccess';
+import { useInputHelper } from '@/utils/input';
+import { useFormatter } from '@/utils/formatter';
+import { useReceiptUtils } from './utils';
+/** import:utils **/
 
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
+/** import:stores **/
+import { useBannerStore } from '@/stores/banner';
+/** import:stores **/
 
-import { useReceiptUtils } from './utils'
-import { useInputHelper } from '@/utils/input'
+/** import:components **/
+import WorkflowContainer from '@/components/WorkflowContainer.vue';
+import DataForm from '@/components/DataForm.vue';
+import TemplateEditor from '@/components/TemplateEditor.vue';
+/** import:components **/
 
-import { useFormatter } from '@/utils/formatter'
+/** section:utils **/
+const router = useRouter();
+const { isEmpty, notEmpty } = useValidations();
+const dataAccess = useDataAccess();
 const {
-  formatNumber
-} = useFormatter()
-/*** import:utils ***/
+  formatNumber,
+} = useFormatter();
+const banner = useBannerStore();
+/** section:utils **/
 
-/*** import:stores ***/
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-/*** import:stores ***/
-
-/*** import:components ***/
-import {
-  TButton,
-  TInput,
-  TSelect,
-  TTable
-} from 'coffeebrew-vue-components'
-
-import WorkflowContainer from '@/components/WorkflowContainer.vue'
-import Form from '@/components/Form.vue'
-import TemplateEditor from '@/components/TemplateEditor.vue'
-/*** import:components ***/
-
-/*** section:global ***/
-const currentRoute = Object.assign({}, router.currentRoute.value)
+/** section:global **/
+const currentRoute = Object.assign({}, router.currentRoute.value);
 const invoiceId = computed(() => {
-  return currentRoute.query.invoiceId
-})
+  return currentRoute.query.invoiceId;
+});
 
 const contactId = computed(() => {
-  return currentRoute.query.contactId
-})
+  return currentRoute.query.contactId;
+});
 
 const {
   fieldsLayout,
@@ -55,242 +48,207 @@ const {
   recordValue,
   receiptConfigLabel,
   invoiceLabel,
-  currencyLabel,
-  transactionLabel,
-  contactLabel,
-  validations
-} = useReceiptUtils()
-/*** section:global ***/
+  validations,
+} = useReceiptUtils();
+/** section:global **/
 
-/*** section:filters ***/
+/** section:filters **/
 const filtersData = ref({
   invoiceId: [],
-  receiptConfigId: []
-})
+  receiptConfigId: [],
+});
 
 if (notEmpty(invoiceId.value)) {
-  filtersData.value.invoiceId = [{ value: invoiceId.value }]
+  filtersData.value.invoiceId = [{ value: invoiceId.value }];
 }
 
 const filtersDataFields = computed(() => {
   return [
     {
-      key: 'invoiceId', type: 'singleSelect', label: 'Invoice',
+      key: 'invoiceId',
+      type: 'singleSelect',
+      label: 'Invoice',
       reference: { label: invoiceLabel },
-      listable: false, viewable: true, creatable: true, updatable: true,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'invoices',
         value: recordValue,
-        label: invoiceLabel
-      }
+        label: invoiceLabel,
+      },
     },
     {
-      key: 'receiptConfigId', type: 'singleSelect', label: 'Receipt Config',
+      key: 'receiptConfigId',
+      type: 'singleSelect',
+      label: 'Receipt Config',
       reference: { label: receiptConfigLabel },
-      listable: false, viewable: true, creatable: true, updatable: true,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'receipt_configs',
         value: recordValue,
-        label: receiptConfigLabel
-      }
-    }
-  ]
-})
+        label: receiptConfigLabel,
+      },
+    },
+  ];
+});
 
-const filtersInputHelper = useInputHelper(filtersDataFields.value)
+const filtersInputHelper = useInputHelper(filtersDataFields.value);
 
 const filtersLayout = computed(() => {
   return [
-    { invoiceId: 'lg', receiptConfigId: 'lg' }
-  ]
-})
+    { invoiceId: 'lg', receiptConfigId: 'lg' },
+  ];
+});
 
 const filterableKeys = computed(() => {
-  return filtersDataFields.value.map(f => f.key)
-})
+  return filtersDataFields.value.map(f => f.key);
+});
 
-const filtersErrorMessages = ref({})
-
-const filtersConfirmButton = computed(() => {
-  return {
-    type: 'text',
-    value: 'Filter',
-    icon: 'fa-solid fa-check'
-  }
-})
-
-const filtersCancelButton = computed(() => {
-  return {
-    type: 'text',
-    value: 'Cancel',
-    icon: 'fa-solid fa-xmark'
-  }
-})
+const filtersErrorMessages = ref({});
 
 function resetReceiptData() {
-  updatedReceipt.value = null
-  invoice.value = null
-  currency.value = null
-  billingContact.value = null
-  receiptConfig.value = null
-  receiptNumberSequence.value = null
-  receiptTemplate.value = null
-  invoiceNumberSequence.value = null
+  updatedReceipt.value = null;
+  invoice.value = null;
+  currency.value = null;
+  billingContact.value = null;
+  receiptConfig.value = null;
+  receiptNumberSequence.value = null;
+  receiptTemplate.value = null;
+  invoiceNumberSequence.value = null;
 }
 
 async function formatReceipt(receipt) {
   const promises = receiptKeys.value.map((key) => {
-    return receiptHelper.formatDataForShow(key, receipt)
-  })
+    return receiptHelper.formatDataForShow(key, receipt);
+  });
 
   Promise
     .all(promises)
     .then((results) => {
-      updatedReceipt.value = {}
+      updatedReceipt.value = {};
       receiptKeys.value.forEach((key, i) => {
-        updatedReceipt.value[key] = results[i]
-      })
+        updatedReceipt.value[key] = results[i];
+      });
     })
     .catch((error) => {
-      showBanner(`Error generating receipt!`)
-      console.error(error)
-    })
+      showBanner(`Error generating receipt!`);
+      console.error(error);
+    });
 }
 
 async function updateReceiptData(result) {
-  await formatReceipt(Object.assign({}, result.receipt))
+  await formatReceipt(Object.assign({}, result.receipt));
 
-  invoice.value = Object.assign({}, result.invoice)
-  currency.value = Object.assign({}, result.currency)
-  billingContact.value = Object.assign({}, result.billingContact)
-  receiptConfig.value = Object.assign({}, result.receiptConfig)
-  receiptNumberSequence.value = Object.assign({}, result.receiptNumberSequence)
-  receiptTemplate.value = Object.assign({}, result.receiptTemplate)
-  invoiceNumberSequence.value = Object.assign({}, result.invoiceNumberSequence)
+  invoice.value = Object.assign({}, result.invoice);
+  currency.value = Object.assign({}, result.currency);
+  billingContact.value = Object.assign({}, result.billingContact);
+  receiptConfig.value = Object.assign({}, result.receiptConfig);
+  receiptNumberSequence.value = Object.assign({}, result.receiptNumberSequence);
+  receiptTemplate.value = Object.assign({}, result.receiptTemplate);
+  invoiceNumberSequence.value = Object.assign({}, result.invoiceNumberSequence);
 }
 
 async function submitFilters() {
-  resetReceiptData()
+  resetReceiptData();
 
-  const params = filtersInputHelper.formatFilters(filtersData.value)
+  const params = filtersInputHelper.formatFilters(filtersData.value);
   dataAccess
     .create('income_receipts', params, { path: 'preview_receipt' })
     .then((result) => {
-      updateReceiptData(result)
+      updateReceiptData(result);
     })
     .catch((error) => {
-      console.error(error)
-      showBanner(`Error previewing receipt!`)
-    })
+      console.error(error);
+      showBanner(`Error previewing receipt!`);
+    });
 }
 
 function resetFilters() {
-  resetReceiptData()
+  resetReceiptData();
 
   filtersData.value = {
     invoiceId: [],
-    receiptConfigId: []
-  }
+    receiptConfigId: [],
+  };
 }
-/*** section:filters ***/
+/** section:filters **/
 
-/*** section:receipt ***/
-const updatedReceipt = ref()
-const originalPaymentAmount = ref(0)
+/** section:receipt **/
+const updatedReceipt = ref();
+const originalPaymentAmount = ref(0);
 
-const receiptFieldsLayout = fieldsLayout
+const receiptFieldsLayout = fieldsLayout;
 
 const receiptDataFields = computed(() => {
-  return generateDataFields(invoiceId.value, contactId.value)
-})
+  return generateDataFields(invoiceId.value, contactId.value);
+});
 
 const receiptFieldKeys = computed(() => {
-  return creatableReceiptFields.value.map(f => f.key)
-})
+  return creatableReceiptFields.value.map(f => f.key);
+});
 
 const notUpdatableReceiptFields = [
   'receiptNumber',
   'billableAmount',
   'paidAmount',
-  'remainingAmount'
-]
+  'remainingAmount',
+];
 
 const creatableReceiptFields = computed(() => {
   return receiptDataFields.value.filter((field) => {
-    return !notUpdatableReceiptFields.includes(field.key) && field.creatable
-  })
-})
+    return !notUpdatableReceiptFields.includes(field.key) && field.creatable;
+  });
+});
 
 const receiptKeys = computed(() => {
-  return receiptDataFields.value.map(f => f.key)
-})
+  return receiptDataFields.value.map(f => f.key);
+});
 
-const receiptHelper = useInputHelper(receiptDataFields.value)
-
-const receiptNumber = computed(() => {
-  const parts = []
-
-  if (notEmpty(receiptNumberSequence.value.prefix)) {
-    parts.push(receiptNumberSequence.value.prefix)
-  }
-
-  parts.push(receiptNumberSequence.value.currentSequence)
-
-  if (notEmpty(receiptNumberSequence.value.suffix)) {
-    parts.push(receiptNumberSequence.value.suffix)
-  }
-
-  return parts.join('-')
-})
+const receiptHelper = useInputHelper(receiptDataFields.value);
 
 watch(updatedReceipt, (newVal, oldVal) => {
-  if (isEmpty(newVal) || isEmpty(oldVal)) { return }
+  if (isEmpty(newVal) || isEmpty(oldVal)) { return; }
 
-  receiptErrorMessages.value = {}
+  receiptErrorMessages.value = {};
   if (originalPaymentAmount.value !== newVal.paymentAmount) {
-    const remainingAmount = updatedReceipt.value.billableAmount - updatedReceipt.value.paidAmount - updatedReceipt.value.paymentAmount
+    const { billableAmount, paidAmount, paymentAmount } = updatedReceipt.value;
+    const remainingAmount = billableAmount - paidAmount - paymentAmount;
 
     const errors = receiptHelper.validateParams(
       { remainingAmount: validations.create.remainingAmount },
-      Object.assign({}, updatedReceipt.value, { paymentAmount: newVal.paymentAmount, remainingAmount }) 
-    )
+      Object.assign({}, updatedReceipt.value, { paymentAmount: newVal.paymentAmount, remainingAmount })
+    );
 
     if (Object.keys(errors).length > 0) {
-      receiptErrorMessages.value = errors
+      receiptErrorMessages.value = errors;
     } else {
-      updatedReceipt.value.remainingAmount = parseFloat(formatNumber(remainingAmount, 2))
+      updatedReceipt.value.remainingAmount = parseFloat(formatNumber(remainingAmount, 2));
     }
-    originalPaymentAmount.value = newVal.paymentAmount
+    originalPaymentAmount.value = newVal.paymentAmount;
   }
-}, { deep: true })
+}, { deep: true });
 
-const receiptErrorMessages = ref({})
-const receiptConfirmButton = {
-  type: 'text',
-  value: 'Generate Receipt',
-  icon: 'fa-solid fa-check'
-}
+const receiptErrorMessages = ref({});
+/** section:receipt **/
 
-const receiptCancelButton = {
-  type: 'text',
-  value: 'Cancel',
-  icon: 'fa-solid fa-xmark'
-}
-/*** section:receipt ***/
-
-/*** section:template ***/
-const invoice = ref()
-const currency = ref()
-const transaction = ref()
-const billingContact = ref()
-const receiptConfig = ref()
-const receiptNumberSequence = ref()
-const receiptTemplate = ref()
-const invoiceNumberSequence = ref()
+/** section:template **/
+const invoice = ref();
+const currency = ref();
+const transaction = ref();
+const billingContact = ref();
+const receiptConfig = ref();
+const receiptNumberSequence = ref();
+const receiptTemplate = ref();
+const invoiceNumberSequence = ref();
 
 const templateData = computed(() => {
   return {
@@ -301,60 +259,57 @@ const templateData = computed(() => {
     billingContact: billingContact.value,
     receiptConfig: receiptConfig.value,
     receiptNumberSequence: receiptNumberSequence.value,
-    invoiceNumberSequence: invoiceNumberSequence.value
-  }
-})
-/*** section:template ***/
+    invoiceNumberSequence: invoiceNumberSequence.value,
+  };
+});
+/** section:template **/
 
-/*** section:action ***/
-const showTemplateEditor = ref(false)
+/** section:action **/
+const showTemplateEditor = ref(false);
 async function createReceipt() {
-  showTemplateEditor.value = false
+  showTemplateEditor.value = false;
   const params = Object.assign(
     {},
     {
       receipt: receiptHelper.formatDataForSave(updatedReceipt.value),
-      receiptConfigId: receiptConfig.value.id
+      receiptConfigId: receiptConfig.value.id,
     }
-  )
+  );
 
   await dataAccess
     .create('income_receipts', params, { path: 'generate_with_transaction' })
     .then((result) => {
-      updatedReceipt.value.id = result.id
-      transaction.value = result.transaction
-      showTemplateEditor.value = true
-      showBanner(`Receipt created successfully!`)
+      updatedReceipt.value.id = result.id;
+      transaction.value = result.transaction;
+      showTemplateEditor.value = true;
+      showBanner(`Receipt created successfully!`);
     })
     .catch((error) => {
-      showBanner(`Error creating receipt!`)
-      console.error(error)
-    })
+      showBanner(`Error creating receipt!`);
+      console.error(error);
+    });
 }
+/** section:action **/
 
-function resetReceipt() {
-}
-/*** section:action ***/
-
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
-/*** section:steps ***/
+/** section:steps **/
 const steps = computed(() => {
   return [
     { title: 'Select Invoice' },
     { title: 'Fill Receipt' },
-    { title: 'Preview Receipt' }
-  ]
-})
+    { title: 'Preview Receipt' },
+  ];
+});
 
 async function prevStep(currentStep) {
   if (currentStep === 0) { // filter
@@ -364,25 +319,27 @@ async function prevStep(currentStep) {
 
 async function nextStep(currentStep) {
   if (currentStep === 1) { // fill receipt
-    await submitFilters()
+    await submitFilters();
   } else if (currentStep === 2) { // preview receipt
-    await createReceipt()
+    await createReceipt();
   }
 }
 
 async function submit() {
-  await createReceipt()
+  await createReceipt();
 }
-/*** section:steps ***/
+/** section:steps **/
 
 onMounted(() => {
-  resetFilters()
-})
+  resetFilters();
+});
 </script>
 
 <template>
   <div class="page-container">
-    <h3 class="heading">Create Receipt</h3>
+    <h3 class="heading">
+      Create Receipt
+    </h3>
 
     <WorkflowContainer
       :steps="steps"
@@ -391,7 +348,7 @@ onMounted(() => {
       @submit="submit"
     >
       <template #step-0>
-        <Form
+        <DataForm
           v-model="filtersData"
           :fields-layout="filtersLayout"
           :data-fields="filterableKeys"
@@ -402,7 +359,7 @@ onMounted(() => {
       </template> <!-- step-0:select receipt -->
 
       <template #step-1>
-        <Form
+        <DataForm
           v-if="updatedReceipt"
           v-model="updatedReceipt"
           :fields-layout="receiptFieldsLayout"
@@ -416,8 +373,8 @@ onMounted(() => {
       <template #step-2>
         <TemplateEditor
           v-if="showTemplateEditor"
-          template-type="receipt_templates"
           :id="receiptTemplate.id"
+          template-type="receipt_templates"
           :content-markup="receiptTemplate.contentMarkup"
           :content-styles="receiptTemplate.contentStyles"
           :data="templateData"

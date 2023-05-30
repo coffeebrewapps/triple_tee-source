@@ -1,101 +1,140 @@
 <script setup>
-import { computed } from 'vue'
-import { useValidations } from '@/utils/validations'
-import DataPage from '@/components/DataPage.vue'
-
-const { greaterThan } = useValidations()
+import { computed } from 'vue';
+import DataPage from '@/components/DataPage.vue';
 
 const props = defineProps({
   billingContactId: {
     type: String,
-    default: null
-  }
-})
+    default: null,
+  },
+});
 
 const fieldsLayout = [
   { description: 'lg' },
   { customFields: 'lg' },
   { receiptNumberSequenceId: 'lg' },
   { billingContactId: 'lg' },
-  { receiptTemplateId: 'lg' }
-]
+  { receiptTemplateId: 'lg' },
+];
 
 const dataFields = computed(() => {
   return [
-    { key: 'id', type: 'text', label: 'ID', listable: true, viewable: true, creatable: false, updatable: false, sortable: true },
-    { key: 'description', type: 'text', label: 'Description', listable: true, viewable: true, creatable: true, updatable: true },
-    { key: 'customFields', type: 'object', label: 'Custom Fields (JSON)', listable: false, viewable: true, creatable: true, updatable: true },
     {
-      key: 'receiptNumberSequenceId', type: 'singleSelect', label: 'Sequence Number',
+      key: 'id',
+      type: 'text',
+      label: 'ID',
+      listable: true,
+      viewable: true,
+      creatable: false,
+      updatable: false,
+      sortable: true,
+    },
+    {
+      key: 'description',
+      type: 'text',
+      label: 'Description',
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+    },
+    {
+      key: 'customFields',
+      type: 'object',
+      label: 'Custom Fields (JSON)',
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
+    },
+    {
+      key: 'receiptNumberSequenceId',
+      type: 'singleSelect',
+      label: 'Sequence Number',
       reference: { label: sequenceNumberLabel },
-      listable: false, viewable: true, creatable: true, updatable: false,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: false,
       options: {
         server: true,
         pagination: true,
         modelClass: 'sequences',
         value: recordValue,
-        label: sequenceNumberLabel
-      }
+        label: sequenceNumberLabel,
+      },
     },
     {
-      key: 'billingContactId', type: 'singleSelect', label: 'Contact',
-      reference: { label: contactLabel }, defaultValue: () => { return props.billingContactId },
-      listable: true, viewable: true, creatable: true, updatable: false, filterable: true,
+      key: 'billingContactId',
+      type: 'singleSelect',
+      label: 'Contact',
+      reference: { label: contactLabel },
+      defaultValue: () => { return props.billingContactId; },
+      listable: true,
+      viewable: true,
+      creatable: true,
+      updatable: false,
+      filterable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'contacts',
         value: recordValue,
-        label: contactLabel
-      }
+        label: contactLabel,
+      },
     },
     {
-      key: 'receiptTemplateId', type: 'singleSelect', label: 'Template',
+      key: 'receiptTemplateId',
+      type: 'singleSelect',
+      label: 'Template',
       reference: { label: templateLabel },
-      listable: false, viewable: true, creatable: true, updatable: true,
+      listable: false,
+      viewable: true,
+      creatable: true,
+      updatable: true,
       options: {
         server: true,
         pagination: true,
         modelClass: 'receipt_templates',
         value: recordValue,
-        label: templateLabel
-      }
-    }
-  ]
-})
+        label: templateLabel,
+      },
+    },
+  ];
+});
 
 const validations = {
-}
+};
 
 const filters = computed(() => {
-  const initData = {}
+  const initData = {};
 
   if (props.billingContactId) {
-    initData.billingContactId = [{ value: props.billingContactId }]
+    initData.billingContactId = [{ value: props.billingContactId }];
   }
 
   return {
     initData,
     layout: [
-      { billingContactId: 'lg' }
-    ]
-  }
-})
+      { billingContactId: 'lg' },
+    ],
+  };
+});
 
 function recordValue(record) {
-  return record.id
+  return record.id;
 }
 
 function sequenceNumberLabel(record) {
-  return record.name
+  return record.name;
 }
 
 function contactLabel(record) {
-  return record.name
+  return record.name;
 }
 
 function templateLabel(record) {
-  return record.name
+  return record.name;
 }
 </script>
 

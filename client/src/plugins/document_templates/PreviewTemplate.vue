@@ -1,79 +1,81 @@
 <script setup>
-/*** import:global ***/
-import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
-/*** import:global ***/
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
 
-/*** import:utils ***/
-import { useDataAccess } from '@/utils/dataAccess'
-const dataAccess = useDataAccess()
-/*** import:utils ***/
+/** import:utils **/
+import { useDataAccess } from '@/utils/dataAccess';
+/** import:utils **/
 
-/*** import:stores ***/
-import { useBannerStore } from '@/stores/banner'
-const banner = useBannerStore()
-/*** import:stores ***/
+/** import:stores **/
+import { useBannerStore } from '@/stores/banner';
+/** import:stores **/
 
-/*** import:components ***/
-import {
-  TButton
-} from 'coffeebrew-vue-components'
+/** import:components **/
+import TemplateEditor from '@/components/TemplateEditor.vue';
+/** import:components **/
 
-import TemplateEditor from '@/components/TemplateEditor.vue'
-/*** import:components ***/
-
-/*** section:props ***/
-const props = defineProps({
+/** section:props **/
+defineProps({
   disabled: {
     type: Boolean,
-    default: false
-  }
-})
-/*** section:props ***/
+    default: false,
+  },
+});
+/** section:props **/
 
-/*** section:global ***/
-const sampleData = ref({})
+/** section:utils **/
+const router = useRouter();
+const dataAccess = useDataAccess();
+const banner = useBannerStore();
+/** section:utils **/
 
-const currentRoute = Object.assign({}, router.currentRoute.value)
+/** section:global **/
+const currentRoute = Object.assign({}, router.currentRoute.value);
+
 const templateId = computed(() => {
-  return currentRoute.params.id
-})
+  return currentRoute.params.id;
+});
+
 const templateType = computed(() => {
-  return currentRoute.params.templateType
-})
-const currentTemplate = ref()
+  return currentRoute.params.templateType;
+});
+
+const sampleData = ref({});
+const currentTemplate = ref();
 
 const heading = computed(() => {
-  if (!currentTemplate.value) { return `` }
+  if (!currentTemplate.value) { return ``; }
 
   if (templateType.value === 'invoice_templates') {
-    return `Invoice Template: ${currentTemplate.value.name}`
+    return `Invoice Template: ${currentTemplate.value.name}`;
   } else {
-    return `Receipt Template: ${currentTemplate.value.name}`
+    return `Receipt Template: ${currentTemplate.value.name}`;
   }
-})
-/*** section:global ***/
+});
+/** section:global **/
 
-/*** section:action ***/
+/** section:action **/
 async function updateMarkup(updated) {
   const params = Object.assign(
     {},
     currentTemplate.value,
     {
-      contentMarkup: updated
+      contentMarkup: updated,
     }
-  )
+  );
 
   await dataAccess
     .update(templateType.value, templateId.value, params)
     .then((result) => {
-      currentTemplate.value = result
-      showBanner(`Updated markup successfully!`)
+      currentTemplate.value = result;
+      showBanner(`Updated markup successfully!`);
     })
     .catch((error) => {
-      showBanner(`Error updating markup!`)
-    })
+      console.error(error);
+      showBanner(`Error updating markup!`);
+    });
 }
 
 async function updateStyles(updated) {
@@ -81,57 +83,58 @@ async function updateStyles(updated) {
     {},
     currentTemplate.value,
     {
-      contentStyles: updated
+      contentStyles: updated,
     }
-  )
+  );
 
   await dataAccess
     .update(templateType.value, templateId.value, params)
     .then((result) => {
-      currentTemplate.value = result
-      showBanner(`Updated styles successfully!`)
+      currentTemplate.value = result;
+      showBanner(`Updated styles successfully!`);
     })
     .catch((error) => {
-      showBanner(`Error updating styles !`)
-    })
+      console.error(error);
+      showBanner(`Error updating styles !`);
+    });
 }
 
 function updateData(updated) {
-  sampleData.value[templateType.value] = updated
+  sampleData.value[templateType.value] = updated;
 }
-/*** section:action ***/
+/** section:action **/
 
-/*** section:banner ***/
+/** section:banner **/
 function showBanner(message) {
-  banner.show(message)
-  setTimeout(hideBanner, 5000)
+  banner.show(message);
+  setTimeout(hideBanner, 5000);
 }
 
 function hideBanner() {
-  banner.hide()
+  banner.hide();
 }
-/*** section:banner ***/
+/** section:banner **/
 
 async function loadTemplate() {
   await dataAccess
     .view(templateType.value, templateId.value, {})
     .then((result) => {
-      currentTemplate.value = result
+      currentTemplate.value = result;
     })
     .catch((error) => {
-      showBanner(`Error loading template!`)
-      console.log(error)
-    })
+      showBanner(`Error loading template!`);
+      console.log(error);
+    });
 }
 
-onMounted(async () => {
+onMounted(async() => {
   sampleData.value = {
     invoice_templates: {
       invoice: {
         invoiceNumber: 2,
         invoiceDate: '2023-05-26T14:06:15.686Z',
         dueDate: '2023-06-25T14:06:15.686Z',
-        totalAmount: 574.98
+        totalAmount: 574.98,
       },
       invoiceLines: [
         {
@@ -143,7 +146,7 @@ onMounted(async () => {
           subtotal: 205.93,
           invoiceId: '1',
           createdAt: '2023-05-26T14:07:10.051Z',
-          updatedAt: '2023-05-26T14:07:10.051Z'
+          updatedAt: '2023-05-26T14:07:10.051Z',
         },
         {
           id: '2',
@@ -154,7 +157,7 @@ onMounted(async () => {
           subtotal: 354.05,
           invoiceId: '1',
           createdAt: '2023-05-26T14:07:10.055Z',
-          updatedAt: '2023-05-26T14:07:10.055Z'
+          updatedAt: '2023-05-26T14:07:10.055Z',
         },
         {
           id: '3',
@@ -165,8 +168,8 @@ onMounted(async () => {
           subtotal: 15,
           invoiceId: '1',
           createdAt: '2023-05-26T14:07:10.057Z',
-          updatedAt: '2023-05-26T14:07:10.057Z'
-        }
+          updatedAt: '2023-05-26T14:07:10.057Z',
+        },
       ],
       invoiceConfig: {
         id: '1',
@@ -176,7 +179,7 @@ onMounted(async () => {
         dueDateCycleUnit: 'day',
         paymentTerms: 'Payment due to account 395-17573-542',
         tags: [
-          '1'
+          '1',
         ],
         customFields: {},
         invoiceNumberSequenceId: '1',
@@ -184,7 +187,7 @@ onMounted(async () => {
         invoiceTemplateId: '1',
         currencyId: '1',
         createdAt: '2023-05-26T06:32:33.830Z',
-        updatedAt: '2023-05-26T06:32:33.830Z'
+        updatedAt: '2023-05-26T06:32:33.830Z',
       },
       invoiceNumberSequence: {
         id: '1',
@@ -195,7 +198,7 @@ onMounted(async () => {
         prefix: 'INV',
         suffix: 'ABC',
         createdAt: '2023-05-26T06:30:04.445Z',
-        updatedAt: '2023-05-26T06:30:04.445Z'
+        updatedAt: '2023-05-26T06:30:04.445Z',
       },
       billingContact: {
         id: '1',
@@ -223,7 +226,7 @@ onMounted(async () => {
         logo: null,
         customFields: null,
         createdAt: '2023-05-26T06:30:24.570Z',
-        updatedAt: '2023-05-26T06:30:24.570Z'
+        updatedAt: '2023-05-26T06:30:24.570Z',
       },
       currency: {
         id: '1',
@@ -233,8 +236,8 @@ onMounted(async () => {
         effectiveStart: '2012-12-31T16:00:00.000Z',
         effectiveEnd: null,
         createdAt: '2023-05-26T06:29:49.052Z',
-        updatedAt: '2023-05-26T06:29:49.052Z'
-      }
+        updatedAt: '2023-05-26T06:29:49.052Z',
+      },
     },
 
     receipt_templates: {
@@ -245,7 +248,7 @@ onMounted(async () => {
         billableAmount: 559.98,
         paidAmount: 0,
         paymentAmount: 186.66,
-        remainingAmount: 373.32
+        remainingAmount: 373.32,
       },
       invoice: {
         id: '1',
@@ -259,7 +262,7 @@ onMounted(async () => {
         currencyId: '1',
         contactId: '1',
         createdAt: '2023-05-26T14:52:42.186Z',
-        updatedAt: '2023-05-26T14:52:42.186Z'
+        updatedAt: '2023-05-26T14:52:42.186Z',
       },
       currency: {
         id: '1',
@@ -269,7 +272,7 @@ onMounted(async () => {
         effectiveStart: '2012-12-31T16:00:00.000Z',
         effectiveEnd: null,
         createdAt: '2023-05-26T06:29:49.052Z',
-        updatedAt: '2023-05-26T06:29:49.052Z'
+        updatedAt: '2023-05-26T06:29:49.052Z',
       },
       transaction: {
         id: '1',
@@ -282,7 +285,7 @@ onMounted(async () => {
         currencyId: '1',
         associatedTransactionId: null,
         createdAt: '2023-05-30T05:12:37.363Z',
-        updatedAt: '2023-05-30T05:12:37.363Z'
+        updatedAt: '2023-05-30T05:12:37.363Z',
       },
       billingContact: {
         id: '1',
@@ -310,7 +313,7 @@ onMounted(async () => {
         logo: null,
         customFields: null,
         createdAt: '2023-05-26T06:30:24.570Z',
-        updatedAt: '2023-05-27T13:03:15.547Z'
+        updatedAt: '2023-05-27T13:03:15.547Z',
       },
       receiptConfig: {
         id: '1',
@@ -320,7 +323,7 @@ onMounted(async () => {
         receiptTemplateId: '1',
         createdAt: '2023-05-30T03:49:56.187Z',
         updatedAt: '2023-05-30T03:51:03.739Z',
-        description: 'Company ABC Receipt Config'
+        description: 'Company ABC Receipt Config',
       },
       receiptNumberSequence: {
         id: '2',
@@ -331,7 +334,7 @@ onMounted(async () => {
         prefix: 'REC',
         suffix: 'ABC',
         createdAt: '2023-05-30T03:47:57.707Z',
-        updatedAt: '2023-05-30T03:47:57.707Z'
+        updatedAt: '2023-05-30T03:47:57.707Z',
       },
       invoiceNumberSequence: {
         id: '1',
@@ -342,23 +345,25 @@ onMounted(async () => {
         prefix: 'INV',
         suffix: 'ABC',
         createdAt: '2023-05-26T06:30:04.445Z',
-        updatedAt: '2023-05-26T06:30:04.445Z'
-      }
-    }
-  }
+        updatedAt: '2023-05-26T06:30:04.445Z',
+      },
+    },
+  };
 
-  await loadTemplate()
-})
+  await loadTemplate();
+});
 </script>
 
 <template>
   <div class="page-container">
-    <h2 class="heading">{{ heading }}</h2>
+    <h2 class="heading">
+      {{ heading }}
+    </h2>
 
     <TemplateEditor
       v-if="currentTemplate"
-      :template-type="templateType"
       :id="currentTemplate.id"
+      :template-type="templateType"
       :content-markup="currentTemplate.contentMarkup"
       :content-styles="currentTemplate.contentStyles"
       :data="sampleData[templateType]"
