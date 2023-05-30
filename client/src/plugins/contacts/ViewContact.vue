@@ -25,7 +25,7 @@ import TabContainer from '@/components/TabContainer.vue';
 import InvoiceConfigs from '@/plugins/invoice_configs/InvoiceConfigs.vue';
 import ReceiptConfigs from '@/plugins/receipt_configs/ReceiptConfigs.vue';
 import BillingConfigs from '@/plugins/billing_configs/BillingConfigs.vue';
-import Invoices from '@/plugins/invoices/Invoices.vue';
+import InvoicesPage from '@/plugins/invoices/InvoicesPage.vue';
 /** import:components **/
 
 /** section:utils **/
@@ -199,7 +199,7 @@ onMounted(async() => {
       </template> <!-- template-3 -->
 
       <template #tab-4>
-        <Invoices
+        <InvoicesPage
           :contact-id="contactId"
         />
       </template> <!-- template-4 -->
