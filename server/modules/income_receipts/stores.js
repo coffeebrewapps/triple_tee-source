@@ -217,7 +217,7 @@ module.exports = (dataAccess, logger, utils) => {
 
   function createWithTransaction(params) {
     try {
-      const receiptNumberSequence = params.receiptNumberSequence;
+      const receiptNumberSequenceId = params.receiptNumberSequenceId;
       const receipt = Object.assign({}, params.receipt);
       const invoiceId = receipt.invoiceId;
 
@@ -239,47 +239,79 @@ module.exports = (dataAccess, logger, utils) => {
       }
 
       receipt.remainingAmount = parseFloat((billableAmount - paidAmount - receipt.paymentAmount).toFixed(2));
+      const lastUsedNumber = parseInt(receipt.receiptNumber);
 
-      const receiptNumberSequenceResult = dataAccess.update(
-        'sequences',
-        receiptNumberSequence,
-        Object.assign({}, receiptNumberSequence, { lastUsedNumber: parseInt(receipt.receiptNumber) })
-      );
+      const { success, results } = dataAccess.atomic(
+        [
+          {
+            id: 'updateNumberSequence',
+            params: {
+              receiptNumberSequenceId,
+              lastUsedNumber
+            },
+            invoke: ({ receiptNumberSequenceId, lastUsedNumber }, pastResults) => {
+              return dataAccess.update('sequences', receiptNumberSequenceId, { lastUsedNumber });
+            },
+            rollback: (result) => {
+              const updatedSequenceNumberId = result.record.id
+              const updatedLastUsedNumber = result.record.lastUsedNumber
+              dataAccess.update('sequences', updatedSequenceNumberId, { lastUsedNumber: updatedLastUsedNumber - 1 })
+            }
+          },
+          {
+            id: 'createTransaction',
+            params: {
+              type: 'income',
+              transactionDate: receipt.receiptDate,
+              description: `Income from Receipt ${receipt.receiptNumber}`,
+              amount: receipt.paymentAmount,
+              homeCurrencyAmount: receipt.paymentAmount,
+              tags: [],
+              currencyId: receipt.currencyId
+            },
+            invoke: (params, pastResults) => {
+              return dataAccess.create('transactions', params);
+            },
+            rollback: (result) => {
+              const transactionId = result.record.id
+              dataAccess.remove('transactions', transactionId)
+            }
+          },
+          {
+            id: 'createReceipt',
+            params: receipt,
+            invoke: (params, pastResults) => {
+              const createdTransaction = pastResults[0].result.record;
+              return dataAccess.create('income_receipts', Object.assign({}, params, { incomeTransactionId: createdTransaction.id }));
+            },
+            rollback: (result) => {
+              const receiptId = result.record.id;
+              dataAccess.remove('income_receipts', receiptId);
+            }
+          }
+        ]
+      )
 
-      if (!receiptNumberSequenceResult.success) {
-        return receiptNumberSequenceResult;
-      }
-
-      const createdTransaction = dataAccess.create(
-        'transactions',
-        {
-          type: 'income',
-          transactionDate: receipt.receiptDate,
-          description: `Income from Receipt ${receipt.receiptNumber}`,
-          amount: receipt.paymentAmount,
-          homeCurrencyAmount: receipt.paymentAmount,
-          tags: [],
-          currencyId: receipt.currencyId
+      if (success) {
+        const createdReceipt = results[2].record
+        const transaction = results[1].record
+        return {
+          success: true,
+          record: Object.assign(
+            {},
+            createdReceipt,
+            { transaction }
+          )
         }
-      ).record;
-
-      receipt.incomeTransactionId = createdTransaction.id;
-
-      const createdReceipt = create(receipt).record;
-
-      return {
-        success: true,
-        record: Object.assign(
-          {},
-          createdReceipt,
-          { transaction: createdTransaction }
-        )
-      };
+      } else {
+        return results[0].result
+      }
     } catch (error) {
+      logger.error(error)
       return {
         success: false,
         errors: error
-      };
+      }
     }
   }
 

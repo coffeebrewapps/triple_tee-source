@@ -175,7 +175,7 @@ module.exports = (config, logger, utils) => {
       };
     }
 
-    const result = validator.validate(modelClass, params, schemaCache, indexCache, dataCache);
+    const result = validator.validate(modelClass, Object.assign({}, existing.record, params), schemaCache, indexCache, dataCache);
 
     if (result.valid) {
       const now = new Date();
@@ -269,6 +269,26 @@ module.exports = (config, logger, utils) => {
     indexCache = data;
     writeData(indexes, indexCache);
     return { data };
+  }
+
+  function atomic(steps) {
+    const pastResults = [];
+    const success = steps.every((step) => {
+      const result = step.invoke(step.params, pastResults);
+      if (!result.success) {
+        pastResults.forEach((pastResult) => {
+          pastResult.step.rollback(pastResult.result)
+        })
+        pastResults.unshift({ step, result });
+        return false
+      }
+      pastResults.unshift({ step, result });
+      return true
+    })
+    return {
+      success,
+      results: pastResults
+    }
   }
 
   function paginateData(data, filters) {
@@ -636,6 +656,7 @@ module.exports = (config, logger, utils) => {
     download,
     upload,
     downloadIndexes,
-    uploadIndexes
+    uploadIndexes,
+    atomic
   }
 }

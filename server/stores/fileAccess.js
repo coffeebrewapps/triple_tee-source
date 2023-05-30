@@ -3,15 +3,19 @@
 module.exports = (config, logger, utils) => {
   const path = require('path')
   const fs = require('fs');
-  const fsPromises = require('fs').promises;
 
   const schemasData = require('../../_init/schemas.json');
+
+  const writeToFileQueue = {};
 
   function pathName(modelClass) {
     return path.join(config.dataDir, `${modelClass}.json`);
   }
 
   async function initData(schemas, indexes) {
+    writeToFileQueue[schemas] = [];
+    writeToFileQueue[indexes] = [];
+
     return new Promise((resolve, reject) => {
       Promise.all([loadSchemasAndData(schemas), loadIndexes(indexes)])
       .then((result) => {
@@ -31,6 +35,7 @@ module.exports = (config, logger, utils) => {
       loadSchemas(schemas)
         .then((schemaResult) => {
           const promises = Object.keys(schemaResult).map((modelClass) => {
+            writeToFileQueue[modelClass] = [];
             return loadData(modelClass);
           });
           Promise
@@ -146,10 +151,22 @@ module.exports = (config, logger, utils) => {
   }
 
   async function writeToFile(modelClass, data) {
+    writeToFileQueue[modelClass].push(data);
+    executeWriteToFileQueue(modelClass);
+  }
+
+  async function executeWriteToFileQueue(modelClass) {
+    if (writeToFileQueue[modelClass].length === 0) { return }
+
+    const data = writeToFileQueue[modelClass].shift();
+
     try {
-      fs.promises.writeFile(pathName(modelClass), JSON.stringify(data));
-    } catch (error) {
-      logger.error(`Error writing to file`, { modelClass, error });
+      logger.log(`Executing write to file...`, { modelClass });
+      fs.writeFileSync(pathName(modelClass), JSON.stringify(data));
+      logger.log(`Data written to file`, { modelClass });
+      executeWriteToFileQueue(modelClass);
+    } catch(error) {
+      logger.error(`Error writing to file`, { modelClass, error })
     }
   }
 

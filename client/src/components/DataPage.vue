@@ -274,6 +274,7 @@ async function resetFilters() {
         filtersData.value[key] = results[i]
       })
       filtersLoaded.value = true
+      offset.value = 0
       loadData()
     })
 }

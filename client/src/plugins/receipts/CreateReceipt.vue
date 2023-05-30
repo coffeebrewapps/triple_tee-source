@@ -307,7 +307,7 @@ async function createReceipt() {
     {},
     {
       receipt: receiptHelper.formatDataForSave(updatedReceipt.value),
-      receiptNumberSequence: receiptNumberSequence.value
+      receiptNumberSequenceId: receiptNumberSequence.value.id
     }
   )
 
