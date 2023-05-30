@@ -168,6 +168,7 @@ function resetInvoiceData() {
   updatedInvoice.value = null;
   updatedInvoiceLines.value = [];
   invoiceTemplate.value = null;
+  invoiceErrorMessages.value = {};
 }
 
 async function formatInvoice(invoice) {
@@ -214,6 +215,7 @@ async function submitFilters() {
     .then((result) => {
       updateInvoiceData(result);
       invoiceLinesLoading.value = false;
+      currentStep.value = 1;
     })
     .catch((error) => {
       console.error(error);
@@ -449,6 +451,7 @@ async function createInvoice() {
         .then((result) => {
           updatedInvoice.value.id = result.id;
           updatedInvoiceLines.value = result.invoiceLines;
+          currentStep.value = 2;
           showBanner(`Invoice created successfully!`);
         })
         .catch((error) => {
@@ -475,6 +478,8 @@ function hideBanner() {
 /** section:banner **/
 
 /** section:steps **/
+const currentStep = ref(0);
+
 const steps = computed(() => {
   return [
     { title: 'Filter Work Logs' },
@@ -483,17 +488,18 @@ const steps = computed(() => {
   ];
 });
 
-async function prevStep(currentStep) {
-  if (currentStep === 0) { // filter
-  } else if (currentStep === 1) { // fill invoice
+async function prevStep(step) {
+  if (step === 0) { // filter
+    resetInvoiceData();
+    currentStep.value = step;
+  } else {
+    // do nothing because it's not possible to come back to fill invoice
   }
 }
 
-async function nextStep(currentStep) {
-  if (currentStep === 1) { // fill invoice
+async function nextStep(step) {
+  if (step === 1) { // fill invoice
     await submitFilters();
-  } else if (currentStep === 2) { // preview invoice
-    await createInvoice();
   }
 }
 
@@ -515,6 +521,7 @@ onMounted(() => {
 
     <WorkflowContainer
       :steps="steps"
+      :current-step-number="currentStep"
       @prev-step="prevStep"
       @next-step="nextStep"
       @submit="submit"

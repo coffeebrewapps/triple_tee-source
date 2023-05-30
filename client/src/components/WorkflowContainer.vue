@@ -17,6 +17,10 @@ const props = defineProps({
       return [];
     },
   },
+  currentStepNumber: {
+    type: Number,
+    default: 0,
+  },
 });
 /** section:props **/
 
@@ -25,37 +29,33 @@ const emit = defineEmits(['prevStep', 'nextStep', 'submit']);
 /** section:emit **/
 
 /** section:global **/
-const currentStepNumber = ref(0);
-
 const hasPrevStep = computed(() => {
-  return currentStepNumber.value < props.steps.length - 1 && currentStepNumber.value > 0;
+  return props.currentStepNumber < props.steps.length - 1 && props.currentStepNumber > 0;
 });
 
 const hasNextStep = computed(() => {
-  return currentStepNumber.value < props.steps.length - 1;
+  return props.currentStepNumber < props.steps.length - 1;
 });
 
 const submitStep = computed(() => {
   if (props.steps.length === 1) {
     return true;
   } else {
-    return currentStepNumber.value === props.steps.length - 2;
+    return props.currentStepNumber === props.steps.length - 2;
   }
 });
 /** section:global **/
 
 /** section:action **/
 function prevStep() {
-  if (currentStepNumber.value > 0) {
-    currentStepNumber.value = currentStepNumber.value - 1;
-    emit('prevStep', currentStepNumber.value);
+  if (props.currentStepNumber > 0) {
+    emit('prevStep', props.currentStepNumber - 1);
   }
 }
 
 function nextStep() {
-  if (currentStepNumber.value < props.steps.length - 1) {
-    currentStepNumber.value = currentStepNumber.value + 1;
-    emit('nextStep', currentStepNumber.value);
+  if (props.currentStepNumber < props.steps.length - 1) {
+    emit('nextStep', props.currentStepNumber + 1);
   }
 }
 
@@ -66,7 +66,7 @@ function submit() {
 
 /** section:styles **/
 function breadcrumbStyle(i) {
-  if (currentStepNumber.value === i) {
+  if (props.currentStepNumber === i) {
     return `step-breadcrumb active`;
   } else {
     return `step-breadcrumb`;
@@ -113,7 +113,7 @@ function breadcrumbStyle(i) {
         @click="prevStep()"
       />
       <TButton
-        v-if="hasNextStep"
+        v-if="hasNextStep && !submitStep"
         value="Next Step"
         icon="fa-solid fa-arrow-right"
         @click="nextStep()"

@@ -124,6 +124,8 @@ function resetReceiptData() {
   receiptNumberSequence.value = null;
   receiptTemplate.value = null;
   invoiceNumberSequence.value = null;
+  receiptErrorMessages.value = {};
+  originalPaymentAmount.value = 0;
 }
 
 async function formatReceipt(receipt) {
@@ -165,6 +167,7 @@ async function submitFilters() {
     .create('income_receipts', params, { path: 'preview_receipt' })
     .then((result) => {
       updateReceiptData(result);
+      currentStep.value = 1;
     })
     .catch((error) => {
       console.error(error);
@@ -282,6 +285,7 @@ async function createReceipt() {
       updatedReceipt.value.id = result.id;
       transaction.value = result.transaction;
       showTemplateEditor.value = true;
+      currentStep.value = 2;
       showBanner(`Receipt created successfully!`);
     })
     .catch((error) => {
@@ -303,6 +307,8 @@ function hideBanner() {
 /** section:banner **/
 
 /** section:steps **/
+const currentStep = ref(0);
+
 const steps = computed(() => {
   return [
     { title: 'Select Invoice' },
@@ -311,17 +317,18 @@ const steps = computed(() => {
   ];
 });
 
-async function prevStep(currentStep) {
-  if (currentStep === 0) { // filter
-  } else if (currentStep === 1) { // fill receipt
+async function prevStep(step) {
+  if (step === 0) { // filter
+    resetReceiptData();
+    currentStep.value = step;
+  } else {
+    // do nothing because it's not possible to come back to fill receipt
   }
 }
 
-async function nextStep(currentStep) {
-  if (currentStep === 1) { // fill receipt
+async function nextStep(step) {
+  if (step === 1) { // fill receipt
     await submitFilters();
-  } else if (currentStep === 2) { // preview receipt
-    await createReceipt();
   }
 }
 
@@ -343,6 +350,7 @@ onMounted(() => {
 
     <WorkflowContainer
       :steps="steps"
+      :current-step-number="currentStep"
       @prev-step="prevStep"
       @next-step="nextStep"
       @submit="submit"

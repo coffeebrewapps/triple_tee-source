@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 
 /** import:utils **/
 import { useDataAccess } from '@/utils/dataAccess';
+import { useTemplateUtils } from './utils';
 /** import:utils **/
 
 /** import:stores **/
@@ -29,6 +30,7 @@ defineProps({
 const router = useRouter();
 const dataAccess = useDataAccess();
 const banner = useBannerStore();
+const { initSampleData } = useTemplateUtils();
 /** section:utils **/
 
 /** section:global **/
@@ -128,227 +130,7 @@ async function loadTemplate() {
 }
 
 onMounted(async() => {
-  sampleData.value = {
-    invoice_templates: {
-      invoice: {
-        invoiceNumber: 2,
-        invoiceDate: '2023-05-26T14:06:15.686Z',
-        dueDate: '2023-06-25T14:06:15.686Z',
-        totalAmount: 574.98,
-      },
-      invoiceLines: [
-        {
-          id: '1',
-          description: 'Requirements gathering',
-          unit: 'hour',
-          unitCost: 100,
-          unitValue: 2.06,
-          subtotal: 205.93,
-          invoiceId: '1',
-          createdAt: '2023-05-26T14:07:10.051Z',
-          updatedAt: '2023-05-26T14:07:10.051Z',
-        },
-        {
-          id: '2',
-          description: 'Implementation',
-          unit: 'hour',
-          unitCost: 85,
-          unitValue: 4.17,
-          subtotal: 354.05,
-          invoiceId: '1',
-          createdAt: '2023-05-26T14:07:10.055Z',
-          updatedAt: '2023-05-26T14:07:10.055Z',
-        },
-        {
-          id: '3',
-          description: 'GST',
-          unit: 'fixed',
-          unitCost: 15,
-          unitValue: 1,
-          subtotal: 15,
-          invoiceId: '1',
-          createdAt: '2023-05-26T14:07:10.057Z',
-          updatedAt: '2023-05-26T14:07:10.057Z',
-        },
-      ],
-      invoiceConfig: {
-        id: '1',
-        invoiceCycleDurationValue: 1,
-        invoiceCycleDurationUnit: 'month',
-        dueDateCycleValue: 30,
-        dueDateCycleUnit: 'day',
-        paymentTerms: 'Payment due to account 395-17573-542',
-        tags: [
-          '1',
-        ],
-        customFields: {},
-        invoiceNumberSequenceId: '1',
-        billingContactId: '1',
-        invoiceTemplateId: '1',
-        currencyId: '1',
-        createdAt: '2023-05-26T06:32:33.830Z',
-        updatedAt: '2023-05-26T06:32:33.830Z',
-      },
-      invoiceNumberSequence: {
-        id: '1',
-        name: 'Company ABC Invoice Sequence',
-        startingNumber: 1,
-        lastUsedNumber: 1,
-        incrementStep: 1,
-        prefix: 'INV',
-        suffix: 'ABC',
-        createdAt: '2023-05-26T06:30:04.445Z',
-        updatedAt: '2023-05-26T06:30:04.445Z',
-      },
-      billingContact: {
-        id: '1',
-        name: 'Company ABC',
-        accountNumber: null,
-        addressLine1: null,
-        addressLine2: null,
-        addressLine3: null,
-        city: null,
-        state: null,
-        country: 'Singapore',
-        postcode: null,
-        contactNumber1: null,
-        contactNumber2: null,
-        contactNumber3: null,
-        contactPerson1: null,
-        contactPerson2: null,
-        contactPerson3: null,
-        contactEmail1: null,
-        contactEmail2: null,
-        contactEmail3: null,
-        url1: null,
-        url2: null,
-        url3: null,
-        logo: null,
-        customFields: null,
-        createdAt: '2023-05-26T06:30:24.570Z',
-        updatedAt: '2023-05-26T06:30:24.570Z',
-      },
-      currency: {
-        id: '1',
-        code: 'USD',
-        symbol: '$',
-        exchangeRate: 1,
-        effectiveStart: '2012-12-31T16:00:00.000Z',
-        effectiveEnd: null,
-        createdAt: '2023-05-26T06:29:49.052Z',
-        updatedAt: '2023-05-26T06:29:49.052Z',
-      },
-    },
-
-    receipt_templates: {
-      receipt: {
-        id: '1',
-        receiptNumber: 1,
-        receiptDate: '2023-05-30T05:12:34.709Z',
-        billableAmount: 559.98,
-        paidAmount: 0,
-        paymentAmount: 186.66,
-        remainingAmount: 373.32,
-      },
-      invoice: {
-        id: '1',
-        invoiceNumber: 2,
-        invoiceDate: '2023-05-26T14:52:33.327Z',
-        dueDate: '2023-06-25T14:52:33.327Z',
-        totalAmount: 559.98,
-        customFields: {},
-        voided: false,
-        invoiceConfigId: '1',
-        currencyId: '1',
-        contactId: '1',
-        createdAt: '2023-05-26T14:52:42.186Z',
-        updatedAt: '2023-05-26T14:52:42.186Z',
-      },
-      currency: {
-        id: '1',
-        code: 'USD',
-        symbol: '$',
-        exchangeRate: 1,
-        effectiveStart: '2012-12-31T16:00:00.000Z',
-        effectiveEnd: null,
-        createdAt: '2023-05-26T06:29:49.052Z',
-        updatedAt: '2023-05-26T06:29:49.052Z',
-      },
-      transaction: {
-        id: '1',
-        type: 'income',
-        transactionDate: '2023-05-30T05:12:34.709Z',
-        description: 'Income from Receipt 1',
-        amount: 186.66,
-        homeCurrencyAmount: 186.66,
-        tags: [],
-        currencyId: '1',
-        associatedTransactionId: null,
-        createdAt: '2023-05-30T05:12:37.363Z',
-        updatedAt: '2023-05-30T05:12:37.363Z',
-      },
-      billingContact: {
-        id: '1',
-        name: 'Company ABC',
-        accountNumber: '247-246473-782',
-        addressLine1: '123 City Street',
-        addressLine2: '#25-873',
-        addressLine3: 'Northern Building',
-        city: 'Singapore',
-        state: null,
-        country: 'Singapore',
-        postcode: '635723',
-        contactNumber1: null,
-        contactNumber2: null,
-        contactNumber3: null,
-        contactPerson1: null,
-        contactPerson2: null,
-        contactPerson3: null,
-        contactEmail1: null,
-        contactEmail2: null,
-        contactEmail3: null,
-        url1: null,
-        url2: null,
-        url3: null,
-        logo: null,
-        customFields: null,
-        createdAt: '2023-05-26T06:30:24.570Z',
-        updatedAt: '2023-05-27T13:03:15.547Z',
-      },
-      receiptConfig: {
-        id: '1',
-        customFields: {},
-        receiptNumberSequenceId: '2',
-        billingContactId: '1',
-        receiptTemplateId: '1',
-        createdAt: '2023-05-30T03:49:56.187Z',
-        updatedAt: '2023-05-30T03:51:03.739Z',
-        description: 'Company ABC Receipt Config',
-      },
-      receiptNumberSequence: {
-        id: '2',
-        name: 'Company ABC Receipt Sequence',
-        startingNumber: 0,
-        lastUsedNumber: 0,
-        incrementStep: 1,
-        prefix: 'REC',
-        suffix: 'ABC',
-        createdAt: '2023-05-30T03:47:57.707Z',
-        updatedAt: '2023-05-30T03:47:57.707Z',
-      },
-      invoiceNumberSequence: {
-        id: '1',
-        name: 'Company ABC Invoice Sequence',
-        startingNumber: 1,
-        lastUsedNumber: 1,
-        incrementStep: 1,
-        prefix: 'INV',
-        suffix: 'ABC',
-        createdAt: '2023-05-26T06:30:04.445Z',
-        updatedAt: '2023-05-26T06:30:04.445Z',
-      },
-    },
-  };
+  sampleData.value = initSampleData(templateType.value);
 
   await loadTemplate();
 });
@@ -366,7 +148,7 @@ onMounted(async() => {
       :template-type="templateType"
       :content-markup="currentTemplate.contentMarkup"
       :content-styles="currentTemplate.contentStyles"
-      :data="sampleData[templateType]"
+      :data="sampleData"
       :disabled="disabled"
       @content-markup-change="updateMarkup"
       @content-styles-change="updateStyles"

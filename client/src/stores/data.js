@@ -38,13 +38,13 @@ export const useDataStore = defineStore('data', () => {
 
   async function initData(force = false) {
     if (!init.value || force) {
-      console.log(`Init data start`);
+      console.debug(`Init data start`);
       const existingModelData = JSON.parse(localStorage.getItem('data') || '{}');
 
       schemaCache.value = schemasData;
       localStorage.setItem(schemas, JSON.stringify(schemasData));
 
-      console.log(`Init schema complete`);
+      console.debug(`Init schema complete`);
 
       Object.keys(schemasData).forEach((modelClass) => {
         if (existingModelData[modelClass] && Object.keys(existingModelData[modelClass]).length > 0) {
@@ -187,7 +187,11 @@ export const useDataStore = defineStore('data', () => {
       };
     }
 
-    const result = validator.validate(modelClass, params, schemaCache.value, indexCache.value, dataCache.value);
+    const result = validator.validate(
+      modelClass,
+      Object.assign({}, existing.record, params),
+      schemaCache.value, indexCache.value, dataCache.value
+    );
 
     if (result.valid) {
       const now = new Date();
@@ -315,15 +319,15 @@ export const useDataStore = defineStore('data', () => {
         }, []);
 
         if (indexedIds.length > 0) {
-          console.log(`Index hit`, { field, filterValue });
+          console.debug(`Index hit`, { field, filterValue });
           indexedIds.forEach(i => filteredIds.add(i));
         } else {
-          console.log(`Index miss`, { field, filterValue });
+          console.debug(`Index miss`, { field, filterValue });
           const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
           idsFromData.forEach(i => filteredIds.add(i));
         }
       } else {
-        console.log(`Index miss`, { field, filterValue });
+        console.debug(`Index miss`, { field, filterValue });
         const idsFromData = filterIdsFromData(modelClass, modelData, filterSchemas, field, filterValue);
         idsFromData.forEach(i => filteredIds.add(i));
       }
@@ -379,6 +383,26 @@ export const useDataStore = defineStore('data', () => {
     });
   }
 
+  function atomic(steps) {
+    const pastResults = [];
+    const success = steps.every((step) => {
+      const result = step.invoke(step.params, pastResults);
+      if (!result.success) {
+        pastResults.forEach((pastResult) => {
+          pastResult.step.rollback(pastResult.result);
+        });
+        pastResults.unshift({ step, result });
+        return false;
+      }
+      pastResults.unshift({ step, result });
+      return true;
+    });
+    return {
+      success,
+      results: pastResults,
+    };
+  }
+
   return {
     registerFunction,
     customFunctionsForModel,
@@ -397,5 +421,6 @@ export const useDataStore = defineStore('data', () => {
     upload,
     downloadIndexes,
     uploadIndexes,
+    atomic,
   };
 });
