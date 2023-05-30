@@ -18,18 +18,28 @@
     <div class="app-container">
       <div class="input-control">
         <div class="input-label">Port</div>
-        <div class="input-field"><input type="number" id="portInput" /></div>
+        <div class="input-field">
+          <div class="input-value">
+            <input type="number" id="portInput" />
+          </div>
+        </div>
       </div>
 
       <div class="input-control">
         <div class="input-label">Current Directory</div>
-        <div class="input-field"><input type="text" id="currentDirInput" readonly /></div>
+        <div class="input-field">
+          <div class="input-value">
+            <input type="text" id="currentDirInput" readonly />
+          </div>
+        </div>
       </div>
 
       <div class="input-control">
         <div class="input-label">Data Directory</div>
         <div class="input-field">
-          <input type="text" id="dataDirInput">
+          <div class="input-value">
+            <input type="text" id="dataDirInput" /> <button class="button" id="dataDirChooseButton">Choose</button>
+          </div>
           <div class="input-hint">If you want to use an absolute path, make sure to start with a / character, eg. /home/you/Documents/data.</div>
         </div>
       </div>
@@ -37,7 +47,9 @@
       <div class="input-control">
         <div class="input-label">Log File Path</div>
         <div class="input-field">
-          <input type="text" id="logFileInput" />
+          <div class="input-value">
+            <input type="text" id="logFileInput" /> <button class="button" id="logFileChooseButton">Choose</button>
+          </div>
           <div class="input-hint">If you want to use an absolute path, make sure to start with a / character, eg. /home/you/Documents/logs/debug.log.</div>
         </div>
       </div>
