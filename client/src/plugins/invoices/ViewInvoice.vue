@@ -104,15 +104,17 @@ async function loadTemplateData() {
       const currency = result.currency;
       const billingContact = result.billingContact;
       const country = result.country;
+      const logo = result.logo;
 
       templateData.value = {
         invoice: currentInvoice.value,
         invoiceLines: invoiceLines.value,
         invoiceConfig: invoiceConfig.value,
         invoiceNumberSequence,
-        billingContact: Object.assign({}, billingContact, { country: country.countryName }),
+        billingContact: Object.assign({}, billingContact, { country: country.countryName, logo: logo.rawData }),
         currency,
         country,
+        logo,
       };
       flashMessage(`Loaded template data successfully!`);
     })

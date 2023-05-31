@@ -58,7 +58,11 @@ async function loadPlugins(app) {
         logger.log(`Loading plugin`, { plugin });
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {
-          app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
+          if (route.multipart) {
+            app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
+          } else {
+            app[route.method](`${pluginRouter.prefix}${route.path}`, uploader.none(), route.handler);
+          }
         });
         logger.log(`Loaded plugin`, { name: plugin.name });
       }

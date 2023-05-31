@@ -143,6 +143,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
     ).record;
 
     const country = billingContact.includes.country[billingContact.country];
+    const logo = billingContact.includes.logo[billingContact.logo];
 
     return {
       invoiceConfig,
@@ -151,6 +152,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
       invoiceTemplate,
       currency,
       country,
+      logo,
     };
   }
 
@@ -168,6 +170,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
         invoiceTemplate,
         currency,
         country,
+        logo,
       } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const billingConfigs = dataAccess.list(
@@ -209,6 +212,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
           invoiceTemplate,
           currency,
           country,
+          logo,
         },
       };
     } catch (error) {
@@ -277,6 +281,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
         invoiceTemplate,
         currency,
         country,
+        logo,
       } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const invoiceLines = dataAccess.list(
@@ -295,6 +300,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
           invoiceTemplate,
           currency,
           country,
+          logo,
         },
       };
     } catch (error) {
