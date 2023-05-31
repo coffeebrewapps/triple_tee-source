@@ -216,6 +216,12 @@ export function useContactUtils() {
       key: 'logo',
       type: 'file',
       label: 'Logo',
+      file: {
+        modelClass: 'documents',
+        type: 'img',
+        label: (record) => { return record.filename },
+        value: (record) => { return record.rawData },
+      },
       listable: false,
       viewable: true,
       creatable: true,

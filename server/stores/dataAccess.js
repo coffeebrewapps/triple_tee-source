@@ -301,6 +301,11 @@ module.exports = ({ config, logger, utils }) => {
     };
   }
 
+  function downloadRawFile(mimeType, filePath) {
+    const rawFileDataUri = downloader.downloadRawFile(mimeType, filePath);
+    return rawFileDataUri;
+  }
+
   function paginateData(data, filters) {
     let filteredData = Array.from(data);
     if (utils.notEmpty(filters.offset) && utils.notEmpty(filters.limit) && filteredData.length > 0) {
@@ -677,5 +682,6 @@ module.exports = ({ config, logger, utils }) => {
     downloadIndexes,
     uploadIndexes,
     atomic,
+    downloadRawFile,
   };
 };

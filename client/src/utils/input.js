@@ -115,7 +115,7 @@ export function useInputHelper(schemas) {
   }
 
   function inputableField(field) {
-    return inputType(field) === 'text' || inputType(field) === 'number' || inputType(field) === 'file';
+    return inputType(field) === 'text' || inputType(field) === 'number';
   }
 
   function multiInputableField(field) {
@@ -262,6 +262,30 @@ export function useInputHelper(schemas) {
           resolve(JSON.stringify(fieldValue, false, 4));
         } else {
           resolve(fieldValue);
+        }
+        return;
+      }
+
+      if (fileField(field)) {
+        const fileOptions = schemasMap.value[field].file;
+
+        if (
+          notEmpty(record.includes) &&
+          notEmpty(record.includes[field]) &&
+          Object.keys(record.includes[field]).length > 0
+        ) {
+          const foreignValue = record.includes[field][fieldValue];
+          resolve(fileOptions.label(foreignValue));
+        } else {
+          dataAccess
+            .view(fileOptions.modelClass, fieldValue, {})
+            .then((result) => {
+              resolve(fileOptions.label(result));
+            })
+            .catch((error) => {
+              console.error(error);
+              resolve(fieldValue);
+            });
         }
         return;
       }

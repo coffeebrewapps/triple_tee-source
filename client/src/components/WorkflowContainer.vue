@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 /** import:global **/
 
 /** import:components **/

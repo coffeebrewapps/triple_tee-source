@@ -6,6 +6,7 @@ import { onMounted, ref, computed } from 'vue';
 /** import:utils **/
 import { useInputHelper } from '@/utils/input';
 import { useErrors } from '@/utils/errors';
+import { useValidations } from '@/utils/validations';
 /** import:utils **/
 
 /** import:components **/
@@ -120,6 +121,10 @@ const {
   initOptionsData,
 } = useInputHelper(props.schemas);
 
+const {
+  notEmpty,
+} = useValidations();
+
 const errorsMap = useErrors();
 
 const fieldToggles = ref(nullToggleableFields.value.reduce((o, f) => {
@@ -132,11 +137,20 @@ function showField(field) {
 }
 
 function showInput(field) {
-  return showField(field) && inputableField(field) && !fileField(field);
+  return showField(field) && inputableField(field);
 }
 
 function showFileInput(field) {
   return showField(field) && fileField(field);
+}
+
+function fileInputLabel(field) {
+  const label = inputLabel(field);
+  if (notEmpty(data.value[field])) {
+    return `${label} (Existing: ${data.value[field]})`;
+  } else {
+    return label;
+  }
 }
 
 function showTextarea(field) {
@@ -256,7 +270,7 @@ function formatDataForSubmit() {
 }
 
 function submitData() {
-  const formattedData = formatDataForSubmit()
+  const formattedData = formatDataForSubmit();
   emit('submit', formattedData);
 }
 
@@ -311,10 +325,9 @@ onMounted(async() => {
 
               <TInput
                 v-if="showFileInput(field)"
-                v-model="data[field]"
-                type="file"
                 ref="fileRefs"
-                :label="inputLabel(field)"
+                type="file"
+                :label="fileInputLabel(field)"
                 :size="row[field]"
                 :disabled="!fieldUpdatable(field)"
                 :error-message="fieldErrorMessage(field)"
