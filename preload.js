@@ -5,7 +5,9 @@ const path = require('path');
 contextBridge.exposeInMainWorld('electronAPI', {
   openDirDialog: async() => ipcRenderer.invoke('dialog:openDir'),
   openFileDialog: async() => ipcRenderer.invoke('dialog:openFile'),
-  setAppConfig: ({ port, dataDir, logFile }) => ipcRenderer.send('set-app-config', { port, dataDir, logFile }),
+  setAppConfig: ({ port, dataDir, logFile, uploadDir }) => {
+    ipcRenderer.send('set-app-config', { port, dataDir, logFile, uploadDir });
+  },
 });
 
 const currentDir = path.join(__dirname);
@@ -18,4 +20,5 @@ contextBridge.exposeInMainWorld('initAppConfigs', {
   currentDir,
   dataDir: parsedResult.dataDir,
   logFile: parsedResult.logFile,
+  uploadDir: parsedResult.uploadDir,
 });

@@ -29,7 +29,7 @@ const createWindow = () => {
 
   win.loadFile('./config_app/index.html');
 
-  ipcMain.on('set-app-config', (event, { port, dataDir, logFile }) => {
+  ipcMain.on('set-app-config', (event, { port, dataDir, logFile, uploadDir }) => {
     const configFile = path.join(__dirname, 'app_config.json');
     const result = fs.readFileSync(configFile, { encoding: 'utf8' });
     const parsedResult = JSON.parse(result);
@@ -47,10 +47,15 @@ const createWindow = () => {
       updatedConfig.logFile = logFile;
     }
 
+    if (uploadDir) {
+      updatedConfig.uploadDir = uploadDir;
+    }
+
     if (
       parsedResult.port !== updatedConfig.port ||
       parsedResult.dataDir !== updatedConfig.dataDir ||
-      parsedResult.logFile !== updatedConfig.logFile
+      parsedResult.logFile !== updatedConfig.logFile ||
+      parsedResult.uploadDir !== updatedConfig.uploadDir
     ) {
       fs.writeFileSync(configFile, JSON.stringify(updatedConfig), { encoding: 'utf8' });
     }
