@@ -3,15 +3,27 @@ const path = require('path');
 const fsPromises = require('fs').promises;
 
 const cors = require('cors');
+const multer = require('multer');
 
 const common = require('../common');
 const utils = require('./utils.js');
 const { readConfigFile } = require('./config.js');
 const config = readConfigFile();
 
-const logger = require('./logger.js')(config);
-const dataAccess = require('./stores/dataAccess')(config, logger, utils);
-const routes = require('./routes/shared')(config, logger, utils);
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, config.uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${file.fieldname}-${file.originalname}`);
+  }
+})
+
+const uploader = multer({ storage: storage });
+
+const logger = require('./logger.js')({ config });
+const dataAccess = require('./stores/dataAccess')({ config, logger, utils });
+const routes = require('./routes/shared')({ config, logger, utils });
 
 logger.log(`Loaded configs`, config);
 
@@ -40,13 +52,13 @@ async function loadPlugins(app) {
   await fsPromises.readdir(config.modulesDir)
     .then((files) => {
       for (const file of files) {
-        const plugin = require(path.join(config.modulesDir, file, 'index.js'))(dataAccess, routes, logger, utils);
-        logger.log(`Loading plugin: ${plugin.name}`);
+        const plugin = require(path.join(config.modulesDir, file, 'index.js'))({ dataAccess, routes, logger, utils, uploader });
+        logger.log(`Loading plugin`, { plugin });
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {
           app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
         });
-        logger.log(`Loaded plugin: ${plugin.name}`);
+        logger.log(`Loaded plugin`, { name: plugin.name });
       }
     })
     .catch((err) => {

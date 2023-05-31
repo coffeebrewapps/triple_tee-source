@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-module.exports = (config) => {
+module.exports = ({ config }) => {
   const logToFile = fs.createWriteStream(config.logFile, { flags: 'w' });
   const logToStdout = process.stdout;
 

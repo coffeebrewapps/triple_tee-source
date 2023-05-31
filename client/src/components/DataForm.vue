@@ -93,6 +93,8 @@ const data = computed({
     emit('update:modelValue', val);
   },
 });
+
+const dataForSubmit = ref({});
 /** section:props **/
 
 /** section:emit **/
@@ -112,6 +114,7 @@ const {
   nullToggleableField,
   nullToggleableFields,
   objectField,
+  fileField,
   formatInputOptionsData,
   fetchOptions,
   initOptionsData,
@@ -129,7 +132,11 @@ function showField(field) {
 }
 
 function showInput(field) {
-  return showField(field) && inputableField(field);
+  return showField(field) && inputableField(field) && !fileField(field);
+}
+
+function showFileInput(field) {
+  return showField(field) && fileField(field);
 }
 
 function showTextarea(field) {
@@ -177,6 +184,15 @@ function fieldErrorMessage(field) {
   }).join(', ');
 }
 /** section:inputUtils **/
+
+/** section:fileUtils **/
+const uploadedFiles = ref({});
+
+function handleFileUpload(event, field) {
+  const file = event.target.files[0];
+  uploadedFiles.value[field] = file;
+}
+/** section:fileUtils **/
 
 /** section:selectTableUtils **/
 const inputOptionsData = ref({});
@@ -228,8 +244,20 @@ function dataFieldClass(field) {
 /** section:styles **/
 
 /** section:action **/
+function formatDataForSubmit() {
+  return Object.entries(data.value).reduce((o, [key, value]) => {
+    if (inputType(key) === 'file') {
+      o[key] = uploadedFiles.value[key];
+    } else {
+      o[key] = value;
+    }
+    return o;
+  }, {});
+}
+
 function submitData() {
-  emit('submit', data.value);
+  const formattedData = formatDataForSubmit()
+  emit('submit', formattedData);
 }
 
 function cancel() {
@@ -238,6 +266,7 @@ function cancel() {
 /** section:action **/
 
 onMounted(async() => {
+  dataForSubmit.value = props.modelValue;
   await initOptionsData()
     .then((result) => {
       inputOptionsData.value = result;
@@ -278,6 +307,18 @@ onMounted(async() => {
                 :size="row[field]"
                 :disabled="!fieldUpdatable(field)"
                 :error-message="fieldErrorMessage(field)"
+              />
+
+              <TInput
+                v-if="showFileInput(field)"
+                v-model="data[field]"
+                type="file"
+                ref="fileRefs"
+                :label="inputLabel(field)"
+                :size="row[field]"
+                :disabled="!fieldUpdatable(field)"
+                :error-message="fieldErrorMessage(field)"
+                @change="handleFileUpload($event, field)"
               />
 
               <TTextarea

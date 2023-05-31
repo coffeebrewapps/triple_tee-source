@@ -1,4 +1,4 @@
-module.exports = (config, logger, utils) => {
+module.exports = ({ config, logger, utils }) => {
   const path = require('path');
   const fs = require('fs');
 

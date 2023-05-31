@@ -1,4 +1,4 @@
-module.exports = (config, logger, utils) => {
+module.exports = ({ config, logger, utils }) => {
   function list(store) {
     return function(req, res) {
       const params = req.query;

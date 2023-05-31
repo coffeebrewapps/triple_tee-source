@@ -71,7 +71,7 @@ export function useApiAccess() {
     return new Promise((resolve, reject) => {
       const url = formatUrl(modelClass, null, suffix);
       axios
-        .post(url, params)
+        .post(url, params, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then((res) => {
           resolve(res.data.record);
         })
@@ -85,7 +85,7 @@ export function useApiAccess() {
     return new Promise((resolve, reject) => {
       const url = formatUrl(modelClass, id, suffix);
       axios
-        .put(url, params)
+        .put(url, params, { headers: { 'Content-Type': 'multipart/form-data' } })
         .then((res) => {
           resolve(res.data.record);
         })

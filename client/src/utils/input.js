@@ -58,6 +58,10 @@ export function useInputHelper(schemas) {
     return Object.keys(schemasMap.value).filter(f => numberField(f));
   });
 
+  const fileFields = computed(() => {
+    return Object.keys(schemasMap.value).filter(f => fileField(f));
+  });
+
   const include = computed(() => {
     return schemas.filter(h => h.reference);
   });
@@ -107,7 +111,7 @@ export function useInputHelper(schemas) {
   }
 
   function inputableField(field) {
-    return inputType(field) === 'text' || inputType(field) === 'number';
+    return inputType(field) === 'text' || inputType(field) === 'number' || inputType(field) === 'file';
   }
 
   function multiInputableField(field) {
@@ -153,6 +157,10 @@ export function useInputHelper(schemas) {
 
   function numberField(field) {
     return inputType(field) === 'number';
+  }
+
+  function fileField(field) {
+    return inputType(field) === 'file';
   }
 
   function formatInputOptionsData(field, offset, limit, dataFromServer) {
@@ -459,6 +467,8 @@ export function useInputHelper(schemas) {
     objectFields,
     numberField,
     numberFields,
+    fileField,
+    fileFields,
     includeKeys,
     formatInputOptionsData,
     formatDataFields,

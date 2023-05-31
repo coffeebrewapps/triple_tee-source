@@ -1,4 +1,4 @@
-module.exports = (config, logger, utils) => {
+module.exports = ({ config, logger, utils }) => {
   function validate(
     modelClass, record, schemas, indexes, data,
     check = { unique: true, required: true, foreign: true }

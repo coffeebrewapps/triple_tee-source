@@ -1,6 +1,6 @@
-module.exports = (config, logger, utils) => {
-  const fileAccess = require('./fileAccess')(config, logger, utils);
-  const validator = require('./validator')(config, logger, utils);
+module.exports = ({ config, logger, utils }) => {
+  const fileAccess = require('./fileAccess')({ config, logger, utils });
+  const validator = require('./validator')({ config, logger, utils });
 
   const dataStore = config.dataStore;
   const schemas = config.schemas;

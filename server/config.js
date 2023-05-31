@@ -29,6 +29,13 @@ function readConfigFile() {
     modulesDir = path.join(rootDir, parsedResult.modulesDir);
   }
 
+  let uploadDir = null;
+  if (path.isAbsolute(parsedResult.uploadDir)) {
+    uploadDir = parsedResult.uploadDir;
+  } else {
+    uploadDir = path.join(rootDir, parsedResult.uploadDir);
+  }
+
   return Object.assign(
     {},
     parsedResult,
@@ -36,6 +43,7 @@ function readConfigFile() {
       dataDir,
       logFile,
       modulesDir,
+      uploadDir,
     }
   );
 }

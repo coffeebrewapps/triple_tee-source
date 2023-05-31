@@ -214,7 +214,7 @@ export function useContactUtils() {
     },
     {
       key: 'logo',
-      type: 'text',
+      type: 'file',
       label: 'Logo',
       listable: false,
       viewable: true,
