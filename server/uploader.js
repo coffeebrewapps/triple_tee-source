@@ -14,7 +14,12 @@ module.exports = ({ config }) => {
       cb(null, uploadDir);
     },
     filename: function(req, file, cb) {
-      cb(null, `${file.fieldname}-${file.originalname}`);
+      const mimetype = file.mimetype;
+      const extension = mimetype.split('/')[1];
+      const suffix = [Date.now(), Math.round(Math.random() * 1E9)].join('-');
+      const sanitizedFilename = file.originalname.replace(/[^0-9A-Za-z]/g, '-');
+      const filename = [file.fieldname, sanitizedFilename, suffix].join('-');
+      cb(null, `${filename}.${extension}`);
     },
   });
 
