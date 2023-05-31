@@ -1,6 +1,6 @@
 const modelClass = 'system_configs';
 
-module.exports = (dataAccess, logger, utils) => {
+module.exports = ({ dataAccess, logger, utils }) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }

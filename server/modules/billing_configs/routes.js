@@ -1,4 +1,4 @@
-module.exports = (routes, stores) => {
+module.exports = ({ routes, stores }) => {
   return {
     prefix: '/api/billing_configs',
     routes: [

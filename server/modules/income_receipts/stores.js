@@ -1,6 +1,6 @@
 const modelClass = 'income_receipts';
 
-module.exports = (dataAccess, logger, utils) => {
+module.exports = ({ dataAccess, logger, utils }) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }

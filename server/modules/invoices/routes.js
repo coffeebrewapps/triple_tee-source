@@ -1,4 +1,4 @@
-module.exports = (routes, stores, logger, utils) => {
+module.exports = ({ routes, stores, logger, utils }) => {
   function previewInvoice(stores) {
     return function(req, res) {
       const params = req.body;

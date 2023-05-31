@@ -1,4 +1,4 @@
-module.exports = (routes, stores, logger, utils) => {
+module.exports = ({ routes, stores, logger, utils }) => {
   return {
     prefix: '/api/tax_tables',
     routes: [

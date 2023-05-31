@@ -1,6 +1,6 @@
 const modelClass = 'billing_configs';
 
-module.exports = (dataAccess) => {
+module.exports = ({ dataAccess }) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }

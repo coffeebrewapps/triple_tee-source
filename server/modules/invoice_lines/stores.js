@@ -1,6 +1,6 @@
 const modelClass = 'invoice_lines';
 
-module.exports = (dataAccess, logger) => {
+module.exports = ({ dataAccess, logger }) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }

@@ -1,4 +1,4 @@
-module.exports = (routes, stores, logger, utils) => {
+module.exports = ({ routes, stores, logger, utils }) => {
   function viewLatest(stores) {
     return function(req, res) {
       const result = stores.viewLatest();

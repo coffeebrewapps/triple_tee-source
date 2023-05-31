@@ -1,6 +1,6 @@
 const modelClass = 'divisions';
 
-module.exports = (dataAccess) => {
+module.exports = ({ dataAccess }) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }
