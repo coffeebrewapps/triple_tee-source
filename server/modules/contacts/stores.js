@@ -22,7 +22,7 @@ module.exports = ({ dataAccess, utils }) => {
 
     const logoResult = dataAccess.view('documents', logoId, {});
 
-    if (!logoResult.sucess) {
+    if (!logoResult.success) {
       return {
         success: true,
         record: contact,
