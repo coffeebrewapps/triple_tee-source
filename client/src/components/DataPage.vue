@@ -883,7 +883,6 @@ function closeDownloadDialog() {
 
 onMounted(async() => {
   await loadSchemas();
-  await loadData();
   await initOptionsData()
     .then((result) => {
       inputOptionsData.value = result;

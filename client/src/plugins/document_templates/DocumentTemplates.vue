@@ -4,10 +4,6 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 /** import:global **/
 
-/** import:stores **/
-import { useEventsStore } from '@/stores/events';
-/** import:stores **/
-
 /** import:components **/
 import DataPage from '@/components/DataPage.vue';
 import TabContainer from '@/components/TabContainer.vue';
@@ -15,7 +11,6 @@ import TabContainer from '@/components/TabContainer.vue';
 
 /** section:utils **/
 const router = useRouter();
-const events = useEventsStore();
 /** section:utils **/
 
 /** section:global **/
@@ -89,12 +84,10 @@ const tabs = [
 
 async function updateInvoiceTemplates() {
   templateType.value = 'invoice_templates';
-  events.emitEvent('loadData', { dataType: 'Invoice Templates' });
 }
 
 async function updateReceiptTemplates() {
   templateType.value = 'receipt_templates';
-  events.emitEvent('loadData', { dataType: 'Receipt Templates' });
 }
 
 async function triggerTabEvent(i) {
