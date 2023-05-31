@@ -26,9 +26,15 @@ module.exports = ({ config, logger, utils, uploader }) => {
     return function(req, res) {
       const params = req.query;
       const id = req.params.id;
-      logger.log(`Viewing record`, { id, params });
 
-      res.send(store.view(id, params));
+      logger.log(`Viewing record`, { id, params });
+      const result = store.view(id, params);
+
+      if (result.success) {
+        res.status(200).send(result);
+      } else {
+        res.status(400).send(result);
+      }
     };
   };
 
@@ -90,7 +96,7 @@ module.exports = ({ config, logger, utils, uploader }) => {
           errors[fileField] = ['invalidFile'];
           res.status(400).send({
             success: false,
-            errors
+            errors,
           });
         } else {
           cb(req, res);

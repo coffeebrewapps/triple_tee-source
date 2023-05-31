@@ -126,11 +126,20 @@ export const useDataStore = defineStore('data', () => {
 
   function view(modelClass, id, params = {}) {
     const data = dataCache.value[modelClass] || {};
-    const record = data[id] || {};
+    const record = data[id];
+
+    if (validator.isEmpty(record)) {
+      return {
+        success: false,
+        errors: ['not exists'],
+      };
+    }
+
     const include = params.include || [];
     const foreignRecords = fetchIncludes(modelClass, record, include);
 
     return {
+      success: true,
       record: Object.assign({}, record, { includes: foreignRecords }),
     };
   }

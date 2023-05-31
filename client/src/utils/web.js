@@ -43,7 +43,12 @@ export function useWebAccess(dataStore) {
     return new Promise((resolve, reject) => {
       const fn = lookupFunction(modelClass, 'view', suffix);
 
-      resolve(fn(modelClass, id, params).record);
+      const result = fn(modelClass, id, params);
+      if (result.success) {
+        resolve(result.record);
+      } else {
+        reject(result.errors);
+      }
     });
   }
 

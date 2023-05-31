@@ -9,7 +9,7 @@ module.exports = ({ dataAccess, utils }) => {
 
   function view(id, params) {
     const contactResult = dataAccess.view(modelClass, id, params);
-    if (utils.isEmpty(contactResult.record)) {
+    if (!contactResult.success) {
       return contactResult;
     }
 
@@ -22,8 +22,9 @@ module.exports = ({ dataAccess, utils }) => {
 
     const logoResult = dataAccess.view('documents', logoId, {});
 
-    if (utils.isEmpty(logoResult.record)) {
+    if (!logoResult.sucess) {
       return {
+        success: true,
         record: contact,
       };
     }
@@ -33,6 +34,7 @@ module.exports = ({ dataAccess, utils }) => {
     const rawLogoDataUri = `data:${logo.mimeType};base64,${Buffer.from(rawLogo, 'binary').toString('base64')}`;
 
     return {
+      success: true,
       record: Object.assign({}, contact, { rawLogo: rawLogoDataUri }),
     };
   }
