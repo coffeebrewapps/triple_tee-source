@@ -3,23 +3,13 @@ const path = require('path');
 const fsPromises = require('fs').promises;
 
 const cors = require('cors');
-const multer = require('multer');
 
 const common = require('../common');
 const utils = require('./utils.js');
 const { readConfigFile } = require('./config.js');
 const config = readConfigFile();
 
-const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, config.uploadDir);
-  },
-  filename: function(req, file, cb) {
-    cb(null, `${file.fieldname}-${file.originalname}`);
-  },
-});
-
-const uploader = multer({ storage });
+const { uploader } = require('./uploader.js')({ config });
 
 const logger = require('./logger.js')({ config });
 const dataAccess = require('./stores/dataAccess')({ config, logger, utils });

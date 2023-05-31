@@ -1,8 +1,7 @@
-const fs = require('fs');
-
 module.exports = ({ config, logger, utils }) => {
   const fileAccess = require('./fileAccess')({ config, logger, utils });
   const validator = require('./validator')({ config, logger, utils });
+  const downloader = require('./downloader')({ config, logger, utils });
 
   const dataStore = config.dataStore;
   const schemas = config.schemas;
@@ -390,15 +389,14 @@ module.exports = ({ config, logger, utils }) => {
 
       const constraint = foreignConstraints[foreignKey] || {};
       const foreignClass = constraint.reference;
+      const foreignKeyType = schema.fields[foreignKey].type;
 
       records[foreignKey] = referenceValue.reduce((references, value) => {
         if (utils.notEmpty(dataCache[foreignClass])) {
           const foreignValue = dataCache[foreignClass][value];
 
-          if (foreignClass === 'documents' && utils.notEmpty(foreignValue)) {
-            const rawFile = fs.readFileSync(foreignValue.filePath);
-            const bufferString = Buffer.from(rawFile, 'binary').toString('base64');
-            const rawFileDataUri = `data:${foreignValue.mimeType};base64,${bufferString}`;
+          if (foreignKeyType === 'file' && utils.notEmpty(foreignValue)) {
+            const rawFileDataUri = downloader.downloadRawFile(foreignValue.mimeType, foreignValue.filePath);
             references[value] = Object.assign({}, foreignValue, { rawData: rawFileDataUri });
           } else {
             references[value] = foreignValue;
