@@ -23,7 +23,7 @@ const uploader = multer({ storage });
 
 const logger = require('./logger.js')({ config });
 const dataAccess = require('./stores/dataAccess')({ config, logger, utils });
-const routes = require('./routes/shared')({ config, logger, utils });
+const routes = require('./routes/shared')({ config, logger, utils, uploader });
 
 logger.log(`Loaded configs`, config);
 

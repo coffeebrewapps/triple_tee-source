@@ -1,49 +1,31 @@
-module.exports = ({ routes, stores, uploader }) => {
+module.exports = ({ routes, stores }) => {
   function create(stores) {
-    return function(req, res) {
-      const logoUpload = uploader.single('logo');
-      logoUpload(req, res, (err) => {
-        if (err) {
-          res.status(400).send({
-            success: false,
-            errors: { logo: ['invalid'] },
-          });
-        } else {
-          const params = req.body;
-          const result = stores.create(params);
+    return routes.withFileUpload('logo', (req, res) => {
+      const logoPath = req.file.path;
+      const params = Object.assign({}, req.body, { logo: logoPath });
+      const result = stores.create(params);
 
-          if (result.success) {
-            res.status(201).send(result);
-          } else {
-            res.status(400).send(result);
-          }
-        }
-      });
-    };
+      if (result.success) {
+        res.status(201).send(result);
+      } else {
+        res.status(400).send(result);
+      }
+    });
   }
-  function update(stores) {
-    return function(req, res) {
-      const logoUpload = uploader.single('logo');
-      logoUpload(req, res, (err) => {
-        if (err) {
-          res.status(400).send({
-            success: false,
-            errors: { logo: ['invalid'] },
-          });
-        } else {
-          const id = req.params.id;
-          const logoPath = req.file.path;
-          const params = Object.assign({}, req.body, { logo: logoPath });
-          const result = stores.update(id, params);
 
-          if (result.success) {
-            res.status(200).send(result);
-          } else {
-            res.status(400).send(result);
-          }
-        }
-      });
-    };
+  function update(stores) {
+    return routes.withFileUpload('logo', (req, res) => {
+      const id = req.params.id;
+      const logoPath = req.file.path;
+      const params = Object.assign({}, req.body, { logo: logoPath });
+      const result = stores.update(id, params);
+
+      if (result.success) {
+        res.status(200).send(result);
+      } else {
+        res.status(400).send(result);
+      }
+    });
   }
 
   return {

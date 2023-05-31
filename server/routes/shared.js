@@ -1,4 +1,4 @@
-module.exports = ({ config, logger, utils }) => {
+module.exports = ({ config, logger, utils, uploader }) => {
   function list(store) {
     return function(req, res) {
       const params = req.query;
@@ -81,6 +81,24 @@ module.exports = ({ config, logger, utils }) => {
     return pdf.downloadPdf;
   }
 
+  function withFileUpload(fileField, cb) {
+    return function(req, res) {
+      const fileUpload = uploader.single(fileField);
+      fileUpload(req, res, (err) => {
+        if (err) {
+          const errors = {};
+          errors[fileField] = ['invalidFile'];
+          res.status(400).send({
+            success: false,
+            errors
+          });
+        } else {
+          cb(req, res);
+        }
+      });
+    };
+  }
+
   return {
     list,
     create,
@@ -89,5 +107,6 @@ module.exports = ({ config, logger, utils }) => {
     remove,
     download,
     downloadPdf,
+    withFileUpload,
   };
 };
