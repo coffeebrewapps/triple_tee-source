@@ -19,12 +19,23 @@ const bannerContainerClass = computed(() => {
     return `banner-container hide`;
   }
 });
+
+function closeBanner() {
+  banner.hide();
+}
 </script>
 
 <template>
   <div
     :class="bannerContainerClass"
   >
+    <div
+      class="close-button"
+      @click="closeBanner"
+    >
+      <i class="fa-solid fa-xmark" />
+    </div>
+
     <div class="message">
       {{ message }}
     </div>
@@ -54,5 +65,28 @@ const bannerContainerClass = computed(() => {
 
 .banner-container.hide {
   transform: translate(400px, 0);
+}
+
+.banner-container .close-button {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  border-radius: 50%;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: var(--color-text);
+  background-color: var(--color-border);
+}
+
+.banner-container.hide .close-button {
+  display: none;
+}
+
+.banner-container .close-button:hover {
+  cursor: pointer;
+  background-color: var(--color-border-hover);
 }
 </style>
