@@ -6,6 +6,7 @@ export function useErrors() {
     isUsed: (_) => { return 'Record is used'; },
     invalidFile: (_) => { return 'File is invalid'; },
     greaterThanOrEqualZero: (_) => { return 'Must be greater than or equal to 0'; },
+    'ENOENT': (_) => { return 'File directory does not exist' },
   };
 
   const dateErrors = {

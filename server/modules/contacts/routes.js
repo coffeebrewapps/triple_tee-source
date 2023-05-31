@@ -1,7 +1,7 @@
-module.exports = ({ routes, stores }) => {
+module.exports = ({ routes, stores, logger }) => {
   function create(stores) {
-    return routes.withFileUpload('logo', (req, res) => {
-      const { path, originalname, mimetype } = req.file;
+    return routes.withFileUpload(['logo'], (req, res) => {
+      const { path, originalname, mimetype } = req.files.logo;
       const params = Object.assign({}, req.body, { logo: { path, originalname, mimetype } });
       const result = stores.create(params);
 
@@ -14,9 +14,9 @@ module.exports = ({ routes, stores }) => {
   }
 
   function update(stores) {
-    return routes.withFileUpload('logo', (req, res) => {
+    return routes.withFileUpload(['logo'], (req, res) => {
       const id = req.params.id;
-      const { path, originalname, mimetype } = req.file;
+      const { path, originalname, mimetype } = req.files.logo;
       const params = Object.assign({}, req.body, { logo: { path, originalname, mimetype } });
       const result = stores.update(id, params);
 

@@ -87,22 +87,29 @@ module.exports = ({ config, logger, utils, uploader }) => {
     return pdf.downloadPdf;
   }
 
-  function withFileUpload(fileField, cb) {
-    return function(req, res) {
-      const fileUpload = uploader.single(fileField);
-      fileUpload(req, res, (err) => {
-        if (err) {
-          const errors = {};
-          errors[fileField] = ['invalidFile'];
-          res.status(400).send({
-            success: false,
-            errors,
-          });
-        } else {
-          cb(req, res);
-        }
-      });
-    };
+  function withFileUpload(fileFields, cb) {
+    return fileFields.map((fileField) => {
+      return function(req, res, next) {
+        const fileUpload = uploader.single(fileField);
+        fileUpload(req, res, (err) => {
+          if (err) {
+            logger.error(`Error uploading file`, { err });
+            const errors = {};
+            errors[fileField] = [err.code];
+            res.status(400).send({
+              success: false,
+              errors,
+            });
+          } else {
+            if (utils.isEmpty(req.files)) {
+              req.files = {};
+            }
+            req.files[fileField] = req.file;
+            next();
+          }
+        });
+      };
+    }).concat([cb]);
   }
 
   return {
