@@ -34,7 +34,7 @@ const {
   formatDuration,
   calculateDuration,
 } = useWorkLogUtils();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 const events = useEventsStore();
 /** section:utils **/
 
@@ -135,17 +135,6 @@ function formatWeeklyData(data) {
 }
 /** section:global **/
 
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
-
 /** section:events **/
 events.registerListener(
   'loadWeeklyLogs',
@@ -228,7 +217,7 @@ async function loadWeekly() {
       weeklyData.value = formatWeeklyData(result.data);
     })
     .catch((error) => {
-      showBanner(`Error loading work logs!`);
+      flashMessage(`Error loading work logs!`);
       console.log(error);
     });
 }

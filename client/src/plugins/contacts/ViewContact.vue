@@ -42,7 +42,7 @@ const {
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const events = useEventsStore();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 /** section:utils **/
 
 /** section:global **/
@@ -70,25 +70,14 @@ async function loadContact() {
     .view(`contacts`, contactId.value, params)
     .then((result) => {
       currentContact.value = result;
-      showBanner(`Loaded contact successfully!`);
+      flashMessage(`Loaded contact successfully!`);
     })
     .catch((error) => {
       console.log(error);
-      showBanner(`Error loading contact!`);
+      flashMessage(`Error loading contact!`);
     });
 }
 /** section:global **/
-
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
 
 /** section:tabs **/
 const tabs = [

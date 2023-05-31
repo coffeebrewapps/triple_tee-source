@@ -31,7 +31,7 @@ import TemplateEditor from '@/components/TemplateEditor.vue';
 const router = useRouter();
 const { isEmpty, notEmpty } = useValidations();
 const dataAccess = useDataAccess();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 /** section:utils **/
 
 /** section:global **/
@@ -186,7 +186,7 @@ async function formatInvoice(invoice) {
       updatedInvoice.value.totalAmount = invoiceTotalAmount.value;
     })
     .catch((error) => {
-      showBanner(`Error generating invoice!`);
+      flashMessage(`Error generating invoice!`);
       console.error(error);
     });
 }
@@ -219,7 +219,7 @@ async function submitFilters() {
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error previewing invoice!`);
+      flashMessage(`Error previewing invoice!`);
     });
 }
 
@@ -452,30 +452,19 @@ async function createInvoice() {
           updatedInvoice.value.id = result.id;
           updatedInvoiceLines.value = result.invoiceLines;
           currentStep.value = 2;
-          showBanner(`Invoice created successfully!`);
+          flashMessage(`Invoice created successfully!`);
         })
         .catch((error) => {
-          showBanner(`Error creating invoice!`);
+          flashMessage(`Error creating invoice!`);
           console.error(error);
         });
     })
     .catch((error) => {
-      showBanner(`Error formatting invoice for save!`);
+      flashMessage(`Error formatting invoice for save!`);
       console.error(error);
     });
 }
 /** section:action **/
-
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
 
 /** section:steps **/
 const currentStep = ref(0);

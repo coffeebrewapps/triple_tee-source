@@ -31,7 +31,7 @@ const router = useRouter();
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const events = useEventsStore();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 /** section:utils **/
 
 /** section:global **/
@@ -81,11 +81,11 @@ async function loadInvoice() {
     .view('invoices', invoiceId.value, params)
     .then((result) => {
       currentInvoice.value = result;
-      showBanner(`Loaded invoice successfully!`);
+      flashMessage(`Loaded invoice successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error loading invoice!`);
+      flashMessage(`Error loading invoice!`);
     });
 }
 
@@ -114,25 +114,14 @@ async function loadTemplateData() {
         currency,
         country,
       };
-      showBanner(`Loaded template data successfully!`);
+      flashMessage(`Loaded template data successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error loading template data!`);
+      flashMessage(`Error loading template data!`);
     });
 }
 /** section:global **/
-
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
 
 /** section:tabs **/
 const tabs = [

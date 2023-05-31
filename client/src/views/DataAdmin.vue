@@ -22,7 +22,7 @@ import {
 
 /** section:global **/
 const dataAccess = useDataAccess();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 
 const modelClass = ref();
 
@@ -58,12 +58,12 @@ async function fetchSchemas() {
       modelSchemas.value = result.map((schema) => {
         return { value: schema, label: schema };
       });
-      showBanner(`Loaded model class options successfully!`);
+      flashMessage(`Loaded model class options successfully!`);
     })
     .catch((error) => {
       errorAlert.value = true;
       errorContent.value = JSON.stringify(error, false, 4);
-      showBanner(`Error loading model class options!`);
+      flashMessage(`Error loading model class options!`);
     });
 }
 
@@ -78,12 +78,12 @@ async function fetchData() {
     .then((result) => {
       rawData.value = result.data;
       dataForUpdate.value = JSON.stringify(rawData.value, false, 4);
-      showBanner(`Fetched ${modelClass.value} successfully!`);
+      flashMessage(`Fetched ${modelClass.value} successfully!`);
     })
     .catch((error) => {
       errorAlert.value = true;
       errorContent.value = JSON.stringify(error, false, 4);
-      showBanner(`Error fetching ${modelClass.value} data!`);
+      flashMessage(`Error fetching ${modelClass.value} data!`);
     })
     .finally(() => {
       dataLoading.value = false;
@@ -107,12 +107,12 @@ async function submitData() {
       .then((result) => {
         rawData.value = result.data;
         dataForUpdate.value = JSON.stringify(rawData.value, false, 4);
-        showBanner(`Updated indexes successfully!`);
+        flashMessage(`Updated indexes successfully!`);
       })
       .catch((error) => {
         errorAlert.value = true;
         errorContent.value = JSON.stringify(error, false, 4);
-        showBanner(`Error updating indexes!`);
+        flashMessage(`Error updating indexes!`);
       })
       .finally(() => {
         dataLoading.value = false;
@@ -121,13 +121,13 @@ async function submitData() {
     await dataAccess
       .upload(modelClass.value, formatModelData(dataForUpdate.value))
       .then((result) => {
-        showBanner(`Updated ${modelClass.value} data successfully!`);
+        flashMessage(`Updated ${modelClass.value} data successfully!`);
         fetchData();
       })
       .catch((error) => {
         errorAlert.value = true;
         errorContent.value = JSON.stringify(error, false, 4);
-        showBanner(`Error updating ${modelClass.value} data!`);
+        flashMessage(`Error updating ${modelClass.value} data!`);
       })
       .finally(() => {
         dataLoading.value = false;
@@ -135,17 +135,6 @@ async function submitData() {
   }
 }
 /** section:global **/
-
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
 
 onMounted(async() => {
   await fetchSchemas();

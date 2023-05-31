@@ -27,11 +27,14 @@ const {
   isEmpty,
   notEmpty,
 } = useValidations();
+
 const dataAccess = useDataAccess();
 const systemConfigsStore = useSystemConfigsStore();
+
 const {
   formatShortTime,
 } = useFormatter(systemConfigsStore);
+
 const {
   dataFields,
   fieldsLayout,
@@ -40,13 +43,15 @@ const {
   calculateDuration,
   includeKeys,
 } = useWorkLogUtils();
+
 const {
   formatDataFields,
   validateParams,
   formatDataForShow,
   formatDataForSave,
 } = useInputHelper(dataFields);
-const banner = useBannerStore();
+
+const { flashMessage } = useBannerStore();
 const events = useEventsStore();
 const shortcuts = useShortcutsStore();
 /** section:utils **/
@@ -146,7 +151,7 @@ async function submitNewTask() {
   const errors = validateParams(validations.create, currentTask.value);
 
   if (Object.keys(errors).length > 0) {
-    showBanner(`Error submitting task!`);
+    flashMessage(`Error submitting task!`);
     return;
   }
 
@@ -155,13 +160,13 @@ async function submitNewTask() {
   await dataAccess
     .create('work_logs', params)
     .then((result) => {
-      showBanner(`Started task successfully!`);
+      flashMessage(`Started task successfully!`);
       loadToday();
       closeStartTaskDialog();
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error creating data!`);
+      flashMessage(`Error creating data!`);
     });
 }
 /** section:startTask **/
@@ -181,7 +186,7 @@ async function updateTask() {
   const errors = validateParams(validations.update, currentTaskForUpdate.value);
 
   if (Object.keys(errors).length > 0) {
-    showBanner(`Error submitting task!`);
+    flashMessage(`Error submitting task!`);
     return;
   }
 
@@ -190,7 +195,7 @@ async function updateTask() {
   await dataAccess
     .update('work_logs', currentTaskForUpdate.value.id, params)
     .then((result) => {
-      showBanner(`Ended task successfully!`);
+      flashMessage(`Ended task successfully!`);
       loadToday();
       closeEndTaskDialog();
 
@@ -202,7 +207,7 @@ async function updateTask() {
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error submiting task!`);
+      flashMessage(`Error submiting task!`);
     });
 }
 
@@ -330,17 +335,6 @@ shortcuts.registerListener(
 );
 /** section:shortcuts **/
 
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
-
 /** section:events **/
 events.registerListener(
   'loadTodayLogs',
@@ -371,7 +365,7 @@ async function loadSchemas() {
       combinedDataFields.value = formatDataFields(fields);
     })
     .catch((error) => {
-      showBanner(`Error loading schemas!`);
+      flashMessage(`Error loading schemas!`);
       console.log(error);
     });
 }
@@ -399,7 +393,7 @@ async function loadToday() {
       if (notEmpty(currentTask.value.startTime)) { taskStarted.value = true; }
     })
     .catch((error) => {
-      showBanner(`Error loading work logs!`);
+      flashMessage(`Error loading work logs!`);
       console.log(error);
     });
 }

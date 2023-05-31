@@ -8,7 +8,7 @@ import {
   TTable
 } from 'coffeebrew-vue-components';
 
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 const dataAccess = useDataAccess();
 
 const offset = ref(0);
@@ -37,15 +37,6 @@ async function updateOffsetAndReload(updated) {
   await loadData();
 }
 
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-
 async function loadData() {
   await dataAccess
     .list('alerts', { offset: offset.value, limit: limit.value })
@@ -56,7 +47,8 @@ async function loadData() {
     })
     .catch((err) => {
       dataLoading.value = false;
-      showBanner(JSON.stringify(err, false, 4));
+      console.error(err);
+      flashMessage(`Error loading inbox!`);
     });
 }
 

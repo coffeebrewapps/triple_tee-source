@@ -29,7 +29,7 @@ const dataAccess = useDataAccess();
 const {
   formatNumber,
 } = useFormatter();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 /** section:utils **/
 
 /** section:global **/
@@ -142,7 +142,7 @@ async function formatReceipt(receipt) {
       });
     })
     .catch((error) => {
-      showBanner(`Error generating receipt!`);
+      flashMessage(`Error generating receipt!`);
       console.error(error);
     });
 }
@@ -171,7 +171,7 @@ async function submitFilters() {
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error previewing receipt!`);
+      flashMessage(`Error previewing receipt!`);
     });
 }
 
@@ -286,25 +286,14 @@ async function createReceipt() {
       transaction.value = result.transaction;
       showTemplateEditor.value = true;
       currentStep.value = 2;
-      showBanner(`Receipt created successfully!`);
+      flashMessage(`Receipt created successfully!`);
     })
     .catch((error) => {
-      showBanner(`Error creating receipt!`);
+      flashMessage(`Error creating receipt!`);
       console.error(error);
     });
 }
 /** section:action **/
-
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
 
 /** section:steps **/
 const currentStep = ref(0);

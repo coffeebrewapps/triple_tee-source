@@ -28,7 +28,7 @@ import TemplateEditor from '@/components/TemplateEditor.vue';
 const router = useRouter();
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 /** section:utils **/
 
 /** section:global **/
@@ -80,11 +80,11 @@ async function loadReceipt() {
     .view('income_receipts', receiptId.value, params)
     .then((result) => {
       currentReceipt.value = result;
-      showBanner(`Loaded receipt successfully!`);
+      flashMessage(`Loaded receipt successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error loading receipt!`);
+      flashMessage(`Error loading receipt!`);
     });
 }
 
@@ -105,25 +105,14 @@ async function loadTemplateData() {
           billingContact,
         }
       );
-      showBanner(`Loaded template data successfully!`);
+      flashMessage(`Loaded template data successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error loading template data!`);
+      flashMessage(`Error loading template data!`);
     });
 }
 /** section:global **/
-
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
 
 /** section:tabs **/
 const tabs = [

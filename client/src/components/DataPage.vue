@@ -139,7 +139,7 @@ const {
 const errorsMap = useErrors();
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 const events = useEventsStore();
 
 const inputOptionsData = ref({});
@@ -532,7 +532,7 @@ async function loadSchemas() {
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error loading schemas!`);
+      flashMessage(`Error loading schemas!`);
     });
 }
 
@@ -558,7 +558,7 @@ async function loadData() {
     .catch((error) => {
       dataLoading.value = false;
       console.error(error);
-      showBanner(`Error loading data!`);
+      flashMessage(`Error loading data!`);
     });
 }
 
@@ -575,17 +575,6 @@ async function viewData(id, resolve, reject) {
     });
 }
 /** section:dataAccess **/
-
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
 
 /** section:error **/
 const errorAlert = ref(false);
@@ -682,7 +671,7 @@ async function createDataAndCloseDialog(rawParams) {
 
   if (Object.keys(errors).length > 0) {
     createErrors.value = errors;
-    showBanner(`Error creating data!`);
+    flashMessage(`Error creating data!`);
     return;
   }
 
@@ -691,13 +680,13 @@ async function createDataAndCloseDialog(rawParams) {
   await dataAccess
     .create(props.modelClass, params)
     .then((result) => {
-      showBanner(`Data created successfully!`);
+      flashMessage(`Data created successfully!`);
       resetFilters();
       closeCreateDialog();
     })
     .catch((error) => {
       createErrors.value = formatErrorsForDisplay(error);
-      showBanner(`Error creating data!`);
+      flashMessage(`Error creating data!`);
     });
 }
 
@@ -760,7 +749,7 @@ async function updateDataAndCloseDialog(rawParams) {
 
   if (Object.keys(errors).length > 0) {
     updateErrors.value = errors;
-    showBanner(`Error updating data!`);
+    flashMessage(`Error updating data!`);
     return;
   }
 
@@ -770,13 +759,13 @@ async function updateDataAndCloseDialog(rawParams) {
   await dataAccess
     .update(props.modelClass, id, params)
     .then((record) => {
-      showBanner(`Data updated successfully!`);
+      flashMessage(`Data updated successfully!`);
       resetFilters();
       closeUpdateDialog();
     })
     .catch((error) => {
       updateErrors.value = formatErrorsForDisplay(error);
-      showBanner(`Error updating data!`);
+      flashMessage(`Error updating data!`);
     });
 }
 
@@ -842,7 +831,7 @@ async function deleteDataAndCloseDialog() {
   await dataAccess
     .remove(props.modelClass, id)
     .then((record) => {
-      showBanner(`Data deleted successfully!`);
+      flashMessage(`Data deleted successfully!`);
       resetFilters();
     })
     .catch((error) => {

@@ -29,7 +29,7 @@ defineProps({
 /** section:utils **/
 const router = useRouter();
 const dataAccess = useDataAccess();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 const { initSampleData } = useTemplateUtils();
 /** section:utils **/
 
@@ -72,11 +72,11 @@ async function updateMarkup(updated) {
     .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result;
-      showBanner(`Updated markup successfully!`);
+      flashMessage(`Updated markup successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error updating markup!`);
+      flashMessage(`Error updating markup!`);
     });
 }
 
@@ -93,11 +93,11 @@ async function updateStyles(updated) {
     .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result;
-      showBanner(`Updated styles successfully!`);
+      flashMessage(`Updated styles successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error updating styles !`);
+      flashMessage(`Error updating styles !`);
     });
 }
 
@@ -106,17 +106,6 @@ function updateData(updated) {
 }
 /** section:action **/
 
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
-
 async function loadTemplate() {
   await dataAccess
     .view(templateType.value, templateId.value, {})
@@ -124,7 +113,7 @@ async function loadTemplate() {
       currentTemplate.value = result;
     })
     .catch((error) => {
-      showBanner(`Error loading template!`);
+      flashMessage(`Error loading template!`);
       console.log(error);
     });
 }

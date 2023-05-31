@@ -26,5 +26,10 @@ export const useBannerStore = defineStore('banner', () => {
     bannerMessage.value = null;
   }
 
-  return { banner, bannerMessage, show, hide, toggle, setMessage, clearMessage };
+  function flashMessage(message) {
+    show(message);
+    setTimeout(hide, 5000);
+  }
+
+  return { banner, bannerMessage, show, hide, toggle, setMessage, clearMessage, flashMessage };
 });

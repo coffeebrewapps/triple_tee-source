@@ -37,7 +37,7 @@ defineProps({
 const router = useRouter();
 const dataAccess = useDataAccess();
 const errorsMap = useErrors();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 const { initSampleData } = useTemplateUtils();
 /** section:utils **/
 
@@ -138,11 +138,11 @@ async function updateMarkup(updated) {
     .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result;
-      showBanner(`Updated markup successfully!`);
+      flashMessage(`Updated markup successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error updating markup!`);
+      flashMessage(`Error updating markup!`);
     });
 }
 
@@ -164,11 +164,11 @@ async function updateStyles(updated) {
     .update(templateType.value, templateId.value, params)
     .then((result) => {
       currentTemplate.value = result;
-      showBanner(`Updated styles successfully!`);
+      flashMessage(`Updated styles successfully!`);
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error updating styles!`);
+      flashMessage(`Error updating styles!`);
     });
 }
 
@@ -181,17 +181,6 @@ function toggleWarningMessage() {
 }
 /** section:action **/
 
-/** section:banner **/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** section:banner **/
-
 async function createTemplate() {
   const params = {
     name: currentTemplate.value.name,
@@ -203,10 +192,10 @@ async function createTemplate() {
     .create(templateType.value, params)
     .then((result) => {
       currentTemplate.value = result;
-      showBanner(`Template created successfully!`);
+      flashMessage(`Template created successfully!`);
     })
     .catch((error) => {
-      showBanner(`Error creating template!`);
+      flashMessage(`Error creating template!`);
       formErrors.value = formatErrorsForDisplay(error);
       console.log(error);
     });

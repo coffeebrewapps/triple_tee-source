@@ -16,7 +16,7 @@ import { useInputHelper } from '@/utils/input';
 
 const dataAccess = useDataAccess();
 const systemConfigsStore = useSystemConfigsStore();
-const banner = useBannerStore();
+const { flashMessage } = useBannerStore();
 
 const formData = ref();
 const errorMessages = ref({});
@@ -134,13 +134,13 @@ async function updateConfig() {
   await dataAccess
     .create('system_configs', params, { path: 'replace' })
     .then((result) => {
-      showBanner(`Updated config successfully!`);
+      flashMessage(`Updated config successfully!`);
       systemConfigsStore.updateSystemConfigs(result);
     })
     .catch((error) => {
       console.error(error);
       errorMessages.value = formatErrorsForDisplay(error);
-      showBanner(`Error updating config!`);
+      flashMessage(`Error updating config!`);
     });
 }
 
@@ -176,17 +176,6 @@ async function loadSystemConfigs() {
   });
 }
 
-/** * section:banner ***/
-function showBanner(message) {
-  banner.show(message);
-  setTimeout(hideBanner, 5000);
-}
-
-function hideBanner() {
-  banner.hide();
-}
-/** * section:banner ***/
-
 onMounted(async() => {
   await loadSystemConfigs()
     .then((result) => {
@@ -201,7 +190,7 @@ onMounted(async() => {
     })
     .catch((error) => {
       console.error(error);
-      showBanner(`Error loading config!`);
+      flashMessage(`Error loading config!`);
     });
 });
 </script>
