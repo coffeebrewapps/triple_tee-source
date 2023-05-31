@@ -81,10 +81,13 @@ module.exports = ({ dataAccess, logger, utils }) => {
       {
         include: [
           'country',
+          'logo',
         ],
       }
     ).record;
+
     const country = billingContact.includes.country[billingContact.country];
+    const logo = billingContact.includes.logo[billingContact.logo];
 
     const pastReceipts = list(
       {
@@ -109,6 +112,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
       billingContact,
       currency,
       country,
+      logo,
       pastReceipts,
       invoiceNumberSequence,
     };
@@ -131,6 +135,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
       billingContact,
       currency,
       country,
+      logo,
       pastReceipts,
       invoiceNumberSequence,
     } = viewInvoiceWithIncludes(receipt.invoiceId);
@@ -142,6 +147,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
       transaction,
       billingContact,
       country,
+      logo,
       pastReceipts,
       receiptNumberSequence,
       invoiceNumberSequence,
@@ -179,6 +185,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
         invoice,
         billingContact,
         currency,
+        logo,
         pastReceipts,
         invoiceNumberSequence,
       } = viewInvoiceWithIncludes(invoiceId);
@@ -199,6 +206,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
           receipt,
           invoice,
           currency,
+          logo,
           billingContact,
           receiptConfig,
           receiptNumberSequence,
@@ -336,6 +344,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
         transaction,
         billingContact,
         country,
+        logo,
         invoiceNumberSequence,
       } = viewReceiptWithIncludes(receiptId);
 
@@ -355,6 +364,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
           transaction,
           billingContact,
           country,
+          logo,
           receiptConfig,
           receiptNumberSequence,
           receiptTemplate,

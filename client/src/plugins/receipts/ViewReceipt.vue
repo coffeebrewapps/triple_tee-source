@@ -96,7 +96,12 @@ async function loadTemplateData() {
     .then((result) => {
       receiptTemplate.value = result.receiptTemplate;
       const country = result.country;
-      const billingContact = Object.assign({}, result.billingContact, { country: country.countryName });
+      const logo = result.logo;
+      const billingContact = Object.assign(
+        {},
+        result.billingContact,
+        { country: country.countryName, logo: logo.rawData }
+      );
 
       templateData.value = Object.assign(
         {},
