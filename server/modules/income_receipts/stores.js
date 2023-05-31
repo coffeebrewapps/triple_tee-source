@@ -233,7 +233,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
       if (receipt.paymentAmount > (billableAmount - paidAmount)) {
         return {
           success: false,
-          errors: ['lessThanOrEqual'],
+          errors: { remainingAmount: ['greaterThanOrEqualZero'] },
         };
       }
 

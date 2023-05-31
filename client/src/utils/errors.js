@@ -4,6 +4,8 @@ export function useErrors() {
     unique: (_) => { return 'Value must be unique'; },
     foreign: (_) => { return 'Foreign key value not found'; },
     isUsed: (_) => { return 'Record is used'; },
+    invalidFile: (_) => { return 'File is invalid'; },
+    greaterThanOrEqualZero: (_) => { return 'Must be greater than or equal to 0'; },
   };
 
   const dateErrors = {
