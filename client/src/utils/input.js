@@ -63,7 +63,7 @@ export function useInputHelper(schemas) {
   });
 
   const include = computed(() => {
-    return schemas.filter(h => h.reference);
+    return schemas.filter(f => f.reference || f.file);
   });
 
   const includeKeys = computed(() => {
@@ -280,6 +280,11 @@ export function useInputHelper(schemas) {
           dataAccess
             .view(fileOptions.modelClass, fieldValue, {})
             .then((result) => {
+              if (isEmpty(record.includes[field])) {
+                record.includes[field] = {};
+              }
+
+              record.includes[field][fieldValue] = result;
               resolve(fileOptions.label(result));
             })
             .catch((error) => {

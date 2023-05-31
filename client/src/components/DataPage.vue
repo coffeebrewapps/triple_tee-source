@@ -120,6 +120,7 @@ const props = defineProps({
 
 /** section:global **/
 const {
+  includeKeys,
   inputLabel,
   inputValue,
   tagsField,
@@ -143,14 +144,6 @@ const { flashMessage } = useBannerStore();
 const events = useEventsStore();
 
 const inputOptionsData = ref({});
-
-const include = computed(() => {
-  return props.dataFields.filter(h => h.reference);
-});
-
-const includeKeys = computed(() => {
-  return include.value.map(h => h.key);
-});
 
 const combinedDataFields = ref(Array.from(props.dataFields));
 

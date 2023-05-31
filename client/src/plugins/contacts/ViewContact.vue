@@ -65,7 +65,7 @@ const heading = computed(() => {
 
 async function loadContact() {
   currentContact.value = null;
-  const params = { include: includeKeys.value.concat(['logo']) };
+  const params = { include: includeKeys.value };
 
   await dataAccess
     .view(`contacts`, contactId.value, params)
