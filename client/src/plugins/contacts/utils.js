@@ -243,7 +243,9 @@ export function useContactUtils() {
   };
 
   const include = computed(() => {
-    return dataFields.filter(h => h.reference);
+    return dataFields.filter((field) => {
+      return field.reference || field.key === 'logo';
+    });
   });
 
   const includeKeys = computed(() => {

@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 const modelClass = 'contacts';
 
 module.exports = ({ dataAccess, utils }) => {
@@ -8,35 +6,7 @@ module.exports = ({ dataAccess, utils }) => {
   }
 
   function view(id, params) {
-    const contactResult = dataAccess.view(modelClass, id, params);
-    if (!contactResult.success) {
-      return contactResult;
-    }
-
-    const contact = contactResult.record;
-    const logoId = contact.logo;
-
-    if (utils.isEmpty(logoId)) {
-      return contactResult;
-    }
-
-    const logoResult = dataAccess.view('documents', logoId, {});
-
-    if (!logoResult.success) {
-      return {
-        success: true,
-        record: contact,
-      };
-    }
-
-    const logo = logoResult.record;
-    const rawLogo = fs.readFileSync(logo.filePath);
-    const rawLogoDataUri = `data:${logo.mimeType};base64,${Buffer.from(rawLogo, 'binary').toString('base64')}`;
-
-    return {
-      success: true,
-      record: Object.assign({}, contact, { rawLogo: rawLogoDataUri }),
-    };
+    return dataAccess.view(modelClass, id, params);
   }
 
   function create(params) {

@@ -38,6 +38,7 @@ const {
 const {
   inputLabel,
   inputValue,
+  fileField,
 } = useInputHelper(dataFields);
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
@@ -64,7 +65,7 @@ const heading = computed(() => {
 
 async function loadContact() {
   currentContact.value = null;
-  const params = { include: includeKeys.value };
+  const params = { include: includeKeys.value.concat(['logo']) };
 
   await dataAccess
     .view(`contacts`, contactId.value, params)
@@ -150,26 +151,28 @@ onMounted(async() => {
               </div> <!-- field-label -->
 
               <div
+                v-if="notEmpty(currentContact) && notEmpty(currentContact[field])"
                 class="field-value"
               >
                 <span
-                  v-if="field !== 'logo' && notEmpty(currentContact) && notEmpty(currentContact[field])"
+                  v-if="!fileField(field)"
                 >
                   {{ inputValue(field, currentContact, includeKeys, dataFields) }}
                 </span>
 
                 <img
+                  v-if="fileField(field)"
                   style="width: 50%;"
-                  v-if="field === 'logo' && notEmpty(currentContact.logo)"
-                  :src="currentContact.rawLogo"
-                />
-
-                <span
-                  v-if="isEmpty(currentContact) || isEmpty(currentContact[field])"
+                  :src="inputValue(field, currentContact, includeKeys, dataFields)"
                 >
-                  --- no value ---
-                </span>
-              </div> <!-- field-value -->
+              </div> <!-- field-value:notEmpty -->
+
+              <div
+                v-if="isEmpty(currentContact) || isEmpty(currentContact[field])"
+                class="field-value"
+              >
+                <span>--- no value ---</span>
+              </div> <!-- field-value:isEmpty -->
             </div> <!-- data-field -->
           </div> <!-- data-row -->
         </div> <!-- contact-container -->

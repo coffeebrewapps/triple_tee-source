@@ -139,7 +139,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
     const billingContact = dataAccess.view(
       'contacts',
       invoiceConfig.billingContactId,
-      { include: ['country'] }
+      { include: ['country', 'logo'] }
     ).record;
 
     const country = billingContact.includes.country[billingContact.country];

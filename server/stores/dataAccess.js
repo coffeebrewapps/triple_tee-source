@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 module.exports = ({ config, logger, utils }) => {
   const fileAccess = require('./fileAccess')({ config, logger, utils });
   const validator = require('./validator')({ config, logger, utils });
@@ -391,7 +393,16 @@ module.exports = ({ config, logger, utils }) => {
 
       records[foreignKey] = referenceValue.reduce((references, value) => {
         if (utils.notEmpty(dataCache[foreignClass])) {
-          references[value] = dataCache[foreignClass][value];
+          const foreignValue = dataCache[foreignClass][value];
+
+          if (foreignClass === 'documents' && utils.notEmpty(foreignValue)) {
+            const rawFile = fs.readFileSync(foreignValue.filePath);
+            const bufferString = Buffer.from(rawFile, 'binary').toString('base64');
+            const rawFileDataUri = `data:${foreignValue.mimeType};base64,${bufferString}`;
+            references[value] = Object.assign({}, foreignValue, { rawData: rawFileDataUri });
+          } else {
+            references[value] = foreignValue;
+          }
         } else {
           references[value] = null;
         }

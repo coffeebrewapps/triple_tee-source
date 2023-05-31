@@ -83,7 +83,7 @@ export function useInputHelper(schemas) {
     const fieldValue = record[field];
     if (isEmpty(fieldValue)) { return; }
 
-    if (notEmpty(referenceField)) {
+    if (notEmpty(referenceField) && !fileField(field)) {
       const includes = record.includes || {};
       const rawValue = [fieldValue].flat().filter(v => !!v);
 
@@ -105,6 +105,10 @@ export function useInputHelper(schemas) {
       return formatTimestamp(fieldValue, systemConfigs.timezone);
     } else if (inputType(field) === 'date') {
       return formatDate(fieldValue, systemConfigs.timezone);
+    } else if (fileField(field)) {
+      const includes = record.includes || {};
+      const foreignValue = (includes[field][fieldValue] || {});
+      return foreignValue.rawData;
     } else {
       return fieldValue;
     }
