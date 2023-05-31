@@ -6,7 +6,7 @@ module.exports = ({ routes, stores, uploader }) => {
         if (err) {
           res.status(400).send({
             success: false,
-            errors: { logo: ['invalid'] }
+            errors: { logo: ['invalid'] },
           });
         } else {
           const params = req.body;
@@ -19,7 +19,7 @@ module.exports = ({ routes, stores, uploader }) => {
           }
         }
       });
-    }
+    };
   }
   function update(stores) {
     return function(req, res) {
@@ -28,7 +28,7 @@ module.exports = ({ routes, stores, uploader }) => {
         if (err) {
           res.status(400).send({
             success: false,
-            errors: { logo: ['invalid'] }
+            errors: { logo: ['invalid'] },
           });
         } else {
           const id = req.params.id;
@@ -43,9 +43,8 @@ module.exports = ({ routes, stores, uploader }) => {
           }
         }
       });
-    }
+    };
   }
-
 
   return {
     prefix: '/api/contacts',

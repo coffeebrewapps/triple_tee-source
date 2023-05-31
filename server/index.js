@@ -11,15 +11,15 @@ const { readConfigFile } = require('./config.js');
 const config = readConfigFile();
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function(req, file, cb) {
     cb(null, config.uploadDir);
   },
-  filename: function (req, file, cb) {
+  filename: function(req, file, cb) {
     cb(null, `${file.fieldname}-${file.originalname}`);
-  }
-})
+  },
+});
 
-const uploader = multer({ storage: storage });
+const uploader = multer({ storage });
 
 const logger = require('./logger.js')({ config });
 const dataAccess = require('./stores/dataAccess')({ config, logger, utils });
@@ -52,7 +52,9 @@ async function loadPlugins(app) {
   await fsPromises.readdir(config.modulesDir)
     .then((files) => {
       for (const file of files) {
-        const plugin = require(path.join(config.modulesDir, file, 'index.js'))({ dataAccess, routes, logger, utils, uploader });
+        const plugin = require(path.join(config.modulesDir, file, 'index.js'))({
+          dataAccess, routes, logger, utils, uploader,
+        });
         logger.log(`Loading plugin`, { plugin });
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {
