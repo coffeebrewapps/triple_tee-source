@@ -153,10 +153,16 @@ onMounted(async() => {
                 class="field-value"
               >
                 <span
-                  v-if="notEmpty(currentContact) && notEmpty(currentContact[field])"
+                  v-if="field !== 'logo' && notEmpty(currentContact) && notEmpty(currentContact[field])"
                 >
                   {{ inputValue(field, currentContact, includeKeys, dataFields) }}
                 </span>
+
+                <img
+                  style="width: 50%;"
+                  v-if="field === 'logo' && notEmpty(currentContact.logo)"
+                  :src="currentContact.rawLogo"
+                />
 
                 <span
                   v-if="isEmpty(currentContact) || isEmpty(currentContact[field])"

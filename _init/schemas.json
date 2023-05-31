@@ -203,6 +203,10 @@
         "country": {
           "reference": "countries",
           "primary": "alpha3Code"
+        },
+        "logo": {
+          "reference": "documents",
+          "primary": "id"
         }
       },
       "unique": [],
@@ -266,6 +270,44 @@
     "indexes": {
       "filter": {
         "code": { "match": true }
+      }
+    }
+  },
+  "documents": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "filename": {
+        "type": "text"
+      },
+      "mimeType": {
+        "type": "text"
+      },
+      "filePath": {
+        "type": "text"
+      },
+      "tags": {
+        "type": "array",
+        "default": []
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {},
+      "unique": [],
+      "required": ["filename", "mimeType", "filePath"]
+    },
+    "indexes": {
+      "filter": {
+        "filename": { "match": true },
+        "tags": {}
       }
     }
   },

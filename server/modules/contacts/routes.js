@@ -1,8 +1,8 @@
 module.exports = ({ routes, stores }) => {
   function create(stores) {
     return routes.withFileUpload('logo', (req, res) => {
-      const logoPath = req.file.path;
-      const params = Object.assign({}, req.body, { logo: logoPath });
+      const { path, originalname, mimetype } = req.file;
+      const params = Object.assign({}, req.body, { logo: { path, originalname, mimetype } });
       const result = stores.create(params);
 
       if (result.success) {
@@ -16,8 +16,8 @@ module.exports = ({ routes, stores }) => {
   function update(stores) {
     return routes.withFileUpload('logo', (req, res) => {
       const id = req.params.id;
-      const logoPath = req.file.path;
-      const params = Object.assign({}, req.body, { logo: logoPath });
+      const { path, originalname, mimetype } = req.file;
+      const params = Object.assign({}, req.body, { logo: { path, originalname, mimetype } });
       const result = stores.update(id, params);
 
       if (result.success) {
