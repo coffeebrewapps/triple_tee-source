@@ -81,23 +81,25 @@ const filters = {
 /** section:global **/
 
 /** section:tab **/
+const selectedTab = ref(0);
 const tabs = [
   { label: 'Invoice', onchange: updateInvoiceTemplates },
   { label: 'Receipt', onchange: updateReceiptTemplates },
 ];
 
-function updateInvoiceTemplates() {
+async function updateInvoiceTemplates() {
   templateType.value = 'invoice_templates';
   events.emitEvent('loadData', { dataType: 'Invoice Templates' });
 }
 
-function updateReceiptTemplates() {
+async function updateReceiptTemplates() {
   templateType.value = 'receipt_templates';
   events.emitEvent('loadData', { dataType: 'Receipt Templates' });
 }
 
-function triggerTabEvent(i) {
-  tabs[i].onchange();
+async function triggerTabEvent(i) {
+  await tabs[i].onchange();
+  selectedTab.value = i;
 }
 /** section:tab **/
 
@@ -166,10 +168,12 @@ async function openUpdatePage(id) {
 
     <TabContainer
       :tabs="tabs"
+      :selected-tab="selectedTab"
       @tab-change="triggerTabEvent"
     >
       <template #tab-0>
         <DataPage
+          v-if="selectedTab === 0"
           model-class="invoice_templates"
           data-type="Invoice Templates"
           :fullscreen="true"
@@ -183,6 +187,7 @@ async function openUpdatePage(id) {
 
       <template #tab-1>
         <DataPage
+          v-if="selectedTab === 1"
           model-class="receipt_templates"
           data-type="Receipt Templates"
           :fullscreen="true"

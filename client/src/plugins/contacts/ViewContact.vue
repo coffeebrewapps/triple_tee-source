@@ -81,6 +81,7 @@ async function loadContact() {
 /** section:global **/
 
 /** section:tabs **/
+const selectedTab = ref(0);
 const tabs = [
   { label: 'Details', onchange: loadContact },
   { label: 'Invoice Configs', onchange: loadInvoiceConfig },
@@ -105,8 +106,9 @@ async function loadInvoices() {
   events.emitEvent('loadData', { dataType: 'Invoices' });
 }
 
-function triggerTabEvent(i) {
-  tabs[i].onchange();
+async function triggerTabEvent(i) {
+  await tabs[i].onchange();
+  selectedTab.value = i;
 }
 /** section:tabs **/
 
@@ -128,10 +130,12 @@ onMounted(async() => {
     <TabContainer
       v-if="currentContact"
       :tabs="tabs"
+      :selected-tab="selectedTab"
       @tab-change="triggerTabEvent"
     >
       <template #tab-0>
         <div
+          v-if="selectedTab === 0"
           class="contact-container"
         >
           <div
@@ -180,24 +184,28 @@ onMounted(async() => {
 
       <template #tab-1>
         <InvoiceConfigs
+          v-if="selectedTab === 1"
           :billing-contact-id="contactId"
         />
       </template> <!-- template-1 -->
 
       <template #tab-2>
         <ReceiptConfigs
+          v-if="selectedTab === 2"
           :billing-contact-id="contactId"
         />
       </template> <!-- template-2 -->
 
       <template #tab-3>
         <BillingConfigs
+          v-if="selectedTab === 3"
           :contact-id="contactId"
         />
       </template> <!-- template-3 -->
 
       <template #tab-4>
         <InvoicesPage
+          v-if="selectedTab === 4"
           :contact-id="contactId"
         />
       </template> <!-- template-4 -->

@@ -120,13 +120,15 @@ async function loadTemplateData() {
 /** section:global **/
 
 /** section:tabs **/
+const selectedTab = ref(0);
 const tabs = [
   { label: 'Details', onchange: loadReceipt },
   { label: 'View Receipt PDF', onchange: loadTemplateData },
 ];
 
-function triggerTabEvent(i) {
-  tabs[i].onchange();
+async function triggerTabEvent(i) {
+  await tabs[i].onchange();
+  selectedTab.value = i;
 }
 /** section:tabs **/
 
@@ -147,11 +149,13 @@ onMounted(async() => {
 
     <TabContainer
       v-if="currentReceipt"
+      :selected-tab="selectedTab"
       :tabs="tabs"
       @tab-change="triggerTabEvent"
     >
       <template #tab-0>
         <div
+          v-if="selectedTab === 0"
           class="details-container"
         >
           <div
@@ -192,7 +196,7 @@ onMounted(async() => {
 
       <template #tab-1>
         <TemplateEditor
-          v-if="receiptTemplate"
+          v-if="selectedTab === 1 && receiptTemplate"
           :id="receiptTemplate.id"
           template-type="receipt_templates"
           :content-markup="receiptTemplate.contentMarkup"

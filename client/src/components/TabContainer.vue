@@ -5,6 +5,10 @@ import { ref } from 'vue';
 
 /** section:props **/
 const props = defineProps({
+  selectedTab: {
+    type: Number,
+    default: 0,
+  },
   tabs: {
     type: Array,
     default() {
@@ -20,10 +24,8 @@ const emit = defineEmits(['tabChange']);
 
 /** section:global **/
 const tabRefs = ref([]);
-const selectedTab = ref(0);
 
 function selectTab(tab) {
-  selectedTab.value = tab;
   tabRefs.value[tab].blur();
   emit('tabChange', tab);
 }
@@ -38,7 +40,7 @@ function navigateTab(tab) {
 
 /** section:style **/
 function tabStyle(i) {
-  if (i === selectedTab.value) {
+  if (i === props.selectedTab) {
     return `tab active`;
   } else {
     return `tab`;
@@ -46,7 +48,7 @@ function tabStyle(i) {
 }
 
 function tabContentStyle(i) {
-  if (i === selectedTab.value) {
+  if (i === props.selectedTab) {
     return `tab-content active`;
   } else {
     return `tab-content`;

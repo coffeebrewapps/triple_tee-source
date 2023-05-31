@@ -126,6 +126,7 @@ async function loadTemplateData() {
 /** section:global **/
 
 /** section:tabs **/
+const selectedTab = ref(0);
 const tabs = [
   { label: 'Details', onchange: loadInvoice },
   { label: 'Invoice Lines', onchange: loadInvoiceLines },
@@ -136,8 +137,9 @@ async function loadInvoiceLines() {
   events.emitEvent('loadData', { dataType: 'Invoice Lines' });
 }
 
-function triggerTabEvent(i) {
-  tabs[i].onchange();
+async function triggerTabEvent(i) {
+  await tabs[i].onchange();
+  selectedTab.value = i;
 }
 /** section:tabs **/
 
@@ -158,11 +160,13 @@ onMounted(async() => {
 
     <TabContainer
       v-if="currentInvoice"
+      :selected-tab="selectedTab"
       :tabs="tabs"
       @tab-change="triggerTabEvent"
     >
       <template #tab-0>
         <div
+          v-if="selectedTab === 0"
           class="details-container"
         >
           <div
@@ -203,13 +207,14 @@ onMounted(async() => {
 
       <template #tab-1>
         <InvoiceLines
+          v-if="selectedTab === 1"
           :invoice-id="invoiceId"
         />
       </template> <!-- template-1 -->
 
       <template #tab-2>
         <TemplateEditor
-          v-if="invoiceTemplate"
+          v-if="selectedTab === 2 && invoiceTemplate"
           :id="invoiceTemplate.id"
           template-type="invoice_templates"
           :content-markup="invoiceTemplate.contentMarkup"

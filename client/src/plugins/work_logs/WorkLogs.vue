@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { useEventsStore } from '@/stores/events';
 
 import { useWorkLogUtils } from './utils';
@@ -18,6 +19,7 @@ const {
   validations,
 } = useWorkLogUtils();
 
+const selectedTab = ref(0);
 const tabs = [
   { label: 'Today', onchange: updateTodayLog },
   { label: 'Weekly', onchange: updateWeeklyLogs },
@@ -36,8 +38,9 @@ function updateAllLogs() {
   events.emitEvent('loadData', { dataType: 'Work Logs' });
 }
 
-function triggerTabEvent(i) {
-  tabs[i].onchange();
+async function triggerTabEvent(i) {
+  await tabs[i].onchange();
+  selectedTab.value = i;
 }
 </script>
 
@@ -49,18 +52,24 @@ function triggerTabEvent(i) {
 
     <TabContainer
       :tabs="tabs"
+      :selected-tab="selectedTab"
       @tab-change="triggerTabEvent"
     >
       <template #tab-0>
-        <TodayLog />
+        <TodayLog
+          v-if="selectedTab === 0"
+        />
       </template>
 
       <template #tab-1>
-        <WeekLog />
+        <WeekLog
+          v-if="selectedTab === 1"
+        />
       </template>
 
       <template #tab-2>
         <DataPage
+          v-if="selectedTab === 2"
           model-class="work_logs"
           data-type="Work Logs"
           :fullscreen="true"

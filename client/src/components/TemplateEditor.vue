@@ -6,6 +6,7 @@ import { useRouter } from 'vue-router';
 
 /** import:utils **/
 import { useDataAccess } from '@/utils/dataAccess';
+import { useValidations } from '@/utils/validations';
 import { Liquid } from 'liquidjs';
 /** import:utils **/
 
@@ -67,6 +68,7 @@ const emit = defineEmits(['contentMarkupChange', 'contentStylesChange', 'dataCha
 /** section:utils **/
 const router = useRouter();
 const dataAccess = useDataAccess();
+const { notEmpty } = useValidations();
 const liquidEngine = new Liquid();
 /** section:utils **/
 
@@ -78,13 +80,20 @@ const template = computed(() => {
     contentStyles: props.contentStyles,
   };
 });
+/** section:global **/
 
+/** section:tabs **/
+const selectedTab = ref(0);
 const editorTabs = [
   { label: 'Markup' },
   { label: 'Styles' },
   { label: 'Data' },
 ];
-/** section:global **/
+
+function triggerTabEvent(i) {
+  selectedTab.value = i;
+}
+/** section:tabs **/
 
 /** section:editor **/
 const markupEditor = ref('markupEditor');
@@ -215,7 +224,11 @@ function updateStyles() {
 }
 
 function updateData() {
-  emit('dataChange', JSON.parse(sampleDataEditor.value.innerText));
+  const sampleDataEditorContent = sampleDataEditor.value.innerText;
+
+  if (notEmpty(sampleDataEditorContent)) {
+    emit('dataChange', JSON.parse(sampleDataEditorContent));
+  }
 }
 
 /** section:editor **/
@@ -239,15 +252,21 @@ const previewError = ref(false);
 async function renderPreview() {
   return new Promise((resolve, reject) => {
     parsedMarkup.value = null;
-    liquidEngine
-      .parseAndRender(markupEditor.value.innerText, JSON.parse(sampleDataEditor.value.innerText))
-      .then((result) => {
-        parsedMarkup.value = result;
-        resolve(result);
-      })
-      .catch((error) => {
-        reject(error);
-      });
+    const sampleDataEditorContent = sampleDataEditor.value.innerText;
+
+    if (notEmpty(sampleDataEditorContent)) {
+      liquidEngine
+        .parseAndRender(markupEditor.value.innerText, JSON.parse(sampleDataEditorContent))
+        .then((result) => {
+          parsedMarkup.value = result;
+          resolve(result);
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    } else {
+      resolve();
+    }
   });
 }
 /** section:preview **/
@@ -314,7 +333,9 @@ onMounted(async() => {
   <div class="preview-template">
     <div class="template-editor">
       <TabContainer
+        :selected-tab="selectedTab"
         :tabs="editorTabs"
+        @tab-change="triggerTabEvent"
       >
         <template #tab-0>
           <div
