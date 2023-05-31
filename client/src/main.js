@@ -7,6 +7,7 @@ import router from './router';
 
 import './assets/main.css';
 
+import { useUploader } from '@/utils/uploader';
 import { initPlugins } from '@/utils/plugins';
 
 const app = createApp(App);
@@ -16,6 +17,7 @@ app.use(pinia);
 app.use(router);
 
 const dataStore = useDataStore();
-initPlugins(router, dataStore);
+const uploader = useUploader();
+initPlugins(router, dataStore, uploader);
 
 app.mount('#app');

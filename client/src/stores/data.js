@@ -2,6 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 
 import { useDataValidations } from '@/utils/dataValidations';
+import { useDownloader } from '@/utils/downloader';
 
 import schemasData from '@/../../_init/schemas.json';
 
@@ -9,6 +10,8 @@ export const useDataStore = defineStore('data', () => {
   const schemas = '_schemas';
 
   const validator = useDataValidations();
+  const downloader = useDownloader();
+
   const init = ref(false);
   const schemaCache = ref({});
   const dataCache = ref({});
@@ -363,10 +366,18 @@ export const useDataStore = defineStore('data', () => {
 
       const constraint = foreignConstraints[foreignKey] || {};
       const foreignClass = constraint.reference;
+      const foreignKeyType = schema.fields[foreignKey].type;
 
       records[foreignKey] = referenceValue.reduce((references, value) => {
         if (validator.notEmpty(dataCache.value[foreignClass])) {
-          references[value] = dataCache.value[foreignClass][value];
+          const foreignValue = dataCache.value[foreignClass][value];
+
+          if (foreignKeyType === 'file' && validator.notEmpty(foreignValue)) {
+            const rawFileDataUri = downloader.downloadRawFile(foreignValue.mimeType, foreignValue.filePath);
+            references[value] = Object.assign({}, foreignValue, { rawData: rawFileDataUri });
+          } else {
+            references[value] = foreignValue;
+          }
         } else {
           references[value] = null;
         }
@@ -412,6 +423,11 @@ export const useDataStore = defineStore('data', () => {
     };
   }
 
+  function downloadRawFile(mimeType, filePath) {
+    const rawFileDataUri = downloader.downloadRawFile(mimeType, filePath);
+    return rawFileDataUri;
+  }
+
   return {
     registerFunction,
     customFunctionsForModel,
@@ -431,5 +447,6 @@ export const useDataStore = defineStore('data', () => {
     downloadIndexes,
     uploadIndexes,
     atomic,
+    downloadRawFile,
   };
 });

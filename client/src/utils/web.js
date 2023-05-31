@@ -1,10 +1,10 @@
 export function useWebAccess(dataStore) {
   function lookupFunction(modelClass, fnType, suffix) {
+    const functions = dataStore.customFunctionsForModel(modelClass, fnType) || {};
     if (suffix) {
-      const functions = dataStore.customFunctionsForModel(modelClass, fnType) || {};
       return functions[suffix.path] || dataStore[fnType];
     } else {
-      return dataStore[fnType];
+      return functions[fnType] || dataStore[fnType];
     }
   }
 
@@ -55,10 +55,10 @@ export function useWebAccess(dataStore) {
   async function create(modelClass, params, suffix = null) {
     console.debug({ request: 'create', modelClass, params, suffix });
     await initData();
-    return new Promise((resolve, reject) => {
-      const fn = lookupFunction(modelClass, 'create', suffix);
 
-      const result = fn(modelClass, params);
+    const fn = lookupFunction(modelClass, 'create', suffix);
+    const result = await fn(modelClass, params);
+    return new Promise((resolve, reject) => {
       if (result.success) {
         resolve(result.record);
       } else {
@@ -70,10 +70,10 @@ export function useWebAccess(dataStore) {
   async function update(modelClass, id, params, suffix = null) {
     console.debug({ request: 'update', modelClass, id, params, suffix });
     await initData();
-    return new Promise((resolve, reject) => {
-      const fn = lookupFunction(modelClass, 'update', suffix);
 
-      const result = fn(modelClass, id, params);
+    const fn = lookupFunction(modelClass, 'update', suffix);
+    const result = await fn(modelClass, id, params);
+    return new Promise((resolve, reject) => {
       if (result.success) {
         resolve(result.record);
       } else {

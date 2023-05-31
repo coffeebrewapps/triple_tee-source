@@ -18,7 +18,7 @@ module.exports = ({ dataAccess, utils }) => {
     );
 
     if (logoResult.success) {
-      return dataAccess.create(modelClass, params);
+      return dataAccess.create(modelClass, Object.assign({}, params, { logo: logoResult.record.id }));
     } else {
       return logoResult;
     }

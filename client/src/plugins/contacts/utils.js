@@ -219,8 +219,8 @@ export function useContactUtils() {
       file: {
         modelClass: 'documents',
         type: 'img',
-        label: (record) => { return record.filename },
-        value: (record) => { return record.rawData },
+        label: (record) => { return record.filename; },
+        value: (record) => { return record.rawData; },
       },
       listable: false,
       viewable: true,
