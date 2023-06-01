@@ -30,6 +30,12 @@ export function useErrors() {
     lessThanOrEqual: ({ compareValue }) => {
       return `Must be less than or equal to ${compareValue}`;
     },
+    compareLessThan: ({ compareNumber }) => {
+      return `Must be less than ${compareNumber}`;
+    },
+    compareMoreThan: ({ compareNumber }) => {
+      return `Must be more than ${compareNumber}`;
+    },
   };
 
   return Object.assign(

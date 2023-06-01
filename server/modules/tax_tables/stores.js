@@ -21,6 +21,22 @@ module.exports = ({ dataAccess, logger, utils }) => {
     return dataAccess.remove(modelClass, id);
   }
 
+  function viewWithTiers(id, params) {
+    const taxTableResult = dataAccess.view(modelClass, id, params);
+
+    if (taxTableResult.success) {
+      const taxTable = taxTableResult.record;
+      const taxTiers = dataAccess.list('tax_tiers', { filters: { taxTableId: taxTable.id } });
+
+      return {
+        success: true,
+        record: Object.assign({}, taxTable, { taxTiers }),
+      };
+    } else {
+      return taxTableResult;
+    }
+  }
+
   return {
     modelClass,
     list,

@@ -99,6 +99,38 @@ export function useValidations() {
     };
   }
 
+  function compareLessThan(record, numberToCheckField, compareNumberField) {
+    const numberToCheck = record[numberToCheckField];
+    const compareNumber = record[compareNumberField];
+
+    if (isEmpty(numberToCheck) || isEmpty(compareNumber)) { return; }
+
+    if (numberToCheck > compareNumber) {
+      return {
+        name: 'compareLessThan',
+        params: {
+          compareNumber: compareNumberField,
+        },
+      };
+    }
+  }
+
+  function compareMoreThan(record, numberToCheckField, compareNumberField) {
+    const numberToCheck = record[numberToCheckField];
+    const compareNumber = record[compareNumberField];
+
+    if (isEmpty(numberToCheck) || isEmpty(compareNumber)) { return; }
+
+    if (numberToCheck < compareNumber) {
+      return {
+        name: 'compareMoreThan',
+        params: {
+          compareNumber: compareNumberField,
+        },
+      };
+    }
+  }
+
   const dateValidations = {
     notEarlierThan,
     futureDate,
@@ -110,6 +142,8 @@ export function useValidations() {
     greaterThanOrEqual,
     lessThan,
     lessThanOrEqual,
+    compareLessThan,
+    compareMoreThan,
   };
 
   return Object.assign(

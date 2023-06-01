@@ -995,6 +995,56 @@
       }
     }
   },
+  "tax_tiers": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "minIncome": {
+        "type": "number"
+      },
+      "maxIncome": {
+        "type": "number"
+      },
+      "maxPayableAmount": {
+        "type": "number"
+      },
+      "rate": {
+        "type": "number"
+      },
+      "taxTableId": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "taxTableId": {
+          "reference": "tax_tables",
+          "primary": "id"
+        }
+      },
+      "unique": [],
+      "required": [
+        "minIncome",
+        "maxIncome",
+        "maxPayableAmount",
+        "rate",
+        "taxTableId"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "taxTableId": {}
+      }
+    }
+  },
   "transactions": {
     "fields": {
       "id": {
