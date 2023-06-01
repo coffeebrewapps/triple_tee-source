@@ -112,12 +112,8 @@ module.exports = ({ dataAccess, logger, utils }) => {
 
     if (lastBracketIndex < 0) {
       return {
-        success: true,
-        record: {
-          incomeBracket: null,
-          payable: 0,
-          nettIncome,
-        },
+        success: false,
+        errors: ['noMatchingIncomeBracket'],
       };
     }
 
