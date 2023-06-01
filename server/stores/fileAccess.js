@@ -24,6 +24,10 @@ module.exports = ({ config, logger, utils }) => {
     writeToFileQueue[schemas] = [];
     writeToFileQueue[indexes] = [];
 
+    if (!fs.existsSync(config.dataDir)) {
+      fs.mkdirSync(config.dataDir);
+    }
+
     return new Promise((resolve, reject) => {
       Promise.all([loadSchemasAndData(schemas), loadIndexes(indexes)])
         .then((result) => {

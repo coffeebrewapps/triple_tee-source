@@ -3,10 +3,13 @@ module.exports = {
     ignore: [
       '^/bin$',
       '^/client$',
+      '^/data$',
       '^/node_modules$',
       '^/public$',
       '^/server$',
+      '^/uploads$',
       '^/.tool-versions',
+      '^/yarn-error.log',
       '^/yarn.lock'
     ]
   },
