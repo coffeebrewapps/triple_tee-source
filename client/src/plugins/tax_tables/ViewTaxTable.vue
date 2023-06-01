@@ -97,6 +97,7 @@ const taxTierDataFields = computed(() => {
   return fields;
 });
 
+const taxTierValidations = taxTierUtils.validations.create;
 const taxTierHelper = useInputHelper(taxTierDataFields.value);
 
 const updatableTaxTierKeys = taxTierHelper.updatableKeys;
@@ -104,6 +105,7 @@ const updatableTaxTierKeys = taxTierHelper.updatableKeys;
 const currentTaxTiers = ref([]);
 const taxTiersEditable = ref([]);
 const taxTiersLoading = ref(false);
+const taxTiersValidationErrors = ref([]);
 
 const currentTierForDelete = ref();
 const deleteTierDialogPrimaryText = ref('');
@@ -156,7 +158,6 @@ const taxTiersRowActions = [
     icon: 'fa-solid fa-check',
     click: async function(row, index) {
       await saveTaxTier(row, index);
-      taxTiersEditable.value[index] = false;
     },
     show: function(row, index) {
       return taxTiersEditable.value[index];
@@ -194,6 +195,7 @@ async function addTaxTier() {
     taxTableId: taxTableId.value,
   });
   taxTiersEditable.value.push(true);
+  taxTiersValidationErrors.value.push({});
 }
 
 function formatTierForSave(tier) {
@@ -204,14 +206,29 @@ function formatTierForSave(tier) {
   return taxTierHelper.formatDataForSave(tierForSave);
 }
 
+function formatTierFieldErrorMessage(index, field) {
+  const errorMessage = (taxTiersValidationErrors.value[index][field] || []).map((error) => {
+    return errorsMap[error.name](error.params);
+  }).join(', ');
+  return errorMessage;
+}
+
 async function saveTaxTier(row, index) {
   const formattedTier = formatTierForSave(row);
+  taxTiersValidationErrors.value[index] = {};
+  const validationErrors = taxTierHelper.validateParams(taxTierValidations, formattedTier);
+
+  if (Object.keys(validationErrors).length > 0) {
+    taxTiersValidationErrors.value[index] = validationErrors;
+    return;
+  }
 
   if (row.id) {
     await dataAccess
       .update('tax_tiers', row.id, Object.assign({}, formattedTier, { taxTableId: taxTableId.value }))
       .then((result) => {
         loadTaxTiers();
+        taxTiersEditable.value[index] = false;
         flashMessage(`Saved tax tier ${row.id} successfully!`);
       })
       .catch((error) => {
@@ -223,6 +240,7 @@ async function saveTaxTier(row, index) {
       .create('tax_tiers', Object.assign({}, formattedTier, { taxTableId: taxTableId.value }))
       .then((result) => {
         loadTaxTiers();
+        taxTiersEditable.value[index] = false;
         flashMessage(`Saved tax tier successfully!`);
       })
       .catch((error) => {
@@ -366,7 +384,7 @@ onMounted(async() => {
             type="number"
             label=""
             size="sm"
-            :error-message="''"
+            :error-message="formatTierFieldErrorMessage(i, 'minIncome')"
           />
         </div>
 
@@ -387,7 +405,7 @@ onMounted(async() => {
             type="number"
             label=""
             size="sm"
-            :error-message="''"
+            :error-message="formatTierFieldErrorMessage(i, 'maxIncome')"
           />
         </div>
 
@@ -413,7 +431,7 @@ onMounted(async() => {
             type="number"
             label=""
             size="sm"
-            :error-message="''"
+            :error-message="formatTierFieldErrorMessage(i, 'maxPayableAmount')"
           />
         </div>
 
@@ -439,7 +457,7 @@ onMounted(async() => {
             type="number"
             label=""
             size="sm"
-            :error-message="''"
+            :error-message="formatTierFieldErrorMessage(i, 'rate')"
           />
         </div>
 

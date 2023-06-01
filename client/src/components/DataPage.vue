@@ -133,6 +133,7 @@ const {
   formatDataForSave,
   formatErrorsForDisplay,
   formatFilters,
+  validateParams,
   initOptionsData,
 } = useInputHelper(props.dataFields);
 const systemConfigsStore = useSystemConfigsStore();
@@ -154,20 +155,6 @@ const combinedDataFields = ref(Array.from(props.dataFields));
 
 const schemasLoaded = ref(false);
 const filtersLoaded = ref(false);
-
-function validateParams(validations, params) {
-  return Object.keys(validations).reduce((errors, field) => {
-    const validators = validations[field];
-    const fieldErrors = validators.map((validator) => {
-      return validator(params);
-    }).filter(e => !!e);
-
-    if (fieldErrors.length > 0) {
-      errors[field] = fieldErrors;
-    }
-    return errors;
-  }, {});
-}
 
 function formatDataFields(fields) {
   combinedDataFields.value = combinedDataFields.value.map((field) => {

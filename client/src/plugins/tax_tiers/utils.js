@@ -1,3 +1,9 @@
+import { useValidations } from '@/utils/validations';
+const {
+  greaterThanOrEqual,
+  compareMoreThan,
+} = useValidations();
+
 export function useTaxTierUtils() {
   const fieldsLayout = [
     { minIncome: 'md', maxIncome: 'md' },
@@ -84,10 +90,44 @@ export function useTaxTierUtils() {
     ];
   }
 
+  const validations = {
+    create: {
+      minIncome: [
+        (record) => { return greaterThanOrEqual(record, 'minIncome', 0); },
+      ],
+      maxIncome: [
+        (record) => { return greaterThanOrEqual(record, 'minIncome', 0); },
+        (record) => { return compareMoreThan(record, 'maxIncome', 'minIncome'); },
+      ],
+      maxPayableAmount: [
+        (record) => { return greaterThanOrEqual(record, 'maxPayableAmount', 0); },
+      ],
+      rate: [
+        (record) => { return greaterThanOrEqual(record, 'rate', 0); },
+      ],
+    },
+    update: {
+      minIncome: [
+        (record) => { return greaterThanOrEqual(record, 'minIncome', 0); },
+      ],
+      maxIncome: [
+        (record) => { return greaterThanOrEqual(record, 'minIncome', 0); },
+        (record) => { return compareMoreThan(record, 'maxIncome', 'minIncome'); },
+      ],
+      maxPayableAmount: [
+        (record) => { return greaterThanOrEqual(record, 'maxPayableAmount', 0); },
+      ],
+      rate: [
+        (record) => { return greaterThanOrEqual(record, 'rate', 0); },
+      ],
+    },
+  };
+
   return {
     fieldsLayout,
     recordValue,
     taxTableLabel,
     generateDataFields,
+    validations,
   };
 }
