@@ -27,9 +27,9 @@ function module {
     touch $module_file
     echo "const name = '$model';
 
-module.exports = (dataAccess, routes, logger, utils) => {
-  const stores = require('./stores')(dataAccess, logger, utils);
-  const router = require('./routes')(routes, stores, logger, utils);
+module.exports = ({ dataAccess, routes, logger, utils }) => {
+  const stores = require('./stores')({ dataAccess, logger, utils });
+  const router = require('./routes')({ routes, stores, logger, utils });
 
   return {
     name,
@@ -41,7 +41,7 @@ module.exports = (dataAccess, routes, logger, utils) => {
 
   route_file="$module_dir/routes.js"
   if [[ ! -f $route_file ]]; then
-    echo "module.exports = (routes, stores, logger, utils) => {
+    echo "module.exports = ({ routes, stores, logger, utils }) => {
   return {
     prefix: '/api/${model}',
     routes: [
@@ -60,7 +60,7 @@ module.exports = (dataAccess, routes, logger, utils) => {
   if [[ ! -f $store_file ]]; then
     echo "const modelClass = '$model';
 
-module.exports = (dataAccess, logger, utils) => {
+module.exports = ({ dataAccess, logger, utils }) => {
   function list(filters = {}) {
     return dataAccess.list(modelClass, filters);
   }
