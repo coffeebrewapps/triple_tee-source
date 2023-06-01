@@ -43,28 +43,31 @@ function openSystemConfigs() {
 
 <template>
   <div class="toggles">
-    <div class="alert-toggle">
+    <div class="alert-toggle tooltipable">
       <TButton
         button-type="icon"
         icon="fa-solid fa-bell"
         @click="toggleAlerts"
       />
+      <span class="tooltip align-right">Alerts</span>
     </div>
 
-    <div class="theme-toggle">
+    <div class="theme-toggle tooltipable">
       <TButton
         button-type="icon"
         :icon="themeIcon"
         @click="toggleTheme"
       />
+      <span class="tooltip align-right">Switch Theme</span>
     </div>
 
-    <div class="">
+    <div class="tooltipable">
       <TButton
         button-type="icon"
         icon="fa-solid fa-gears"
         @click="openSystemConfigs"
       />
+      <span class="tooltip align-right">System Configs</span>
     </div>
   </div>
 </template>
