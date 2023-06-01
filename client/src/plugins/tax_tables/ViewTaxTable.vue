@@ -18,6 +18,7 @@ import { useBannerStore } from '@/stores/banner';
 
 /** import:components **/
 import {
+  TConfirmDialog,
   TInput,
   TTable
 } from 'coffeebrew-vue-components';
@@ -99,6 +100,10 @@ const currentTaxTiers = ref([]);
 const taxTiersEditable = ref([]);
 const taxTiersLoading = ref(false);
 
+const currentTierForDelete = ref();
+const deleteTierDialogPrimaryText = ref('');
+const deleteTierDialog = ref(false);
+
 async function loadTaxTiers() {
   taxTiersLoading.value = true;
   currentTaxTiers.value = [];
@@ -162,6 +167,16 @@ const taxTiersRowActions = [
       return taxTiersEditable.value[index];
     },
   },
+  {
+    name: 'Delete',
+    icon: 'fa-solid fa-trash-can',
+    click: async function(row, index) {
+      await openDeleteDialog(row, index);
+    },
+    show: function(row, index) {
+      return true;
+    },
+  },
 ];
 
 async function addTaxTier() {
@@ -210,6 +225,38 @@ async function saveTaxTier(row, index) {
         flashMessage(`Error saving tax tier!`);
       });
   }
+}
+
+async function openDeleteDialog(row, index) {
+  currentTierForDelete.value = index;
+  deleteTierDialog.value = true;
+  deleteTierDialogPrimaryText.value = `Are you sure you want to delete tier row ${index + 1}?`;
+}
+
+async function deleteTierAndCloseDialog() {
+  const index = currentTierForDelete.value;
+  const tier = currentTaxTiers.value[index];
+  if (tier.id) {
+    await dataAccess
+      .remove('tax_tiers', tier.id)
+      .then((result) => {
+        loadTaxTiers();
+        flashMessage(`Deleted tax tier successfully!`);
+      })
+      .catch((error) => {
+        console.error(error);
+        flashMessage(`Error deleting tax tier!`);
+      });
+  } else {
+    currentTaxTiers.value.splice(index, 1);
+  }
+
+  closeDeleteTierDialog();
+}
+
+function closeDeleteTierDialog() {
+  deleteTierDialog.value = false;
+  currentTierForDelete.value = null;
 }
 
 function formatRate(rate) {
@@ -333,6 +380,19 @@ onMounted(async() => {
         <div />
       </template>
     </TTable>
+
+    <TConfirmDialog
+      v-if="currentTierForDelete"
+      v-model="deleteTierDialog"
+      title="Delete Tier"
+      :primary-text="deleteTierDialogPrimaryText"
+      secondary-text=""
+      :width="500"
+      :height="250"
+      class="delete-dialog"
+      @confirm="deleteTierAndCloseDialog"
+      @cancel="closeDeleteTierDialog"
+    />
   </div> <!-- page-container -->
 </template>
 
