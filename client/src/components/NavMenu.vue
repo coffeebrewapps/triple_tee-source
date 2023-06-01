@@ -83,22 +83,31 @@ const navContainerClass = computed(() => {
 .nav {
   display: flex;
   flex-direction: column;
+  padding: 1rem 0;
   width: 230px;
   height: 100%;
-  border: 1px solid var(--color-border);
   overflow-y: auto;
-  background-color: var(--color-background);
+  background-color: var(--color-background-soft);
 }
 
 .nav-item {
-  padding: 1rem;
-  text-align: center;
-  border-bottom: 1px solid var(--color-border);
-  background-color: var(--color-background);
+  padding: 0.5rem 2rem;
+  text-align: left;
+  font-size: 0.8rem;
+  background-color: var(--color-background-soft);
 }
 
 .nav-container .nav-item.active {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
   background-color: var(--color-background-mute);
+}
+
+.nav-container .nav-item:hover {
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .nav-toggle {
