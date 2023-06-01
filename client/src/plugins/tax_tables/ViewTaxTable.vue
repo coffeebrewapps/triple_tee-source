@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useInputHelper } from '@/utils/input';
 import { useValidations } from '@/utils/validations';
+import { useErrors } from '@/utils/errors';
 
 import { useTaxTableUtils } from './utils';
 import { useTaxTierUtils } from '@/plugins/tax_tiers/utils';
@@ -32,6 +33,7 @@ import ViewPage from '@/components/ViewPage.vue';
 const router = useRouter();
 const dataAccess = useDataAccess();
 const { notEmpty } = useValidations();
+const errorsMap = useErrors();
 const { flashMessage } = useBannerStore();
 /** section:utils **/
 
@@ -269,8 +271,12 @@ function formatRate(rate) {
 
 /** section:estimateTax **/
 const estimatedTax = ref();
+const estimateTaxErrorMessage = ref();
 
 async function estimateTax() {
+  estimatedTax.value = null;
+  estimateTaxErrorMessage.value = null;
+
   await dataAccess
     .view('tax_tables', taxTableId.value, {}, { path: 'estimate' })
     .then((result) => {
@@ -279,6 +285,11 @@ async function estimateTax() {
     })
     .catch((error) => {
       console.error(error);
+      estimateTaxErrorMessage.value = Object.entries(error).map(([field, errors]) => {
+        return errors.map((fieldError) => {
+          return `${field} ${errorsMap[fieldError]()}`;
+        }).join('\n');
+      }).join('\n');
       flashMessage(`Error estimating tax!`);
     });
 }
@@ -325,6 +336,13 @@ onMounted(async() => {
         value="Estimate Tax"
         @click="estimateTax"
       />
+
+      <div
+        v-if="estimateTaxErrorMessage"
+        class="error-message"
+      >
+        Estimate Tax Error: {{ estimateTaxErrorMessage }}
+      </div>
     </div>
 
     <div class="divider" />
@@ -484,7 +502,14 @@ onMounted(async() => {
 
 .tax-table-actions {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+}
+
+.error-message {
+  color: var(--color-error);
+  font-size: 0.8rem;
 }
 
 .actions {
