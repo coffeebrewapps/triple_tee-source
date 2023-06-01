@@ -68,6 +68,28 @@ a {
   color: var(--color-text);
 }
 
+.tooltipable .tooltip {
+  visibility: hidden;
+  padding: 4px;
+  position: absolute;
+  left: 10px;
+  top: 2rem;
+  z-index: 1;
+  background-color: var(--color-border-hover);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  border-radius: 4px;
+}
+
+.tooltipable .tooltip.align-right {
+  left: initial;
+  right: 0;
+}
+
+.tooltipable:hover .tooltip {
+  visibility: visible;
+}
+
 .v-enter-active,
 .v-leave-active {
   transition: opacity 0.1s ease;

@@ -477,7 +477,7 @@ onMounted(async() => {
           >
             <div
               v-if="action.show(row, i)"
-              class="action"
+              class="action tooltipable"
               @click="action.click(row, i)"
             >
               <i :class="action.icon" />
@@ -538,23 +538,6 @@ onMounted(async() => {
 
 .action:hover {
   cursor: pointer;
-}
-
-.action .tooltip {
-  visibility: hidden;
-  padding: 4px;
-  position: absolute;
-  left: 10px;
-  bottom: -1rem;
-  z-index: 1;
-  background-color: var(--color-border-hover);
-  color: var(--color-text);
-  font-size: 0.8rem;
-  border-radius: 4px;
-}
-
-.action:hover .tooltip {
-  visibility: visible;
 }
 
 .row-field.payable,
