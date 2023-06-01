@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 /** import:global **/
 
 /** import:utils **/
@@ -82,8 +82,8 @@ async function formatData() {
       results.forEach((result) => {
         const formattedKey = `${result.key}Formatted`;
         formattedData.value[formattedKey] = result.tags;
-      })
-    })
+      });
+    });
 }
 /** section:utils **/
 
@@ -121,7 +121,7 @@ function formattedTag(key, index) {
 }
 /** section:tags **/
 
-onMounted(async () => {
+onMounted(async() => {
   await formatData();
 });
 </script>
@@ -173,12 +173,12 @@ onMounted(async () => {
             class="field-value"
           >
             <div
-              v-for="(tag, j) in data[field]"
-              :key="j"
+              v-for="(tag, t) in data[field]"
+              :key="t"
               class="tag"
               :style="tagStyle(data, tag, field)"
             >
-              {{ formattedTag(field, j) }}
+              {{ formattedTag(field, t) }}
             </div>
 
             <div
@@ -188,7 +188,6 @@ onMounted(async () => {
               --- no value ---
             </div>
           </div> <!-- field-value:tags -->
-
         </div> <!-- data-field -->
       </div> <!-- data-row -->
     </div> <!-- details-container -->
