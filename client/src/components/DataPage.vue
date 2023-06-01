@@ -120,6 +120,11 @@ const props = defineProps({
 
 /** section:global **/
 const {
+  multipartData,
+  listableFields,
+  viewableKeys,
+  creatableKeys,
+  updatableKeys,
   includeKeys,
   inputLabel,
   inputValue,
@@ -427,10 +432,6 @@ const limit = ref(5);
 
 const dataLoading = ref(false);
 
-const listedHeaders = computed(() => {
-  return props.dataFields.filter(h => h.listable);
-});
-
 const listedData = ref([]);
 
 async function updateOffsetAndReload(updated) {
@@ -477,7 +478,7 @@ async function formatListedData() {
 
   data.value.forEach((row, i) => {
     listedData.value.push(Object.assign({}, row));
-    listedHeaders.value.forEach((field) => {
+    listableFields.value.forEach((field) => {
       const key = field.key;
       const value = row[key];
       if (tagsField(key)) {
@@ -593,17 +594,6 @@ const errorAlertSize = computed(() => {
 const viewDialog = ref(false);
 const currentRow = ref();
 
-const viewableFields = computed(() => {
-  return props.dataFields.filter(h => h.viewable).reduce((o, h) => {
-    o[h.key] = h;
-    return o;
-  }, {});
-});
-
-const viewableKeys = computed(() => {
-  return Object.keys(viewableFields.value);
-});
-
 async function openViewDialog(id) {
   viewData(
     id,
@@ -624,17 +614,6 @@ async function openViewDialog(id) {
 const createDialog = ref(false);
 const newRow = ref();
 const createErrors = ref({});
-
-const creatableFields = computed(() => {
-  return props.dataFields.filter(h => h.creatable).reduce((o, h) => {
-    o[h.key] = h;
-    return o;
-  }, {});
-});
-
-const creatableKeys = computed(() => {
-  return Object.keys(creatableFields.value);
-});
 
 const createValidations = computed(() => {
   return props.validations.create || [];
@@ -671,7 +650,7 @@ async function createDataAndCloseDialog(rawParams) {
   const params = formatDataForSave(rawParams);
 
   await dataAccess
-    .create(props.modelClass, params)
+    .create(props.modelClass, params, multipartData.value)
     .then((result) => {
       flashMessage(`Data created successfully!`);
       resetFilters();
@@ -702,17 +681,6 @@ function resetNewRow() {
 const updateDialog = ref(false);
 const currentRowForUpdate = ref();
 const updateErrors = ref({});
-
-const updatableFields = computed(() => {
-  return props.dataFields.filter(h => h.updatable).reduce((o, h) => {
-    o[h.key] = h;
-    return o;
-  }, {});
-});
-
-const updatableKeys = computed(() => {
-  return Object.keys(updatableFields.value);
-});
 
 const updateValidations = computed(() => {
   return props.validations.update || [];
@@ -750,7 +718,7 @@ async function updateDataAndCloseDialog(rawParams) {
   const params = formatDataForSave(rawParams);
 
   await dataAccess
-    .update(props.modelClass, id, params)
+    .update(props.modelClass, id, params, {}, multipartData.value)
     .then((record) => {
       flashMessage(`Data updated successfully!`);
       resetFilters();
@@ -924,7 +892,7 @@ onMounted(async() => {
 
     <TTable
       name=""
-      :headers="listedHeaders"
+      :headers="listableFields"
       :data="listedData"
       :table-actions="tableActions"
       :actions="rowActions"

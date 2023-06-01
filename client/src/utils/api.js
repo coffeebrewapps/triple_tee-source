@@ -67,11 +67,16 @@ export function useApiAccess() {
     });
   }
 
-  async function create(modelClass, params, suffix = null) {
+  async function create(modelClass, params, suffix = null, multipart = false) {
     return new Promise((resolve, reject) => {
       const url = formatUrl(modelClass, null, suffix);
+      const headers = {};
+      if (multipart) {
+        headers['Content-Type'] = 'multipart/form-data';
+      }
+
       axios
-        .post(url, params, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .post(url, params, { headers })
         .then((res) => {
           resolve(res.data.record);
         })
@@ -81,11 +86,16 @@ export function useApiAccess() {
     });
   }
 
-  async function update(modelClass, id, params, suffix = null) {
+  async function update(modelClass, id, params, suffix = null, multipart = false) {
     return new Promise((resolve, reject) => {
       const url = formatUrl(modelClass, id, suffix);
+      const headers = {};
+      if (multipart) {
+        headers['Content-Type'] = 'multipart/form-data';
+      }
+
       axios
-        .put(url, params, { headers: { 'Content-Type': 'multipart/form-data' } })
+        .put(url, params, { headers })
         .then((res) => {
           resolve(res.data.record);
         })

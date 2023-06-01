@@ -22,6 +22,42 @@ export function useInputHelper(schemas) {
     }, {});
   });
 
+  const listableFields = computed(() => {
+    return Object.values(schemasMap.value).filter(f => f.listable);
+  });
+
+  const listableKeys = computed(() => {
+    return listableFields.value.map(f => f.key);
+  });
+
+  const viewableFields = computed(() => {
+    return Object.values(schemasMap.value).filter(f => f.viewable);
+  });
+
+  const viewableKeys = computed(() => {
+    return viewableFields.value.map(f => f.key);
+  });
+
+  const creatableFields = computed(() => {
+    return Object.values(schemasMap.value).filter(f => f.creatable);
+  });
+
+  const creatableKeys = computed(() => {
+    return creatableFields.value.map(f => f.key);
+  });
+
+  const updatableFields = computed(() => {
+    return Object.values(schemasMap.value).filter(f => f.updatable);
+  });
+
+  const updatableKeys = computed(() => {
+    return updatableFields.value.map(f => f.key);
+  });
+
+  const multipartData = computed(() => {
+    return schemas.any(f => f.type === 'file');
+  });
+
   const clientOptionsFields = computed(() => {
     return Object.keys(schemasMap.value).filter(f => clientOptionsField(f));
   });
@@ -477,6 +513,15 @@ export function useInputHelper(schemas) {
 
   return {
     schemasMap,
+    listableFields,
+    listableKeys,
+    viewableFields,
+    viewableKeys,
+    creatableFields,
+    creatableKeys,
+    updatableFields,
+    updatableKeys,
+    multipartData,
     clientOptionsFields,
     clientOptionsField,
     serverOptionsFields,
