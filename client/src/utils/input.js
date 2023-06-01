@@ -55,7 +55,7 @@ export function useInputHelper(schemas) {
   });
 
   const multipartData = computed(() => {
-    return schemas.any(f => f.type === 'file');
+    return Object.values(schemasMap.value).some(f => f.type === 'file');
   });
 
   const clientOptionsFields = computed(() => {
