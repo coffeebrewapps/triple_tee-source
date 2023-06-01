@@ -198,6 +198,9 @@ onMounted(async () => {
 <style scoped>
 .view-container {
   margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .view-container .heading {
