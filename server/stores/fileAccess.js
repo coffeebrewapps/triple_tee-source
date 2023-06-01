@@ -3,6 +3,16 @@ module.exports = ({ config, logger, utils }) => {
   const fs = require('fs');
 
   const schemasData = require('../../_init/schemas.json');
+  const contactsData = require('../../_init/contacts.json');
+  const countriesData = require('../../_init/countries.json');
+  const currenciesData = require('../../_init/currencies.json');
+  const systemConfigsData = require('../../_init/system_configs.json');
+  const bootstrapData = {
+    contacts: contactsData,
+    countries: countriesData,
+    currencies: currenciesData,
+    system_configs: systemConfigsData,
+  };
 
   const writeToFileQueue = {};
 
@@ -93,7 +103,7 @@ module.exports = ({ config, logger, utils }) => {
 
   async function loadData(modelClass) {
     return new Promise((resolve, reject) => {
-      initFileIfNotExists(modelClass)
+      initFileIfNotExists(modelClass, bootstrapData[modelClass])
         .then(() => {
           readFromFile(modelClass)
             .then((result) => {
