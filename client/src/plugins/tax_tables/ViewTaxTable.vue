@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 /** import:utils **/
 import { useDataAccess } from '@/utils/dataAccess';
 import { useInputHelper } from '@/utils/input';
+import { useValidations } from '@/utils/validations';
 
 import { useTaxTableUtils } from './utils';
 import { useTaxTierUtils } from '@/plugins/tax_tiers/utils';
@@ -18,6 +19,7 @@ import { useBannerStore } from '@/stores/banner';
 
 /** import:components **/
 import {
+  TButton,
   TConfirmDialog,
   TInput,
   TTable
@@ -29,6 +31,7 @@ import ViewPage from '@/components/ViewPage.vue';
 /** section:utils **/
 const router = useRouter();
 const dataAccess = useDataAccess();
+const { notEmpty } = useValidations();
 const { flashMessage } = useBannerStore();
 /** section:utils **/
 
@@ -264,6 +267,42 @@ function formatRate(rate) {
 }
 /** section:taxTiers **/
 
+/** section:estimateTax **/
+const estimatedTax = ref();
+
+async function estimateTax() {
+  await dataAccess
+    .view('tax_tables', taxTableId.value, {}, { path: 'estimate' })
+    .then((result) => {
+      estimatedTax.value = result;
+      flashMessage(`Estimated tax successfully!`);
+    })
+    .catch((error) => {
+      console.error(error);
+      flashMessage(`Error estimating tax!`);
+    });
+}
+
+function tierPayable(tier) {
+  return (
+    notEmpty(estimatedTax.value) &&
+    estimatedTax.value.incomeBracket.id === tier.id
+  );
+}
+/** section:estimateTax **/
+
+/** section:styles **/
+const taxTierFieldStyles = computed(() => {
+  return currentTaxTiers.value.map((tier) => {
+    if (tierPayable(tier)) {
+      return `row-field payable`;
+    } else {
+      return `row-field`;
+    }
+  });
+});
+/** section:styles **/
+
 onMounted(async() => {
   await loadTaxTable();
   await loadTaxTiers();
@@ -279,6 +318,14 @@ onMounted(async() => {
       :data-fields="taxTableDataFields"
       :data="currentTaxTable"
     />
+
+    <div class="tax-table-actions">
+      <TButton
+        icon="fa-solid fa-calculator"
+        value="Estimate Tax"
+        @click="estimateTax"
+      />
+    </div>
 
     <div class="divider" />
 
@@ -304,6 +351,13 @@ onMounted(async() => {
             :error-message="''"
           />
         </div>
+
+        <div
+          v-if="!taxTiersEditable[i]"
+          :class="taxTierFieldStyles[i]"
+        >
+          {{ row.minIncome.toFixed(2) }}
+        </div>
       </template> <!-- minIncome -->
 
       <template #[`data-col.maxIncome`]="{ row, i }">
@@ -318,6 +372,18 @@ onMounted(async() => {
             :error-message="''"
           />
         </div>
+
+        <div
+          v-if="!taxTiersEditable[i]"
+          :class="taxTierFieldStyles[i]"
+        >
+          {{ row.maxIncome.toFixed(2) }}
+          <span
+            v-if="tierPayable(row)"
+          >
+            (Nett Income: {{ estimatedTax.nettIncome.toFixed(2) }})
+          </span>
+        </div>
       </template> <!-- maxIncome -->
 
       <template #[`data-col.maxPayableAmount`]="{ row, i }">
@@ -331,6 +397,18 @@ onMounted(async() => {
             size="sm"
             :error-message="''"
           />
+        </div>
+
+        <div
+          v-if="!taxTiersEditable[i]"
+          :class="taxTierFieldStyles[i]"
+        >
+          {{ row.maxPayableAmount.toFixed(2) }}
+          <span
+            v-if="tierPayable(row)"
+          >
+            (Payable: {{ estimatedTax.payable.toFixed(2) }})
+          </span>
         </div>
       </template> <!-- maxPayableAmount -->
 
@@ -349,6 +427,7 @@ onMounted(async() => {
 
         <div
           v-if="!taxTiersEditable[i]"
+          :class="taxTierFieldStyles[i]"
         >
           {{ formatRate(row.rate) }}%
         </div>
@@ -403,6 +482,11 @@ onMounted(async() => {
   gap: 1rem;
 }
 
+.tax-table-actions {
+  display: flex;
+  justify-content: center;
+}
+
 .actions {
   display: flex;
   gap: 8px;
@@ -428,5 +512,11 @@ onMounted(async() => {
 
 .action:hover .tooltip {
   visibility: visible;
+}
+
+.row-field.payable,
+.row-field.payable span {
+  font-weight: 900;
+  font-size: 1.2rem;
 }
 </style>

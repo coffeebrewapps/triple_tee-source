@@ -1,10 +1,8 @@
 module.exports = ({ routes, stores, logger, utils }) => {
-  function viewWithTiers(stores) {
+  function estimateTax(stores) {
     return function(req, res) {
-      const params = req.query;
       const id = req.params.id;
-
-      const result = stores.viewWithTiers(id, params);
+      const result = stores.estimateTax(id);
 
       if (result.success) {
         res.status(200).send(result);
@@ -23,7 +21,7 @@ module.exports = ({ routes, stores, logger, utils }) => {
       { method: 'post', path: '/', handler: routes.create(stores) },
       { method: 'put', path: '/:id', handler: routes.update(stores) },
       { method: 'delete', path: '/:id', handler: routes.remove(stores) },
-      { method: 'get', path: '/:id/with_tiers', handler: viewWithTiers(stores) },
+      { method: 'get', path: '/:id/estimate', handler: estimateTax(stores) },
     ],
   };
 };
