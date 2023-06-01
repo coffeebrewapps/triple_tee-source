@@ -215,9 +215,12 @@ module.exports = ({ dataAccess, logger, utils }) => {
         },
       };
     } catch (error) {
+      logger.error(`previewReceipt`, { error });
       return {
         success: false,
-        errors: error,
+        errors: {
+          root: ['unknown'],
+        },
       };
     }
   }
@@ -241,7 +244,9 @@ module.exports = ({ dataAccess, logger, utils }) => {
       if (receipt.paymentAmount > (billableAmount - paidAmount)) {
         return {
           success: false,
-          errors: { remainingAmount: ['greaterThanOrEqualZero'] },
+          errors: {
+            remainingAmount: ['greaterThanOrEqualZero'],
+          },
         };
       }
 
@@ -326,10 +331,12 @@ module.exports = ({ dataAccess, logger, utils }) => {
         return results[0].result;
       }
     } catch (error) {
-      logger.error(error);
+      logger.error(`createWithTransaction`, { error });
       return {
         success: false,
-        errors: error,
+        errors: {
+          root: ['unknown'],
+        },
       };
     }
   }
@@ -372,9 +379,12 @@ module.exports = ({ dataAccess, logger, utils }) => {
         },
       };
     } catch (error) {
+      logger.error(`viewTemplateData`, { error });
       return {
         success: false,
-        errors: error,
+        errors: {
+          root: ['unknown'],
+        },
       };
     }
   }

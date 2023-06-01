@@ -22,7 +22,7 @@ export function useApiAccess() {
   }
 
   function formatErrors(error) {
-    return [error].flat().filter(e => !!e);
+    return error.response.data.errors;
   }
 
   async function schemas(modelClass = null) {
@@ -80,8 +80,8 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data.record);
         })
-        .catch(({ response }) => {
-          reject(response.data.errors);
+        .catch((error) => {
+          reject(formatErrors(error));
         });
     });
   }
@@ -99,8 +99,8 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data.record);
         })
-        .catch(({ response }) => {
-          reject(response.data.errors);
+        .catch((error) => {
+          reject(formatErrors(error));
         });
     });
   }
@@ -113,8 +113,8 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data.record);
         })
-        .catch(({ response }) => {
-          reject(response.data.errors);
+        .catch((error) => {
+          reject(formatErrors(error));
         });
     });
   }
@@ -127,8 +127,8 @@ export function useApiAccess() {
         .then((res) => {
           resolve(res.data);
         })
-        .catch(({ response }) => {
-          reject(response.data.errors);
+        .catch((error) => {
+          reject(formatErrors(error));
         });
     });
   }

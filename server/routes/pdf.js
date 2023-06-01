@@ -21,7 +21,10 @@ module.exports = (templateType, stores, logger) => {
     const template = result.record;
 
     if (Object.keys(template).length === 0) {
-      res.status(400).send({ errors: 'Record not found' });
+      const errors = {
+        id: ['notFound'],
+      };
+      res.status(400).send({ errors });
       return;
     }
 
@@ -32,7 +35,8 @@ module.exports = (templateType, stores, logger) => {
         return result;
       })
       .catch((error) => {
-        logger.log(`Error parsing template!`, error);
+        logger.error(`Error parsing template!`, error);
+        return ``;
       });
 
     await createResponse(res, htmlString, filename);

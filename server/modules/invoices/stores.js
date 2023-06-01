@@ -219,7 +219,9 @@ module.exports = ({ dataAccess, logger, utils }) => {
       logger.error(`previewInvoice`, { error });
       return {
         success: false,
-        errors: error,
+        errors: {
+          root: ['unknown'],
+        },
       };
     }
   }
@@ -236,13 +238,11 @@ module.exports = ({ dataAccess, logger, utils }) => {
         Object.assign({}, invoiceNumberSequence, { lastUsedNumber: parseInt(invoice.invoiceNumber) })
       );
 
-      logger.log(`updateInvoiceNumberSequence`, { invoiceNumberSequenceResult });
       if (!invoiceNumberSequenceResult.success) {
         return invoiceNumberSequenceResult;
       }
 
       const createdInvoice = create(invoice).record;
-      logger.log(`createdInvoice`, { createdInvoice });
       const createdLines = invoiceLines.map((line) => {
         const result = dataAccess.create(
           'invoice_lines',
@@ -250,7 +250,6 @@ module.exports = ({ dataAccess, logger, utils }) => {
         );
         return result.record;
       });
-      logger.log(`createdInvoiceLines`, { createdLines });
 
       return {
         success: true,
@@ -261,9 +260,12 @@ module.exports = ({ dataAccess, logger, utils }) => {
         ),
       };
     } catch (error) {
+      logger.error(`createWithLines`, { error });
       return {
         success: false,
-        errors: error,
+        errors: {
+          root: ['unknown'],
+        },
       };
     }
   }
@@ -304,9 +306,12 @@ module.exports = ({ dataAccess, logger, utils }) => {
         },
       };
     } catch (error) {
+      logger.error(`viewTemplateData`, { error });
       return {
         success: false,
-        errors: error,
+        errors: {
+          root: ['unknown'],
+        },
       };
     }
   }

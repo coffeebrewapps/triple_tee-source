@@ -115,7 +115,9 @@ module.exports = ({ config, logger, utils }) => {
     if (utils.isEmpty(record)) {
       return {
         success: false,
-        errors: ['not exists'],
+        errors: {
+          id: ['notFound'],
+        },
       };
     }
 
@@ -178,7 +180,9 @@ module.exports = ({ config, logger, utils }) => {
     if (!existing.record) {
       return {
         success: false,
-        errors: ['not exists'],
+        errors: {
+          id: ['notFound'],
+        },
       };
     }
 
@@ -246,7 +250,9 @@ module.exports = ({ config, logger, utils }) => {
     } else {
       return {
         success: false,
-        errors: ['isUsed'],
+        errors: {
+          id: ['isUsed'],
+        },
       };
     }
   }

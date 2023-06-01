@@ -796,10 +796,13 @@ async function deleteDataAndCloseDialog() {
       resetFilters();
     })
     .catch((error) => {
+      const errorFields = formatErrorsForDisplay(error);
+      errorContent.value = Object.entries(errorFields).map(([errorField, errors]) => {
+        return errors.map((err) => {
+          return errorsMap[err.name](err.params);
+        }).join('\n');
+      }).join('\n');
       errorAlert.value = true;
-      errorContent.value = error.map((type) => {
-        return errorsMap[type]();
-      }).join(', ');
     })
     .finally(() => {
       closeDeleteDialog();

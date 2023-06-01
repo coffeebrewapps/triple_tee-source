@@ -1,10 +1,11 @@
 export function useErrors() {
-  const constraintErrors = {
+  const serverErrors = {
     required: (_) => { return 'Field is required'; },
     unique: (_) => { return 'Value must be unique'; },
     foreign: (_) => { return 'Foreign key value not found'; },
     isUsed: (_) => { return 'Record is used'; },
     invalidFile: (_) => { return 'File is invalid'; },
+    notFound: (_) => { return 'Not found'; },
     greaterThanOrEqualZero: (_) => { return 'Must be greater than or equal to 0'; },
     ENOENT: (_) => { return 'File directory does not exist'; },
   };
@@ -40,7 +41,7 @@ export function useErrors() {
 
   return Object.assign(
     {},
-    constraintErrors,
+    serverErrors,
     dateErrors,
     numberErrors
   );

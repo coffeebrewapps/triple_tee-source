@@ -26,7 +26,9 @@ module.exports = ({ dataAccess, logger, utils }) => {
     if (utils.isEmpty(found)) {
       return {
         success: false,
-        errors: ['not exists'],
+        errors: {
+          id: ['notFound'],
+        },
       };
     }
 

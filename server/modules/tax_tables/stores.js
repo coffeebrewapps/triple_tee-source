@@ -113,7 +113,9 @@ module.exports = ({ dataAccess, logger, utils }) => {
     if (lastBracketIndex < 0) {
       return {
         success: false,
-        errors: ['noMatchingIncomeBracket'],
+        errors: {
+          payableTier: ['notFound'],
+        },
       };
     }
 
