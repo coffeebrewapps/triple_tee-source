@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 
 import DataForm from '@/components/DataForm.vue';
 import {
@@ -32,7 +32,7 @@ const fieldKeys = computed(() => {
 });
 
 const fieldsLayout = [
-  { tagFormat: 'md', timezone: 'md' },
+  { tagFormat: 'md', timezoneRegion: 'md', timezone: 'lg' },
   { baseCurrencyId: 'lg', baseContactId: 'lg' },
 ];
 
@@ -48,72 +48,121 @@ function contactLabel(record) {
   return record.name;
 }
 
-const dataFields = computed(() => {
-  return [
-    {
-      key: 'id',
-      type: 'text',
-      label: 'ID',
-      listable: true,
-      viewable: true,
-      creatable: false,
-      updatable: false,
-      sortable: true,
-    },
-    {
-      key: 'tagFormat',
-      type: 'text',
-      label: 'Tag Format',
-      listable: false,
-      viewable: true,
-      creatable: true,
-      updatable: true,
-    },
-    {
-      key: 'timezone',
-      type: 'text',
-      label: 'Timezone',
-      listable: false,
-      viewable: true,
-      creatable: true,
-      updatable: true,
-    },
-    {
-      key: 'baseCurrencyId',
-      type: 'singleSelect',
-      label: 'Base Currency',
-      reference: { label: currencyLabel },
-      listable: true,
-      viewable: true,
-      creatable: true,
-      updatable: true,
-      options: {
-        server: true,
-        pagination: true,
-        modelClass: 'currencies',
-        value: recordValue,
-        label: currencyLabel,
-      },
-    },
-    {
-      key: 'baseContactId',
-      type: 'singleSelect',
-      label: 'Base Contact',
-      reference: { label: contactLabel },
-      listable: true,
-      viewable: true,
-      creatable: true,
-      updatable: true,
-      options: {
-        server: true,
-        pagination: true,
-        modelClass: 'contacts',
-        value: recordValue,
-        label: contactLabel,
-      },
-    },
-  ];
+function timezoneLabel(record) {
+  return record.name;
+}
+
+const timezoneRegions = computed(() => {
+  return Intl.supportedValuesOf('timeZone').reduce((o, timezone) => {
+    const [region, city] = timezone.split('/');
+    if (o[region]) {
+      o[region].push(city);
+    } else {
+      o[region] = [city];
+    }
+    return o;
+  }, {});
 });
+
+const timezoneRegionsForSelect = computed(() => {
+  return Object.keys(timezoneRegions.value).map((region) => {
+    return { value: region, label: region };
+  });
+});
+
+watch(formData, (newVal, oldVal) => {
+  if (newVal.timezoneRegion) {
+    dataFields.value[3].options = timezoneRegionCities(newVal.timezoneRegion);
+  }
+}, { deep: true });
+
+function timezoneRegionCities(region) {
+  if (region === 'UTC') {
+    return [{ value: 'UTC', label: 'UTC' }];
+  }
+
+  const matchCities = timezoneRegions.value[region];
+  return matchCities.map((city) => {
+    const timezone = `${region}/${city}`;
+    return { value: timezone, label: timezone };
+  });
+};
+
+const dataFields = ref([
+  {
+    key: 'id',
+    type: 'text',
+    label: 'ID',
+    listable: true,
+    viewable: true,
+    creatable: false,
+    updatable: false,
+    sortable: true,
+  },
+  {
+    key: 'tagFormat',
+    type: 'text',
+    label: 'Tag Format',
+    listable: false,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+  },
+  {
+    key: 'timezoneRegion',
+    type: 'select',
+    label: 'Timezone (Region)',
+    listable: false,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+    options: timezoneRegionsForSelect.value,
+  },
+  {
+    key: 'timezone',
+    type: 'select',
+    label: 'Timezone (City)',
+    listable: false,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+    options: [],
+  },
+  {
+    key: 'baseCurrencyId',
+    type: 'singleSelect',
+    label: 'Base Currency',
+    reference: { label: currencyLabel },
+    listable: true,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+    options: {
+      server: true,
+      pagination: true,
+      modelClass: 'currencies',
+      value: recordValue,
+      label: currencyLabel,
+    },
+  },
+  {
+    key: 'baseContactId',
+    type: 'singleSelect',
+    label: 'Base Contact',
+    reference: { label: contactLabel },
+    listable: true,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+    options: {
+      server: true,
+      pagination: true,
+      modelClass: 'contacts',
+      value: recordValue,
+      label: contactLabel,
+    },
+  },
+]);
 const {
   formatDataForShow,
   formatDataForSave,
@@ -123,6 +172,7 @@ const {
 function initFormData() {
   return {
     tagFormat: '{{ category }}:{{ name }}',
+    timezoneRegion: 'UTC',
     timezone: 'UTC',
     baseCurrencyId: [],
     baseContactId: [],
@@ -131,6 +181,8 @@ function initFormData() {
 
 async function updateConfig() {
   const params = formatDataForSave(Object.assign({}, formData.value));
+  delete params.timezoneRegion;
+
   await dataAccess
     .create('system_configs', params, { path: 'replace' })
     .then((result) => {
@@ -183,6 +235,9 @@ onMounted(async() => {
         formatFormDataForShow(result)
           .then((formattedResult) => {
             formData.value = formattedResult;
+            if (formData.value.timezone) {
+              formData.value.timezoneRegion = formData.value.timezone.split('/')[0];
+            }
           });
       } else {
         formData.value = initFormData();
