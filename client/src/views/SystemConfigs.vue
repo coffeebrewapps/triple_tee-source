@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 
 import DataForm from '@/components/DataForm.vue';
 import {
@@ -32,7 +32,7 @@ const fieldKeys = computed(() => {
 });
 
 const fieldsLayout = [
-  { tagFormat: 'md', timezoneRegion: 'md', timezone: 'lg' },
+  { tagFormat: 'md', timezone: 'lg' },
   { baseCurrencyId: 'lg', baseContactId: 'lg' },
 ];
 
@@ -48,45 +48,9 @@ function contactLabel(record) {
   return record.name;
 }
 
-function timezoneLabel(record) {
-  return record.name;
-}
-
-const timezoneRegions = computed(() => {
-  return Intl.supportedValuesOf('timeZone').reduce((o, timezone) => {
-    const [region, city] = timezone.split('/');
-    if (o[region]) {
-      o[region].push(city);
-    } else {
-      o[region] = [city];
-    }
-    return o;
-  }, {});
+const timezones = Intl.supportedValuesOf('timeZone').map((timezone) => {
+  return { value: timezone, label: timezone };
 });
-
-const timezoneRegionsForSelect = computed(() => {
-  return Object.keys(timezoneRegions.value).map((region) => {
-    return { value: region, label: region };
-  });
-});
-
-watch(formData, (newVal, oldVal) => {
-  if (newVal.timezoneRegion) {
-    dataFields.value[3].options = timezoneRegionCities(newVal.timezoneRegion);
-  }
-}, { deep: true });
-
-function timezoneRegionCities(region) {
-  if (region === 'UTC') {
-    return [{ value: 'UTC', label: 'UTC' }];
-  }
-
-  const matchCities = timezoneRegions.value[region];
-  return matchCities.map((city) => {
-    const timezone = `${region}/${city}`;
-    return { value: timezone, label: timezone };
-  });
-};
 
 const dataFields = ref([
   {
@@ -109,24 +73,14 @@ const dataFields = ref([
     updatable: true,
   },
   {
-    key: 'timezoneRegion',
-    type: 'select',
-    label: 'Timezone (Region)',
-    listable: false,
-    viewable: true,
-    creatable: true,
-    updatable: true,
-    options: timezoneRegionsForSelect.value,
-  },
-  {
     key: 'timezone',
     type: 'select',
-    label: 'Timezone (City)',
+    label: 'Timezone',
     listable: false,
     viewable: true,
     creatable: true,
     updatable: true,
-    options: [],
+    options: timezones,
   },
   {
     key: 'baseCurrencyId',
@@ -172,7 +126,6 @@ const {
 function initFormData() {
   return {
     tagFormat: '{{ category }}:{{ name }}',
-    timezoneRegion: 'UTC',
     timezone: 'UTC',
     baseCurrencyId: [],
     baseContactId: [],
@@ -181,7 +134,6 @@ function initFormData() {
 
 async function updateConfig() {
   const params = formatDataForSave(Object.assign({}, formData.value));
-  delete params.timezoneRegion;
 
   await dataAccess
     .create('system_configs', params, { path: 'replace' })
@@ -235,9 +187,6 @@ onMounted(async() => {
         formatFormDataForShow(result)
           .then((formattedResult) => {
             formData.value = formattedResult;
-            if (formData.value.timezone) {
-              formData.value.timezoneRegion = formData.value.timezone.split('/')[0];
-            }
           });
       } else {
         formData.value = initFormData();

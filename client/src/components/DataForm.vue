@@ -189,6 +189,10 @@ function fieldToggleLabel(field) {
   return `Has ${inputLabel(field)}`;
 }
 
+function fieldSearchable(field) {
+  return (inputType(field) === 'select' || inputType(field) === 'enum') && schemasMap.value[field].options.length > 30;
+}
+
 function fieldErrorMessage(field) {
   if (!props.errorMessages) { return ``; }
   if (!props.errorMessages[field]) { return ``; }
@@ -370,6 +374,7 @@ onMounted(async() => {
                 :options="schemasMap[field].options"
                 :size="row[field]"
                 :disabled="!fieldUpdatable(field)"
+                :searchable="fieldSearchable(field)"
                 :error-message="fieldErrorMessage(field)"
               />
 
