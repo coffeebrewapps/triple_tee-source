@@ -75,6 +75,7 @@ module.exports = ({ config, logger, utils }) => {
   }
 
   function list(modelClass, filters = {}) {
+    const schema = schemaCache[modelClass];
     const modelData = dataCache[modelClass] || {};
     const data = Object.values(modelData);
     const paramsFilters = filters.filters || {};
@@ -89,7 +90,8 @@ module.exports = ({ config, logger, utils }) => {
     }
 
     if (sortFilters.field) {
-      sortData(filteredData, sortFilters);
+      const fieldType = schema.fields[sortFilters.field].type;
+      sortData(filteredData, Object.assign({}, sortFilters, { fieldType }));
     }
 
     const total = filteredData.length;
@@ -425,11 +427,23 @@ module.exports = ({ config, logger, utils }) => {
 
   function sortData(data, params) {
     const sortField = params.field;
+    const sortFieldType = params.fieldType;
     const sortOrder = params.order === 'asc' ? 1 : -1;
     data.sort((a, b) => {
-      if (a[sortField] < b[sortField]) {
+      let aParsed = a[sortField];
+      let bParsed = b[sortField];
+
+      if (sortFieldType === 'date' || sortFieldType === 'datetime') {
+        if (utils.notEmpty(aParsed)) { aParsed = new Date(aParsed); }
+        if (utils.notEmpty(bParsed)) { bParsed = new Date(bParsed); }
+      } else if (sortFieldType === 'number') {
+        if (utils.notEmpty(aParsed)) { aParsed = parseFloat(aParsed); }
+        if (utils.notEmpty(bParsed)) { bParsed = parseFloat(bParsed); }
+      }
+
+      if (aParsed < bParsed) {
         return sortOrder * -1;
-      } else if (a[sortField] > b[sortField]) {
+      } else if (aParsed > bParsed) {
         return sortOrder * 1;
       } else {
         return 0;
