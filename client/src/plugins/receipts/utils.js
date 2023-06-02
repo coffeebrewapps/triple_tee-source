@@ -1,5 +1,9 @@
 import { useValidations } from '@/utils/validations';
 import { useFormatter } from '@/utils/formatter';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
+
+const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 
 const {
   greaterThan,
@@ -201,7 +205,7 @@ export function useReceiptUtils() {
   }
 
   function invoiceLabel(record) {
-    return `Invoice ${record.invoiceNumber} (${formatDate(record.invoiceDate)})`;
+    return `Invoice ${record.invoiceNumber} (${formatDate(record.invoiceDate, systemConfigs.timezone)})`;
   }
 
   function currencyLabel(record) {

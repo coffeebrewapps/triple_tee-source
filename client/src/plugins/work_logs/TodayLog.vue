@@ -30,10 +30,11 @@ const {
 
 const dataAccess = useDataAccess();
 const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 
 const {
   formatShortTime,
-} = useFormatter(systemConfigsStore);
+} = useFormatter();
 
 const {
   dataFields,
@@ -489,14 +490,14 @@ onMounted(async() => {
 
         <div class="duration">
           <div class="start-time">
-            {{ formatShortTime(log.startTime) }}
+            {{ formatShortTime(log.startTime, systemConfigs.timezone) }}
           </div>
 
           <div
             v-if="notEmpty(log.endTime)"
             class="end-time"
           >
-            to {{ formatShortTime(log.endTime) }}
+            to {{ formatShortTime(log.endTime, systemConfigs.timezone) }}
           </div>
 
           <div

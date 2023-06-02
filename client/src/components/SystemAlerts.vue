@@ -7,9 +7,10 @@ import { useSystemConfigsStore } from '@/stores/systemConfigs';
 const alerts = useAlertsStore();
 
 const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 const {
   formatTimestamp,
-} = useFormatter(systemConfigsStore);
+} = useFormatter();
 
 const showAlerts = computed(() => {
   return alerts.showAlert;
@@ -55,7 +56,7 @@ function toggle() {
         {{ message }}
       </div>
       <div class="timestamp">
-        {{ formatTimestamp(timestamp) }}
+        {{ formatTimestamp(timestamp, systemConfigs) }}
       </div>
     </div>
   </div>

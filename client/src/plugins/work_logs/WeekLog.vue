@@ -27,9 +27,10 @@ defineProps({
 /** section:utils **/
 const dataAccess = useDataAccess();
 const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 const {
   formatLongDate,
-} = useFormatter(systemConfigsStore);
+} = useFormatter();
 const {
   formatDuration,
   calculateDuration,
@@ -294,7 +295,7 @@ onMounted(async() => {
 
           <div class="heading">
             <div class="date">
-              {{ formatLongDate(day) }}
+              {{ formatLongDate(day, systemConfigs.timezone) }}
             </div>
 
             <div
