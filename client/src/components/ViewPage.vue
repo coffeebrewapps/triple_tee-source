@@ -158,7 +158,7 @@ onMounted(async() => {
             <span
               v-if="notEmpty(data) && notEmpty(data[field])"
             >
-              {{ inputValue(field, data, includeKeys, dataFields) }}
+              {{ inputValue(field, data, includeKeys, dataFields, systemConfigs) }}
             </span>
 
             <span

@@ -14,6 +14,7 @@ import { useContactUtils } from './utils';
 /** import:stores **/
 import { useEventsStore } from '@/stores/events';
 import { useBannerStore } from '@/stores/banner';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 /** import:stores **/
 
 /** import:components **/
@@ -44,6 +45,7 @@ const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const events = useEventsStore();
 const { flashMessage } = useBannerStore();
+const systemConfigs = useSystemConfigsStore();
 /** section:utils **/
 
 /** section:global **/
@@ -161,13 +163,13 @@ onMounted(async() => {
                 <span
                   v-if="!fileField(field)"
                 >
-                  {{ inputValue(field, currentContact, includeKeys, dataFields) }}
+                  {{ inputValue(field, currentContact, includeKeys, dataFields, systemConfigs) }}
                 </span>
 
                 <img
                   v-if="fileField(field)"
                   style="width: 50%;"
-                  :src="inputValue(field, currentContact, includeKeys, dataFields)"
+                  :src="inputValue(field, currentContact, includeKeys, dataFields, systemConfigs)"
                 >
               </div> <!-- field-value:notEmpty -->
 

@@ -14,6 +14,7 @@ import { useInvoiceUtils } from './utils';
 /** import:stores **/
 import { useEventsStore } from '@/stores/events';
 import { useBannerStore } from '@/stores/banner';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 /** import:stores **/
 
 /** import:components **/
@@ -32,6 +33,7 @@ const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const events = useEventsStore();
 const { flashMessage } = useBannerStore();
+const systemConfigs = useSystemConfigsStore();
 /** section:utils **/
 
 /** section:global **/
@@ -191,7 +193,7 @@ onMounted(async() => {
                 <span
                   v-if="notEmpty(currentInvoice) && notEmpty(currentInvoice[field])"
                 >
-                  {{ inputValue(field, currentInvoice, includeKeys, dataFields) }}
+                  {{ inputValue(field, currentInvoice, includeKeys, dataFields, systemConfigs) }}
                 </span>
 
                 <span

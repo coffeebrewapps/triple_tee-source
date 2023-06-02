@@ -13,6 +13,7 @@ import { useReceiptUtils } from './utils';
 
 /** import:stores **/
 import { useBannerStore } from '@/stores/banner';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 /** import:stores **/
 
 /** import:components **/
@@ -29,6 +30,7 @@ const router = useRouter();
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const { flashMessage } = useBannerStore();
+const systemConfigs = useSystemConfigsStore();
 /** section:utils **/
 
 /** section:global **/
@@ -180,7 +182,7 @@ onMounted(async() => {
                 <span
                   v-if="notEmpty(currentReceipt) && notEmpty(currentReceipt[field])"
                 >
-                  {{ inputValue(field, currentReceipt, includeKeys, dataFields) }}
+                  {{ inputValue(field, currentReceipt, includeKeys, dataFields, systemConfigs) }}
                 </span>
 
                 <span

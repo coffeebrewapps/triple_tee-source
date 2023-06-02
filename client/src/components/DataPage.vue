@@ -931,7 +931,7 @@ onMounted(async() => {
               <div
                 v-if="notEmpty(row[header.key])"
               >
-                {{ inputValue(header.key, row, includeKeys, combinedDataFields) }}
+                {{ inputValue(header.key, row, includeKeys, combinedDataFields, systemConfigs) }}
               </div>
 
               <div

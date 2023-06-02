@@ -1,13 +1,10 @@
 import { computed } from 'vue';
 
 import { useDataAccess } from '@/utils/dataAccess';
-import { useSystemConfigsStore } from '@/stores/systemConfigs';
 import { useFormatter } from '@/utils/formatter';
 import { useValidations } from '@/utils/validations';
 
 const dataAccess = useDataAccess();
-const systemConfigsStore = useSystemConfigsStore();
-const systemConfigs = systemConfigsStore.getSystemConfigs();
 const {
   formatDate,
   formatTimestamp,
@@ -114,7 +111,7 @@ export function useInputHelper(schemas) {
     return (schemasMap.value[field] || {}).label;
   }
 
-  function inputValue(field, record, includeKeys, schemas) {
+  function inputValue(field, record, includeKeys, schemas, systemConfigs) {
     const referenceField = includeKeys.find(v => v === field);
     const fieldValue = record[field];
     if (isEmpty(fieldValue)) { return; }

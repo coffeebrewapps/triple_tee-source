@@ -181,7 +181,7 @@ onMounted(async() => {
             <div
               v-if="notEmpty(record[field])"
             >
-              {{ inputValue(field, record, includeKeys, dataFields) }}
+              {{ inputValue(field, record, includeKeys, dataFields, systemConfigs) }}
             </div>
 
             <div
