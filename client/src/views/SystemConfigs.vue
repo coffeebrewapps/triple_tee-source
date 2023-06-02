@@ -49,7 +49,8 @@ function contactLabel(record) {
 }
 
 const timezones = Intl.supportedValuesOf('timeZone').map((timezone) => {
-  return { value: timezone, label: timezone };
+  const timezoneLabel = timezone.replace(/_/g, ' ');
+  return { value: timezone, label: timezoneLabel };
 });
 
 const dataFields = ref([
