@@ -302,7 +302,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function filterData(modelClass, filters) {
-    const modelData = dataCache[modelClass] || {};
+    const modelData = dataCache.value[modelClass] || {};
     const filterIndexes = indexCache.value.filter[modelClass] || {};
     const filterSchemas = {};
 
