@@ -104,6 +104,7 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function list(modelClass, filters = {}) {
+    const schema = schemaCache.value[modelClass];
     const modelData = dataCache.value[modelClass] || {};
     const data = Object.values(modelData);
     const paramsFilters = filters.filters || {};
@@ -112,13 +113,14 @@ export const useDataStore = defineStore('data', () => {
     let filteredData = [];
 
     if (Object.keys(paramsFilters).length > 0) {
-      filteredData = filterData(modelClass, data, paramsFilters);
+      filteredData = filterData(modelClass, paramsFilters);
     } else {
       filteredData = data;
     }
 
     if (sortFilters.field) {
-      sortData(filteredData, sortFilters);
+      const fieldType = schema.fields[sortFilters.field].type;
+      sortData(filteredData, Object.assign({}, sortFilters, { fieldType }));
     }
 
     const total = filteredData.length;
@@ -299,7 +301,8 @@ export const useDataStore = defineStore('data', () => {
     return filteredData;
   }
 
-  function filterData(modelClass, modelData, filters) {
+  function filterData(modelClass, filters) {
+    const modelData = dataCache[modelClass] || {};
     const filterIndexes = indexCache.value.filter[modelClass] || {};
     const filterSchemas = {};
 
@@ -400,11 +403,23 @@ export const useDataStore = defineStore('data', () => {
 
   function sortData(data, params) {
     const sortField = params.field;
+    const sortFieldType = params.fieldType;
     const sortOrder = params.order === 'asc' ? 1 : -1;
     data.sort((a, b) => {
-      if (a[sortField] < b[sortField]) {
+      let aParsed = a[sortField];
+      let bParsed = b[sortField];
+
+      if (sortFieldType === 'date' || sortFieldType === 'datetime') {
+        if (validator.notEmpty(aParsed)) { aParsed = new Date(aParsed); }
+        if (validator.notEmpty(bParsed)) { bParsed = new Date(bParsed); }
+      } else if (sortFieldType === 'number') {
+        if (validator.notEmpty(aParsed)) { aParsed = parseFloat(aParsed); }
+        if (validator.notEmpty(bParsed)) { bParsed = parseFloat(bParsed); }
+      }
+
+      if (aParsed < bParsed) {
         return sortOrder * -1;
-      } else if (a[sortField] > b[sortField]) {
+      } else if (aParsed > bParsed) {
         return sortOrder * 1;
       } else {
         return 0;
