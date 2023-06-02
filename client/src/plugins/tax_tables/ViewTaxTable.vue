@@ -115,12 +115,14 @@ async function loadTaxTiers() {
   taxTiersLoading.value = true;
   currentTaxTiers.value = [];
   taxTiersEditable.value = [];
+  taxTiersValidationErrors.value = [];
 
   await dataAccess
     .list('tax_tiers', { filters: { taxTableId: taxTableId.value }, sort: { field: 'minIncome', order: 'asc' } })
     .then((results) => {
       currentTaxTiers.value = results.data;
       taxTiersEditable.value = results.data.map(d => false);
+      taxTiersValidationErrors.value = taxTiersEditable.value.map(t => '');
       flashMessage(`Loaded tax tiers successfully!`);
     })
     .catch((error) => {
