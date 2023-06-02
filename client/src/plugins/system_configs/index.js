@@ -19,6 +19,7 @@ const usePlugin = (router, dataStore) => {
         order: 'desc',
       },
       include: ['baseCurrencyId', 'baseContactId'],
+      offset: 0,
       limit: 1,
     };
     const latest = dataStore.list(modelClass, filters).data[0];
