@@ -83,7 +83,7 @@ module.exports = ({ config, logger, utils }) => {
     let filteredData = [];
 
     if (Object.keys(paramsFilters).length > 0) {
-      filteredData = filterData(modelClass, paramsFilters);
+      filteredData = filterData(modelClass, data, paramsFilters);
     } else {
       filteredData = data;
     }
@@ -323,8 +323,7 @@ module.exports = ({ config, logger, utils }) => {
     return filteredData;
   }
 
-  function filterData(modelClass, filters) {
-    const modelData = dataCache[modelClass] || {};
+  function filterData(modelClass, modelData, filters) {
     const filterIndexes = indexCache.filter[modelClass] || {};
     const filterSchemas = (schemaCache[modelClass].indexes || {}).filter || {};
 

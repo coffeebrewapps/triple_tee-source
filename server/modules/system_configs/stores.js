@@ -43,6 +43,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
         order: 'desc',
       },
       include: ['baseCurrencyId', 'baseContactId'],
+      offset: 0,
       limit: 1,
     };
     const latest = list(filters).data[0];
