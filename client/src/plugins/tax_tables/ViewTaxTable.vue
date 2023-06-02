@@ -385,7 +385,7 @@ onMounted(async() => {
             v-model="row.minIncome"
             type="number"
             label=""
-            size="sm"
+            size="md"
             :error-message="formatTierFieldErrorMessage(i, 'minIncome')"
           />
         </div>
@@ -406,7 +406,7 @@ onMounted(async() => {
             v-model="row.maxIncome"
             type="number"
             label=""
-            size="sm"
+            size="md"
             :error-message="formatTierFieldErrorMessage(i, 'maxIncome')"
           />
         </div>
@@ -432,7 +432,7 @@ onMounted(async() => {
             v-model="row.maxPayableAmount"
             type="number"
             label=""
-            size="sm"
+            size="md"
             :error-message="formatTierFieldErrorMessage(i, 'maxPayableAmount')"
           />
         </div>
@@ -458,7 +458,7 @@ onMounted(async() => {
             v-model="row.rate"
             type="number"
             label=""
-            size="sm"
+            size="md"
             :error-message="formatTierFieldErrorMessage(i, 'rate')"
           />
         </div>
