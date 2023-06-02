@@ -1,3 +1,5 @@
+import { useStore } from './store';
+
 const route = {
   path: '/tax_tables',
   name: 'Tax Tables',
@@ -15,8 +17,13 @@ const viewTaxTableRoute = {
 };
 
 const usePlugin = (router, dataStore) => {
+  const store = useStore(dataStore);
+
   router.addRoute(route);
   router.addRoute(viewTaxTableRoute);
+
+  dataStore.registerFunction('tax_tables', 'view', 'estimate', store.estimateTax);
+
   return route;
 };
 
