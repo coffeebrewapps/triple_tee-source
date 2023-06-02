@@ -5,6 +5,16 @@ import { useDataValidations } from '@/utils/dataValidations';
 import { useDownloader } from '@/utils/downloader';
 
 import schemasData from '@/../../_init/schemas.json';
+import contactsData from '@/../../_init/contacts.json';
+import countriesData from '@/../../_init/countries.json';
+import currenciesData from '@/../../_init/currencies.json';
+import systemConfigsData from '@/../../_init/system_configs.json';
+const bootstrapData = {
+  contacts: contactsData,
+  countries: countriesData,
+  currencies: currenciesData,
+  system_configs: systemConfigsData,
+};
 
 export const useDataStore = defineStore('data', () => {
   const schemas = '_schemas';
@@ -53,7 +63,7 @@ export const useDataStore = defineStore('data', () => {
         if (existingModelData[modelClass] && Object.keys(existingModelData[modelClass]).length > 0) {
           dataCache.value[modelClass] = existingModelData[modelClass];
         } else {
-          dataCache.value[modelClass] = {};
+          dataCache.value[modelClass] = bootstrapData[modelClass] || {};
         }
       });
       localStorage.setItem('data', JSON.stringify(dataCache.value));
@@ -102,7 +112,7 @@ export const useDataStore = defineStore('data', () => {
     let filteredData = [];
 
     if (Object.keys(paramsFilters).length > 0) {
-      filteredData = filterData(modelClass, paramsFilters);
+      filteredData = filterData(modelClass, data, paramsFilters);
     } else {
       filteredData = data;
     }
@@ -289,8 +299,7 @@ export const useDataStore = defineStore('data', () => {
     return filteredData;
   }
 
-  function filterData(modelClass, filters) {
-    const modelData = dataCache.value[modelClass] || {};
+  function filterData(modelClass, modelData, filters) {
     const filterIndexes = indexCache.value.filter[modelClass] || {};
     const filterSchemas = {};
 
