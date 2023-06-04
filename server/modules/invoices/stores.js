@@ -242,7 +242,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
         return invoiceNumberSequenceResult;
       }
 
-      const invoiceResult = dataStore.create('invoices', invoice);
+      const invoiceResult = dataAccess.create('invoices', invoice);
 
       if (!invoiceResult.success) {
         return invoiceResult;
