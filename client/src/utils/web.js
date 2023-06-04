@@ -1,7 +1,7 @@
 export function useWebAccess(dataStore) {
   function lookupFunction(modelClass, fnType, suffix) {
     const functions = dataStore.customFunctionsForModel(modelClass, fnType) || {};
-    if (suffix) {
+    if (suffix && suffix.path) {
       return functions[suffix.path] || dataStore[fnType];
     } else {
       return functions[fnType] || dataStore[fnType];
