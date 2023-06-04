@@ -1,10 +1,13 @@
 module.exports = ({ routes, stores, logger }) => {
   function create(stores) {
     return routes.withFileUpload(['logo'], (req, res) => {
-      const { path, originalname, mimetype } = req.files.logo;
-      const params = Object.assign({}, req.body, { logo: { path, originalname, mimetype } });
-      const result = stores.create(params);
+      const params = Object.assign({}, req.body);
 
+      if (req.files.logo) {
+        params.logo = req.files.logo;
+      }
+
+      const result = stores.create(params);
       if (result.success) {
         res.status(201).send(result);
       } else {
@@ -16,8 +19,12 @@ module.exports = ({ routes, stores, logger }) => {
   function update(stores) {
     return routes.withFileUpload(['logo'], (req, res) => {
       const id = req.params.id;
-      const { path, originalname, mimetype } = req.files.logo;
-      const params = Object.assign({}, req.body, { logo: { path, originalname, mimetype } });
+      const params = Object.assign({}, req.body);
+
+      if (req.files.logo) {
+        params.logo = req.files.logo;
+      }
+
       const result = stores.update(id, params);
 
       if (result.success) {

@@ -10,33 +10,45 @@ module.exports = ({ dataAccess, utils }) => {
   }
 
   function create(params) {
-    const { path, originalname, mimetype } = params.logo;
+    const updatedParams = Object.assign({}, params);
 
-    const logoResult = dataAccess.create(
-      'documents',
-      { filename: originalname, mimeType: mimetype, filePath: path }
-    );
+    if (utils.notEmpty(params.logo)) {
+      const { path, originalname, mimetype } = params.logo;
 
-    if (logoResult.success) {
-      return dataAccess.create(modelClass, Object.assign({}, params, { logo: logoResult.record.id }));
-    } else {
-      return logoResult;
+      const logoResult = dataAccess.create(
+        'documents',
+        { filename: originalname, mimeType: mimetype, filePath: path }
+      );
+
+      if (!logoResult.success) {
+        return logoResult;
+      }
+
+      updatedParams.logo = logoResult.record.id;
     }
+
+    return dataAccess.create(modelClass, updatedParams);
   }
 
   function update(id, params) {
-    const { path, originalname, mimetype } = params.logo;
+    const updatedParams = Object.assign({}, params);
 
-    const logoResult = dataAccess.create(
-      'documents',
-      { filename: originalname, mimeType: mimetype, filePath: path }
-    );
+    if (utils.notEmpty(params.logo)) {
+      const { path, originalname, mimetype } = params.logo;
 
-    if (logoResult.success) {
-      return dataAccess.update(modelClass, id, Object.assign({}, params, { logo: logoResult.record.id }));
-    } else {
-      return logoResult;
+      const logoResult = dataAccess.create(
+        'documents',
+        { filename: originalname, mimeType: mimetype, filePath: path }
+      );
+
+      if (!logoResult.success) {
+        return logoResult;
+      }
+
+      updatedParams.logo = logoResult.record.id;
     }
+
+    return dataAccess.update(modelClass, id, updatedParams);
   }
 
   function remove(id) {
