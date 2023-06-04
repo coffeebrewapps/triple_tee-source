@@ -1,4 +1,4 @@
-// Reference: https://github.com/hyfi06/node-convertToPdf
+// Reference: https://github.com/hyfi06/node-html2pdf
 
 const puppeteer = require('puppeteer');
 const { Duplex } = require('stream');
