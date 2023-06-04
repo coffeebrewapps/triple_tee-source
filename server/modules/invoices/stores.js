@@ -142,8 +142,8 @@ module.exports = ({ dataAccess, logger, utils }) => {
       { include: ['country', 'logo'] }
     ).record;
 
-    const country = billingContact.includes.country[billingContact.country];
-    const logo = billingContact.includes.logo[billingContact.logo];
+    const country = billingContact.includes.country[billingContact.country] || {};
+    const logo = billingContact.includes.logo[billingContact.logo] || {};
 
     return {
       invoiceConfig,
@@ -234,7 +234,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
 
       const invoiceNumberSequenceResult = dataAccess.update(
         'sequences',
-        invoiceNumberSequence,
+        invoiceNumberSequence.id,
         Object.assign({}, invoiceNumberSequence, { lastUsedNumber: parseInt(invoice.invoiceNumber) })
       );
 
@@ -242,7 +242,13 @@ module.exports = ({ dataAccess, logger, utils }) => {
         return invoiceNumberSequenceResult;
       }
 
-      const createdInvoice = create(invoice).record;
+      const invoiceResult = dataStore.create('invoices', invoice);
+
+      if (!invoiceResult.success) {
+        return invoiceResult;
+      }
+
+      const createdInvoice = invoiceResult.record;
       const createdLines = invoiceLines.map((line) => {
         const result = dataAccess.create(
           'invoice_lines',

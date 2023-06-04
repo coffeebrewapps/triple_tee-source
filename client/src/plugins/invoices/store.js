@@ -21,10 +21,11 @@ export function useStore(dataStore) {
     const billingContact = dataStore.view(
       'contacts',
       invoiceConfig.billingContactId,
-      { include: ['country'] }
+      { include: ['country', 'logo'] }
     ).record;
 
-    const country = billingContact.includes.country[billingContact.country];
+    const country = billingContact.includes.country[billingContact.country] || {};
+    const logo = billingContact.includes.logo[billingContact.logo] || {};
 
     return {
       invoiceConfig,
@@ -33,6 +34,7 @@ export function useStore(dataStore) {
       invoiceTemplate,
       currency,
       country,
+      logo,
     };
   }
 
@@ -153,6 +155,8 @@ export function useStore(dataStore) {
         billingContact,
         invoiceTemplate,
         currency,
+        country,
+        logo,
       } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const billingConfigs = dataStore.list(
@@ -193,6 +197,8 @@ export function useStore(dataStore) {
           billingContact,
           invoiceTemplate,
           currency,
+          country,
+          logo,
         },
       };
     } catch (error) {
@@ -212,7 +218,7 @@ export function useStore(dataStore) {
 
       const invoiceNumberSequenceResult = dataStore.update(
         'sequences',
-        invoiceNumberSequence,
+        invoiceNumberSequence.id,
         Object.assign({}, invoiceNumberSequence, { lastUsedNumber: parseInt(invoice.invoiceNumber) })
       );
 
@@ -220,7 +226,13 @@ export function useStore(dataStore) {
         return invoiceNumberSequenceResult;
       }
 
-      const createdInvoice = dataStore.create('invoices', invoice).record;
+      const invoiceResult = dataStore.create('invoices', invoice);
+
+      if (!invoiceResult.success) {
+        return invoiceResult;
+      }
+
+      const createdInvoice = invoiceResult.record;
       const createdLines = invoiceLines.map((line) => {
         const result = dataStore.create(
           'invoice_lines',
@@ -258,6 +270,7 @@ export function useStore(dataStore) {
         invoiceTemplate,
         currency,
         country,
+        logo,
       } = viewInvoiceConfigWithIncludes(invoiceConfigId);
 
       const invoiceLines = dataStore.list(
@@ -276,6 +289,7 @@ export function useStore(dataStore) {
           invoiceTemplate,
           currency,
           country,
+          logo,
         },
       };
     } catch (error) {
