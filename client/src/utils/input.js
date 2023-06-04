@@ -421,7 +421,12 @@ export function useInputHelper(schemas) {
       }
     });
 
-    return data;
+    return Object.entries(data).reduce((o, [key, val]) => {
+      if (notEmpty(val)) {
+        o[key] =  val;
+      }
+      return o;
+    }, {});
   }
 
   function formatErrorsForDisplay(error) {
