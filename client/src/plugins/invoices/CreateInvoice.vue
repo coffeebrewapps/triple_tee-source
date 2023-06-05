@@ -209,6 +209,7 @@ async function submitFilters() {
   resetInvoiceData();
   invoiceLinesLoading.value = true;
 
+  console.log({ filtersData: filtersData.value });
   const params = filtersInputHelper.formatFilters(filtersData.value);
   dataAccess
     .create('invoices', params, { path: 'preview_invoice' })

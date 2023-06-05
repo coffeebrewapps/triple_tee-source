@@ -1,7 +1,12 @@
 <script setup>
+import { ref } from 'vue';
 import DataPage from '@/components/DataPage.vue';
 import { useFormatter } from '@/utils/formatter';
 import { useSystemConfigsStore } from '@/stores/systemConfigs';
+import {
+  TConfirmDialog
+} from 'coffeebrew-vue-components';
+import { useBannerStore } from '@/stores/banner';
 
 const systemConfigsStore = useSystemConfigsStore();
 const systemConfigs = systemConfigsStore.getSystemConfigs();
@@ -9,6 +14,8 @@ const systemConfigs = systemConfigsStore.getSystemConfigs();
 const {
   formatDate,
 } = useFormatter();
+
+const { flashMessage } = useBannerStore();
 
 const fieldsLayout = [
   { type: 'lg', transactionDate: 'md' },
@@ -30,7 +37,16 @@ function currencyLabel(record) {
   const startDate = formatDate(record.effectiveStart, systemConfigs.timezone);
   const endDate = formatDate(record.effectiveEnd, systemConfigs.timezone);
 
-  return `${record.code} (${startDate} - ${endDate})`;
+  let label = `${record.code}`;
+  label = label.concat(` (${startDate}`);
+
+  if (endDate) {
+    label = label.concat(` - ${endDate})`);
+  } else {
+    label = label.concat(` - present)`);
+  }
+
+  return label;
 }
 
 function transactionLabel(record) {
@@ -166,15 +182,60 @@ const filters = {
     { transactionDate: 'md' },
   ],
 };
+
+const actions = {
+  row: {
+    reverse: {
+      name: 'Reverse',
+      icon: 'fa-solid fa-rotate-left',
+      click: async function(row, index) {
+        await openReverseDialog(row);
+      },
+    },
+  },
+};
+
+const currentRowForReverse = ref();
+const reverseDialog = ref(false);
+
+async function openReverseDialog(record) {
+  currentRowForReverse.value = record;
+  reverseDialog.value = true;
+}
+
+function reverseDataAndCloseDialog() {
+  flashMessage(`Reversed transaction successfully!`);
+  closeReverseDialog();
+}
+
+function closeReverseDialog() {
+  reverseDialog.value = false;
+}
 </script>
 
 <template>
-  <DataPage
-    model-class="transactions"
-    data-type="Transactions"
-    :fullscreen="true"
-    :fields-layout="fieldsLayout"
-    :data-fields="dataFields"
-    :filters="filters"
-  />
+  <div class="page-container">
+    <DataPage
+      model-class="transactions"
+      data-type="Transactions"
+      :fullscreen="true"
+      :fields-layout="fieldsLayout"
+      :data-fields="dataFields"
+      :filters="filters"
+      :actions="actions"
+    />
+
+    <TConfirmDialog
+      v-if="currentRowForReverse"
+      v-model="reverseDialog"
+      title="Reverse Transaction"
+      primary-text="Are you sure you want to reverse this transaction?"
+      :secondary-text="currentRowForReverse.description"
+      :width="500"
+      :height="350"
+      class="reverse-dialog"
+      @confirm="reverseDataAndCloseDialog"
+      @cancel="closeReverseDialog"
+    />
+  </div>
 </template>

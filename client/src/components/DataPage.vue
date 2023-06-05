@@ -370,6 +370,10 @@ const tableActions = computed(() => {
     initialActions.unshift(filterAction);
   }
 
+  Object.entries(props.actions.table || {}).forEach((action) => {
+    initialActions.push(action);
+  });
+
   return initialActions;
 });
 
@@ -404,11 +408,17 @@ const rowActions = computed(() => {
   const removeOverride = props.actions.remove || {};
   const removeAction = Object.assign({}, defaultRemoveAction, removeOverride);
 
-  return [
+  const initialActions = [
     viewAction,
     updateAction,
     removeAction,
   ];
+
+  Object.values(props.actions.row || {}).forEach((action) => {
+    initialActions.push(action);
+  });
+
+  return initialActions;
 });
 
 const data = ref([]);
