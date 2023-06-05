@@ -454,7 +454,7 @@ export function useInputHelper(schemas) {
 
     return Object.entries(data).reduce((o, [key, val]) => {
       if (notEmpty(val)) {
-        o[key] =  val;
+        o[key] = val;
       }
       return o;
     }, {});

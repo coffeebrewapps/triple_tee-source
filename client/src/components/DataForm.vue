@@ -135,15 +135,6 @@ function showFileInput(field) {
   return showField(field) && fileField(field);
 }
 
-function fileInputLabel(field) {
-  const label = inputLabel(field);
-  if (notEmpty(data.value[field])) {
-    return `${label} (Existing: ${data.value[field]})`;
-  } else {
-    return label;
-  }
-}
-
 function showTextarea(field) {
   return showField(field) && (multiInputableField(field) || objectField(field));
 }
