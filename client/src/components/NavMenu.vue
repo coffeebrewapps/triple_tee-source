@@ -88,6 +88,17 @@ const navContainerClass = computed(() => {
   height: 100%;
   overflow-y: auto;
   background-color: var(--color-background-soft);
+  box-shadow: 2px 2px 2px var(--color-border);
+}
+
+body.dark .nav {
+  box-shadow: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .nav {
+    box-shadow: none;
+  }
 }
 
 .nav-item {
