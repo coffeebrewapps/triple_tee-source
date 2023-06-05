@@ -28,7 +28,6 @@ async function loadPlugins(app, modulesDir, dependencies) {
 }
 
 async function startServer(port, appConfigPath) {
-  const common = require('../common');
   const utils = require('./utils.js');
   const { readConfigFile } = require('./config.js');
   const config = readConfigFile(appConfigPath);

@@ -292,7 +292,7 @@ function cancel() {
 /** section:action **/
 
 onMounted(async() => {
-  data.value = Object.assign({}, props.modelValue)
+  data.value = Object.assign({}, props.modelValue);
   await initOptionsData()
     .then((result) => {
       inputOptionsData.value = result;
