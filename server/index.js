@@ -2,120 +2,114 @@ const express = require('express');
 const path = require('path');
 const fsPromises = require('fs').promises;
 
+const app = express();
 const cors = require('cors');
 
-const common = require('../common');
-const utils = require('./utils.js');
-const { readConfigFile } = require('./config.js');
-const config = readConfigFile();
-
-const { uploader } = require('./uploader.js')({ config });
-
-const logger = require('./logger.js')({ config });
-const dataAccess = require('./stores/dataAccess')({ config, logger, utils });
-const routes = require('./routes/shared')({ config, logger, utils, uploader });
-
-logger.log(`Loaded configs`, config);
-
-const app = express();
-const port = config.port || process.env.PORT || common.DEFAULT_PORT;
-
-let server = null;
-
-let corsConfig = {};
-
-if (process.env.NODE_ENV === 'development') {
-  corsConfig = {
-    origin: 'http://localhost',
-  };
-}
-
-process.on('uncaughtException', (error, origin) => {
-  logger.error(`Uncaught error occurred`, { error, origin });
-});
-
-process.on('unhandledRejection', (error, origin) => {
-  logger.error(`Unhandled rejection occurred`, { error, origin });
-});
-
-async function loadPlugins(app) {
-  await fsPromises.readdir(config.modulesDir)
+async function loadPlugins(app, modulesDir, dependencies) {
+  await fsPromises.readdir(modulesDir)
     .then((files) => {
       for (const file of files) {
-        const plugin = require(path.join(config.modulesDir, file, 'index.js'))({
-          dataAccess, routes, logger, utils, uploader,
-        });
-        logger.log(`Loading plugin`, { plugin });
+        const plugin = require(path.join(modulesDir, file, 'index.js'))(dependencies);
+        dependencies.logger.log(`Loading plugin`, { plugin });
         const pluginRouter = plugin.router;
         pluginRouter.routes.forEach((route) => {
           if (route.multipart) {
             app[route.method](`${pluginRouter.prefix}${route.path}`, route.handler);
           } else {
-            app[route.method](`${pluginRouter.prefix}${route.path}`, uploader.none(), route.handler);
+            app[route.method](`${pluginRouter.prefix}${route.path}`, dependencies.uploader.none(), route.handler);
           }
         });
-        logger.log(`Loaded plugin`, { name: plugin.name });
+        dependencies.logger.log(`Loaded plugin`, { name: plugin.name });
       }
     })
     .catch((err) => {
-      logger.error(err);
+      dependencies.logger.error(err);
     });
 }
 
-/** * start:Middleware ***/
-app.use(express.json());
-app.use(cors(corsConfig));
-app.use(express.static(path.join(__dirname, 'public')));
-/** * end:Middleware ***/
+async function startServer(port, appConfigPath) {
+  const common = require('../common');
+  const utils = require('./utils.js');
+  const { readConfigFile } = require('./config.js');
+  const config = readConfigFile(appConfigPath);
 
-/** * start:Routes ***/
-app.get('/', function(req, res) {
-  (async() => {
-    await dataAccess.initData();
-    logger.log(`Refreshed data`);
-  })();
-});
+  const { uploader } = require('./uploader.js')({ config });
 
-app.get('/api/schemas', function(req, res) {
-  res.send(dataAccess.listSchemas());
-});
+  const logger = require('./logger.js')({ config });
+  const dataAccess = require('./stores/dataAccess')({ config, logger, utils });
+  const routes = require('./routes/shared')({ config, logger, utils, uploader });
 
-app.get('/api/schemas/:schema', function(req, res) {
-  const modelClass = req.params.schema;
-  res.send(dataAccess.viewSchemas(modelClass));
-});
+  logger.log(`Loaded configs`, config);
 
-app.get('/api/schemas/:schema/download', function(req, res) {
-  const modelClass = req.params.schema;
-  res.send(dataAccess.download(modelClass));
-});
+  let corsConfig = {};
 
-app.put('/api/schemas/:schema/upload', function(req, res) {
-  const modelClass = req.params.schema;
-  const data = req.body;
-  res.send(dataAccess.upload(modelClass, data));
-});
+  if (process.env.NODE_ENV === 'development') {
+    corsConfig = {
+      origin: 'http://localhost',
+    };
+  }
 
-app.get('/api/indexes', function(req, res) {
-  res.send(dataAccess.downloadIndexes());
-});
+  process.on('uncaughtException', (error, origin) => {
+    logger.error(`Uncaught error occurred`, { error, origin });
+  });
 
-app.put('/api/indexes', function(req, res) {
-  const data = req.body;
-  res.send(dataAccess.uploadIndexes(data));
-});
+  process.on('unhandledRejection', (error, origin) => {
+    logger.error(`Unhandled rejection occurred`, { error, origin });
+  });
 
-app.get('/api/countries', function(req, res) {
-  const params = req.query;
-  logger.log(`Requesting countries data`, params);
-  res.send(dataAccess.list('countries', params));
-});
-/** * end:Routes ***/
+  /** * start:Middleware ***/
+  app.use(express.json());
+  app.use(cors(corsConfig));
+  app.use(express.static(path.join(__dirname, 'public')));
+  /** * end:Middleware ***/
 
-(async() => {
+  /** * start:Routes ***/
+  app.get('/', function(req, res) {
+    (async() => {
+      await dataAccess.initData();
+      logger.log(`Refreshed data`);
+    })();
+  });
+
+  app.get('/api/schemas', function(req, res) {
+    res.send(dataAccess.listSchemas());
+  });
+
+  app.get('/api/schemas/:schema', function(req, res) {
+    const modelClass = req.params.schema;
+    res.send(dataAccess.viewSchemas(modelClass));
+  });
+
+  app.get('/api/schemas/:schema/download', function(req, res) {
+    const modelClass = req.params.schema;
+    res.send(dataAccess.download(modelClass));
+  });
+
+  app.put('/api/schemas/:schema/upload', function(req, res) {
+    const modelClass = req.params.schema;
+    const data = req.body;
+    res.send(dataAccess.upload(modelClass, data));
+  });
+
+  app.get('/api/indexes', function(req, res) {
+    res.send(dataAccess.downloadIndexes());
+  });
+
+  app.put('/api/indexes', function(req, res) {
+    const data = req.body;
+    res.send(dataAccess.uploadIndexes(data));
+  });
+
+  app.get('/api/countries', function(req, res) {
+    const params = req.query;
+    logger.log(`Requesting countries data`, params);
+    res.send(dataAccess.list('countries', params));
+  });
+  /** * end:Routes ***/
+
   await dataAccess.initData();
 
-  await loadPlugins(app);
+  await loadPlugins(app, config.modulesDir, { dataAccess, routes, logger, utils, uploader });
 
   // fallback
   app.get('/*', function(req, res) {
@@ -124,9 +118,9 @@ app.get('/api/countries', function(req, res) {
 
   logger.log(`Server starting at port ${port}`);
 
-  server = app.listen(port);
-})();
+  app.listen(port);
+}
 
 module.exports = {
-  server,
+  startServer,
 };

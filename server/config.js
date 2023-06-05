@@ -3,9 +3,8 @@ const fs = require('fs');
 
 const rootDir = path.dirname(__filename);
 
-function readConfigFile() {
-  const configFile = path.join(rootDir, '../app_config.json');
-  const result = fs.readFileSync(configFile, { encoding: 'utf8' });
+function readConfigFile(appConfigPath) {
+  const result = fs.readFileSync(appConfigPath, { encoding: 'utf8' });
   const parsedResult = JSON.parse(result);
 
   let dataDir = null;

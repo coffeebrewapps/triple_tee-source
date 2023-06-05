@@ -10,15 +10,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
 });
 
-const currentDir = path.join(__dirname);
-const configFile = path.join(__dirname, 'app_config.json');
-const result = fs.readFileSync(configFile, { encoding: 'utf8' });
-const parsedResult = JSON.parse(result);
-
-contextBridge.exposeInMainWorld('initAppConfigs', {
-  port: parsedResult.port,
-  currentDir,
-  dataDir: parsedResult.dataDir,
-  logFile: parsedResult.logFile,
-  uploadDir: parsedResult.uploadDir,
+ipcRenderer.on('init-app-config', (event, { port, currentDir, dataDir, logFile, uploadDir }) => {
+  contextBridge.exposeInMainWorld('initAppConfigs', {
+    port,
+    currentDir,
+    dataDir,
+    logFile,
+    uploadDir,
+  });
 });

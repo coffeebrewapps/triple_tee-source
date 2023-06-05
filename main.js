@@ -3,6 +3,10 @@ const fs = require('fs');
 const path = require('path');
 const common = require('./common');
 
+const userDataPath = app.getPath('userData');
+const userConfigFilePath = path.join(userDataPath, 'app_config.json');
+const initConfigFilePath = path.join(__dirname, '_init', 'app_config.json');
+
 async function handleDirOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog({ properties: ['openDirectory'] });
   if (!canceled) {
@@ -17,6 +21,12 @@ async function handleFileOpen() {
   }
 }
 
+const initFiles = () => {
+  if (!fs.existsSync(userConfigFilePath)) {
+    fs.copyFileSync(initConfigFilePath, userConfigFilePath);
+  }
+}
+
 const createWindow = () => {
   const win = new BrowserWindow({
     width: common.DEFAULT_WIN_WIDTH,
@@ -27,11 +37,16 @@ const createWindow = () => {
     },
   });
 
+  const currentDir = path.join(__dirname);
+  const result = fs.readFileSync(userConfigFilePath, { encoding: 'utf8' });
+  const parsedResult = JSON.parse(result);
+
+  win.webContents.send('init-app-config', Object.assign({}, parsedResult, { currentDir }));
+
   win.loadFile('./config_app/index.html');
 
-  ipcMain.on('set-app-config', (event, { port, dataDir, logFile, uploadDir }) => {
-    const configFile = path.join(__dirname, 'app_config.json');
-    const result = fs.readFileSync(configFile, { encoding: 'utf8' });
+  ipcMain.on('set-app-config', async (event, { port, dataDir, logFile, uploadDir }) => {
+    const result = fs.readFileSync(userConfigFilePath, { encoding: 'utf8' });
     const parsedResult = JSON.parse(result);
     const updatedConfig = Object.assign({}, parsedResult);
 
@@ -57,10 +72,12 @@ const createWindow = () => {
       parsedResult.logFile !== updatedConfig.logFile ||
       parsedResult.uploadDir !== updatedConfig.uploadDir
     ) {
-      fs.writeFileSync(configFile, JSON.stringify(updatedConfig), { encoding: 'utf8' });
+      fs.writeFileSync(userConfigFilePath, JSON.stringify(updatedConfig), { encoding: 'utf8' });
     }
 
-    require('./dist/index');
+    const { startServer } = require('./dist/index');
+    await startServer(updatedConfig.port, userConfigFilePath);
+
     const res = win.loadURL(`http://localhost:${updatedConfig.port}`);
 
     res.then((data) => {
@@ -75,6 +92,7 @@ app.whenReady().then(() => {
   ipcMain.handle('dialog:openDir', handleDirOpen);
   ipcMain.handle('dialog:openFile', handleFileOpen);
 
+  initFiles();
   createWindow();
 
   app.on('activate', () => {

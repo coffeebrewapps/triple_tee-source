@@ -4,6 +4,7 @@ module.exports = {
       '^/bin$',
       '^/client$',
       '^/data$',
+      '^/dev$',
       '^/node_modules$',
       '^/public$',
       '^/server$',
