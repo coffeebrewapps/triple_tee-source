@@ -3,6 +3,7 @@ import { computed } from 'vue';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useFormatter } from '@/utils/formatter';
 import { useValidations } from '@/utils/validations';
+import { useFileUtils } from '@/utils/file';
 
 const dataAccess = useDataAccess();
 const {
@@ -10,6 +11,10 @@ const {
   formatTimestamp,
 } = useFormatter();
 const { isEmpty, notEmpty } = useValidations();
+
+const {
+  base64ToFile,
+} = useFileUtils();
 
 export function useInputHelper(schemas) {
   const schemasMap = computed(() => {
@@ -279,24 +284,6 @@ export function useInputHelper(schemas) {
     } else {
       return fieldValue;
     }
-  }
-
-  async function base64ToFile(datauri, filename, mimeType) {
-    return new Promise((resolve, reject) => {
-      fetch(datauri)
-        .then((result) => {
-          result.blob()
-            .then((blob) => {
-              resolve(new File([blob], filename, { type: mimeType }));
-            })
-            .catch((error) => {
-              reject(error);
-            });
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    });
   }
 
   async function formatDataForShow(field, record) {

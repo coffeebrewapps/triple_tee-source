@@ -7,6 +7,7 @@ import { onMounted, ref, computed, watch } from 'vue';
 import { useInputHelper } from '@/utils/input';
 import { useErrors } from '@/utils/errors';
 import { useValidations } from '@/utils/validations';
+import { useFileUtils } from '@/utils/file';
 /** import:utils **/
 
 /** import:components **/
@@ -186,13 +187,17 @@ function fieldErrorMessage(field) {
 /** section:inputUtils **/
 
 /** section:fileUtils **/
+const {
+  fileToBase64,
+} = useFileUtils();
+
 function sanitizeFileFields(formData) {
   const sanitized = Object.assign({}, formData);
   fileFields.value.forEach((field) => {
     if (notEmpty(sanitized[field]) && notEmpty(props.modelValue[field])) {
       compareFiles(sanitized[field], props.modelValue[field])
         .then((result) => {
-          if (result.file1 === result.file2) {
+          if (result) {
             sanitized[field] = null;
           }
         })
@@ -204,27 +209,15 @@ function sanitizeFileFields(formData) {
   return sanitized;
 }
 
-async function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const fileReader = new FileReader();
-    fileReader.readAsDataURL(file);
-
-    fileReader.onload = () => {
-      resolve(fileReader.result);
-    };
-
-    fileReader.onerror = (error) => {
-      reject(error);
-    };
-  });
-}
-
 async function compareFiles(file1, file2) {
   return new Promise((resolve, reject) => {
     const promises = [fileToBase64(file1), fileToBase64(file2)];
     Promise.all(promises)
       .then((results) => {
-        resolve({ file1: results[0], file2: results[1] });
+        resolve(results[0] === results[1]);
+      })
+      .catch((error) => {
+        reject(error);
       });
   });
 }
