@@ -416,7 +416,7 @@ onMounted(async() => {
               />
 
               <TDateRange
-                v-if="showDateRange(field)"
+                v-if="showDateRange(field) && data[field]"
                 v-model:start-date="data[field].startDate"
                 v-model:end-date="data[field].endDate"
                 :label="inputLabel(field)"
@@ -425,7 +425,7 @@ onMounted(async() => {
               />
 
               <TDateTimeRange
-                v-if="showDateTimeRange(field)"
+                v-if="showDateTimeRange(field) && data[field]"
                 v-model:start-time="data[field].startTime"
                 v-model:end-time="data[field].endTime"
                 :label="inputLabel(field)"
