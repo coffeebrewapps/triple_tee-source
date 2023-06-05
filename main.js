@@ -35,6 +35,7 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
       nodeIntegration: true,
     },
+    icon: './icons/t3_icon.png',
   });
 
   const currentDir = path.join(__dirname);

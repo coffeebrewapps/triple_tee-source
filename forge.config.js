@@ -1,5 +1,8 @@
 module.exports = {
   packagerConfig: {
+    name: 'Triple Tee App',
+    executableName: 'triple_tee',
+    icon: './icons/icon',
     ignore: [
       '^/bin$',
       '^/client$',
@@ -18,15 +21,28 @@ module.exports = {
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        options: {
+          icon: './icons/t3_icon.ico',
+        },
+      },
     },
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
+      config: {
+        options: {
+          icon: './icons/t3_icon.icns',
+        },
+      },
     },
     {
       name: '@electron-forge/maker-deb',
-      config: {},
+      config: {
+        options: {
+          icon: './icons/t3_icon.png',
+        },
+      },
     },
     {
       name: '@electron-forge/maker-rpm',
