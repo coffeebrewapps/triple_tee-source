@@ -114,7 +114,7 @@ async function loadTemplate() {
     })
     .catch((error) => {
       flashMessage(`Error loading template!`);
-      console.log(error);
+      console.error(error);
     });
 }
 

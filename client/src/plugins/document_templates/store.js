@@ -57,7 +57,7 @@ export function useStore(dataStore) {
           });
         })
         .catch((error) => {
-          console.log(`Error parsing template!`, error);
+          console.error(error);
           reject(error);
         });
     });

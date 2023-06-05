@@ -197,7 +197,7 @@ async function createTemplate() {
     .catch((error) => {
       flashMessage(`Error creating template!`);
       formErrors.value = formatErrorsForDisplay(error);
-      console.log(error);
+      console.error(error);
     });
 }
 

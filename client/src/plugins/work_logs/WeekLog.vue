@@ -219,7 +219,7 @@ async function loadWeekly() {
     })
     .catch((error) => {
       flashMessage(`Error loading work logs!`);
-      console.log(error);
+      console.error(error);
     });
 }
 

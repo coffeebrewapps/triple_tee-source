@@ -367,7 +367,7 @@ async function loadSchemas() {
     })
     .catch((error) => {
       flashMessage(`Error loading schemas!`);
-      console.log(error);
+      console.error(error);
     });
 }
 
@@ -395,7 +395,7 @@ async function loadToday() {
     })
     .catch((error) => {
       flashMessage(`Error loading work logs!`);
-      console.log(error);
+      console.error(error);
     });
 }
 

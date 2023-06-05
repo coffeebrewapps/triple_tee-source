@@ -76,7 +76,7 @@ async function loadContact() {
       flashMessage(`Loaded contact successfully!`);
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
       flashMessage(`Error loading contact!`);
     });
 }

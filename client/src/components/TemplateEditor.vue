@@ -166,7 +166,7 @@ async function confirmMarkupEdit() {
     .catch((error) => {
       previewError.value = true;
       parsedMarkup.value = `Markup error`;
-      console.log(error);
+      console.error(error);
     })
     .finally(() => {
       markupEditable.value = false;
@@ -196,7 +196,7 @@ async function confirmSampleDataEdit() {
     .catch((error) => {
       previewError.value = true;
       parsedMarkup.value = `Sample data error`;
-      console.log(error);
+      console.error(error);
     })
     .finally(() => {
       sampleDataEditable.value = false;
@@ -292,7 +292,7 @@ async function generateTemplate() {
       viewPdf();
     })
     .catch((error) => {
-      console.log(error);
+      console.error(error);
     })
     .finally(() => {
       closePreviewDialog();
