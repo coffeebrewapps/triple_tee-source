@@ -281,6 +281,24 @@ export function useInputHelper(schemas) {
     }
   }
 
+  async function base64ToFile(datauri, filename, mimeType) {
+    return new Promise((resolve, reject) => {
+      fetch(datauri)
+        .then((result) => {
+          result.blob()
+            .then((blob) => {
+              resolve(new File([blob], filename, { type: mimeType }));
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        })
+        .catch((error) => {
+          reject(error);
+        });
+    });
+  }
+
   async function formatDataForShow(field, record) {
     return new Promise((resolve, reject) => {
       const fieldValue = setDefaultValue(field, record);
@@ -308,7 +326,14 @@ export function useInputHelper(schemas) {
           Object.keys(record.includes[field]).length > 0
         ) {
           const foreignValue = record.includes[field][fieldValue];
-          resolve(fileOptions.label(foreignValue));
+
+          base64ToFile(foreignValue.rawData, foreignValue.filename, foreignValue.mimeType)
+            .then((file) => {
+              resolve(file);
+            })
+            .catch((error) => {
+              reject(error);
+            });
         } else {
           dataAccess
             .view(fileOptions.modelClass, fieldValue, {})
@@ -318,7 +343,13 @@ export function useInputHelper(schemas) {
               }
 
               record.includes[field][fieldValue] = result;
-              resolve(fileOptions.label(result));
+              base64ToFile(result.rawData, result.filename, result.mimeType)
+                .then((file) => {
+                  resolve(file);
+                })
+                .catch((error) => {
+                  reject(error);
+                });
             })
             .catch((error) => {
               console.error(error);

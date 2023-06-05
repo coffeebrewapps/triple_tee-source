@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { onMounted, ref, computed } from 'vue';
+import { onMounted, ref, computed, watch } from 'vue';
 /** import:global **/
 
 /** import:utils **/
@@ -16,6 +16,7 @@ import {
   TDateRange,
   TDateTimePicker,
   TDateTimeRange,
+  TFilePicker,
   TInput,
   TSelect,
   TSelectTable,
@@ -85,17 +86,6 @@ const props = defineProps({
     },
   },
 });
-
-const data = computed({
-  get: () => {
-    return props.modelValue;
-  },
-  set: (val) => {
-    emit('update:modelValue', val);
-  },
-});
-
-const dataForSubmit = ref({});
 /** section:props **/
 
 /** section:emit **/
@@ -115,6 +105,7 @@ const {
   nullToggleableField,
   nullToggleableFields,
   objectField,
+  fileFields,
   fileField,
   formatInputOptionsData,
   fetchOptions,
@@ -204,11 +195,47 @@ function fieldErrorMessage(field) {
 /** section:inputUtils **/
 
 /** section:fileUtils **/
-const uploadedFiles = ref({});
+function sanitizeFileFields(formData) {
+  const sanitized = Object.assign({}, formData);
+  fileFields.value.forEach((field) => {
+    if (notEmpty(sanitized[field]) && notEmpty(props.modelValue[field])) {
+      compareFiles(sanitized[field], props.modelValue[field])
+        .then((result) => {
+          if (result.file1 === result.file2) {
+            sanitized[field] = null;
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  });
+  return sanitized;
+}
 
-function handleFileUpload(event, field) {
-  const file = event.target.files[0];
-  uploadedFiles.value[field] = file;
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+
+    fileReader.onload = () => {
+      resolve(fileReader.result);
+    };
+
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+  });
+}
+
+async function compareFiles(file1, file2) {
+  return new Promise((resolve, reject) => {
+    const promises = [fileToBase64(file1), fileToBase64(file2)];
+    Promise.all(promises)
+      .then((results) => {
+        resolve({ file1: results[0], file2: results[1] });
+      });
+  });
 }
 /** section:fileUtils **/
 
@@ -243,6 +270,14 @@ async function offsetChange(field, newOffset) {
 }
 /** section:selectTableUtils **/
 
+/** section:data **/
+const data = ref({});
+
+watch(props.modelValue, (newVal, oldVal) => {
+  data.value = Object.assign({}, newVal);
+});
+/** section:data **/
+
 /** section:styles **/
 const formClass = computed(() => {
   if (props.compact) {
@@ -262,20 +297,9 @@ function dataFieldClass(field) {
 /** section:styles **/
 
 /** section:action **/
-function formatDataForSubmit() {
-  return Object.entries(data.value).reduce((o, [key, value]) => {
-    if (inputType(key) === 'file') {
-      o[key] = uploadedFiles.value[key];
-    } else {
-      o[key] = value;
-    }
-    return o;
-  }, {});
-}
-
 function submitData() {
-  const formattedData = formatDataForSubmit();
-  emit('submit', formattedData);
+  const sanitized = sanitizeFileFields(data.value);
+  emit('submit', sanitized);
 }
 
 function cancel() {
@@ -284,7 +308,6 @@ function cancel() {
 /** section:action **/
 
 onMounted(async() => {
-  dataForSubmit.value = props.modelValue;
   await initOptionsData()
     .then((result) => {
       inputOptionsData.value = result;
@@ -327,15 +350,13 @@ onMounted(async() => {
                 :error-message="fieldErrorMessage(field)"
               />
 
-              <TInput
+              <TFilePicker
                 v-if="showFileInput(field)"
-                ref="fileRefs"
-                type="file"
-                :label="fileInputLabel(field)"
+                v-model="data[field]"
+                :label="inputLabel(field)"
                 :size="row[field]"
                 :disabled="!fieldUpdatable(field)"
                 :error-message="fieldErrorMessage(field)"
-                @change="handleFileUpload($event, field)"
               />
 
               <TTextarea
