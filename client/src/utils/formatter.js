@@ -3,27 +3,43 @@ const liquidEngine = new Liquid();
 
 export function useFormatter() {
   function formatDate(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
-    const locale = formatOptions.locale;
-    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone });
+    if (rawValue) {
+      const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+      const locale = formatOptions.locale;
+      return (new Date(rawValue)).toLocaleDateString(locale, { timeZone });
+    } else {
+      return null;
+    }
   }
 
   function formatLongDate(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
-    const locale = formatOptions.locale;
-    return (new Date(rawValue)).toLocaleDateString(locale, { timeZone, dateStyle: 'full' });
+    if (rawValue) {
+      const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+      const locale = formatOptions.locale;
+      return (new Date(rawValue)).toLocaleDateString(locale, { timeZone, dateStyle: 'full' });
+    } else {
+      return null;
+    }
   }
 
   function formatTimestamp(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
-    const locale = formatOptions.locale;
-    return (new Date(rawValue)).toLocaleString(locale, { timeZone });
+    if (rawValue) {
+      const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+      const locale = formatOptions.locale;
+      return (new Date(rawValue)).toLocaleString(locale, { timeZone });
+    } else {
+      return null;
+    }
   }
 
   function formatShortTime(rawValue, timeZone) {
-    const formatOptions = Intl.DateTimeFormat().resolvedOptions();
-    const locale = formatOptions.locale;
-    return (new Date(rawValue)).toLocaleTimeString(locale, { timeZone, timeStyle: 'medium' });
+    if (rawValue) {
+      const formatOptions = Intl.DateTimeFormat().resolvedOptions();
+      const locale = formatOptions.locale;
+      return (new Date(rawValue)).toLocaleTimeString(locale, { timeZone, timeStyle: 'medium' });
+    } else {
+      return null;
+    }
   }
 
   function formatNumber(value, dp) {
