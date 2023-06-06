@@ -504,6 +504,9 @@ events.registerListener(
     id: `DataPage-${props.dataType}`,
     invoke: (payload) => {
       if (payload.dataType === props.dataType) {
+        if (payload.filters) {
+          filtersData.value = Object.assign({}, payload.filters);
+        }
         loadData();
       }
     },

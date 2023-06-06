@@ -54,7 +54,7 @@ async function openViewPage(row) {
 }
 
 async function openCreatePage() {
-  router.push({ name: 'Create Receipt' });
+  router.push({ name: 'Create Receipt', query: { contactId: props.contactId, invoiceId: props.invoiceId } });
 }
 </script>
 

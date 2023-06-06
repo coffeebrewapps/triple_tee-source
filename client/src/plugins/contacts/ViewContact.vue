@@ -27,6 +27,7 @@ import InvoiceConfigs from '@/plugins/invoice_configs/InvoiceConfigs.vue';
 import ReceiptConfigs from '@/plugins/receipt_configs/ReceiptConfigs.vue';
 import BillingConfigs from '@/plugins/billing_configs/BillingConfigs.vue';
 import InvoicesPage from '@/plugins/invoices/InvoicesPage.vue';
+import ReceiptsPage from '@/plugins/receipts/ReceiptsPage.vue';
 /** import:components **/
 
 /** section:utils **/
@@ -90,22 +91,27 @@ const tabs = [
   { label: 'Receipt Configs', onchange: loadReceiptConfig },
   { label: 'Billing Configs', onchange: loadBillingConfig },
   { label: 'Invoices', onchange: loadInvoices },
+  { label: 'Receipts', onchange: loadReceipts },
 ];
 
 async function loadInvoiceConfig() {
-  events.emitEvent('loadData', { dataType: 'Invoice Configs' });
+  events.emitEvent('loadData', { dataType: 'Invoice Configs', filters: { billingContactId: contactId.value } });
 }
 
 async function loadReceiptConfig() {
-  events.emitEvent('loadData', { dataType: 'Receipt Configs' });
+  events.emitEvent('loadData', { dataType: 'Receipt Configs', filters: { billingContactId: contactId.value } });
 }
 
 async function loadBillingConfig() {
-  events.emitEvent('loadData', { dataType: 'Billing Configs' });
+  events.emitEvent('loadData', { dataType: 'Billing Configs', filters: { contactId: contactId.value } });
 }
 
 async function loadInvoices() {
-  events.emitEvent('loadData', { dataType: 'Invoices' });
+  events.emitEvent('loadData', { dataType: 'Invoices', filters: { contactId: contactId.value } });
+}
+
+async function loadReceipts() {
+  events.emitEvent('loadData', { dataType: 'Receipts', filters: { contactId: contactId.value } });
 }
 
 async function triggerTabEvent(i) {
@@ -211,6 +217,13 @@ onMounted(async() => {
           :contact-id="contactId"
         />
       </template> <!-- template-4 -->
+
+      <template #tab-5>
+        <ReceiptsPage
+          v-if="selectedTab === 5"
+          :contact-id="contactId"
+        />
+      </template> <!-- template-5 -->
     </TabContainer>
   </div> <!-- page-container -->
 </template>
