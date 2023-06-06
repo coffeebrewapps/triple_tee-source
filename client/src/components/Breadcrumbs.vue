@@ -29,7 +29,11 @@ const navs = computed(() => {
 });
 
 function goToNav(nav) {
-  router.push(nav);
+  if (nav.meta.buildParams) {
+    router.push({ name: nav.name, ...nav.meta.buildParams(currentRoute.value) });
+  } else {
+    router.push({ name: nav.name });
+  }
 }
 </script>
 

@@ -3,7 +3,7 @@ import { computed } from 'vue';
 import DataPage from '@/components/DataPage.vue';
 
 const props = defineProps({
-  billingContactId: {
+  contactId: {
     type: String,
     default: null,
   },
@@ -69,7 +69,7 @@ const dataFields = computed(() => {
       type: 'singleSelect',
       label: 'Contact',
       reference: { label: contactLabel },
-      defaultValue: () => { return props.billingContactId; },
+      defaultValue: () => { return props.contactId; },
       listable: true,
       viewable: true,
       creatable: true,
@@ -109,8 +109,8 @@ const validations = {
 const filters = computed(() => {
   const initData = {};
 
-  if (props.billingContactId) {
-    initData.billingContactId = [{ value: props.billingContactId }];
+  if (props.contactId) {
+    initData.billingContactId = [{ value: props.contactId }];
   }
 
   return {

@@ -33,6 +33,10 @@ import ViewDialog from '@/components/ViewDialog.vue';
 
 /** section:props **/
 const props = defineProps({
+  showHeading: {
+    type: Boolean,
+    default: false,
+  },
   dataType: {
     type: String,
     default: '',
@@ -868,7 +872,10 @@ onMounted(async() => {
 
 <template>
   <div class="page-container">
-    <h2 class="heading">
+    <h2
+      v-if="showHeading"
+      class="heading"
+    >
       {{ dataType }}
     </h2>
 

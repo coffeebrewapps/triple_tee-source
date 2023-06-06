@@ -21,7 +21,7 @@ const actions = {
 };
 
 async function openViewPage(id) {
-  router.push({ name: 'View Contact', params: { id } });
+  router.push({ name: 'View Contact', params: { contactId: id } });
 }
 </script>
 

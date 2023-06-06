@@ -52,6 +52,7 @@ const {
 /** section:filters **/
 const filtersData = ref({
   tags: [],
+  contactId: [],
   invoiceConfigId: [],
   startTime: {
     startTime: null,
@@ -62,10 +63,6 @@ const filtersData = ref({
     endTime: null,
   },
 });
-
-if (notEmpty(contactId.value)) {
-  filtersData.value.invoiceConfigId = [{ value: contactId.value }];
-}
 
 const filtersDataFields = computed(() => {
   return [
@@ -209,7 +206,6 @@ async function submitFilters() {
   resetInvoiceData();
   invoiceLinesLoading.value = true;
 
-  console.log({ filtersData: filtersData.value });
   const params = filtersInputHelper.formatFilters(filtersData.value);
   dataAccess
     .create('invoices', params, { path: 'preview_invoice' })
@@ -228,6 +224,7 @@ function resetFilters() {
   resetInvoiceData();
 
   filtersData.value = {
+    contactId: [],
     tags: [],
     invoiceConfigId: [],
     startTime: {
@@ -239,6 +236,10 @@ function resetFilters() {
       endTime: null,
     },
   };
+
+  if (notEmpty(contactId.value)) {
+    filtersData.value.contactId = [{ value: contactId.value }];
+  }
 }
 /** section:filters **/
 

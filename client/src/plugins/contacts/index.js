@@ -7,13 +7,76 @@ const route = {
 };
 
 const viewContactRoute = {
-  path: '/contacts/:id',
+  path: '/contacts/:contactId',
   name: 'View Contact',
   component: () => import('./ViewContact.vue'),
+  props: true,
   meta: {
     parentRoute: { name: 'Contacts' },
     hidden: true,
   },
+  children: [
+    {
+      path: 'details',
+      name: 'Contact Details',
+      component: () => import('./ContactDetails.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contacts' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'invoice_configs',
+      name: 'Contact Invoice Configs',
+      component: () => import('@/plugins/invoice_configs/InvoiceConfigs.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contacts' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'receipt_configs',
+      name: 'Contact Receipt Configs',
+      component: () => import('@/plugins/receipt_configs/ReceiptConfigs.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contacts' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'billing_configs',
+      name: 'Contact Billing Configs',
+      component: () => import('@/plugins/billing_configs/BillingConfigs.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contacts' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'invoices',
+      name: 'Contact Invoices',
+      component: () => import('@/plugins/invoices/InvoicesPage.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contacts' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'receipts',
+      name: 'Contact Receipts',
+      component: () => import('@/plugins/receipts/ReceiptsPage.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contacts' },
+        hidden: true,
+      },
+    },
+  ],
 };
 
 const usePlugin = (router, dataStore, uploader) => {
