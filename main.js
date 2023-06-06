@@ -1,6 +1,7 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const net = require('net');
 const common = require('./common');
 
 const userDataPath = app.getPath('userData');
@@ -19,6 +20,10 @@ async function handleFileOpen() {
   if (!canceled) {
     return filePaths[0];
   }
+}
+
+async function handleShowFileInFinder(event, { filePath }) {
+  await shell.showItemInFolder(filePath);
 }
 
 const initFiles = () => {
@@ -50,6 +55,27 @@ const createWindow = () => {
   );
 
   win.loadFile('./config_app/index.html');
+
+  ipcMain.on('check-port', async(event, { port }) => {
+    return new Promise((resolve, reject) => {
+      const server = net.createServer();
+
+      server.once('error', function(err) {
+        if (err.code === 'EADDRINUSE') {
+          resolve(false);
+        } else {
+          reject(err);
+        }
+      });
+
+      server.once('listening', function() {
+        server.close();
+        resolve(true);
+      });
+
+      server.listen(port);
+    });
+  });
 
   ipcMain.on('set-app-config', async(event, { port, dataRootDir }) => {
     const result = fs.readFileSync(userConfigFilePath, { encoding: 'utf8' });
@@ -87,6 +113,7 @@ const createWindow = () => {
 app.whenReady().then(() => {
   ipcMain.handle('dialog:openDir', handleDirOpen);
   ipcMain.handle('dialog:openFile', handleFileOpen);
+  ipcMain.handle('finder:openFile', handleShowFileInFinder);
 
   initFiles();
   createWindow();

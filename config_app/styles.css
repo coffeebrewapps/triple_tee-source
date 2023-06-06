@@ -54,7 +54,7 @@ body {
 .input-control {
   display: flex;
   gap: 0.5rem;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .input-label {
@@ -78,6 +78,11 @@ body {
 .input-hint {
   font-size: 0.6rem;
   font-style: oblique;
+}
+
+.input-error {
+  color: red;
+  font-size: 0.8rem;
 }
 
 input {
