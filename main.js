@@ -26,6 +26,30 @@ async function handleShowFileInFinder(event, { filePath }) {
   await shell.showItemInFolder(filePath);
 }
 
+async function handleCheckPort(event, { port }) {
+  console.log(`handleCheckPort`);
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+
+    server.once('error', function(err) {
+      console.log(`port in use`);
+      if (err.code === 'EADDRINUSE') {
+        resolve({ result: false, error: 'Port in use' });
+      } else {
+        resolve({ result: false, error: 'Unknown' });
+      }
+    });
+
+    server.once('listening', function() {
+      console.log(`port not in use`);
+      server.close();
+      resolve({ result: true });
+    });
+
+    server.listen(port);
+  });
+}
+
 const initFiles = () => {
   if (!fs.existsSync(userConfigFilePath)) {
     fs.copyFileSync(initConfigFilePath, userConfigFilePath);
@@ -55,27 +79,6 @@ const createWindow = () => {
   );
 
   win.loadFile('./config_app/index.html');
-
-  ipcMain.on('check-port', async(event, { port }) => {
-    return new Promise((resolve, reject) => {
-      const server = net.createServer();
-
-      server.once('error', function(err) {
-        if (err.code === 'EADDRINUSE') {
-          resolve(false);
-        } else {
-          reject(err);
-        }
-      });
-
-      server.once('listening', function() {
-        server.close();
-        resolve(true);
-      });
-
-      server.listen(port);
-    });
-  });
 
   ipcMain.on('set-app-config', async(event, { port, dataRootDir }) => {
     const result = fs.readFileSync(userConfigFilePath, { encoding: 'utf8' });
@@ -114,6 +117,7 @@ app.whenReady().then(() => {
   ipcMain.handle('dialog:openDir', handleDirOpen);
   ipcMain.handle('dialog:openFile', handleFileOpen);
   ipcMain.handle('finder:openFile', handleShowFileInFinder);
+  ipcMain.handle('check-port', handleCheckPort);
 
   initFiles();
   createWindow();

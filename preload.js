@@ -7,7 +7,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setAppConfig: ({ port, dataRootDir }) => {
     ipcRenderer.send('set-app-config', { port, dataRootDir });
   },
-  checkValidPort: async(port) => ipcRenderer.send('check-port', { port }),
+  checkValidPort: async(port) => ipcRenderer.invoke('check-port', { port }),
 });
 
 ipcRenderer.on('init-app-config', (event, { port, appRootDir, logsRootDir, dataRootDir, userConfigFilePath }) => {

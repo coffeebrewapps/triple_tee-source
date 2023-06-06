@@ -31,25 +31,23 @@ function resetErrors() {
 }
 
 async function validateInput() {
-  let error = false;
-
   if (isEmpty(portInput.value)) {
     portInputError.innerHTML = 'Required field';
-    error = true;
-  } else {
-    const result = await window.electronAPI.checkValidPort(portInput.value);
-    if (!result) {
-      portInputError.innerHTML = 'Port is in use';
-      error = true;
-    }
+    return false;
+  }
+
+  const result = await window.electronAPI.checkValidPort(portInput.value);
+  if (!result.result) {
+    portInputError.innerHTML = result.error;
+    return false;
   }
 
   if (isEmpty(dataRootDirInput.value)) {
     dataRootDirInputError.innerHTML = 'Required field';
-    error = true;
+    return false;
   }
 
-  return error;
+  return true;
 }
 
 launchButton.addEventListener('click', async() => {
