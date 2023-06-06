@@ -1,1 +1,0 @@
-{"port":"4001","dataStore":"fs","dataRootDir":"/Users/gohkhoonhiang/Documents/TripleTeeApp","dataDir":"./data","logFile":"./debug.log","uploadDir":"./uploads","modulesDir":"./server/modules","schemas":"_schemas","indexes":"_indexes"}
