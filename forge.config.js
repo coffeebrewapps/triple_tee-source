@@ -4,9 +4,11 @@ module.exports = {
     executableName: 'triple_tee',
     icon: './icons/icon',
     ignore: [
+      '^/app_config.json',
       '^/bin$',
       '^/client$',
       '^/data$',
+      '^/debug.log',
       '^/dev$',
       '^/node_modules$',
       '^/public$',

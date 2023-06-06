@@ -25,7 +25,7 @@ const initFiles = () => {
   if (!fs.existsSync(userConfigFilePath)) {
     fs.copyFileSync(initConfigFilePath, userConfigFilePath);
   }
-}
+};
 
 const createWindow = () => {
   const win = new BrowserWindow({
@@ -38,15 +38,20 @@ const createWindow = () => {
     icon: './icons/t3_icon.png',
   });
 
-  const currentDir = path.join(__dirname);
+  const appRootDir = path.join(app.getAppPath(), 'dist');
+  const logsRootDir = app.getPath('logs');
+  const dataRootDir = path.join(app.getPath('documents'), 'TripleTeeApp');
   const result = fs.readFileSync(userConfigFilePath, { encoding: 'utf8' });
   const parsedResult = JSON.parse(result);
 
-  win.webContents.send('init-app-config', Object.assign({}, parsedResult, { currentDir }));
+  win.webContents.send(
+    'init-app-config',
+    { port: parsedResult.port, appRootDir, logsRootDir, dataRootDir, userConfigFilePath }
+  );
 
   win.loadFile('./config_app/index.html');
 
-  ipcMain.on('set-app-config', async (event, { port, dataDir, logFile, uploadDir }) => {
+  ipcMain.on('set-app-config', async(event, { port, dataRootDir }) => {
     const result = fs.readFileSync(userConfigFilePath, { encoding: 'utf8' });
     const parsedResult = JSON.parse(result);
     const updatedConfig = Object.assign({}, parsedResult);
@@ -55,29 +60,19 @@ const createWindow = () => {
       updatedConfig.port = port;
     }
 
-    if (dataDir) {
-      updatedConfig.dataDir = dataDir;
-    }
-
-    if (logFile) {
-      updatedConfig.logFile = logFile;
-    }
-
-    if (uploadDir) {
-      updatedConfig.uploadDir = uploadDir;
+    if (dataRootDir) {
+      updatedConfig.dataRootDir = dataRootDir;
     }
 
     if (
       parsedResult.port !== updatedConfig.port ||
-      parsedResult.dataDir !== updatedConfig.dataDir ||
-      parsedResult.logFile !== updatedConfig.logFile ||
-      parsedResult.uploadDir !== updatedConfig.uploadDir
+      parsedResult.dataRootDir !== updatedConfig.dataRootDir
     ) {
       fs.writeFileSync(userConfigFilePath, JSON.stringify(updatedConfig), { encoding: 'utf8' });
     }
 
     const { startServer } = require('./dist/index');
-    await startServer(updatedConfig.port, userConfigFilePath);
+    await startServer({ port: updatedConfig.port, appConfigPath: userConfigFilePath, appRootDir, logsRootDir });
 
     const res = win.loadURL(`http://localhost:${updatedConfig.port}`);
 

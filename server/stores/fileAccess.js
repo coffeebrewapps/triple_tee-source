@@ -1,6 +1,7 @@
 module.exports = ({ config, logger, utils }) => {
   const path = require('path');
   const fs = require('fs');
+  const dataDir = config.dataDir;
 
   const schemasData = require('../../_init/schemas.json');
   const contactsData = require('../../_init/contacts.json');
@@ -17,15 +18,16 @@ module.exports = ({ config, logger, utils }) => {
   const writeToFileQueue = {};
 
   function pathName(modelClass) {
-    return path.join(config.dataDir, `${modelClass}.json`);
+    return path.join(dataDir, `${modelClass}.json`);
   }
 
   async function initData(schemas, indexes) {
     writeToFileQueue[schemas] = [];
     writeToFileQueue[indexes] = [];
 
-    if (!fs.existsSync(config.dataDir)) {
-      fs.mkdirSync(config.dataDir);
+    if (!fs.existsSync(dataDir)) {
+      logger.log(`Data directory does not exist, creating directory...`, dataDir);
+      fs.mkdirSync(dataDir, { recursive: true });
     }
 
     return new Promise((resolve, reject) => {
