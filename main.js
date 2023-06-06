@@ -69,9 +69,9 @@ const createWindow = () => {
 
   const appRootDir = path.join(app.getAppPath(), 'dist');
   const logsRootDir = app.getPath('logs');
-  const dataRootDir = path.join(app.getPath('documents'), 'TripleTeeApp');
   const result = fs.readFileSync(userConfigFilePath, { encoding: 'utf8' });
   const parsedResult = JSON.parse(result);
+  const dataRootDir = parsedResult.dataRootDir || path.join(app.getPath('documents'), 'TripleTeeApp');
 
   win.webContents.send(
     'init-app-config',
