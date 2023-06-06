@@ -1,23 +1,35 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+/** import:global **/
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+/** import:global **/
 
+/** import:components **/
+import TabContainer from '@/components/TabContainer.vue';
 import DataForm from '@/components/DataForm.vue';
 import {
   TButton
 } from 'coffeebrew-vue-components';
+/** import:components **/
 
+/** import:utils **/
 import { useDataAccess } from '@/utils/dataAccess';
-
-import { useSystemConfigsStore } from '@/stores/systemConfigs';
-
-import { useBannerStore } from '@/stores/banner';
-
 import { useInputHelper } from '@/utils/input';
+import { useValidations } from '@/utils/validations';
+/** import:utils **/
 
+/** import:stores **/
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
+import { useBannerStore } from '@/stores/banner';
+/** import:stores **/
+
+/** section:utils **/
 const dataAccess = useDataAccess();
 const systemConfigsStore = useSystemConfigsStore();
 const { flashMessage } = useBannerStore();
+const { notEmpty } = useValidations();
+/** section:utils **/
 
+/** section:systemConfigs **/
 const formData = ref();
 const errorMessages = ref({});
 
@@ -180,6 +192,55 @@ async function loadSystemConfigs() {
       });
   });
 }
+/** section:systemConfigs **/
+
+/** section:logs **/
+const logsContentArray = ref([]);
+const logsContent = computed(() => {
+  return logsContentArray.value.join('\n');
+});
+
+const streamDebugLogsIntervalId = ref();
+
+async function streamDebugLogs() {
+  loadDebugLogs();
+  streamDebugLogsIntervalId.value = setInterval(loadDebugLogs, 1000);
+}
+
+async function loadDebugLogs() {
+  dataAccess
+    .downloadStream('logs')
+    .then((result) => {
+      result.data.text()
+        .then((text) => {
+          logsContentArray.value = text.split('\n');
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}
+/** section:logs **/
+
+/** section:tabs **/
+const selectedTab = ref(0);
+const tabs = [
+  { label: 'System Configs', onchange: loadSystemConfigs },
+  { label: 'Debug Logs', onchange: streamDebugLogs },
+];
+
+async function triggerTabEvent(i) {
+  if (notEmpty(streamDebugLogsIntervalId.value)) {
+    clearInterval(streamDebugLogsIntervalId.value);
+  }
+
+  await tabs[i].onchange();
+  selectedTab.value = i;
+}
+/** section:tabs **/
 
 onMounted(async() => {
   await loadSystemConfigs()
@@ -198,33 +259,51 @@ onMounted(async() => {
       flashMessage(`Error loading config!`);
     });
 });
+
+onBeforeUnmount(() => {
+  clearInterval(streamDebugLogsIntervalId.value);
+});
 </script>
 
 <template>
-  <div class="view-container">
-    <DataForm
-      v-if="formData"
-      v-model="formData"
-      :fields-layout="fieldsLayout"
-      :data-fields="fieldKeys"
-      :schemas="dataFields"
-      :error-messages="errorMessages"
-      :submittable="false"
-    />
+  <div class="page-container">
+    <TabContainer
+      :tabs="tabs"
+      :selected-tab="selectedTab"
+      @tab-change="triggerTabEvent"
+    >
+      <template #tab-0>
+        <DataForm
+          v-if="formData"
+          v-model="formData"
+          :fields-layout="fieldsLayout"
+          :data-fields="fieldKeys"
+          :schemas="dataFields"
+          :error-messages="errorMessages"
+          :submittable="false"
+        />
 
-    <div class="actions">
-      <TButton
-        class="button"
-        value="Update"
-        icon="fa-solid fa-check"
-        @click="updateConfig()"
-      />
-    </div>
+        <div class="actions">
+          <TButton
+            class="button"
+            value="Update"
+            icon="fa-solid fa-check"
+            @click="updateConfig()"
+          />
+        </div>
+      </template> <!-- template-0 -->
+
+      <template #tab-1>
+        <div class="logs">
+          <pre>{{ logsContent }}</pre>
+        </div>
+      </template> <!-- template-1 -->
+    </TabContainer>
   </div>
 </template>
 
 <style scoped>
-.view-container {
+.page-container {
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -233,5 +312,18 @@ onMounted(async() => {
 .actions {
   display: flex;
   justify-content: center;
+}
+
+.logs {
+  padding: 1rem;
+  width: 90vw;
+  height: 70vh;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  overflow: auto;
+}
+
+.logs pre {
+  white-space: break-spaces;
 }
 </style>

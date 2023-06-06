@@ -1,6 +1,8 @@
 const express = require('express');
 const path = require('path');
-const fsPromises = require('fs').promises;
+const fs = require('fs');
+const fsPromises = fs.promises;
+const { Duplex } = require('stream');
 
 const app = express();
 const cors = require('cors');
@@ -103,6 +105,17 @@ async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
     const params = req.query;
     logger.log(`Requesting countries data`, params);
     res.send(dataAccess.list('countries', params));
+  });
+
+  app.post('/api/logs', async function(req, res) {
+    res.header('Content-Type', 'text/plain');
+    const stream = new Duplex();
+    stream.push(logger.tailLog());
+    stream.push(null);
+    stream.pipe(res);
+    stream.on('end', function() {
+      res.end();
+    });
   });
   /** * end:Routes ***/
 

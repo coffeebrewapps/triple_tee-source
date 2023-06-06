@@ -30,14 +30,14 @@ function toggleTheme() {
   document.body.classList.toggle('light', !theme.value);
 }
 
-function openSystemConfigs() {
+function openSystemAdmin() {
   const route = {
-    path: '/system_configs',
-    name: 'System Configs',
-    component: () => import('@/views/SystemConfigs.vue'),
+    path: '/system_admin',
+    name: 'System Admin',
+    component: () => import('@/views/SystemAdmin.vue'),
   };
   router.addRoute(route);
-  router.push({ name: 'System Configs' });
+  router.push({ name: 'System Admin' });
 }
 </script>
 
@@ -65,9 +65,9 @@ function openSystemConfigs() {
       <TButton
         button-type="icon"
         icon="fa-solid fa-gears"
-        @click="openSystemConfigs"
+        @click="openSystemAdmin"
       />
-      <span class="tooltip align-right">System Configs</span>
+      <span class="tooltip align-right">System Admin</span>
     </div>
   </div>
 </template>
