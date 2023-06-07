@@ -10,7 +10,6 @@ import SystemBanner from '@/components/SystemBanner.vue';
 import NavMenu from '@/components/NavMenu.vue';
 import TopNav from '@/components/TopNav.vue';
 import SystemAlerts from '@/components/SystemAlerts.vue';
-import BreadCrumbs from '@/components/BreadCrumbs.vue';
 /** import:components **/
 
 /** import:stores **/
