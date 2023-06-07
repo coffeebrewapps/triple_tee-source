@@ -251,5 +251,56 @@ function currencyLabel(record) {
     :data-fields="dataFields"
     :validations="validations"
     :filters="filters"
-  />
+  >
+    <template #header-row>
+      <th />
+    </template>
+
+    <template #data-content="{ row, inputValue }">
+      <td class="col">
+        <div class="content-row">
+          <div class="highlight">
+            {{ inputValue('description', row) }}
+          </div>
+          <div class="small">
+            {{ inputValue('currencyId', row) }}
+          </div>
+          <div class="small">
+            {{ inputValue('paymentTerms', row) }}
+          </div>
+          <div class="small">
+            Billed every
+            {{ inputValue('invoiceCycleDurationValue', row) }}
+            {{ inputValue('invoiceCycleDurationUnit', row) }}
+          </div>
+          <div class="small">
+            Due in
+            {{ inputValue('dueDateCycleValue', row) }} {{ inputValue('dueDateCycleUnit', row) }}
+            from Invoice Date
+          </div>
+        </div>
+      </td>
+    </template>
+  </DataPage>
 </template>
+
+<style scoped>
+.col {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.content-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.highlight {
+  font-weight: 900;
+}
+
+.small {
+  font-size: 0.8rem;
+}
+</style>

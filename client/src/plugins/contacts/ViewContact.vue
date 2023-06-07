@@ -28,12 +28,7 @@ const views = [
   <div class="page-container">
     <MultiViewContainer
       :views="views"
+      :heading="`Contact #${contactId}`"
     />
   </div> <!-- page-container -->
 </template>
-
-<style scoped>
-.page-container .heading {
-  font-weight: 900;
-}
-</style>

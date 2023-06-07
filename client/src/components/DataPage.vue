@@ -174,6 +174,10 @@ function formatDataFields(fields) {
     }
   });
 }
+
+function formatInputValueForField(field, row) {
+  return inputValue(field, row, includeKeys.value, combinedDataFields.value, systemConfigs.value);
+}
 /** section:global **/
 
 /** section:filter **/
@@ -912,78 +916,88 @@ onMounted(async() => {
       @offset-change="updateOffsetAndReload"
     >
       <template #header-row="{ headers, actions }">
-        <th
-          v-for="(header, i) in headers"
-          :key="i"
-          class="col"
-          @click="toggleSort(header.key)"
+        <slot
+          name="header-row"
+          v-bind="{ headers, actions }"
         >
-          <div
-            :class="sortHeaderStyles[header.key]"
+          <th
+            v-for="(header, i) in headers"
+            :key="i"
+            class="col"
+            @click="toggleSort(header.key)"
           >
-            {{ header.label }}
+            <div
+              :class="sortHeaderStyles[header.key]"
+            >
+              {{ header.label }}
 
-            <i class="fa-solid fa-sort" />
-            <i class="fa-solid fa-sort-up" />
-            <i class="fa-solid fa-sort-down" />
-          </div>
-        </th>
+              <i class="fa-solid fa-sort" />
+              <i class="fa-solid fa-sort-up" />
+              <i class="fa-solid fa-sort-down" />
+            </div>
+          </th>
 
-        <th
-          v-if="actions.length > 0"
-          class="col"
-        />
+          <th
+            v-if="actions.length > 0"
+            class="col"
+          />
+        </slot> <!-- header-row -->
       </template>
 
       <template #data-content="{ headers, row, i }">
-        <td
-          v-for="(header, h) in headers"
-          :key="h"
-          class="col"
+        <slot
+          name="data-content"
+          v-bind="{ headers, row, i, inputValue: formatInputValueForField }"
         >
-          <slot
-            :name="`data-col.${header.key}`"
-            v-bind="{ header, row, i }"
+          <td
+            v-for="(header, h) in headers"
+            :key="h"
+            class="col"
           >
-            <div
-              v-if="!tagsField(header.key)"
+            <slot
+              :name="`data-col.${header.key}`"
+              v-bind="{ header, row, i }"
             >
               <div
-                v-if="notEmpty(row[header.key])"
+                v-if="!tagsField(header.key)"
               >
-                {{ inputValue(header.key, row, includeKeys, combinedDataFields, systemConfigs) }}
+                <div
+                  v-if="notEmpty(row[header.key])"
+                >
+                  {{ inputValue(header.key, row, includeKeys, combinedDataFields, systemConfigs) }}
+                </div>
+
+                <div
+                  v-if="isEmpty(row[header.key])"
+                  class="no-value"
+                >
+                  --- no value ---
+                </div>
               </div>
 
+              <!-- hardcode format for tags because it is standard through the app --->
               <div
-                v-if="isEmpty(row[header.key])"
-                class="no-value"
+                v-if="tagsField(header.key)"
               >
-                --- no value ---
-              </div>
-            </div>
+                <div
+                  v-for="(tag, j) in row[header.key]"
+                  :key="j"
+                  class="tag"
+                  :style="tagStyle(row, tag, header.key)"
+                >
+                  {{ formattedTag(row, header.key, j) }}
+                </div>
 
-            <!-- hardcode format for tags because it is standard through the app --->
-            <div
-              v-if="tagsField(header.key)"
-            >
-              <div
-                v-for="(tag, j) in row[header.key]"
-                :key="j"
-                class="tag"
-                :style="tagStyle(row, tag, header.key)"
-              >
-                {{ formattedTag(row, header.key, j) }}
+                <div
+                  v-if="row[header.key].length === 0"
+                  class="no-value"
+                >
+                  --- no value ---
+                </div>
               </div>
-
-              <div
-                v-if="row[header.key].length === 0"
-                class="no-value"
-              >
-                --- no value ---
-              </div>
-            </div>
-          </slot>
-        </td>
+            </slot>
+          </td>
+        </slot> <!-- data-content -->
       </template>
     </TTable>
 

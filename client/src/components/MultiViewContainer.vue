@@ -6,6 +6,10 @@ import { useRouter, onBeforeRouteUpdate } from 'vue-router';
 
 /** section:props **/
 const props = defineProps({
+  heading: {
+    type: String,
+    default: null,
+  },
   views: {
     type: Array,
     default() {
@@ -79,6 +83,13 @@ onMounted(() => {
     </div>
 
     <div class="view-content">
+      <h3
+        v-if="heading"
+        class="heading"
+      >
+        {{ heading }}
+      </h3>
+
       <router-view />
     </div>
   </div>
@@ -122,5 +133,10 @@ onMounted(() => {
 
 .view-content {
   width: 85vw;
+}
+
+.view-content .heading {
+  font-weight: 900;
+  margin-bottom: 0.5rem;
 }
 </style>
