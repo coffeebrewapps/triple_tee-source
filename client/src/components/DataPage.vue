@@ -929,9 +929,23 @@ onMounted(async() => {
       v-if="showFilters"
       :class="filtersStyleClass"
     >
-      <h3 class="heading">
-        Filters
-      </h3>
+      <div class="filters-form">
+        <h3 class="heading">
+          Filters
+        </h3>
+
+        <DataForm
+          v-model="filtersData"
+          :fields-layout="filtersLayout"
+          :data-fields="filterableKeys"
+          :schemas="filtersDataFields"
+          :error-messages="filtersErrorMessages"
+          :confirm-button="filtersConfirmButton"
+          :cancel-button="filtersCancelButton"
+          @submit="submitFilters"
+          @cancel="resetFilters"
+        />
+      </div>
 
       <div
         class="toggle tooltipable"
@@ -940,27 +954,32 @@ onMounted(async() => {
         <i class="fa-sharp fa-solid fa-xmark" />
         <span class="tooltip align-right">Close</span>
       </div>
-
-      <DataForm
-        v-model="filtersData"
-        :fields-layout="filtersLayout"
-        :data-fields="filterableKeys"
-        :schemas="filtersDataFields"
-        :error-messages="filtersErrorMessages"
-        :confirm-button="filtersConfirmButton"
-        :cancel-button="filtersCancelButton"
-        @submit="submitFilters"
-        @cancel="resetFilters"
-      />
     </div> <!-- filters -->
 
     <div
       v-if="computedTableStyle.oneline"
       :class="sortContainerStyleClass"
     >
-      <h3 class="heading">
-        Sort
-      </h3>
+      <div class="sort-form">
+        <h3 class="heading">
+          Sort
+        </h3>
+
+        <div class="sort-fields">
+          <div
+            v-for="(header, i) in sortableFields"
+            :key="i"
+            :class="sortHeaderStyles[header.key]"
+            @click="toggleSort(header.key)"
+          >
+            {{ header.label }}
+
+            <i class="fa-solid fa-sort" />
+            <i class="fa-solid fa-sort-up" />
+            <i class="fa-solid fa-sort-down" />
+          </div>
+        </div>
+      </div>
 
       <div
         class="toggle tooltipable"
@@ -968,21 +987,6 @@ onMounted(async() => {
       >
         <i class="fa-sharp fa-solid fa-xmark" />
         <span class="tooltip align-right">Close</span>
-      </div>
-
-      <div class="sort-fields">
-        <div
-          v-for="(header, i) in sortableFields"
-          :key="i"
-          :class="sortHeaderStyles[header.key]"
-          @click="toggleSort(header.key)"
-        >
-          {{ header.label }}
-
-          <i class="fa-solid fa-sort" />
-          <i class="fa-solid fa-sort-up" />
-          <i class="fa-solid fa-sort-down" />
-        </div>
       </div>
     </div> <!-- sort -->
 
@@ -1244,11 +1248,13 @@ onMounted(async() => {
 }
 
 .filters {
+  display: flex;
   position: fixed;
   right: 0;
   top: 0;
   padding: 1.5rem;
   width: 100vw;
+  height: 100vh;
   background-color: var(--color-background-mute);
   z-index: 1;
   transition: all 0.5s linear;
@@ -1259,7 +1265,12 @@ onMounted(async() => {
 }
 
 .filters.collapsed {
-  transform: translate(0, -100vh);
+  transform: translate(100vw, 0);
+}
+
+.filters.expanded .filters-form {
+  padding: 1rem;
+  width: 100%;
 }
 
 .filters.expanded .toggle {
@@ -1269,9 +1280,6 @@ onMounted(async() => {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
 }
 
 .filters.expanded .toggle:hover {
@@ -1346,12 +1354,12 @@ a.hidden {
 
 .sort-container {
   display: flex;
-  flex-direction: column;
   position: fixed;
   right: 0;
   top: 0;
   padding: 1.5rem;
-  width: 100vw;
+  width: 30vw;
+  height: 100vh;
   background-color: var(--color-background-mute);
   z-index: 1;
   transition: all 0.5s linear;
@@ -1362,7 +1370,14 @@ a.hidden {
 }
 
 .sort-container.collapsed {
-  transform: translate(0, -100vh);
+  transform: translate(100vw, 0);
+}
+
+.sort-container .sort-form {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  width: 100%;
 }
 
 .sort-container.expanded .toggle {
@@ -1372,9 +1387,6 @@ a.hidden {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
 }
 
 .sort-container.expanded .toggle:hover {
