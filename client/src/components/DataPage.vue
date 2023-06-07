@@ -119,6 +119,12 @@ const props = defineProps({
       return {};
     },
   },
+  tableStyle: {
+    type: Object,
+    default() {
+      return {};
+    },
+  },
 });
 /** section:props **/
 
@@ -338,6 +344,16 @@ async function toggleSort(field) {
 /** section:sort **/
 
 /** section:table **/
+const defaultTableStyle = {
+  oneline: false,
+  showHeader: true,
+  highlightField: 'id',
+};
+
+const computedTableStyle = computed(() => {
+  return Object.assign({}, defaultTableStyle, props.tableStyle);
+});
+
 const tableActions = computed(() => {
   const defaultCreateAction = {
     name: 'Create',
@@ -920,7 +936,10 @@ onMounted(async() => {
           name="header-row"
           v-bind="{ headers, actions }"
         >
+          <th v-if="!computedTableStyle.showHeader" />
+
           <th
+            v-if="computedTableStyle.showHeader"
             v-for="(header, i) in headers"
             :key="i"
             class="col"
@@ -938,7 +957,7 @@ onMounted(async() => {
           </th>
 
           <th
-            v-if="actions.length > 0"
+            v-if="actions.length > 0 && computedTableStyle.showHeader"
             class="col"
           />
         </slot> <!-- header-row -->
@@ -950,6 +969,34 @@ onMounted(async() => {
           v-bind="{ headers, row, i, inputValue: formatInputValueForField }"
         >
           <td
+            v-if="computedTableStyle.oneline"
+            class="col oneline"
+          >
+            <div class="content-row">
+              <div class="highlight">
+                <slot
+                  :name="`highlight.${computedTableStyle.highlightField}`"
+                  v-bind="{ row, formattedValue: formatInputValueForField(computedTableStyle.highlightField, row), inputValue: formatInputValueForField }"
+                >
+                  {{ formatInputValueForField(computedTableStyle.highlightField, row) }}
+                </slot>
+              </div>
+
+              <div
+                v-for="(header, h) in headers"
+                class="small"
+              >
+                <slot
+                  :name="`data-col.${header.key}`"
+                  v-bind="{ header, row, i, formattedValue: formatInputValueForField(header.key, row), inputValue: formatInputValueForField }"
+                >
+                </slot>
+              </div>
+            </div>
+          </td>
+
+          <td
+            v-if="!computedTableStyle.oneline"
             v-for="(header, h) in headers"
             :key="h"
             class="col"
@@ -996,7 +1043,7 @@ onMounted(async() => {
                 </div>
               </div>
             </slot>
-          </td>
+          </td> <!-- not:oneline -->
         </slot> <!-- data-content -->
       </template>
     </TTable>
@@ -1167,5 +1214,22 @@ a.hidden {
 .col .no-value {
   font-size: 0.8rem;
   font-style: oblique;
+}
+
+.col.oneline {
+  width: 100%;
+}
+
+.col.oneline .content-row {
+  display: flex;
+  flex-direction: column;
+}
+
+.col.oneline .content-row .highlight {
+  font-weight: 900;
+}
+
+.col.oneline .content-row .small {
+  font-size: 0.8rem;
 }
 </style>

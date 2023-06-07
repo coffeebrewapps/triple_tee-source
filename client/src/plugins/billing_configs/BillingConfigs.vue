@@ -150,6 +150,12 @@ const dataFields = computed(() => {
   ];
 });
 
+const tableStyle = {
+  oneline: true,
+  showHeader: false,
+  highlightField: 'description',
+};
+
 const validations = {
   create: {
     unitCost: [
@@ -215,51 +221,17 @@ function contactLabel(record) {
     :data-fields="dataFields"
     :validations="validations"
     :filters="filters"
+    :table-style="tableStyle"
   >
-    <template #header-row>
-      <th />
+    <template #highlight.description="{ formattedValue }">
+      {{ formattedValue }}
     </template>
 
-    <template #data-content="{ row, inputValue }">
-      <td class="col">
-        <div class="content-row">
-          <div class="highlight">
-            {{ inputValue('description', row) }}
-          </div>
-          <div class="small">
-            Charging
-            <strong>{{ inputValue('unitCost', row) }}</strong>
-            per
-            <strong>{{ inputValue('unit', row) }}</strong>
-          </div>
-        </div>
-      </td>
+    <template #data-col.unitCost="{ row, formattedValue, inputValue }">
+      Charging
+      <strong>{{ formattedValue }}</strong>
+      per
+      <strong>{{ inputValue('unit', row) }}</strong>
     </template>
   </DataPage>
 </template>
-
-<style scoped>
-.col {
-  text-align: left;
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
-  width: 100%;
-}
-
-.content-row {
-  display: flex;
-  flex-direction: column;
-}
-
-.highlight {
-  font-weight: 900;
-}
-
-.small {
-  font-size: 0.8rem;
-}
-
-.small strong {
-  font-weight: 600;
-}
-</style>

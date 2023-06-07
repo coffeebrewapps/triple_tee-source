@@ -20,6 +20,14 @@ a {
   transition: 0.4s;
 }
 
+strong {
+  font-weight: 600;
+}
+
+.heading {
+  font-weight: 900;
+}
+
 .divider {
   border-bottom: 1px solid var(--color-border);
 }

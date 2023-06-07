@@ -103,6 +103,12 @@ const dataFields = computed(() => {
   ];
 });
 
+const tableStyle = {
+  oneline: true,
+  showHeader: false,
+  highlightField: 'description',
+};
+
 const validations = {
 };
 
@@ -147,47 +153,10 @@ function templateLabel(record) {
     :data-fields="dataFields"
     :validations="validations"
     :filters="filters"
+    :table-style="tableStyle"
   >
-    <template #header-row>
-      <th />
-    </template>
-
-    <template #data-content="{ row, inputValue }">
-      <td class="col">
-        <div class="content-row">
-          <div class="highlight">
-            {{ inputValue('description', row) }}
-          </div>
-          <div class="small">
-            {{ inputValue('receiptNumberSequenceId', row) }}
-          </div>
-          <div class="small">
-            {{ inputValue('receiptTemplateId', row) }}
-          </div>
-        </div>
-      </td>
+    <template #highlight.description="{ formattedValue }">
+      {{ formattedValue }}
     </template>
   </DataPage>
 </template>
-
-<style scoped>
-.col {
-  text-align: left;
-  padding: 0.5rem;
-  border-bottom: 1px solid var(--color-border);
-  width: 100%;
-}
-
-.content-row {
-  display: flex;
-  flex-direction: column;
-}
-
-.highlight {
-  font-weight: 900;
-}
-
-.small {
-  font-size: 0.8rem;
-}
-</style>

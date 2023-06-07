@@ -17,7 +17,15 @@ const {
   fieldsLayout,
   filters,
   validations,
+  formatDuration,
+  calculateDuration,
 } = useWorkLogUtils();
+
+const tableStyle = {
+  oneline: true,
+  showHeader: false,
+  highlightField: 'description',
+};
 
 const selectedTab = ref(0);
 const tabs = [
@@ -77,7 +85,12 @@ async function triggerTabEvent(i) {
           :data-fields="dataFields"
           :validations="validations"
           :filters="filters"
-        />
+          :table-style="tableStyle"
+        >
+          <template #data-col.startTime="{ row }">
+            Total duration <strong>{{ formatDuration(calculateDuration(row)) }}</strong>
+          </template>
+        </DataPage>
       </template>
     </TabContainer>
   </div>
@@ -86,9 +99,5 @@ async function triggerTabEvent(i) {
 <style scoped>
 .view-container {
   margin: 1rem 0;
-}
-
-.heading {
-  font-weight: 900;
 }
 </style>
