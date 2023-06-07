@@ -1,7 +1,6 @@
 <script setup>
 /** import:global **/
 import { ref, computed, watch, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 /** import:global **/
 
 /** import:utils **/
@@ -23,7 +22,6 @@ import TemplateEditor from '@/components/TemplateEditor.vue';
 /** import:components **/
 
 /** section:utils **/
-const router = useRouter();
 const { isEmpty, notEmpty } = useValidations();
 const dataAccess = useDataAccess();
 const {
@@ -32,16 +30,20 @@ const {
 const { flashMessage } = useBannerStore();
 /** section:utils **/
 
+/** section:props **/
+const props = defineProps({
+  contactId: {
+    type: String,
+    default: null,
+  },
+  invoiceId: {
+    type: String,
+    default: null,
+  },
+});
+/** section:props **/
+
 /** section:global **/
-const currentRoute = Object.assign({}, router.currentRoute.value);
-const invoiceId = computed(() => {
-  return currentRoute.query.invoiceId;
-});
-
-const contactId = computed(() => {
-  return currentRoute.query.contactId;
-});
-
 const {
   fieldsLayout,
   generateDataFields,
@@ -58,8 +60,8 @@ const filtersData = ref({
   receiptConfigId: [],
 });
 
-if (notEmpty(invoiceId.value)) {
-  filtersData.value.invoiceId = [{ value: invoiceId.value }];
+if (notEmpty(props.invoiceId)) {
+  filtersData.value.invoiceId = [{ value: props.invoiceId }];
 }
 
 const filtersDataFields = computed(() => {
@@ -192,7 +194,7 @@ const originalPaymentAmount = ref(0);
 const receiptFieldsLayout = fieldsLayout;
 
 const receiptDataFields = computed(() => {
-  return generateDataFields(invoiceId.value, contactId.value);
+  return generateDataFields(props.invoiceId, props.contactId);
 });
 
 const receiptFieldKeys = computed(() => {

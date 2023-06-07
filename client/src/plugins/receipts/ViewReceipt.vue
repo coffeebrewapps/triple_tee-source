@@ -1,7 +1,6 @@
 <script setup>
 /** import:global **/
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 /** import:global **/
 
 /** import:utils **/
@@ -26,34 +25,37 @@ import TemplateEditor from '@/components/TemplateEditor.vue';
 /** import:components **/
 
 /** section:utils **/
-const router = useRouter();
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const { flashMessage } = useBannerStore();
 const systemConfigs = useSystemConfigsStore();
 /** section:utils **/
 
+/** section:props **/
+const props = defineProps({
+  contactId: {
+    type: String,
+    default: null,
+  },
+  receiptId: {
+    type: String,
+    default: null,
+  },
+  invoiceId: {
+    type: String,
+    default: null,
+  },
+});
+/** section:props **/
+
 /** section:global **/
-const currentRoute = Object.assign({}, router.currentRoute.value);
-
-const receiptId = computed(() => {
-  return currentRoute.params.id;
-});
-
-const invoiceId = computed(() => {
-  return currentRoute.query.invoiceId;
-});
-
-const contactId = computed(() => {
-  return currentRoute.query.contactId;
-});
 const {
   fieldsLayout,
   generateDataFields,
 } = useReceiptUtils();
 
 const dataFields = computed(() => {
-  return generateDataFields(invoiceId.value, contactId.value);
+  return generateDataFields(props.invoiceId, props.contactId);
 });
 
 const {
@@ -79,7 +81,7 @@ async function loadReceipt() {
   const params = { include: includeKeys.value };
 
   await dataAccess
-    .view('income_receipts', receiptId.value, params)
+    .view('income_receipts', props.receiptId, params)
     .then((result) => {
       currentReceipt.value = result;
       flashMessage(`Loaded receipt successfully!`);

@@ -96,6 +96,26 @@ const viewContactRoute = {
         hidden: true,
       },
     },
+    {
+      path: 'receipts/new',
+      name: 'Contact Create Receipt',
+      component: () => import('@/plugins/receipts/CreateReceipt.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contact Receipts' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'receipts/:receiptId',
+      name: 'Contact View Receipt',
+      component: () => import('@/plugins/receipts/ViewReceipt.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contact Receipts' },
+        hidden: true,
+      },
+    },
   ],
 };
 

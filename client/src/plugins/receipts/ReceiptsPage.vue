@@ -47,14 +47,16 @@ const actions = {
 
 async function openViewPage(row) {
   router.push({
-    name: 'View Receipt',
-    params: { id: row.id },
-    query: { invoiceId: row.invoiceId, contactId: row.contactId },
+    name: 'Contact View Receipt',
+    params: { receiptId: row.id, invoiceId: row.invoiceId, contactId: row.contactId },
   });
 }
 
 async function openCreatePage() {
-  router.push({ name: 'Create Receipt', query: { contactId: props.contactId, invoiceId: props.invoiceId } });
+  router.push({
+    name: 'Contact Create Receipt',
+    params: { contactId: props.contactId },
+  });
 }
 </script>
 
