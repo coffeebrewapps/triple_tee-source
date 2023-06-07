@@ -26,9 +26,6 @@ const views = [
 
 <template>
   <div class="page-container">
-    <h2 class="heading">
-      Contact #{{ contactId }}
-    </h2>
     <MultiViewContainer
       :views="views"
     />
@@ -36,10 +33,6 @@ const views = [
 </template>
 
 <style scoped>
-.page-container {
-  margin-top: 1rem;
-}
-
 .page-container .heading {
   font-weight: 900;
 }
