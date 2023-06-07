@@ -259,20 +259,20 @@ function currencyLabel(record) {
     :filters="filters"
     :table-style="tableStyle"
   >
-    <template #highlight.description="{ formattedValue }">
+    <template #[`highlight.description`]="{ formattedValue }">
       {{ formattedValue }}
     </template>
 
-    <template #data-col.currencyId="{ formattedValue }">
+    <template #[`data-col.currencyId`]="{ formattedValue }">
       Chargeable in <strong>{{ formattedValue }}</strong>
     </template>
 
-    <template #data-col.invoiceCycleDurationValue="{ row, formattedValue, inputValue }">
+    <template #[`data-col.invoiceCycleDurationValue`]="{ row, formattedValue, inputValue }">
       Billed every
       <strong>{{ formattedValue }} {{ inputValue('invoiceCycleDurationUnit', row) }}</strong>
     </template>
 
-    <template #data-col.dueDateCycleValue="{ row, formattedValue, inputValue }">
+    <template #[`data-col.dueDateCycleValue`]="{ row, formattedValue, inputValue }">
       Due in
       <strong>{{ formattedValue }} {{ inputValue('dueDateCycleUnit', row) }}</strong>
       from Invoice Date

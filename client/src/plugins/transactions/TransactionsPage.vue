@@ -234,15 +234,15 @@ function closeReverseDialog() {
       :actions="actions"
       :table-style="tableStyle"
     >
-      <template #highlight.description="{ formattedValue }">
+      <template #[`highlight.description`]="{ formattedValue }">
         {{ formattedValue }}
       </template>
 
-      <template #data-col.transactionDate="{ formattedValue }">
+      <template #[`data-col.transactionDate`]="{ formattedValue }">
         Transacted on <strong>{{ formattedValue }}</strong>
       </template>
 
-      <template #data-col.amount="{ row, formattedValue, inputValue }">
+      <template #[`data-col.amount`]="{ row, formattedValue, inputValue }">
         <strong>{{ inputValue('type', row) }}</strong> amount
         <strong>{{ row.includes.currencyId[row.currencyId].code }}{{ formattedValue }}</strong>
         <span v-if="baseCurrency.id !== row.currencyId">

@@ -155,7 +155,7 @@ function templateLabel(record) {
     :filters="filters"
     :table-style="tableStyle"
   >
-    <template #highlight.description="{ formattedValue }">
+    <template #[`highlight.description`]="{ formattedValue }">
       {{ formattedValue }}
     </template>
   </DataPage>

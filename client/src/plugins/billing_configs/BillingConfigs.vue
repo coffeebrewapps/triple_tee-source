@@ -223,11 +223,11 @@ function contactLabel(record) {
     :filters="filters"
     :table-style="tableStyle"
   >
-    <template #highlight.description="{ formattedValue }">
+    <template #[`highlight.description`]="{ formattedValue }">
       {{ formattedValue }}
     </template>
 
-    <template #data-col.unitCost="{ row, formattedValue, inputValue }">
+    <template #[`data-col.unitCost`]="{ row, formattedValue, inputValue }">
       Charging
       <strong>{{ formattedValue }}</strong>
       per

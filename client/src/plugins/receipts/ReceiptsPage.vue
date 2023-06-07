@@ -77,11 +77,11 @@ async function openCreatePage() {
     :actions="actions"
     :table-style="tableStyle"
   >
-    <template #highlight.receiptNumber="{ formattedValue }">
+    <template #[`highlight.receiptNumber`]="{ formattedValue }">
       Receipt Number {{ formattedValue.toString().padStart(6, '0') }}
     </template>
 
-    <template #data-col.paymentAmount="{ row, formattedValue, inputValue }">
+    <template #[`data-col.paymentAmount`]="{ row, formattedValue, inputValue }">
       Payment of
       <strong>
         {{ row.includes.currencyId[row.currencyId].code }}{{ formattedValue.toFixed(2) }}
@@ -93,7 +93,7 @@ async function openCreatePage() {
       received on <strong>{{ inputValue('receiptDate', row) }}</strong>
     </template>
 
-    <template #data-col.remainingAmount="{ row, formattedValue }">
+    <template #[`data-col.remainingAmount`]="{ row, formattedValue }">
       Balance due
       <strong>
         {{ row.includes.currencyId[row.currencyId].code }}{{ formattedValue.toFixed(2) }}

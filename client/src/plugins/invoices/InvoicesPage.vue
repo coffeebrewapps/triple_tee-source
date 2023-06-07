@@ -67,19 +67,19 @@ async function openCreatePage() {
     :actions="actions"
     :table-style="tableStyle"
   >
-    <template #highlight.invoiceNumber="{ formattedValue }">
+    <template #[`highlight.invoiceNumber`]="{ formattedValue }">
       Invoice Number {{ formattedValue.toString().padStart(6, '0') }}
     </template>
 
-    <template #data-col.invoiceDate="{ formattedValue }">
+    <template #[`data-col.invoiceDate`]="{ formattedValue }">
       Invoiced on <strong>{{ formattedValue }}</strong>
     </template>
 
-    <template #data-col.dueDate="{ formattedValue }">
+    <template #[`data-col.dueDate`]="{ formattedValue }">
       Due on <strong>{{ formattedValue }}</strong>
     </template>
 
-    <template #data-col.totalAmount="{ row, formattedValue }">
+    <template #[`data-col.totalAmount`]="{ row, formattedValue }">
       Total
       <strong>
         {{ row.includes.currencyId[row.currencyId].code }}{{ formattedValue.toFixed(2) }}

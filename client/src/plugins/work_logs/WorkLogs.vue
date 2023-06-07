@@ -82,7 +82,7 @@ async function triggerTabEvent(i) {
         :filters="filters"
         :table-style="tableStyle"
       >
-        <template #data-col.startTime="{ row }">
+        <template #[`data-col.startTime`]="{ row }">
           Total duration <strong>{{ formatDuration(calculateDuration(row)) }}</strong>
         </template>
       </DataPage>
