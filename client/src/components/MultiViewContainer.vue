@@ -1,7 +1,7 @@
 <script setup>
 /** import:global **/
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, onBeforeRouteUpdate } from 'vue-router';
 /** import:global **/
 
 /** section:props **/
@@ -44,6 +44,16 @@ function viewStyle(i) {
   }
 }
 /** section:style **/
+
+onBeforeRouteUpdate((to, from) => {
+  const currentViewIndex = props.views.findIndex(v => v.name === to.name);
+  if (currentViewIndex > -1) {
+    return true;
+  } else {
+    selectView(0);
+    return false;
+  }
+});
 
 onMounted(() => {
   selectView(0);
