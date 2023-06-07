@@ -37,6 +37,14 @@ function openSystemAdmin() {
 function openLogs() {
   router.push({ name: 'System Logs' });
 }
+
+function openDataAdmin() {
+  router.push({ name: 'Data Admin' });
+}
+
+function openInbox() {
+  router.push({ name: 'Inbox' });
+}
 </script>
 
 <template>
@@ -53,7 +61,7 @@ function openLogs() {
     <div class="tooltipable">
       <TButton
         button-type="icon"
-        icon="fa-solid fa-gears"
+        icon="fa-solid fa-screwdriver-wrench"
         @click="openSystemAdmin"
       />
       <span class="tooltip align-right">Configure</span>
@@ -66,6 +74,24 @@ function openLogs() {
         @click="openLogs"
       />
       <span class="tooltip align-right">System Logs</span>
+    </div>
+
+    <div class="tooltipable">
+      <TButton
+        button-type="icon"
+        icon="fa-solid fa-database"
+        @click="openDataAdmin"
+      />
+      <span class="tooltip align-right">Data Admin</span>
+    </div>
+
+    <div class="tooltipable">
+      <TButton
+        button-type="icon"
+        icon="fa-solid fa-inbox"
+        @click="openInbox"
+      />
+      <span class="tooltip align-right">Inbox</span>
     </div>
 
     <div class="alert-toggle tooltipable">

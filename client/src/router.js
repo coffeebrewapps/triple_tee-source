@@ -11,13 +11,19 @@ const router = createRouter({
 router.addRoute({
   path: '/',
   name: 'Inbox',
-  component: () => import('@/views/HomeView.vue'),
+  component: () => import('@/views/InboxPage.vue'),
+  meta: {
+    hidden: true,
+  },
 });
 
 router.addRoute({
   path: '/admin',
   name: 'Data Admin',
   component: () => import('@/views/DataAdmin.vue'),
+  meta: {
+    hidden: true,
+  },
 });
 
 router.addRoute({
