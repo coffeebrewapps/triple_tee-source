@@ -1068,7 +1068,8 @@ onMounted(async() => {
                 <slot
                   :name="`data-col.${header.key}`"
                   v-bind="{
-                    header, row, i,
+                    header, row, i, key: header.key,
+                    rawValue: row[header.key],
                     formattedValue: formatInputValueForField(header.key, row),
                     inputValue: formatInputValueForField
                   }"

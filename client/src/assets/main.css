@@ -51,6 +51,10 @@ strong {
   color: var(--color-text);
 }
 
+.tag.inline {
+  display: inline-block;
+}
+
 .tag.sm {
   width: 50px;
 }

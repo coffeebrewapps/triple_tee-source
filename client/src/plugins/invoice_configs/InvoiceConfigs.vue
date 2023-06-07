@@ -1,9 +1,17 @@
 <script setup>
 import { computed } from 'vue';
 import { useValidations } from '@/utils/validations';
+import { useFormatter } from '@/utils/formatter';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 import DataPage from '@/components/DataPage.vue';
 
 const { greaterThan } = useValidations();
+const {
+  formatTagSync,
+  tagStyle,
+} = useFormatter();
+const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 
 const props = defineProps({
   contactId: {
@@ -276,6 +284,17 @@ function currencyLabel(record) {
       Due in
       <strong>{{ formattedValue }} {{ inputValue('dueDateCycleUnit', row) }}</strong>
       from Invoice Date
+    </template>
+
+    <template #[`data-col.tags`]="{ row, key, rawValue }">
+      <span
+        v-for="(tag, t) in rawValue"
+        :key="t"
+        class="tag inline"
+        :style="tagStyle(row, tag, key)"
+      >
+        {{ formatTagSync(row, tag, key, systemConfigs.tagFormat) }}
+      </span>
     </template>
   </DataPage>
 </template>

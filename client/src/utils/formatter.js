@@ -54,11 +54,30 @@ export function useFormatter() {
     }
   }
 
+  function parseTagFormatSync(formatString, tag) {
+    if (formatString) {
+      return liquidEngine.parseAndRenderSync(formatString, tag);
+    } else {
+      return tag;
+    }
+  }
+
   async function formatTag(record, tag, field, tagFormat) {
     const includes = (record.includes || {})[field] || {};
     if (includes[tag]) {
       const value = includes[tag] || {};
       const formattedValue = await parseTagFormat(tagFormat, value);
+      return formattedValue;
+    } else {
+      return tag;
+    }
+  }
+
+  function formatTagSync(record, tag, field, tagFormat) {
+    const includes = (record.includes || {})[field] || {};
+    if (includes[tag]) {
+      const value = includes[tag] || {};
+      const formattedValue = parseTagFormatSync(tagFormat, value);
       return formattedValue;
     } else {
       return tag;
@@ -90,7 +109,10 @@ export function useFormatter() {
     formatTimestamp,
     formatShortTime,
     formatNumber,
+    parseTagFormat,
+    parseTagFormatSync,
     formatTag,
+    formatTagSync,
     tagStyle,
   };
 }

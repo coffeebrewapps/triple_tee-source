@@ -1,9 +1,17 @@
 <script setup>
 import { computed } from 'vue';
 import { useValidations } from '@/utils/validations';
+import { useFormatter } from '@/utils/formatter';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 import DataPage from '@/components/DataPage.vue';
 
 const { notEarlierThan, greaterThanOrEqual } = useValidations();
+const {
+  formatTagSync,
+  tagStyle,
+} = useFormatter();
+const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 
 const props = defineProps({
   contactId: {
@@ -96,7 +104,7 @@ const dataFields = computed(() => {
       label: 'Include Tags',
       isTags: true,
       reference: { label: tagLabel },
-      listable: false,
+      listable: true,
       viewable: true,
       creatable: true,
       updatable: true,
@@ -232,6 +240,17 @@ function contactLabel(record) {
       <strong>{{ formattedValue }}</strong>
       per
       <strong>{{ inputValue('unit', row) }}</strong>
+    </template>
+
+    <template #[`data-col.includeTags`]="{ row, key, rawValue }">
+      <span
+        v-for="(tag, t) in rawValue"
+        :key="t"
+        class="tag inline"
+        :style="tagStyle(row, tag, key)"
+      >
+        {{ formatTagSync(row, tag, key, systemConfigs.tagFormat) }}
+      </span>
     </template>
   </DataPage>
 </template>
