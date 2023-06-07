@@ -99,6 +99,28 @@ const filters = {
     { name: 'md', prefix: 'md', suffix: 'md' },
   ],
 };
+
+const tableStyle = {
+  oneline: true,
+  showHeader: false,
+  highlightField: 'name',
+};
+
+function formatSequenceNumber(row, field) {
+  const parts = [];
+
+  if (row.prefix) {
+    parts.push(row.prefix);
+  }
+
+  parts.push(field.toString().padStart(6, '0'));
+
+  if (row.suffix) {
+    parts.push(row.suffix);
+  }
+
+  return parts.join('-');
+}
 </script>
 
 <template>
@@ -109,5 +131,14 @@ const filters = {
     :data-fields="dataFields"
     :validations="validations"
     :filters="filters"
-  />
+    :table-style="tableStyle"
+  >
+    <template #[`data-col.lastUsedNumber`]="{ row }">
+      Last <strong>{{ formatSequenceNumber(row, row.lastUsedNumber) }}</strong>
+    </template>
+
+    <template #[`data-col.incrementStep`]="{ row }">
+      Next <strong>{{ formatSequenceNumber(row, (row.lastUsedNumber + row.incrementStep)) }}</strong>
+    </template>
+  </DataPage>
 </template>

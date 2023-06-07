@@ -1,8 +1,10 @@
 <script setup>
 import { useValidations } from '@/utils/validations';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 import DataPage from '@/components/DataPage.vue';
 
 const { notEarlierThan, greaterThan } = useValidations();
+const systemConfigsStore = useSystemConfigsStore();
 
 const fieldsLayout = [
   { code: 'md', symbol: 'md', exchangeRate: 'md' },
@@ -116,6 +118,22 @@ function validateEffectiveEnd(record) {
 function validateExchangeRate(record) {
   return greaterThan(record, 'exchangeRate', 0);
 }
+
+const tableStyle = {
+  oneline: true,
+  showHeader: false,
+  highlightField: 'code',
+};
+
+function sameAsBaseCurrency(row) {
+  const systemConfigs = systemConfigsStore.getSystemConfigs();
+  const baseCurrency = systemConfigs.includes.baseCurrencyId[systemConfigs.baseCurrencyId];
+  return baseCurrency && baseCurrency.code === row.code;
+}
+
+function latestCurrency(row) {
+  return (new Date()) >= (new Date(row.effectiveStart));
+}
 </script>
 
 <template>
@@ -126,5 +144,37 @@ function validateExchangeRate(record) {
     :data-fields="dataFields"
     :validations="validations"
     :filters="filters"
-  />
+    :table-style="tableStyle"
+  >
+    <template #[`highlight.code`]="{ row, formattedValue }">
+      <div class="align-middle">
+        <strong>{{ formattedValue }} ({{ row.symbol }})</strong>
+        <span
+          v-if="sameAsBaseCurrency(row)"
+          class="tag inline"
+        >Base</span>
+        <span
+          v-if="latestCurrency(row)"
+          class="tag inline"
+        >Latest</span>
+      </div>
+    </template>
+
+    <template #[`data-col.exchangeRate`]="{ formattedValue }">
+      Exchange rate <strong>{{ formattedValue }}</strong>
+    </template>
+
+    <template #[`data-col.effectiveStart`]="{ row, formattedValue, inputValue }">
+      Effective <strong>{{ formattedValue }}</strong>
+      <span v-if="row.effectiveEnd"> - <strong>{{ inputValue('effectiveEnd', row) }}</strong></span>
+      <span v-if="!row.effectiveEnd"> - <strong>present</strong></span>
+    </template>
+  </DataPage>
 </template>
+
+<style scoped>
+.align-middle {
+  display: flex;
+  align-items: center;
+}
+</style>
