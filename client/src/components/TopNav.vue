@@ -90,7 +90,7 @@ function goBackToParent() {
           icon="fa-solid fa-arrow-left"
           @click="goBackToParent"
         />
-        <span class="tooltip">Go Back</span>
+        <span class="tooltip align-middle align-left">Go Back</span>
       </div>
     </div>
 
@@ -101,7 +101,7 @@ function goBackToParent() {
           :icon="themeIcon"
           @click="toggleTheme"
         />
-        <span class="tooltip align-right">Switch Theme</span>
+        <span class="tooltip">Theme</span>
       </div>
 
       <div class="tooltipable">
@@ -119,7 +119,7 @@ function goBackToParent() {
           icon="fa-solid fa-file-lines"
           @click="openLogs"
         />
-        <span class="tooltip align-right">System Logs</span>
+        <span class="tooltip align-right">Logs</span>
       </div>
 
       <div class="tooltipable">
@@ -128,7 +128,7 @@ function goBackToParent() {
           icon="fa-solid fa-database"
           @click="openDataAdmin"
         />
-        <span class="tooltip align-right">Data Admin</span>
+        <span class="tooltip align-right">Data</span>
       </div>
 
       <div class="tooltipable">

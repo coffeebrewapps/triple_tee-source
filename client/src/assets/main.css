@@ -81,9 +81,18 @@ a {
   border-radius: 4px;
 }
 
+.tooltipable .tooltip.align-left {
+  left: initial;
+  right: -3.5rem;
+}
+
 .tooltipable .tooltip.align-right {
   left: initial;
   right: 0;
+}
+
+.tooltipable .tooltip.align-middle {
+  top: 1rem;
 }
 
 .tooltipable:hover .tooltip {
