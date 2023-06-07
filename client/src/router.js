@@ -10,6 +10,15 @@ const router = createRouter({
 
 router.addRoute({
   path: '/',
+  name: 'Home',
+  component: () => import('@/views/HomeView.vue'),
+  meta: {
+    hidden: true,
+  },
+});
+
+router.addRoute({
+  path: '/inbox',
   name: 'Inbox',
   component: () => import('@/views/InboxPage.vue'),
   meta: {
