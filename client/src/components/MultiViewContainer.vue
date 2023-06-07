@@ -68,37 +68,50 @@ onMounted(() => {
       </div>
     </div>
 
-    <router-view />
+    <div class="view-content">
+      <router-view />
+    </div>
   </div>
 </template>
 
 <style scoped>
 .view-container {
   margin: 1rem 0;
+  display: flex;
+  gap: 1rem;
 }
 
 .views {
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 15vw;
 }
 
 .view {
   padding: 0.5rem 1rem;
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 600;
   outline: none;
 }
 
 .view.active {
-  border-bottom: 3px solid var(--color-border);
+  font-size: 0.8rem;
+  font-weight: 900;
 }
 
 .view:hover {
   cursor: pointer;
-  background-color: var(--color-border-hover);
   transition: background-color 0.5s linear;
+  font-size: 0.8rem;
+  font-weight: 900;
 }
 
 .view:focus {
   outline: 5px solid var(--color-border-hover);
+}
+
+.view-content {
+  width: 85vw;
 }
 </style>
