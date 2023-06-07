@@ -17,7 +17,7 @@ const viewContactRoute = {
   },
   children: [
     {
-      path: 'details',
+      path: '',
       name: 'Contact Details',
       component: () => import('./ContactDetails.vue'),
       props: true,
