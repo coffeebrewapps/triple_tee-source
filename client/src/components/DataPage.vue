@@ -1249,18 +1249,17 @@ onMounted(async() => {
   top: 0;
   padding: 1.5rem;
   width: 100vw;
-  height: 100%;
   background-color: var(--color-background-mute);
   z-index: 1;
   transition: all 0.5s linear;
 }
 
 .filters.expanded {
-  transform: translate(0px, 0);
+  transform: translate(0, 0);
 }
 
 .filters.collapsed {
-  transform: translate(100vw, 0);
+  transform: translate(0, -100vh);
 }
 
 .filters.expanded .toggle {
@@ -1352,19 +1351,18 @@ a.hidden {
   right: 0;
   top: 0;
   padding: 1.5rem;
-  width: 30vw;
-  height: 100%;
+  width: 100vw;
   background-color: var(--color-background-mute);
   z-index: 1;
   transition: all 0.5s linear;
 }
 
 .sort-container.expanded {
-  transform: translate(0px, 0);
+  transform: translate(0, 0);
 }
 
 .sort-container.collapsed {
-  transform: translate(30vw, 0);
+  transform: translate(0, -100vh);
 }
 
 .sort-container.expanded .toggle {
