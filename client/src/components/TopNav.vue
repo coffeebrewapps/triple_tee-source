@@ -31,27 +31,16 @@ function toggleTheme() {
 }
 
 function openSystemAdmin() {
-  const route = {
-    path: '/system_admin',
-    name: 'System Admin',
-    component: () => import('@/views/SystemAdmin.vue'),
-  };
-  router.addRoute(route);
-  router.push({ name: 'System Admin' });
+  router.push({ name: 'Configure' });
+}
+
+function openLogs() {
+  router.push({ name: 'System Logs' });
 }
 </script>
 
 <template>
   <div class="toggles">
-    <div class="alert-toggle tooltipable">
-      <TButton
-        button-type="icon"
-        icon="fa-solid fa-bell"
-        @click="toggleAlerts"
-      />
-      <span class="tooltip align-right">Alerts</span>
-    </div>
-
     <div class="theme-toggle tooltipable">
       <TButton
         button-type="icon"
@@ -67,7 +56,25 @@ function openSystemAdmin() {
         icon="fa-solid fa-gears"
         @click="openSystemAdmin"
       />
-      <span class="tooltip align-right">System Admin</span>
+      <span class="tooltip align-right">Configure</span>
+    </div>
+
+    <div class="tooltipable">
+      <TButton
+        button-type="icon"
+        icon="fa-solid fa-file-lines"
+        @click="openLogs"
+      />
+      <span class="tooltip align-right">System Logs</span>
+    </div>
+
+    <div class="alert-toggle tooltipable">
+      <TButton
+        button-type="icon"
+        icon="fa-solid fa-bell"
+        @click="toggleAlerts"
+      />
+      <span class="tooltip align-right">Alerts</span>
     </div>
   </div>
 </template>

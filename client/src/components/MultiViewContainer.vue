@@ -89,21 +89,20 @@ onMounted(() => {
 }
 
 .view {
-  padding: 0.5rem 1rem;
-  font-size: 0.7rem;
-  font-weight: 600;
+  padding: 0.5rem 0;
+  font-size: 0.8rem;
   outline: none;
 }
 
 .view.active {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 900;
 }
 
 .view:hover {
   cursor: pointer;
   transition: background-color 0.5s linear;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 900;
 }
 

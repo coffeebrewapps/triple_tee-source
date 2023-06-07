@@ -1,48 +1,59 @@
-const usePlugin = (router, dataStore) => {
-  function deactivateLatestConfig(modelClass, id, effectiveEnd) {
-    const found = dataStore.view(modelClass, id, {}).record;
-    if (!found) {
-      return {
-        success: false,
-        errors: ['not exists'],
-      };
-    }
+import { useStore } from './store';
 
-    const updated = Object.assign({}, found, { effectiveEnd });
-    return dataStore.update(modelClass, id, updated);
-  }
-
-  function viewLatestConfig(modelClass, params) {
-    const filters = {
-      sort: {
-        field: 'effectiveStart',
-        order: 'desc',
+const route = {
+  path: '/configure',
+  name: 'Configure',
+  component: () => import('./ConfigurePage.vue'),
+  meta: {
+    hidden: true,
+  },
+  children: [
+    {
+      path: 'sequences',
+      name: 'Configure Sequences',
+      component: () => import('@/plugins/sequences/SequencesPage.vue'),
+      meta: {
+        parentRoute: { name: 'Configure' },
+        hidden: true,
       },
-      include: ['baseCurrencyId', 'baseContactId'],
-      offset: 0,
-      limit: 1,
-    };
-    const latest = dataStore.list(modelClass, filters).data[0];
-    return {
-      success: true,
-      record: latest,
-    };
-  }
+    },
+    {
+      path: 'tags',
+      name: 'Configure Tags',
+      component: () => import('@/plugins/tags/TagsPage.vue'),
+      meta: {
+        parentRoute: { name: 'Configure' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'currencies',
+      name: 'Configure Currencies',
+      component: () => import('@/plugins/currencies/CurrenciesPage.vue'),
+      meta: {
+        parentRoute: { name: 'Configure' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'system_configs',
+      name: 'Configure System',
+      component: () => import('./SystemConfigs.vue'),
+      meta: {
+        parentRoute: { name: 'Configure' },
+        hidden: true,
+      },
+    },
+  ],
+};
 
-  function replaceLatestConfig(modelClass, params) {
-    const latest = viewLatestConfig(modelClass, {}).record;
-    const effectiveEnd = new Date();
-    if (latest) {
-      deactivateLatestConfig(modelClass, latest.id, effectiveEnd);
-    }
+const usePlugin = (router, dataStore) => {
+  const store = useStore(dataStore);
 
-    const effectiveStart = new Date(effectiveEnd);
-    effectiveStart.setSeconds(effectiveStart.getSeconds() + 1);
-    return dataStore.create(modelClass, Object.assign({}, params, { effectiveStart }));
-  }
+  router.addRoute(route);
 
-  dataStore.registerFunction('system_configs', 'list', 'latest', viewLatestConfig);
-  dataStore.registerFunction('system_configs', 'create', 'replace', replaceLatestConfig);
+  dataStore.registerFunction('system_configs', 'list', 'latest', store.viewLatestConfig);
+  dataStore.registerFunction('system_configs', 'create', 'replace', store.replaceLatestConfig);
 };
 
 export default usePlugin;
