@@ -80,9 +80,7 @@ const dialog = computed({
 /** section:dialog **/
 
 /** section:form **/
-const formData = computed(() => {
-  return props.data;
-});
+const formData = ref(props.data);
 /** section:form **/
 
 /** section:action **/
