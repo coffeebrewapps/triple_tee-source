@@ -95,7 +95,7 @@ function recordValue(record) {
 }
 
 function invoiceLabel(record) {
-  return record.invoiceNumber;
+  return `Invoice #${record.invoiceNumber}`;
 }
 
 const validations = {
