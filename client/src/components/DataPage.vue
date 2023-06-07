@@ -176,7 +176,7 @@ function formatDataFields(fields) {
 }
 
 function formatInputValueForField(field, row) {
-  return inputValue(field, row, includeKeys.value, combinedDataFields.value, systemConfigs.value);
+  return inputValue(field, row, includeKeys.value, combinedDataFields.value, systemConfigs);
 }
 /** section:global **/
 

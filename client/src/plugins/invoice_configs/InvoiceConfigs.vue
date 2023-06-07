@@ -263,19 +263,16 @@ function currencyLabel(record) {
             {{ inputValue('description', row) }}
           </div>
           <div class="small">
-            {{ inputValue('currencyId', row) }}
-          </div>
-          <div class="small">
-            {{ inputValue('paymentTerms', row) }}
+            Chargeable in <strong>{{ inputValue('currencyId', row) }}</strong>
           </div>
           <div class="small">
             Billed every
-            {{ inputValue('invoiceCycleDurationValue', row) }}
-            {{ inputValue('invoiceCycleDurationUnit', row) }}
+            <strong>{{ inputValue('invoiceCycleDurationValue', row) }}
+              {{ inputValue('invoiceCycleDurationUnit', row) }}</strong>
           </div>
           <div class="small">
             Due in
-            {{ inputValue('dueDateCycleValue', row) }} {{ inputValue('dueDateCycleUnit', row) }}
+            <strong>{{ inputValue('dueDateCycleValue', row) }} {{ inputValue('dueDateCycleUnit', row) }}</strong>
             from Invoice Date
           </div>
         </div>
@@ -289,6 +286,7 @@ function currencyLabel(record) {
   text-align: left;
   padding: 0.5rem;
   border-bottom: 1px solid var(--color-border);
+  width: 100%;
 }
 
 .content-row {
@@ -302,5 +300,9 @@ function currencyLabel(record) {
 
 .small {
   font-size: 0.8rem;
+}
+
+.small strong {
+  font-weight: 600;
 }
 </style>
