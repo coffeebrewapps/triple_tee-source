@@ -155,10 +155,6 @@ async function openUpdatePage(id) {
 
 <template>
   <div class="view-container">
-    <h2 class="heading">
-      Document Templates
-    </h2>
-
     <TabContainer
       :tabs="tabs"
       :selected-tab="selectedTab"
@@ -198,10 +194,6 @@ async function openUpdatePage(id) {
 <style scoped>
 .view-container {
   margin: 1rem 0;
-}
-
-.heading {
-  font-weight: 900;
 }
 
 .template-editor {

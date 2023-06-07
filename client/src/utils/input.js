@@ -56,6 +56,14 @@ export function useInputHelper(schemas) {
     return updatableFields.value.map(f => f.key);
   });
 
+  const sortableFields = computed(() => {
+    return Object.values(schemasMap.value).filter(f => f.sortable);
+  });
+
+  const sortableKeys = computed(() => {
+    return sortableFields.value.map(f => f.key);
+  });
+
   const multipartData = computed(() => {
     return Object.values(schemasMap.value).some(f => f.type === 'file');
   });
@@ -541,6 +549,8 @@ export function useInputHelper(schemas) {
     creatableKeys,
     updatableFields,
     updatableKeys,
+    sortableFields,
+    sortableKeys,
     multipartData,
     clientOptionsFields,
     clientOptionsField,

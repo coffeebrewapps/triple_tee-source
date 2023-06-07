@@ -53,51 +53,39 @@ async function triggerTabEvent(i) {
 </script>
 
 <template>
-  <div class="view-container">
-    <h2 class="heading">
-      Time Tracking
-    </h2>
+  <TabContainer
+    :tabs="tabs"
+    :selected-tab="selectedTab"
+    @tab-change="triggerTabEvent"
+  >
+    <template #tab-0>
+      <TodayLog
+        v-if="selectedTab === 0"
+      />
+    </template>
 
-    <TabContainer
-      :tabs="tabs"
-      :selected-tab="selectedTab"
-      @tab-change="triggerTabEvent"
-    >
-      <template #tab-0>
-        <TodayLog
-          v-if="selectedTab === 0"
-        />
-      </template>
+    <template #tab-1>
+      <WeekLog
+        v-if="selectedTab === 1"
+      />
+    </template>
 
-      <template #tab-1>
-        <WeekLog
-          v-if="selectedTab === 1"
-        />
-      </template>
-
-      <template #tab-2>
-        <DataPage
-          v-if="selectedTab === 2"
-          model-class="work_logs"
-          data-type="Work Logs"
-          :fullscreen="true"
-          :fields-layout="fieldsLayout"
-          :data-fields="dataFields"
-          :validations="validations"
-          :filters="filters"
-          :table-style="tableStyle"
-        >
-          <template #data-col.startTime="{ row }">
-            Total duration <strong>{{ formatDuration(calculateDuration(row)) }}</strong>
-          </template>
-        </DataPage>
-      </template>
-    </TabContainer>
-  </div>
+    <template #tab-2>
+      <DataPage
+        v-if="selectedTab === 2"
+        model-class="work_logs"
+        data-type="Work Logs"
+        :fullscreen="true"
+        :fields-layout="fieldsLayout"
+        :data-fields="dataFields"
+        :validations="validations"
+        :filters="filters"
+        :table-style="tableStyle"
+      >
+        <template #data-col.startTime="{ row }">
+          Total duration <strong>{{ formatDuration(calculateDuration(row)) }}</strong>
+        </template>
+      </DataPage>
+    </template>
+  </TabContainer>
 </template>
-
-<style scoped>
-.view-container {
-  margin: 1rem 0;
-}
-</style>

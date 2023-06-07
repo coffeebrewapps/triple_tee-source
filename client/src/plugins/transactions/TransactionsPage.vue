@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import DataPage from '@/components/DataPage.vue';
 import { useFormatter } from '@/utils/formatter';
 import { useSystemConfigsStore } from '@/stores/systemConfigs';
@@ -10,6 +10,9 @@ import { useBannerStore } from '@/stores/banner';
 
 const systemConfigsStore = useSystemConfigsStore();
 const systemConfigs = systemConfigsStore.getSystemConfigs();
+const baseCurrency = computed(() => {
+  return systemConfigs.includes.baseCurrencyId[systemConfigs.baseCurrencyId];
+});
 
 const {
   formatDate,
@@ -195,6 +198,12 @@ const actions = {
   },
 };
 
+const tableStyle = {
+  oneline: true,
+  showHeader: false,
+  highlightField: 'description',
+};
+
 const currentRowForReverse = ref();
 const reverseDialog = ref(false);
 
@@ -223,7 +232,24 @@ function closeReverseDialog() {
       :data-fields="dataFields"
       :filters="filters"
       :actions="actions"
-    />
+      :table-style="tableStyle"
+    >
+      <template #highlight.description="{ formattedValue }">
+        {{ formattedValue }}
+      </template>
+
+      <template #data-col.transactionDate="{ formattedValue }">
+        Transacted on <strong>{{ formattedValue }}</strong>
+      </template>
+
+      <template #data-col.amount="{ row, formattedValue, inputValue }">
+        <strong>{{ inputValue('type', row) }}</strong> amount
+        <strong>{{ row.includes.currencyId[row.currencyId].code }}{{ formattedValue }}</strong>
+        <span v-if="baseCurrency.id !== row.currencyId">
+          (<strong>{{ baseCurrency.code }}{{ inputValue('homeCurrencyAmount', row) }}</strong>)
+        </span>
+      </template>
+    </DataPage>
 
     <TConfirmDialog
       v-if="currentRowForReverse"

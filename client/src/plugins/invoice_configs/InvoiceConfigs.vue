@@ -264,7 +264,7 @@ function currencyLabel(record) {
     </template>
 
     <template #data-col.currencyId="{ formattedValue }">
-      Chargeable in <strong>{{ formattedValue }}}</strong>
+      Chargeable in <strong>{{ formattedValue }}</strong>
     </template>
 
     <template #data-col.invoiceCycleDurationValue="{ row, formattedValue, inputValue }">

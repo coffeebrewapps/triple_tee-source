@@ -135,6 +135,8 @@ const {
   viewableKeys,
   creatableKeys,
   updatableKeys,
+  sortableFields,
+  sortableKeys,
   includeKeys,
   inputLabel,
   inputValue,
@@ -199,15 +201,17 @@ const filtersErrorMessages = ref({});
 
 const filtersConfirmButton = computed(() => {
   return {
-    type: 'icon',
+    type: 'text',
     icon: 'fa-solid fa-check',
+    value: 'Update Filters',
   };
 });
 
 const filtersCancelButton = computed(() => {
   return {
-    type: 'icon',
+    type: 'text',
     icon: 'fa-solid fa-filter-circle-xmark',
+    value: 'Reset Filters',
   };
 });
 
@@ -239,6 +243,7 @@ const filtersStyleClass = computed(() => {
 });
 
 async function submitFilters(updatedFilters) {
+  toggleFilters();
   offset.value = 0;
   await loadData();
 }
@@ -257,9 +262,14 @@ async function resetFilters() {
         filtersData.value[key] = results[i];
       });
       filtersLoaded.value = true;
+      closeFilters();
       offset.value = 0;
       loadData();
     });
+}
+
+function closeFilters() {
+  filtersState.value = false;
 }
 
 function toggleFilters() {
@@ -285,6 +295,7 @@ function formatFiltersFields() {
 /** section:filter **/
 
 /** section:sort **/
+const sortSectionState = ref(false);
 const currentSortField = ref('id');
 const currentSortOrder = ref(true); // true = asc, false = desc
 
@@ -295,29 +306,30 @@ const sortFilters = computed(() => {
   };
 });
 
-const sortableFields = computed(() => {
-  return props.dataFields.filter(h => h.sortable).reduce((o, h) => {
-    o[h.key] = h;
-    return o;
-  }, {});
-});
-
-const sortableKeys = computed(() => {
-  return Object.keys(sortableFields.value);
-});
+function toggleSortSection() {
+  sortSectionState.value = !sortSectionState.value;
+}
 
 function sortableField(field) {
   return sortableKeys.value.includes(field);
 }
+
+const sortContainerStyleClass = computed(() => {
+  if (sortSectionState.value) {
+    return `sort-container expanded`;
+  } else {
+    return `sort-container collapsed`;
+  }
+});
 
 const sortHeaderStyles = computed(() => {
   return props.dataFields.reduce((o, field) => {
     const key = field.key;
     if (sortableField(key) && key === currentSortField.value) {
       if (currentSortOrder.value) {
-        o[key] = `header-field sort down`;
+        o[key] = `header-field sort active down`;
       } else {
-        o[key] = `header-field sort up`;
+        o[key] = `header-field sort active up`;
       }
     } else if (sortableField(key)) {
       o[key] = `header-field sort reset`;
@@ -385,6 +397,16 @@ const tableActions = computed(() => {
   const filterOverride = props.actions.filter || {};
   const filterAction = Object.assign({}, defaultFilterAction, filterOverride);
 
+  const defaultSortAction = {
+    name: 'Sort',
+    icon: 'fa-solid fa-arrow-down-wide-short',
+    click: async function() {
+      toggleSortSection();
+    },
+  };
+  const sortOverride = props.actions.sort || {};
+  const sortAction = Object.assign({}, defaultSortAction, sortOverride);
+
   const initialActions = [
     createAction,
     exportAction,
@@ -392,6 +414,10 @@ const tableActions = computed(() => {
 
   if (showFilters.value) {
     initialActions.unshift(filterAction);
+  }
+
+  if (computedTableStyle.value.oneline) {
+    initialActions.unshift(sortAction);
   }
 
   Object.entries(props.actions.table || {}).forEach((action) => {
@@ -906,6 +932,15 @@ onMounted(async() => {
       <h3 class="heading">
         Filters
       </h3>
+
+      <div
+        class="toggle tooltipable"
+        @click="toggleFilters"
+      >
+        <i class="fa-sharp fa-solid fa-xmark" />
+        <span class="tooltip align-right">Close</span>
+      </div>
+
       <DataForm
         v-model="filtersData"
         :fields-layout="filtersLayout"
@@ -914,11 +949,42 @@ onMounted(async() => {
         :error-messages="filtersErrorMessages"
         :confirm-button="filtersConfirmButton"
         :cancel-button="filtersCancelButton"
-        :compact="true"
         @submit="submitFilters"
         @cancel="resetFilters"
       />
-    </div>
+    </div> <!-- filters -->
+
+    <div
+      v-if="computedTableStyle.oneline"
+      :class="sortContainerStyleClass"
+    >
+      <h3 class="heading">
+        Sort
+      </h3>
+
+      <div
+        class="toggle tooltipable"
+        @click="toggleSortSection"
+      >
+        <i class="fa-sharp fa-solid fa-xmark" />
+        <span class="tooltip align-right">Close</span>
+      </div>
+
+      <div class="sort-fields">
+        <div
+          v-for="(header, i) in sortableFields"
+          :key="i"
+          :class="sortHeaderStyles[header.key]"
+          @click="toggleSort(header.key)"
+        >
+          {{ header.label }}
+
+          <i class="fa-solid fa-sort" />
+          <i class="fa-solid fa-sort-up" />
+          <i class="fa-solid fa-sort-down" />
+        </div>
+      </div>
+    </div> <!-- sort -->
 
     <TTable
       name=""
@@ -936,10 +1002,10 @@ onMounted(async() => {
           name="header-row"
           v-bind="{ headers, actions }"
         >
-          <th v-if="!computedTableStyle.showHeader" />
+          <div v-if="computedTableStyle.oneline"><th /></div>
 
           <th
-            v-if="computedTableStyle.showHeader"
+            v-if="!computedTableStyle.oneline"
             v-for="(header, i) in headers"
             :key="i"
             class="col"
@@ -957,7 +1023,7 @@ onMounted(async() => {
           </th>
 
           <th
-            v-if="actions.length > 0 && computedTableStyle.showHeader"
+            v-if="actions.length > 0 && !computedTableStyle.oneline"
             class="col"
           />
         </slot> <!-- header-row -->
@@ -1161,20 +1227,49 @@ onMounted(async() => {
 }
 
 .filters {
-  margin-top: 1rem;
-  border-bottom: 1px solid var(--color-border);
+  position: fixed;
+  right: 0;
+  top: 0;
+  padding: 1.5rem;
+  width: 100vw;
+  height: 100%;
+  background-color: var(--color-background-mute);
+  z-index: 1;
+  transition: all 0.5s linear;
 }
 
 .filters.expanded {
-  display: block;
+  transform: translate(0px, 0);
 }
 
 .filters.collapsed {
-  display: none;
+  transform: translate(100vw, 0);
+}
+
+.filters.expanded .toggle {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.filters.expanded .toggle:hover {
+  cursor: pointer;
+  background-color: var(--color-border-hover);
 }
 
 a.hidden {
   display: none;
+}
+
+.header.oneline {
+  display: flex;
+  gap: 1rem;
 }
 
 .header-field {
@@ -1231,5 +1326,66 @@ a.hidden {
 
 .col.oneline .content-row .small {
   font-size: 0.8rem;
+}
+
+.sort-container {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  right: 0;
+  top: 0;
+  padding: 1.5rem;
+  width: 30vw;
+  height: 100%;
+  background-color: var(--color-background-mute);
+  z-index: 1;
+  transition: all 0.5s linear;
+}
+
+.sort-container.expanded {
+  transform: translate(0px, 0);
+}
+
+.sort-container.collapsed {
+  transform: translate(30vw, 0);
+}
+
+.sort-container.expanded .toggle {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+}
+
+.sort-container.expanded .toggle:hover {
+  cursor: pointer;
+  background-color: var(--color-border-hover);
+}
+
+.sort-container .sort-fields {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sort-container .header-field {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.sort-container .header-field:hover,
+.sort-container .header-field.sort.active {
+  background-color: var(--color-border-hover);
+  border-radius: 1rem;
 }
 </style>
