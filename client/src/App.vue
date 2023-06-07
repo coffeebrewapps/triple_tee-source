@@ -1,7 +1,7 @@
 <script setup>
 /** import:global **/
 import { ref, watch, onMounted } from 'vue';
-import { useRouter, RouterView } from 'vue-router';
+import { useRouter, useRoute, RouterView } from 'vue-router';
 import { useDataAccess } from '@/utils/dataAccess';
 /** import:global **/
 
@@ -22,6 +22,7 @@ import { useSystemConfigsStore } from '@/stores/systemConfigs';
 
 /** section:nav **/
 const router = useRouter();
+const currentRoute = useRoute();
 const transitionName = ref('default');
 
 const navigator = useNavStore();
@@ -102,7 +103,9 @@ onMounted(() => {
 
         <div class="divider" />
 
-        <BreadCrumbs />
+        <div class="page-heading">
+          {{ currentRoute.name }}
+        </div>
 
         <Transition mode="out-in">
           <component :is="Component" />
@@ -115,4 +118,9 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.page-heading {
+  padding: 1rem 0;
+  font-size: 1.2rem;
+  font-weight: 900;
+}
 </style>

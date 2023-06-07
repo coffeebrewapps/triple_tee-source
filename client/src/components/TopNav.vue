@@ -1,14 +1,18 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAlertsStore } from '@/stores/alerts';
+import { useValidations } from '@/utils/validations';
 
 import {
   TButton
 } from 'coffeebrew-vue-components';
 
 const router = useRouter();
+const currentRoute = useRoute();
 const alerts = useAlertsStore();
+const { isEmpty, notEmpty } = useValidations();
+
 const theme = ref(true); // true: dark, false: light
 
 const themeIcon = computed(() => {
@@ -45,69 +49,121 @@ function openDataAdmin() {
 function openInbox() {
   router.push({ name: 'Inbox' });
 }
+
+const hasParentRoute = computed(() => {
+  return notEmpty(currentRoute.meta) && notEmpty(currentRoute.meta.parentRoute);
+});
+
+function findParentRoute() {
+  return router.getRoutes().find((route) => {
+    if (isEmpty(currentRoute.meta)) { return false; }
+    if (isEmpty(currentRoute.meta.parentRoute)) { return false; }
+
+    return route.name === currentRoute.meta.parentRoute.name;
+  });
+}
+
+function goBackToParent() {
+  if (isEmpty(currentRoute.meta)) { return; }
+  if (isEmpty(currentRoute.meta.parentRoute)) { return; }
+
+  const parentRoute = findParentRoute();
+  if (isEmpty(parentRoute)) { return; }
+
+  if (notEmpty(parentRoute.meta) && notEmpty(parentRoute.meta.buildParams)) {
+    router.push({ name: parentRoute.name, ...parentRoute.meta.buildParams(currentRoute) });
+  } else {
+    router.push({ name: parentRoute.name });
+  }
+}
 </script>
 
 <template>
-  <div class="toggles">
-    <div class="theme-toggle tooltipable">
-      <TButton
-        button-type="icon"
-        :icon="themeIcon"
-        @click="toggleTheme"
-      />
-      <span class="tooltip align-right">Switch Theme</span>
+  <div class="nav-container">
+    <div class="routes">
+      <div
+        v-if="hasParentRoute"
+        class="route tooltipable"
+      >
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-arrow-left"
+          @click="goBackToParent"
+        />
+        <span class="tooltip">Go Back</span>
+      </div>
     </div>
 
-    <div class="tooltipable">
-      <TButton
-        button-type="icon"
-        icon="fa-solid fa-screwdriver-wrench"
-        @click="openSystemAdmin"
-      />
-      <span class="tooltip align-right">Configure</span>
-    </div>
+    <div class="toggles">
+      <div class="theme-toggle tooltipable">
+        <TButton
+          button-type="icon"
+          :icon="themeIcon"
+          @click="toggleTheme"
+        />
+        <span class="tooltip align-right">Switch Theme</span>
+      </div>
 
-    <div class="tooltipable">
-      <TButton
-        button-type="icon"
-        icon="fa-solid fa-file-lines"
-        @click="openLogs"
-      />
-      <span class="tooltip align-right">System Logs</span>
-    </div>
+      <div class="tooltipable">
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-screwdriver-wrench"
+          @click="openSystemAdmin"
+        />
+        <span class="tooltip align-right">Configure</span>
+      </div>
 
-    <div class="tooltipable">
-      <TButton
-        button-type="icon"
-        icon="fa-solid fa-database"
-        @click="openDataAdmin"
-      />
-      <span class="tooltip align-right">Data Admin</span>
-    </div>
+      <div class="tooltipable">
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-file-lines"
+          @click="openLogs"
+        />
+        <span class="tooltip align-right">System Logs</span>
+      </div>
 
-    <div class="tooltipable">
-      <TButton
-        button-type="icon"
-        icon="fa-solid fa-inbox"
-        @click="openInbox"
-      />
-      <span class="tooltip align-right">Inbox</span>
-    </div>
+      <div class="tooltipable">
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-database"
+          @click="openDataAdmin"
+        />
+        <span class="tooltip align-right">Data Admin</span>
+      </div>
 
-    <div class="alert-toggle tooltipable">
-      <TButton
-        button-type="icon"
-        icon="fa-solid fa-bell"
-        @click="toggleAlerts"
-      />
-      <span class="tooltip align-right">Alerts</span>
+      <div class="tooltipable">
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-inbox"
+          @click="openInbox"
+        />
+        <span class="tooltip align-right">Inbox</span>
+      </div>
+
+      <div class="alert-toggle tooltipable">
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-bell"
+          @click="toggleAlerts"
+        />
+        <span class="tooltip align-right">Alerts</span>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.toggles {
-  align-self: flex-end;
+.nav-container {
+  display: flex;
+  align-items: center;
+}
+
+.nav-container .routes {
+  display: flex;
+  flex-grow: 1;
+}
+
+.nav-container .toggles {
   display: flex;
 }
 </style>
