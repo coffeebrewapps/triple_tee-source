@@ -41,11 +41,11 @@ const actions = {
 };
 
 async function openViewPage(row) {
-  router.push({ name: 'View Invoice', params: { id: row.id }, query: { contactId: row.contactId } });
+  router.push({ name: 'Contact View Invoice', params: { invoiceId: row.id, contactId: row.contactId } });
 }
 
 async function openCreatePage() {
-  router.push({ name: 'Create Invoice', query: { contactId: props.contactId } });
+  router.push({ name: 'Contact Create Invoice', params: { contactId: props.contactId } });
 }
 </script>
 

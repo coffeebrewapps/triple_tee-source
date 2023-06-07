@@ -1,7 +1,6 @@
 <script setup>
 /** import:global **/
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 /** import:global **/
 
 /** import:utils **/
@@ -28,7 +27,6 @@ import TemplateEditor from '@/components/TemplateEditor.vue';
 /** import:components **/
 
 /** section:utils **/
-const router = useRouter();
 const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const events = useEventsStore();
@@ -36,23 +34,27 @@ const { flashMessage } = useBannerStore();
 const systemConfigs = useSystemConfigsStore();
 /** section:utils **/
 
+/** section:props **/
+const props = defineProps({
+  contactId: {
+    type: String,
+    default: null,
+  },
+  invoiceId: {
+    type: String,
+    default: null,
+  },
+});
+/** section:props **/
+
 /** section:global **/
-const currentRoute = Object.assign({}, router.currentRoute.value);
-
-const invoiceId = computed(() => {
-  return currentRoute.params.id;
-});
-
-const contactId = computed(() => {
-  return currentRoute.query.contactId;
-});
 const {
   fieldsLayout,
   generateDataFields,
 } = useInvoiceUtils();
 
 const dataFields = computed(() => {
-  return generateDataFields(contactId.value);
+  return generateDataFields(props.contactId);
 });
 
 const {
@@ -80,7 +82,7 @@ async function loadInvoice() {
   const params = { include: includeKeys.value };
 
   await dataAccess
-    .view('invoices', invoiceId.value, params)
+    .view('invoices', props.invoiceId, params)
     .then((result) => {
       currentInvoice.value = result;
       flashMessage(`Loaded invoice successfully!`);

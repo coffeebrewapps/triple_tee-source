@@ -1,7 +1,6 @@
 <script setup>
 /** import:global **/
 import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 /** import:global **/
 
 /** import:utils **/
@@ -28,18 +27,21 @@ import TemplateEditor from '@/components/TemplateEditor.vue';
 /** import:components **/
 
 /** section:utils **/
-const router = useRouter();
 const { isEmpty, notEmpty } = useValidations();
 const dataAccess = useDataAccess();
 const { flashMessage } = useBannerStore();
 /** section:utils **/
 
-/** section:global **/
-const currentRoute = Object.assign({}, router.currentRoute.value);
-const contactId = computed(() => {
-  return currentRoute.query.contactId;
+/** section:props **/
+const props = defineProps({
+  contactId: {
+    type: String,
+    default: null,
+  },
 });
+/** section:props **/
 
+/** section:global **/
 const {
   generateDataFields,
   recordValue,
@@ -237,8 +239,8 @@ function resetFilters() {
     },
   };
 
-  if (notEmpty(contactId.value)) {
-    filtersData.value.contactId = [{ value: contactId.value }];
+  if (notEmpty(props.contactId)) {
+    filtersData.value.contactId = [{ value: props.contactId }];
   }
 }
 /** section:filters **/
@@ -377,7 +379,7 @@ const invoiceFieldKeys = computed(() => {
 });
 
 const invoiceDataFields = computed(() => {
-  return generateDataFields(contactId.value);
+  return generateDataFields(props.contactId);
 });
 
 const invoiceKeys = computed(() => {

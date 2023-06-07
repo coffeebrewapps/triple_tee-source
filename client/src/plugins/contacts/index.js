@@ -76,6 +76,26 @@ const viewContactRoute = {
         hidden: true,
       },
     },
+    {
+      path: 'invoices/new',
+      name: 'Contact Create Invoice',
+      component: () => import('@/plugins/invoices/CreateInvoice.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contact Invoices' },
+        hidden: true,
+      },
+    },
+    {
+      path: 'invoices/:invoiceId',
+      name: 'Contact View Invoice',
+      component: () => import('@/plugins/invoices/ViewInvoice.vue'),
+      props: true,
+      meta: {
+        parentRoute: { name: 'Contact Invoices' },
+        hidden: true,
+      },
+    },
   ],
 };
 
