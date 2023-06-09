@@ -105,15 +105,16 @@ onMounted(() => {
 .view-container {
   margin: 1rem 0;
   display: flex;
+  flex-direction: column;
   gap: 1rem;
   width: 100%;
 }
 
 .views {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 1rem;
-  width: 15%;
+  width: 100%;
 }
 
 .view {
@@ -125,10 +126,12 @@ onMounted(() => {
 .view.active {
   font-size: 0.9rem;
   font-weight: 900;
+  border-bottom: 3px solid var(--color-border);
 }
 
 .view:hover {
   cursor: pointer;
+  border-bottom: 3px solid var(--color-border);
   transition: background-color 0.5s linear;
   font-size: 0.9rem;
   font-weight: 900;
@@ -139,7 +142,7 @@ onMounted(() => {
 }
 
 .view-content {
-  width: 85%;
+  width: 100%;
 }
 
 .view-content .heading {
