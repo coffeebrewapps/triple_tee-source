@@ -77,5 +77,5 @@ export function useStore(dataStore) {
 
   return {
     reverseTransaction,
-  }
+  };
 }
