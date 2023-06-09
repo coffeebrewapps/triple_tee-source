@@ -121,7 +121,10 @@ export function useApiAccess() {
 
   async function upload(modelClass, params) {
     return new Promise((resolve, reject) => {
-      const url = formatUrl('schemas', modelClass, { path: 'upload' });
+      const url = modelClass === 'indexes' ?
+        formatUrl('indexes') :
+        formatUrl('schemas', modelClass, { path: 'upload' });
+
       axios
         .put(url, params)
         .then((res) => {
