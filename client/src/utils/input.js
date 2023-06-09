@@ -431,7 +431,7 @@ export function useInputHelper(schemas) {
     clientOptionsFields.value.forEach((field) => {
       const value = data[field];
       if (isEmpty(value) || value.length === 0) {
-        delete data[field];
+        data[field] = null;
       }
     });
 
@@ -447,12 +447,16 @@ export function useInputHelper(schemas) {
       }
     });
 
-    return Object.entries(data).reduce((o, [key, val]) => {
-      if (notEmpty(val)) {
+    const formattedData = Object.entries(data).reduce((o, [key, val]) => {
+      if (Object.is(val, undefined)) {
+        o[key] = null;
+      } else {
         o[key] = val;
       }
       return o;
     }, {});
+
+    return formattedData;
   }
 
   function formatErrorsForDisplay(error) {
