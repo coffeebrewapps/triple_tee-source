@@ -508,10 +508,6 @@ onMounted(() => {
 
 <template>
   <div class="page-container">
-    <h3 class="heading">
-      Create Invoice
-    </h3>
-
     <WorkflowContainer
       :steps="steps"
       :current-step-number="currentStep"
@@ -541,81 +537,83 @@ onMounted(() => {
           :submittable="false"
         />
 
-        <TTable
-          v-if="updatedInvoice"
-          name="Invoice Lines"
-          :headers="invoiceLineHeaders"
-          :data="updatedInvoiceLines"
-          :table-actions="invoiceLineTableActions"
-          :actions="invoiceLineRowActions"
-          :loading="invoiceLinesLoading"
-          :pagination="{ offset: 0, limit: updatedInvoiceLines.length, client: true }"
-        >
-          <template #[`data-col.description`]="{ row, i }">
-            <div class="data-col">
-              <TInput
-                v-model="row.description"
-                type="text"
-                label=""
-                size="lg"
-                :error-message="invoiceLineErrorMessage(i, 'description')"
-              />
-            </div>
-          </template>
+        <div class="invoice-lines-table">
+          <TTable
+            v-if="updatedInvoice"
+            name="Invoice Lines"
+            :headers="invoiceLineHeaders"
+            :data="updatedInvoiceLines"
+            :table-actions="invoiceLineTableActions"
+            :actions="invoiceLineRowActions"
+            :loading="invoiceLinesLoading"
+            :pagination="{ offset: 0, limit: updatedInvoiceLines.length, client: true }"
+          >
+            <template #[`data-col.description`]="{ row, i }">
+              <div class="data-col">
+                <TInput
+                  v-model="row.description"
+                  type="text"
+                  label=""
+                  size="md"
+                  :error-message="invoiceLineErrorMessage(i, 'description')"
+                />
+              </div>
+            </template>
 
-          <template #[`data-col.unitCost`]="{ row, i }">
-            <div class="data-col">
-              <TInput
-                v-model="row.unitCost"
-                type="number"
-                label=""
-                size="sm"
-                :error-message="invoiceLineErrorMessage(i, 'unitCost')"
-              />
-            </div>
-          </template>
+            <template #[`data-col.unitCost`]="{ row, i }">
+              <div class="data-col">
+                <TInput
+                  v-model="row.unitCost"
+                  type="number"
+                  label=""
+                  size="sm"
+                  :error-message="invoiceLineErrorMessage(i, 'unitCost')"
+                />
+              </div>
+            </template>
 
-          <template #[`data-col.unit`]="{ row, i }">
-            <div class="data-col">
-              <TSelect
-                v-model="row.unit"
-                type="text"
-                label=""
-                size="md"
-                :options="invoiceLineUnitOptions"
-                :error-message="invoiceLineErrorMessage(i, 'unit')"
-              />
-            </div>
-          </template>
+            <template #[`data-col.unit`]="{ row, i }">
+              <div class="data-col">
+                <TSelect
+                  v-model="row.unit"
+                  type="text"
+                  label=""
+                  size="sm"
+                  :options="invoiceLineUnitOptions"
+                  :error-message="invoiceLineErrorMessage(i, 'unit')"
+                />
+              </div>
+            </template>
 
-          <template #[`data-col.unitValue`]="{ row, i }">
-            <div class="data-col">
-              <TInput
-                v-model="row.unitValue"
-                type="number"
-                label=""
-                size="sm"
-                :error-message="invoiceLineErrorMessage(i, 'unitValue')"
-              />
-            </div>
-          </template>
+            <template #[`data-col.unitValue`]="{ row, i }">
+              <div class="data-col">
+                <TInput
+                  v-model="row.unitValue"
+                  type="number"
+                  label=""
+                  size="sm"
+                  :error-message="invoiceLineErrorMessage(i, 'unitValue')"
+                />
+              </div>
+            </template>
 
-          <template #[`data-col.subtotal`]="{ row, i }">
-            <div class="data-col">
-              <TInput
-                v-model="row.subtotal"
-                type="number"
-                label=""
-                size="sm"
-                :error-message="invoiceLineErrorMessage(i, 'subtotal')"
-              />
-            </div>
-          </template>
+            <template #[`data-col.subtotal`]="{ row, i }">
+              <div class="data-col">
+                <TInput
+                  v-model="row.subtotal"
+                  type="number"
+                  label=""
+                  size="sm"
+                  :error-message="invoiceLineErrorMessage(i, 'subtotal')"
+                />
+              </div>
+            </template>
 
-          <template #pagination="{ total }">
-            Total Lines: {{ total }}
-          </template>
-        </TTable>
+            <template #pagination="{ total }">
+              Total Lines: {{ total }}
+            </template>
+          </TTable>
+        </div> <!-- invoice-lines-table -->
       </template> <!-- step-1:invoice and lines -->
 
       <template #step-2>
@@ -634,13 +632,13 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.page-container .heading {
-  margin: 1rem 0;
-  font-weight: 900;
-}
-
 .data-col {
   padding: 1rem 0;
+}
+
+.invoice-lines-table {
+  width: 100%;
+  overflow: auto;
 }
 
 .actions {

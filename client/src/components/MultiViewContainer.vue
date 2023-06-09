@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, onBeforeRouteUpdate } from 'vue-router';
 /** import:global **/
 
@@ -25,10 +25,16 @@ const viewRefs = ref([]);
 
 const router = useRouter();
 
+const displayableViews = computed(() => {
+  return props.views.filter((view) => {
+    return !view.hidden;
+  });
+});
+
 function selectView(view) {
   viewRefs.value[view].blur();
   selectedView.value = view;
-  router.push(props.views[view]);
+  router.push({ name: props.views[view].name });
 }
 
 function navigateView(view) {
@@ -68,7 +74,7 @@ onMounted(() => {
   <div class="view-container">
     <div class="views">
       <div
-        v-for="(view, i) in views"
+        v-for="(view, i) in displayableViews"
         :key="i"
         ref="viewRefs"
         :class="viewStyle(i)"
@@ -100,13 +106,14 @@ onMounted(() => {
   margin: 1rem 0;
   display: flex;
   gap: 1rem;
+  width: 100%;
 }
 
 .views {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 15vw;
+  width: 15%;
 }
 
 .view {
@@ -132,7 +139,7 @@ onMounted(() => {
 }
 
 .view-content {
-  width: 85vw;
+  width: 85%;
 }
 
 .view-content .heading {

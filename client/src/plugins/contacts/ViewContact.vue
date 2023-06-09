@@ -20,6 +20,8 @@ const views = [
   { name: 'Contact Billing Configs', params: { contactId: props.contactId } },
   { name: 'Contact Invoices', params: { contactId: props.contactId } },
   { name: 'Contact Receipts', params: { contactId: props.contactId } },
+  { name: 'Contact Create Invoice', params: { contactId: props.contactId }, hidden: true },
+  { name: 'Contact Create Receipt', params: { contactId: props.contactId }, hidden: true },
 ];
 /** section:views **/
 </script>
