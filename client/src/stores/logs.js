@@ -6,13 +6,10 @@ export const useLogsStore = defineStore('logs', () => {
 
   function saveLog(message) {
     logs.value.unshift(message);
-    if (logs.value.length > 20) {
-      logs.value.splice(logs.value.length - 1, 1);
-    }
   }
 
   function tailLog() {
-    return logs.value.join('\n');
+    return logs.value.slice(0, 20).join('\n');
   }
 
   return { saveLog, tailLog };
