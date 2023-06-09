@@ -7,7 +7,7 @@ const route = {
   },
 };
 
-const usePlugin = (router, dataStore, uploader, logger) => {
+const usePlugin = ({ router, dataStore, logger }) => {
   router.addRoute(route);
 
   function tailLog() {

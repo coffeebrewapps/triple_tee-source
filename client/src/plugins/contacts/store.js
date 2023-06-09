@@ -1,4 +1,4 @@
-export function useStore(dataStore, uploader) {
+export function useStore({ dataStore, uploader }) {
   function notEmpty(value) {
     return !isEmpty(value);
   }

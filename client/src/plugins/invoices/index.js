@@ -1,6 +1,6 @@
 import { useStore } from './store';
 
-const usePlugin = (router, dataStore, uploader, logger) => {
+const usePlugin = ({ router, dataStore, logger }) => {
   const store = useStore({ dataStore, logger });
 
   dataStore.registerFunction('invoices', 'create', 'generate_with_lines', store.createWithLines);

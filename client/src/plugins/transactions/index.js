@@ -6,14 +6,12 @@ const route = {
   component: () => import('./TransactionsPage.vue'),
 };
 
-const usePlugin = (router, dataStore) => {
-  const store = useStore(dataStore);
+const usePlugin = ({ router, dataStore }) => {
+  const store = useStore({ dataStore });
 
   router.addRoute(route);
 
   dataStore.registerFunction('transactions', 'update', 'reverse', store.reverseTransaction);
-
-  return route;
 };
 
 export default usePlugin;

@@ -38,7 +38,7 @@ const updateTemplateRoute = {
   },
 };
 
-const usePlugin = (router, dataStore, uploader, logger) => {
+const usePlugin = ({ router, dataStore, logger }) => {
   const store = useStore({ dataStore, logger });
 
   router.addRoute(route);
@@ -48,8 +48,6 @@ const usePlugin = (router, dataStore, uploader, logger) => {
 
   dataStore.registerFunction('invoice_templates', 'downloadStream', 'pdf', store.downloadPdf);
   dataStore.registerFunction('receipt_templates', 'downloadStream', 'pdf', store.downloadPdf);
-
-  return route;
 };
 
 export default usePlugin;

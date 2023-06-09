@@ -113,9 +113,8 @@ function client {
   component: () => import('./${model}.vue'),
 }
 
-const usePlugin = (router, dataStore) => {
+const usePlugin = ({ router, dataStore }) => {
   router.addRoute(route);
-  return route;
 };
 
 export default usePlugin;" >> $index_file

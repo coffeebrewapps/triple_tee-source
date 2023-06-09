@@ -7,9 +7,8 @@ const route = {
   },
 };
 
-const usePlugin = (router) => {
+const usePlugin = ({ router }) => {
   router.addRoute(route);
-  return route;
 };
 
 export default usePlugin;

@@ -16,15 +16,13 @@ const viewTaxTableRoute = {
   },
 };
 
-const usePlugin = (router, dataStore) => {
-  const store = useStore(dataStore);
+const usePlugin = ({ router, dataStore }) => {
+  const store = useStore({ dataStore });
 
   router.addRoute(route);
   router.addRoute(viewTaxTableRoute);
 
   dataStore.registerFunction('tax_tables', 'view', 'estimate', store.estimateTax);
-
-  return route;
 };
 
 export default usePlugin;

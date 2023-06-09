@@ -1,4 +1,4 @@
-export function useStore(dataStore) {
+export function useStore({ dataStore }) {
   function reverseTransaction(modelClass, id, params) {
     const result = dataStore.view('transactions', id, {});
 

@@ -4,9 +4,8 @@ const route = {
   component: () => import('./WorkLogs.vue'),
 };
 
-const usePlugin = (router) => {
+const usePlugin = ({ router }) => {
   router.addRoute(route);
-  return route;
 };
 
 export default usePlugin;

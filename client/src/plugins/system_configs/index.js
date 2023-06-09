@@ -47,8 +47,8 @@ const route = {
   ],
 };
 
-const usePlugin = (router, dataStore) => {
-  const store = useStore(dataStore);
+const usePlugin = ({ router, dataStore }) => {
+  const store = useStore({ dataStore });
 
   router.addRoute(route);
 

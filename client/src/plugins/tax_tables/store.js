@@ -1,4 +1,4 @@
-export function useStore(dataStore) {
+export function useStore({ dataStore }) {
   function estimateTax(modelClass, id) {
     /** tax table **/
     const result = dataStore.view('tax_tables', id, {});

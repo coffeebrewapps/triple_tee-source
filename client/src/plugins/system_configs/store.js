@@ -1,4 +1,4 @@
-export function useStore(dataStore) {
+export function useStore({ dataStore }) {
   function deactivateLatestConfig(modelClass, id, effectiveEnd) {
     const found = dataStore.view(modelClass, id, {}).record;
     if (!found) {
