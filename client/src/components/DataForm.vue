@@ -8,6 +8,7 @@ import { useInputHelper } from '@/utils/input';
 import { useErrors } from '@/utils/errors';
 import { useValidations } from '@/utils/validations';
 import { useFileUtils } from '@/utils/file';
+import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
 /** import:components **/
@@ -117,6 +118,8 @@ const {
   notEmpty,
 } = useValidations();
 
+const logger = useLogger();
+
 const errorsMap = useErrors();
 
 const fieldToggles = ref(nullToggleableFields.value.reduce((o, f) => {
@@ -202,7 +205,7 @@ function sanitizeFileFields(formData) {
           }
         })
         .catch((error) => {
-          console.error(error);
+          logger.error(`Error sanitizing file fields`, error);
         });
     }
   });
@@ -303,7 +306,7 @@ onMounted(async() => {
       inputOptionsData.value = result;
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error initializing options data`, error);
     });
 });
 </script>

@@ -8,6 +8,7 @@ import { useInputHelper } from '@/utils/input';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useValidations } from '@/utils/validations';
 import { useContactUtils } from './utils';
+import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
 /** import:stores **/
@@ -41,6 +42,7 @@ const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const { flashMessage } = useBannerStore();
 const systemConfigs = useSystemConfigsStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:global **/
@@ -56,7 +58,7 @@ async function loadContact() {
       currentContact.value = result;
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading contact`, error);
       flashMessage(`Error loading contact!`);
     });
 }

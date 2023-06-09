@@ -38,8 +38,8 @@ const updateTemplateRoute = {
   },
 };
 
-const usePlugin = (router, dataStore) => {
-  const store = useStore(dataStore);
+const usePlugin = (router, dataStore, uploader, logger) => {
+  const store = useStore({ dataStore, logger });
 
   router.addRoute(route);
   router.addRoute(createTemplateRoute);

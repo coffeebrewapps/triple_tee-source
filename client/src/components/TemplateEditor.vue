@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 /** import:utils **/
 import { useDataAccess } from '@/utils/dataAccess';
 import { useValidations } from '@/utils/validations';
+import { useLogger } from '@/utils/logger';
 import { Liquid } from 'liquidjs';
 /** import:utils **/
 
@@ -69,6 +70,7 @@ const emit = defineEmits(['contentMarkupChange', 'contentStylesChange', 'dataCha
 const router = useRouter();
 const dataAccess = useDataAccess();
 const { notEmpty } = useValidations();
+const logger = useLogger();
 const liquidEngine = new Liquid();
 /** section:utils **/
 
@@ -166,7 +168,7 @@ async function confirmMarkupEdit() {
     .catch((error) => {
       previewError.value = true;
       parsedMarkup.value = `Markup error`;
-      console.error(error);
+      logger.error(`Error updating markup`, error);
     })
     .finally(() => {
       markupEditable.value = false;
@@ -196,7 +198,7 @@ async function confirmSampleDataEdit() {
     .catch((error) => {
       previewError.value = true;
       parsedMarkup.value = `Sample data error`;
-      console.error(error);
+      logger.error(`Error updating sample data`, error);
     })
     .finally(() => {
       sampleDataEditable.value = false;
@@ -292,7 +294,7 @@ async function generateTemplate() {
       viewPdf();
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error generating template`, error);
     })
     .finally(() => {
       closePreviewDialog();

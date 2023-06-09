@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 
-import { useBannerStore } from '../stores/banner';
+import { useBannerStore } from '@/stores/banner';
 import { useDataAccess } from '@/utils/dataAccess';
+import { useLogger } from '@/utils/logger';
 
 import {
   TTable
@@ -10,6 +11,7 @@ import {
 
 const { flashMessage } = useBannerStore();
 const dataAccess = useDataAccess();
+const logger = useLogger();
 
 const offset = ref(0);
 const limit = ref(10);
@@ -47,7 +49,7 @@ async function loadData() {
     })
     .catch((err) => {
       dataLoading.value = false;
-      console.error(err);
+      logger.error(`Error loading inbox`, err);
       flashMessage(`Error loading inbox!`);
     });
 }

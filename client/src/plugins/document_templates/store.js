@@ -3,7 +3,7 @@ import { Liquid } from 'liquidjs';
 import html2pdf from 'html2pdf.js';
 const liquidEngine = new Liquid();
 
-export function useStore(dataStore) {
+export function useStore({ dataStore, logger }) {
   async function createHtmlString(template, params) {
     const content = [];
 
@@ -51,13 +51,13 @@ export function useStore(dataStore) {
     return new Promise((resolve, reject) => {
       html2pdf().from(htmlString).outputPdf('arraybuffer')
         .then((result) => {
-          console.log(`Parsing complete!`);
+          logger.log(`Parsing complete!`);
           resolve({
             data: result,
           });
         })
         .catch((error) => {
-          console.error(error);
+          logger.error(`Error parsing template`, error);
           reject(error);
         });
     });

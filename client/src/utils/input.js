@@ -4,6 +4,7 @@ import { useDataAccess } from '@/utils/dataAccess';
 import { useFormatter } from '@/utils/formatter';
 import { useValidations } from '@/utils/validations';
 import { useFileUtils } from '@/utils/file';
+import { useLogger } from '@/utils/logger';
 
 const dataAccess = useDataAccess();
 const {
@@ -15,6 +16,8 @@ const { isEmpty, notEmpty } = useValidations();
 const {
   base64ToFile,
 } = useFileUtils();
+
+const logger = useLogger();
 
 export function useInputHelper(schemas) {
   const schemasMap = computed(() => {
@@ -276,7 +279,7 @@ export function useInputHelper(schemas) {
           resolve(formattedOptions);
         })
         .catch((error) => {
-          console.error(error);
+          logger.error(`Error loading includes from server`, error);
           reject(error);
         });
     });
@@ -347,7 +350,7 @@ export function useInputHelper(schemas) {
                 });
             })
             .catch((error) => {
-              console.error(error);
+              logger.error(`Error formatting data for show`, error);
               resolve(fieldValue);
             });
         }
@@ -402,7 +405,7 @@ export function useInputHelper(schemas) {
             resolve(formattedOptions);
           })
           .catch((error) => {
-            console.error(error);
+            logger.error(`Error formatting data for show`, error);
             const formattedOptions = [];
             fieldIncludeValues.forEach((v) => {
               if (notEmpty(v)) {

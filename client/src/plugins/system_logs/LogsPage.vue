@@ -32,11 +32,11 @@ async function loadDebugLogs() {
           logsContentArray.value = text.split('\n');
         })
         .catch((error) => {
-          console.error(error);
+          console.error(`Error loading logs`, error);
         });
     })
     .catch((error) => {
-      console.error(error);
+      console.error(`Error loading logs`, error);
     });
 }
 

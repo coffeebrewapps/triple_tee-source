@@ -8,6 +8,7 @@ import { useValidations } from '@/utils/validations';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useFormatter } from '@/utils/formatter';
 import { useInputHelper } from '@/utils/input';
+import { useLogger } from '@/utils/logger';
 import { useWorkLogUtils } from './utils';
 /** import:utils **/
 
@@ -55,6 +56,7 @@ const {
 const { flashMessage } = useBannerStore();
 const events = useEventsStore();
 const shortcuts = useShortcutsStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:global **/
@@ -166,7 +168,7 @@ async function submitNewTask() {
       closeStartTaskDialog();
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error creating data`, error);
       flashMessage(`Error creating data!`);
     });
 }
@@ -207,8 +209,8 @@ async function updateTask() {
       }
     })
     .catch((error) => {
-      console.error(error);
-      flashMessage(`Error submiting task!`);
+      logger.error(`Error submitting task`, error);
+      flashMessage(`Error submitting task!`);
     });
 }
 
@@ -367,7 +369,7 @@ async function loadSchemas() {
     })
     .catch((error) => {
       flashMessage(`Error loading schemas!`);
-      console.error(error);
+      logger.error(`Error loading schemas`, error);
     });
 }
 
@@ -395,7 +397,7 @@ async function loadToday() {
     })
     .catch((error) => {
       flashMessage(`Error loading work logs!`);
-      console.error(error);
+      logger.error(`Error loading work logs`, error);
     });
 }
 

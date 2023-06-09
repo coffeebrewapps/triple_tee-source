@@ -9,6 +9,7 @@ import { useFormatter } from '@/utils/formatter';
 import { useErrors } from '@/utils/errors';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useValidations } from '@/utils/validations';
+import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
 /** import:stores **/
@@ -160,6 +161,7 @@ const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const { flashMessage } = useBannerStore();
 const events = useEventsStore();
+const logger = useLogger();
 
 const inputOptionsData = ref({});
 
@@ -552,7 +554,7 @@ async function formatListedData() {
       });
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error fetching formatted data`, error);
     });
 }
 /** section:table **/
@@ -585,7 +587,7 @@ async function loadSchemas() {
       schemasLoaded.value = true;
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading schemas`, error);
       flashMessage(`Error loading schemas!`);
     });
 }
@@ -611,7 +613,7 @@ async function loadData() {
     })
     .catch((error) => {
       dataLoading.value = false;
-      console.error(error);
+      logger.error(`Error loading data`, error);
       flashMessage(`Error loading data!`);
     });
 }

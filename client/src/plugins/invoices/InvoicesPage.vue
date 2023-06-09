@@ -8,12 +8,14 @@ import { useRouter } from 'vue-router';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useEventsStore } from '@/stores/events';
 import { useBannerStore } from '@/stores/banner';
+import { useLogger } from '@/utils/logger';
 import { useInvoiceUtils } from './utils';
 
 const router = useRouter();
 const dataAccess = useDataAccess();
 const { flashMessage } = useBannerStore();
 const events = useEventsStore();
+const logger = useLogger();
 
 const props = defineProps({
   contactId: {
@@ -88,7 +90,7 @@ async function voidDataAndCloseDialog() {
       flashMessage(`Voided invoice successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error voiding invoice`, error);
       flashMessage(`Error voiding invoice!`);
     })
     .finally(() => {

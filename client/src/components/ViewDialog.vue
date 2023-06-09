@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useFormatter } from '@/utils/formatter';
 import { useValidations } from '@/utils/validations';
 import { useInputHelper } from '@/utils/input';
+import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
 /** import:stores **/
@@ -83,6 +84,7 @@ const {
 const systemConfigsStore = useSystemConfigsStore();
 const systemConfigs = systemConfigsStore.getSystemConfigs();
 const { isEmpty, notEmpty } = useValidations();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:emit **/
@@ -153,7 +155,7 @@ onMounted(async() => {
       });
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error initializing page`, error);
     });
 });
 </script>

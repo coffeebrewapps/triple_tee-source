@@ -1,4 +1,4 @@
-export function useStore(dataStore) {
+export function useStore({ dataStore, logger }) {
   function prefillReceipt({ invoice, pastReceipts, receiptConfig, receiptNumberSequence, billingContact, currency }) {
     const currentSequence = receiptNumberSequence.lastUsedNumber + receiptNumberSequence.incrementStep;
 
@@ -297,7 +297,7 @@ export function useStore(dataStore) {
         return results[0].result;
       }
     } catch (error) {
-      console.error(error);
+      logger.error(`Error creating receipt with transaction`, error);
       return {
         success: false,
         errors: error,

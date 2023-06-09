@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useInputHelper } from '@/utils/input';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useValidations } from '@/utils/validations';
+import { useLogger } from '@/utils/logger';
 import { useReceiptUtils } from './utils';
 /** import:utils **/
 
@@ -29,6 +30,7 @@ const dataAccess = useDataAccess();
 const { isEmpty, notEmpty } = useValidations();
 const { flashMessage } = useBannerStore();
 const systemConfigs = useSystemConfigsStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:props **/
@@ -68,14 +70,6 @@ const currentReceipt = ref();
 const receiptTemplate = ref();
 const templateData = ref();
 
-const heading = computed(() => {
-  if (currentReceipt.value) {
-    return `Receipt: ${currentReceipt.value.receiptNumber}`;
-  } else {
-    return `Loading Receipt...`;
-  }
-});
-
 async function loadReceipt() {
   currentReceipt.value = null;
   const params = { include: includeKeys.value };
@@ -87,7 +81,7 @@ async function loadReceipt() {
       flashMessage(`Loaded receipt successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading receipt`, error);
       flashMessage(`Error loading receipt!`);
     });
 }
@@ -117,7 +111,7 @@ async function loadTemplateData() {
       flashMessage(`Loaded template data successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading template data`, error);
       flashMessage(`Error loading template data!`);
     });
 }

@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useInputHelper } from '@/utils/input';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useValidations } from '@/utils/validations';
+import { useLogger } from '@/utils/logger';
 import { useInvoiceUtils } from './utils';
 /** import:utils **/
 
@@ -32,6 +33,7 @@ const { isEmpty, notEmpty } = useValidations();
 const events = useEventsStore();
 const { flashMessage } = useBannerStore();
 const systemConfigs = useSystemConfigsStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:props **/
@@ -69,14 +71,6 @@ const invoiceConfig = ref();
 const invoiceTemplate = ref();
 const templateData = ref();
 
-const heading = computed(() => {
-  if (currentInvoice.value) {
-    return `Invoice: ${currentInvoice.value.invoiceNumber}`;
-  } else {
-    return `Loading Invoice...`;
-  }
-});
-
 async function loadInvoice() {
   currentInvoice.value = null;
   const params = { include: includeKeys.value };
@@ -88,7 +82,7 @@ async function loadInvoice() {
       flashMessage(`Loaded invoice successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading invoice`, error);
       flashMessage(`Error loading invoice!`);
     });
 }
@@ -123,7 +117,7 @@ async function loadTemplateData() {
       flashMessage(`Loaded template data successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading template data`, error);
       flashMessage(`Error loading template data!`);
     });
 }

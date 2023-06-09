@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 /** import:utils **/
 import { useDataAccess } from '@/utils/dataAccess';
 import { useErrors } from '@/utils/errors';
+import { useLogger } from '@/utils/logger';
 import { useTemplateUtils } from './utils';
 /** import:utils **/
 
@@ -39,6 +40,7 @@ const dataAccess = useDataAccess();
 const errorsMap = useErrors();
 const { flashMessage } = useBannerStore();
 const { initSampleData } = useTemplateUtils();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:global **/
@@ -141,7 +143,7 @@ async function updateMarkup(updated) {
       flashMessage(`Updated markup successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error updating markup`, error);
       flashMessage(`Error updating markup!`);
     });
 }
@@ -167,7 +169,7 @@ async function updateStyles(updated) {
       flashMessage(`Updated styles successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error updating styles`, error);
       flashMessage(`Error updating styles!`);
     });
 }
@@ -197,7 +199,7 @@ async function createTemplate() {
     .catch((error) => {
       flashMessage(`Error creating template!`);
       formErrors.value = formatErrorsForDisplay(error);
-      console.error(error);
+      logger.error(`Error creating template`, error);
     });
 }
 

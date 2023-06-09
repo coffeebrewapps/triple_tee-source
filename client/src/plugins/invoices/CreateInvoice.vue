@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useValidations } from '@/utils/validations';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useInputHelper } from '@/utils/input';
+import { useLogger } from '@/utils/logger';
 import { useInvoiceUtils } from './utils';
 /** import:utils **/
 
@@ -30,6 +31,7 @@ import TemplateEditor from '@/components/TemplateEditor.vue';
 const { isEmpty, notEmpty } = useValidations();
 const dataAccess = useDataAccess();
 const { flashMessage } = useBannerStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:props **/
@@ -186,7 +188,7 @@ async function formatInvoice(invoice) {
     })
     .catch((error) => {
       flashMessage(`Error generating invoice!`);
-      console.error(error);
+      logger.error(`Error generating invoice`, error);
     });
 }
 
@@ -217,7 +219,7 @@ async function submitFilters() {
       currentStep.value = 1;
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error previewing invoice`, error);
       flashMessage(`Error previewing invoice!`);
     });
 }
@@ -460,12 +462,12 @@ async function createInvoice() {
         })
         .catch((error) => {
           flashMessage(`Error creating invoice!`);
-          console.error(error);
+          logger.error(`Error creating invoice`, error);
         });
     })
     .catch((error) => {
       flashMessage(`Error formatting invoice for save!`);
-      console.error(error);
+      logger.error(`Error formatting invoice for save`, error);
     });
 }
 /** section:action **/

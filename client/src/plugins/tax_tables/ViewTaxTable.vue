@@ -9,6 +9,7 @@ import { useDataAccess } from '@/utils/dataAccess';
 import { useInputHelper } from '@/utils/input';
 import { useValidations } from '@/utils/validations';
 import { useErrors } from '@/utils/errors';
+import { useLogger } from '@/utils/logger';
 
 import { useTaxTableUtils } from './utils';
 import { useTaxTierUtils } from '@/plugins/tax_tiers/utils';
@@ -35,6 +36,7 @@ const dataAccess = useDataAccess();
 const { notEmpty } = useValidations();
 const errorsMap = useErrors();
 const { flashMessage } = useBannerStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:global **/
@@ -79,7 +81,7 @@ async function loadTaxTable() {
       flashMessage(`Loaded tax table successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading tax table`, error);
       flashMessage(`Error loading tax table!`);
     });
 }
@@ -126,7 +128,7 @@ async function loadTaxTiers() {
       flashMessage(`Loaded tax tiers successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error loading tax tiers`, error);
       flashMessage(`Error loading tax tiers!`);
     })
     .finally(() => {
@@ -234,7 +236,7 @@ async function saveTaxTier(row, index) {
         flashMessage(`Saved tax tier ${row.id} successfully!`);
       })
       .catch((error) => {
-        console.error(error);
+        logger.error(`Error saving tax tier ${row.id}`, error);
         flashMessage(`Error saving tax tier ${row.id}!`);
       });
   } else {
@@ -246,7 +248,7 @@ async function saveTaxTier(row, index) {
         flashMessage(`Saved tax tier successfully!`);
       })
       .catch((error) => {
-        console.error(error);
+        logger.error(`Error saving tax tier`, error);
         flashMessage(`Error saving tax tier!`);
       });
   }
@@ -269,7 +271,7 @@ async function deleteTierAndCloseDialog() {
         flashMessage(`Deleted tax tier successfully!`);
       })
       .catch((error) => {
-        console.error(error);
+        logger.error(`Error deleting tax tier`, error);
         flashMessage(`Error deleting tax tier!`);
       });
   } else {
@@ -304,12 +306,12 @@ async function estimateTax() {
       flashMessage(`Estimated tax successfully!`);
     })
     .catch((error) => {
-      console.error(error);
       estimateTaxErrorMessage.value = Object.entries(error).map(([field, errors]) => {
         return errors.map((fieldError) => {
           return `${field} ${errorsMap[fieldError]()}`;
         }).join('\n');
       }).join('\n');
+      logger.error(`Error estimating tax`, error);
       flashMessage(`Error estimating tax!`);
     });
 }

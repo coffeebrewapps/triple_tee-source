@@ -1,4 +1,4 @@
-export function useStore(dataStore) {
+export function useStore({ dataStore, logger }) {
   function notEmpty(value) {
     return !isEmpty(value);
   }
@@ -202,7 +202,7 @@ export function useStore(dataStore) {
         },
       };
     } catch (error) {
-      console.error(`previewInvoice`, { error });
+      logger.error(`Error previewing invoice`, { error });
       return {
         success: false,
         errors: error,

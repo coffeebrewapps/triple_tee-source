@@ -1,7 +1,7 @@
 import { useStore } from './store';
 
-const usePlugin = (router, dataStore) => {
-  const store = useStore(dataStore);
+const usePlugin = (router, dataStore, uploader, logger) => {
+  const store = useStore({ dataStore, logger });
 
   dataStore.registerFunction('income_receipts', 'create', 'generate_with_transaction', store.createWithTransaction);
   dataStore.registerFunction('income_receipts', 'create', 'preview_receipt', store.previewReceipt);

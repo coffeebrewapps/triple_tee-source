@@ -15,16 +15,16 @@ const usePlugin = (router, dataStore, uploader, logger) => {
       resolve({
         data: {
           text: () => {
-            return new Promise((textResolve, textReject) => {
+            return new Promise((resolve, reject) => {
               try {
                 const logs = logger.tailLog();
-                textResolve(logs);
+                resolve(logs);
               } catch (error) {
-                textReject(error);
+                reject(error);
               }
             });
           },
-        }
+        },
       });
     });
   }

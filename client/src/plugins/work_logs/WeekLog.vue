@@ -7,6 +7,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useFormatter } from '@/utils/formatter';
 import { useWorkLogUtils } from './utils';
+import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
 /** import:stores **/
@@ -37,6 +38,7 @@ const {
 } = useWorkLogUtils();
 const { flashMessage } = useBannerStore();
 const events = useEventsStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:global **/
@@ -219,7 +221,7 @@ async function loadWeekly() {
     })
     .catch((error) => {
       flashMessage(`Error loading work logs!`);
-      console.error(error);
+      logger.error(`Error loading work logs`, error);
     });
 }
 

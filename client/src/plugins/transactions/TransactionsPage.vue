@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import DataPage from '@/components/DataPage.vue';
 import { useFormatter } from '@/utils/formatter';
 import { useDataAccess } from '@/utils/dataAccess';
+import { useLogger } from '@/utils/logger';
 import { useSystemConfigsStore } from '@/stores/systemConfigs';
 import {
   TConfirmDialog
@@ -23,6 +24,7 @@ const {
 const { flashMessage } = useBannerStore();
 const dataAccess = useDataAccess();
 const events = useEventsStore();
+const logger = useLogger();
 
 const fieldsLayout = [
   { type: 'lg', transactionDate: 'md' },
@@ -224,7 +226,7 @@ async function reverseDataAndCloseDialog() {
       flashMessage(`Reversed transaction successfully!`);
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error reversing transaction`, error);
       flashMessage(`Error reversing transaction!`);
     })
     .finally(() => {

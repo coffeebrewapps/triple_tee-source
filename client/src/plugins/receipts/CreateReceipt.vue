@@ -8,6 +8,7 @@ import { useValidations } from '@/utils/validations';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useInputHelper } from '@/utils/input';
 import { useFormatter } from '@/utils/formatter';
+import { useLogger } from '@/utils/logger';
 import { useReceiptUtils } from './utils';
 /** import:utils **/
 
@@ -28,6 +29,7 @@ const {
   formatNumber,
 } = useFormatter();
 const { flashMessage } = useBannerStore();
+const logger = useLogger();
 /** section:utils **/
 
 /** section:props **/
@@ -145,7 +147,7 @@ async function formatReceipt(receipt) {
     })
     .catch((error) => {
       flashMessage(`Error generating receipt!`);
-      console.error(error);
+      logger.error(`Error generating receipt`, error);
     });
 }
 
@@ -172,7 +174,7 @@ async function submitFilters() {
       currentStep.value = 1;
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error previewing receipt`, error);
       flashMessage(`Error previewing receipt!`);
     });
 }
@@ -292,7 +294,7 @@ async function createReceipt() {
     })
     .catch((error) => {
       flashMessage(`Error creating receipt!`);
-      console.error(error);
+      logger.error(`Error creating receipt`, error);
     });
 }
 /** section:action **/
