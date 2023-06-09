@@ -307,9 +307,9 @@ export function useStore(dataStore) {
       return result;
     }
 
-    const isUsed = dataStore.isUsed('invoices', id);
+    const receiptsResult = dataStore.list('income_receipts', { filters: { invoiceId: id } });
 
-    if (isUsed) {
+    if (receiptsResult.total > 0) {
       return {
         success: false,
         errors: { id: ['isUsed'] },
