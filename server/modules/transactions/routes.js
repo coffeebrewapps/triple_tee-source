@@ -12,6 +12,7 @@ module.exports = ({ routes, stores }) => {
       }
     };
   }
+
   return {
     prefix: '/api/transactions',
     routes: [
