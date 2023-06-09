@@ -197,6 +197,16 @@ const filtersData = ref({});
 
 const filtersDataFields = ref(Array.from(props.dataFields));
 
+const filtersDisabledKeys = computed(() => {
+  return props.filters.disable || [];
+});
+
+const filtersUpdatableFields = computed(() => {
+  return filterableKeys.value.filter((key) => {
+    return !filtersDisabledKeys.value.includes(key);
+  });
+});
+
 const filtersErrorMessages = ref({});
 
 const filtersConfirmButton = computed(() => {
@@ -937,7 +947,7 @@ onMounted(async() => {
         <DataForm
           v-model="filtersData"
           :fields-layout="filtersLayout"
-          :data-fields="filterableKeys"
+          :data-fields="filtersUpdatableFields"
           :schemas="filtersDataFields"
           :error-messages="filtersErrorMessages"
           :confirm-button="filtersConfirmButton"

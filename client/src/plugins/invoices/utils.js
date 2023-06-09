@@ -187,6 +187,7 @@ export function useInvoiceUtils() {
       layout: [
         { contactId: 'lg', invoiceNumber: 'lg' },
       ],
+      disable: ['contactId'],
     };
   }
 

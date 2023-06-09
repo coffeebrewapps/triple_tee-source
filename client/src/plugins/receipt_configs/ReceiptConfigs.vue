@@ -124,6 +124,7 @@ const filters = computed(() => {
     layout: [
       { billingContactId: 'lg' },
     ],
+    disable: ['billingContactId'],
   };
 });
 

@@ -270,6 +270,7 @@ export function useReceiptUtils() {
         { receiptNumber: 'lg' },
         { invoiceId: 'lg', contactId: 'lg' },
       ],
+      disable: ['contactId'],
     };
   }
 

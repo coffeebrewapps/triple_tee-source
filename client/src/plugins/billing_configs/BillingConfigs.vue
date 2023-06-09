@@ -200,6 +200,7 @@ const filters = computed(() => {
       { includeTags: 'lg', excludeTags: 'lg' },
       { contactId: 'lg' },
     ],
+    disable: ['contactId'],
   };
 });
 
