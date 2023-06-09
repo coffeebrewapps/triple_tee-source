@@ -74,9 +74,10 @@ function toggle() {
   right: 0;
   width: 300px;
   height: 100%;
-  background-color: var(--color-background-mute);
+  background-color: var(--color-background-soft);
   transition: all 0.5s linear;
   box-shadow: -2px -2px 2px var(--color-border);
+  z-index: 1;
 }
 
 body.dark .alerts-container {

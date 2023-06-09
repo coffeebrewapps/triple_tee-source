@@ -49,11 +49,11 @@ function closeBanner() {
   justify-content: center;
   position: fixed;
   padding: 2rem;
-  top: 1rem;
+  top: 2rem;
   right: 0;
   width: 400px;
   height: 50px;
-  background-color: var(--color-border);
+  background-color: var(--color-background-soft);
   border-radius: 4px;
   transition: all 0.5s linear;
   z-index: 9999;
@@ -78,7 +78,7 @@ function closeBanner() {
   width: 32px;
   height: 32px;
   color: var(--color-text);
-  background-color: var(--color-border);
+  background-color: var(--color-background-soft);
 }
 
 .banner-container.hide .close-button {

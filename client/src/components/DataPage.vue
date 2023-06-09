@@ -1268,7 +1268,7 @@ onMounted(async() => {
   padding: 1.5rem;
   width: 100vw;
   height: 100vh;
-  background-color: var(--color-background-soft);
+  background-color: var(--color-background-mute);
   z-index: 1;
   transition: all 0.5s linear;
 }
@@ -1373,7 +1373,7 @@ a.hidden {
   padding: 1.5rem;
   width: 30vw;
   height: 100vh;
-  background-color: var(--color-background-soft);
+  background-color: var(--color-background-mute);
   z-index: 1;
   transition: all 0.5s linear;
 }
