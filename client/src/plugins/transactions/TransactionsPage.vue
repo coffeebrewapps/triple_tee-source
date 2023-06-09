@@ -2,10 +2,12 @@
 import { ref, computed } from 'vue';
 import DataPage from '@/components/DataPage.vue';
 import { useFormatter } from '@/utils/formatter';
+import { useDataAccess } from '@/utils/dataAccess';
 import { useSystemConfigsStore } from '@/stores/systemConfigs';
 import {
   TConfirmDialog
 } from 'coffeebrew-vue-components';
+import { useEventsStore } from '@/stores/events';
 import { useBannerStore } from '@/stores/banner';
 
 const systemConfigsStore = useSystemConfigsStore();
@@ -19,6 +21,8 @@ const {
 } = useFormatter();
 
 const { flashMessage } = useBannerStore();
+const dataAccess = useDataAccess();
+const events = useEventsStore();
 
 const fieldsLayout = [
   { type: 'lg', transactionDate: 'md' },
@@ -156,7 +160,7 @@ const dataFields = [
     type: 'singleSelect',
     label: 'Associated Transaction',
     reference: { label: transactionLabel },
-    listable: false,
+    listable: true,
     viewable: true,
     creatable: true,
     updatable: true,
@@ -212,9 +216,20 @@ async function openReverseDialog(record) {
   reverseDialog.value = true;
 }
 
-function reverseDataAndCloseDialog() {
-  flashMessage(`Reversed transaction successfully!`);
-  closeReverseDialog();
+async function reverseDataAndCloseDialog() {
+  await dataAccess
+    .update('transactions', currentRowForReverse.value.id, {}, { path: 'reverse' })
+    .then((record) => {
+      events.emitEvent('loadData', { dataType: 'Transactions' });
+      flashMessage(`Reversed transaction successfully!`);
+    })
+    .catch((error) => {
+      console.error(error);
+      flashMessage(`Error reversing transaction!`);
+    })
+    .finally(() => {
+      closeReverseDialog();
+    });
 }
 
 function closeReverseDialog() {
@@ -234,8 +249,12 @@ function closeReverseDialog() {
       :actions="actions"
       :table-style="tableStyle"
     >
-      <template #[`highlight.description`]="{ formattedValue }">
+      <template #[`highlight.description`]="{ row, formattedValue }">
         {{ formattedValue }}
+        <span
+          v-if="row.associatedTransactionId"
+          class="tag inline"
+        >Reversed</span>
       </template>
 
       <template #[`data-col.transactionDate`]="{ formattedValue }">

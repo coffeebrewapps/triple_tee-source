@@ -8,6 +8,7 @@ export function useErrors() {
     notFound: (_) => { return 'Not found'; },
     greaterThanOrEqualZero: (_) => { return 'Must be greater than or equal to 0'; },
     ENOENT: (_) => { return 'File directory does not exist'; },
+    notReversible: (_) => { return 'Transaction is not reversible'; },
   };
 
   const dateErrors = {
