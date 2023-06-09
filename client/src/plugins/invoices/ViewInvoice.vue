@@ -154,10 +154,6 @@ onMounted(async() => {
 
 <template>
   <div class="page-container">
-    <h2 class="heading">
-      {{ heading }}
-    </h2>
-
     <TProgressBar
       v-if="!currentInvoice"
     />
@@ -234,10 +230,6 @@ onMounted(async() => {
 <style scoped>
 .page-container {
   margin-top: 1rem;
-}
-
-.page-container .heading {
-  font-weight: 900;
 }
 
 .details-container {

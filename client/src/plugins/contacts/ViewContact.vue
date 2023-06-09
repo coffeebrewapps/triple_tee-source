@@ -22,6 +22,8 @@ const views = [
   { name: 'Contact Receipts', params: { contactId: props.contactId } },
   { name: 'Contact Create Invoice', params: { contactId: props.contactId }, hidden: true },
   { name: 'Contact Create Receipt', params: { contactId: props.contactId }, hidden: true },
+  { name: 'Contact View Invoice', params: { contactId: props.contactId }, hidden: true },
+  { name: 'Contact View Receipt', params: { contactId: props.contactId }, hidden: true },
 ];
 /** section:views **/
 </script>
@@ -30,7 +32,6 @@ const views = [
   <div class="page-container">
     <MultiViewContainer
       :views="views"
-      :heading="`Contact #${contactId}`"
     />
   </div> <!-- page-container -->
 </template>

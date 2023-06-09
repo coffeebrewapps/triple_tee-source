@@ -14,6 +14,13 @@ const viewContactRoute = {
   meta: {
     parentRoute: { name: 'Contacts' },
     hidden: true,
+    displayName: (route) => {
+      if (route.params) {
+        return `Contact #${route.params.contactId}`;
+      } else {
+        return route.name;
+      }
+    },
   },
   children: [
     {
@@ -24,6 +31,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contacts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Details`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -34,6 +48,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contacts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Invoice Configs`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -44,6 +65,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contacts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Receipt Configs`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -54,6 +82,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contacts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Billing Configs`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -64,6 +99,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contacts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Invoices`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -74,6 +116,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contacts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Receipts`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -84,6 +133,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contact Invoices' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Create Invoice`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -94,6 +150,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contact Invoices' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Invoice #${route.params.invoiceId}`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -104,6 +167,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contact Receipts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Create Receipt`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
     {
@@ -114,6 +184,13 @@ const viewContactRoute = {
       meta: {
         parentRoute: { name: 'Contact Receipts' },
         hidden: true,
+        displayName: (route) => {
+          if (route.params) {
+            return `Contact #${route.params.contactId} Receipt #${route.params.receiptId}`;
+          } else {
+            return route.name;
+          }
+        },
       },
     },
   ],

@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter, useRoute, RouterView } from 'vue-router';
 import { useDataAccess } from '@/utils/dataAccess';
 /** import:global **/
@@ -30,6 +30,14 @@ watch(router.currentRoute, (to, from) => {
   transitionName.value = 'fade';
   loadSystemConfigs();
   navigator.hide();
+});
+
+const currentRouteName = computed(() => {
+  if (currentRoute.meta && currentRoute.meta.displayName) {
+    return currentRoute.meta.displayName(currentRoute);
+  } else {
+    return currentRoute.name;
+  }
 });
 /** section:nav **/
 
@@ -103,7 +111,7 @@ onMounted(() => {
         <div class="divider" />
 
         <div class="page-heading">
-          {{ currentRoute.name }}
+          {{ currentRouteName }}
         </div>
 
         <Transition mode="out-in">
