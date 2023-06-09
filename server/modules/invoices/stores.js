@@ -322,6 +322,25 @@ module.exports = ({ dataAccess, logger, utils }) => {
     }
   }
 
+  function voidInvoice(id) {
+    const result = dataAccess.view('invoices', id, {});
+
+    if (!result.success) {
+      return result;
+    }
+
+    const receiptsResult = dataAccess.list('income_receipts', { filters: { invoiceId: id } });
+
+    if (receiptsResult.total > 0) {
+      return {
+        success: false,
+        errors: { id: ['isUsed'] },
+      };
+    }
+
+    return dataAccess.update('invoices', id, { voided: true });
+  }
+
   return {
     modelClass,
     list,
@@ -332,5 +351,6 @@ module.exports = ({ dataAccess, logger, utils }) => {
     createWithLines,
     previewInvoice,
     viewTemplateData,
+    voidInvoice,
   };
 };

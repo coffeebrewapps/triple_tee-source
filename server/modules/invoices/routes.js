@@ -41,6 +41,20 @@ module.exports = ({ routes, stores, logger, utils }) => {
     };
   }
 
+  function voidInvoice(stores) {
+    return function(req, res) {
+      const id = req.params.id;
+
+      const result = stores.voidInvoice(id);
+
+      if (result.success) {
+        res.status(200).send(result);
+      } else {
+        res.status(400).send(result);
+      }
+    };
+  }
+
   return {
     prefix: '/api/invoices',
     routes: [
@@ -53,6 +67,7 @@ module.exports = ({ routes, stores, logger, utils }) => {
       { method: 'post', path: '/preview_invoice', handler: previewInvoice(stores) },
       { method: 'post', path: '/generate_with_lines', handler: createWithLines(stores) },
       { method: 'get', path: '/:id/template_data', handler: viewTemplateData(stores) },
+      { method: 'put', path: '/:id/void', handler: voidInvoice(stores) },
     ],
   };
 };
