@@ -62,6 +62,10 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.page-container {
+  width: 100%;
+}
+
 .title {
   padding: 1rem 0;
 }
@@ -69,7 +73,7 @@ onBeforeUnmount(() => {
 .logs {
   margin-top: 1rem;
   padding: 1rem;
-  width: 90vw;
+  width: 100%;
   height: 70vh;
   border: 1px solid var(--color-border);
   border-radius: 4px;

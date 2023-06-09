@@ -159,7 +159,7 @@ onMounted(async() => {
       v-model="dataForUpdate"
       :label="dataLabel"
       :rows="30"
-      :cols="150"
+      :cols="120"
       :disabled="dataLoading"
     />
 
@@ -184,7 +184,7 @@ onMounted(async() => {
 
 <style scoped>
 .page-container {
-  margin: 1rem 0;
+  width: 100%;
 }
 
 .heading {
