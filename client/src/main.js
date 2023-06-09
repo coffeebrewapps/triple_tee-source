@@ -8,6 +8,7 @@ import router from './router';
 import './assets/main.css';
 
 import { useUploader } from '@/utils/uploader';
+import { useLogger } from '@/utils/logger';
 import { initPlugins } from '@/utils/plugins';
 
 const app = createApp(App);
@@ -18,6 +19,7 @@ app.use(router);
 
 const dataStore = useDataStore();
 const uploader = useUploader();
-initPlugins(router, dataStore, uploader);
+const logger = useLogger();
+initPlugins(router, dataStore, uploader, logger);
 
 app.mount('#app');

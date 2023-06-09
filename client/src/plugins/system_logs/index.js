@@ -7,8 +7,29 @@ const route = {
   },
 };
 
-const usePlugin = (router, dataStore) => {
+const usePlugin = (router, dataStore, uploader, logger) => {
   router.addRoute(route);
+
+  function tailLog() {
+    return new Promise((resolve, reject) => {
+      resolve({
+        data: {
+          text: () => {
+            return new Promise((textResolve, textReject) => {
+              try {
+                const logs = logger.tailLog();
+                textResolve(logs);
+              } catch (error) {
+                textReject(error);
+              }
+            });
+          },
+        }
+      });
+    });
+  }
+
+  dataStore.registerFunction('logs', 'downloadStream', 'downloadStream', tailLog);
 };
 
 export default usePlugin;
