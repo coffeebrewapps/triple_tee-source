@@ -300,9 +300,29 @@ export function useStore(dataStore) {
     }
   }
 
+  function voidInvoice(modelClass, id) {
+    const result = dataStore.view('invoices', id, {});
+
+    if (!result.success) {
+      return result;
+    }
+
+    const isUsed = dataStore.isUsed('invoices', id);
+
+    if (isUsed) {
+      return {
+        success: false,
+        errors: { id: ['isUsed'] },
+      };
+    }
+
+    return dataStore.update('invoices', id, { voided: true });
+  }
+
   return {
     createWithLines,
     previewInvoice,
     viewTemplateData,
+    voidInvoice,
   };
 }
