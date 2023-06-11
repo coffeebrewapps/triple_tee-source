@@ -1,7 +1,7 @@
 {
   "name": "triple_tee",
   "version": "0.1.0",
-  "description": "An accounting software built for sole prioprietors.",
+  "description": "An accounting software built for sole proprietors.",
   "main": "main.js",
   "repository": "git@github.com-coffeebrewapps:coffeebrewapps/triple_tee-source.git",
   "author": "Coffee Brew Apps <coffeebrewapps@gmail.com>",

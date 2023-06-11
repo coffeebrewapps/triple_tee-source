@@ -63,7 +63,7 @@ body.light {
   --color-border-hover: var(--vt-c-brown-bright-hover);
 
   --color-heading: var(--vt-c-brown-bright-less);
-  --color-text: var(--vt-c-brown-bright-less);
+  --color-text: var(--vt-c-brown-dark);
 
   --color-error: var(--vt-c-red);
   --color-error-hover: var(--vt-c-red-darker);
