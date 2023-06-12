@@ -21,6 +21,26 @@ module.exports = ({ dataAccess, logger, utils }) => {
     return dataAccess.remove(modelClass, id);
   }
 
+  function convertToHomeCurrencyAmount(sourceCurrency, sourceAmount) {
+    const latestSystemConfigs = dataAccess.list(
+      'system_configs',
+      {
+        sort: { field: 'effectiveStart', order: 'desc' },
+        include: ['baseCurrencyId'],
+        offset: 0,
+        limit: 1,
+      }
+    ).data[0];
+
+    const homeCurrency = latestSystemConfigs.includes.baseCurrencyId[latestSystemConfigs.baseCurrencyId];
+
+    if (sourceCurrency.code === homeCurrency.code) {
+      return sourceAmount;
+    } else {
+      return (sourceAmount / sourceCurrency.exchangeRate).toFixed(2);
+    }
+  }
+
   function prefillReceipt({ invoice, pastReceipts, receiptConfig, receiptNumberSequence, billingContact, currency }) {
     const currentSequence = receiptNumberSequence.lastUsedNumber + receiptNumberSequence.incrementStep;
 
@@ -233,6 +253,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
 
       const {
         invoice,
+        currency,
         pastReceipts,
       } = viewInvoiceWithIncludes(invoiceId);
 
@@ -286,7 +307,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
               transactionDate: receipt.receiptDate,
               description: `Income from Receipt ${receipt.receiptNumber}`,
               amount: receipt.paymentAmount,
-              homeCurrencyAmount: receipt.paymentAmount,
+              homeCurrencyAmount: convertToHomeCurrencyAmount(currency, receipt.paymentAmount),
               tags: [],
               currencyId: receipt.currencyId,
             },

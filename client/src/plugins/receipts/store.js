@@ -1,4 +1,24 @@
 export function useStore({ dataStore, logger }) {
+  function convertToHomeCurrencyAmount(sourceCurrency, sourceAmount) {
+    const latestSystemConfigs = dataStore.list(
+      'system_configs',
+      {
+        sort: { field: 'effectiveStart', order: 'desc' },
+        include: ['baseCurrencyId'],
+        offset: 0,
+        limit: 1,
+      }
+    ).data[0];
+
+    const homeCurrency = latestSystemConfigs.includes.baseCurrencyId[latestSystemConfigs.baseCurrencyId];
+
+    if (sourceCurrency.code === homeCurrency.code) {
+      return sourceAmount;
+    } else {
+      return (sourceAmount / sourceCurrency.exchangeRate).toFixed(2);
+    }
+  }
+
   function prefillReceipt({ invoice, pastReceipts, receiptConfig, receiptNumberSequence, billingContact, currency }) {
     const currentSequence = receiptNumberSequence.lastUsedNumber + receiptNumberSequence.incrementStep;
 
@@ -201,6 +221,7 @@ export function useStore({ dataStore, logger }) {
 
       const {
         invoice,
+        currency,
         pastReceipts,
       } = viewInvoiceWithIncludes(invoiceId);
 
@@ -252,7 +273,7 @@ export function useStore({ dataStore, logger }) {
               transactionDate: receipt.receiptDate,
               description: `Income from Receipt ${receipt.receiptNumber}`,
               amount: receipt.paymentAmount,
-              homeCurrencyAmount: receipt.paymentAmount,
+              homeCurrencyAmount: convertToHomeCurrencyAmount(currency, receipt.paymentAmount),
               tags: [],
               currencyId: receipt.currencyId,
             },
