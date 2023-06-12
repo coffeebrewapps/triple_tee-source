@@ -10,13 +10,16 @@ import { useInputHelper } from '@/utils/input';
 import { useValidations } from '@/utils/validations';
 import { useErrors } from '@/utils/errors';
 import { useLogger } from '@/utils/logger';
+import { useFormatter } from '@/utils/formatter';
 
 import { useTaxTableUtils } from './utils';
 import { useTaxTierUtils } from '@/plugins/tax_tiers/utils';
+import { useTaxDeductibleUtils } from '@/plugins/tax_deductibles/utils';
 /** import:utils **/
 
 /** import:stores **/
 import { useBannerStore } from '@/stores/banner';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 /** import:stores **/
 
 /** import:components **/
@@ -24,6 +27,8 @@ import {
   TButton,
   TConfirmDialog,
   TInput,
+  TSelect,
+  TSelectTable,
   TTable
 } from 'coffeebrew-vue-components';
 
@@ -37,6 +42,9 @@ const { notEmpty } = useValidations();
 const errorsMap = useErrors();
 const { flashMessage } = useBannerStore();
 const logger = useLogger();
+const formatter = useFormatter();
+const { getSystemConfigs } = useSystemConfigsStore();
+const systemConfigs = getSystemConfigs();
 /** section:utils **/
 
 /** section:global **/
@@ -181,7 +189,7 @@ const taxTiersRowActions = [
     name: 'Delete',
     icon: 'fa-solid fa-trash-can',
     click: async function(row, index) {
-      await openDeleteDialog(row, index);
+      await openDeleteTierDialog(row, index);
     },
     show: function(row, index) {
       return true;
@@ -254,7 +262,7 @@ async function saveTaxTier(row, index) {
   }
 }
 
-async function openDeleteDialog(row, index) {
+async function openDeleteTierDialog(row, index) {
   currentTierForDelete.value = index;
   deleteTierDialog.value = true;
   deleteTierDialogPrimaryText.value = `Are you sure you want to delete tier row ${index + 1}?`;
@@ -290,6 +298,283 @@ function formatRate(rate) {
   return (rate * 100).toFixed(2);
 }
 /** section:taxTiers **/
+
+/** section:taxDeductibles **/
+const taxDeductibleUtils = useTaxDeductibleUtils();
+
+const taxDeductibleDataFields = computed(() => {
+  const fields = taxDeductibleUtils.generateDataFields(taxTableId.value);
+  const taxTableFieldIndex = fields.findIndex(f => f.key === 'taxTableId');
+  fields.splice(taxTableFieldIndex, 1);
+  const idFieldIndex = fields.findIndex(f => f.key === 'id');
+  fields.splice(idFieldIndex, 1);
+  return fields;
+});
+
+const taxDeductibleValidations = taxDeductibleUtils.validations.create;
+const taxDeductibleHelper = useInputHelper(taxDeductibleDataFields.value);
+const taxDeductibleSchemasMap = taxDeductibleHelper.schemasMap;
+const taxDeductiblesTableName = computed(() => {
+  if (notEmpty(estimatedTax.value)) {
+    return `Tax Deductibles (Total Deductible: ${estimatedTax.value.totalDeductible})`;
+  } else {
+    return `Tax Deductibles`;
+  }
+});
+
+const updatableTaxDeductibleKeys = taxDeductibleHelper.updatableKeys;
+
+const currentTaxDeductibles = ref([]);
+const taxDeductiblesEditable = ref([]);
+const taxDeductiblesLoading = ref(false);
+const taxDeductiblesValidationErrors = ref([]);
+
+const currentDeductibleForDelete = ref();
+const deleteDeductibleDialogPrimaryText = ref('');
+const deleteDeductibleDialog = ref(false);
+
+const deductibleInputOptionsData = ref({});
+const taxDeductibleOptions = ref([]);
+function taxDeductibleType(row) {
+  const found = taxDeductibleOptions.value.find((option) => {
+    return row.type === option.value;
+  })
+  if (found) {
+    return found.label;
+  } else {
+    return row.type;
+  }
+}
+
+const deductibleFieldOffsetChange = computed(() => {
+  return ['includeTags', 'excludeTags'].reduce((o, k) => {
+    o[k] = (offset) => { deductibleOffsetChange(k, offset); };
+    return o;
+  }, {});
+});
+
+async function deductibleOffsetChange(field, newOffset) {
+  const limit = taxDeductibleSchemasMap.value[field].limit || 5;
+  await taxDeductibleHelper.fetchOptions(field, newOffset)
+    .then((result) => {
+      deductibleInputOptionsData.value[field] = taxDeductibleHelper.formatInputOptionsData(field, newOffset, limit, result);
+    });
+}
+
+function formatDeductibleRateOptions(fields) {
+  const enums = fields.type.enums;
+  return Object.keys(enums).map((e) => {
+    return { value: e, label: enums[e] };
+  });
+}
+
+function tagStyle(row, tag, field) {
+  return formatter.tagStyle(row, tag, field);
+}
+
+function formatTag(row, tag, field) {
+  return formatter.formatTagSync(row, tag, field, systemConfigs.tagFormat);
+}
+
+async function loadDeductibleSchemas() {
+  await dataAccess
+    .schemas('tax_deductibles')
+    .then((result) => {
+      const fields = result.fields;
+      taxDeductibleOptions.value = formatDeductibleRateOptions(fields);
+    })
+    .catch((error) => {
+      logger.error(`Error loading deductible schemas`, error);
+      flashMessage(`Error loading deductible schemas!`);
+    });
+}
+
+async function loadTaxDeductibles() {
+  taxDeductiblesLoading.value = true;
+  currentTaxDeductibles.value = [];
+  taxDeductiblesEditable.value = [];
+  taxDeductiblesValidationErrors.value = [];
+
+  await dataAccess
+    .list('tax_deductibles', { filters: { taxTableId: taxTableId.value }, include: ['includeTags', 'excludeTags'] })
+    .then((results) => {
+      currentTaxDeductibles.value = results.data;
+      taxDeductiblesEditable.value = results.data.map(d => false);
+      taxDeductiblesValidationErrors.value = taxDeductiblesEditable.value.map(t => '');
+      flashMessage(`Loaded tax deductibles successfully!`);
+    })
+    .catch((error) => {
+      logger.error(`Error loading tax deductibles`, error);
+      flashMessage(`Error loading tax deductibles!`);
+    })
+    .finally(() => {
+      taxDeductiblesLoading.value = false;
+    });
+}
+
+const taxDeductiblesTableActions = [
+  {
+    name: 'Add',
+    icon: 'fa-solid fa-circle-plus fa-xl',
+    click: async function(data) {
+      await addTaxDeductible();
+    },
+  },
+];
+
+const taxDeductiblesRowActions = [
+  {
+    name: 'Edit',
+    icon: 'fa-solid fa-pencil',
+    click: async function(row, index) {
+      taxDeductiblesEditable.value[index] = true;
+      const promises = Object.keys(row).map((key) => {
+        return taxDeductibleHelper.formatDataForShow(key, row);
+      });
+
+      Promise.all(promises)
+        .then((results) => {
+          Object.keys(row).forEach((key, i) => {
+            row[key] = results[i];
+          });
+        });
+    },
+    show: function(row, index) {
+      return !taxDeductiblesEditable.value[index];
+    },
+  },
+  {
+    name: 'Save',
+    icon: 'fa-solid fa-check',
+    click: async function(row, index) {
+      await saveTaxDeductible(row, index);
+    },
+    show: function(row, index) {
+      return taxDeductiblesEditable.value[index];
+    },
+  },
+  {
+    name: 'Cancel',
+    icon: 'fa-solid fa-xmark',
+    click: async function(row, index) {
+      taxDeductiblesEditable.value[index] = false;
+    },
+    show: function(row, index) {
+      return taxDeductiblesEditable.value[index];
+    },
+  },
+  {
+    name: 'Delete',
+    icon: 'fa-solid fa-trash-can',
+    click: async function(row, index) {
+      await openDeleteDeductibleDialog(row, index);
+    },
+    show: function(row, index) {
+      return true;
+    },
+  },
+];
+
+async function addTaxDeductible() {
+  currentTaxDeductibles.value.push({
+    id: null,
+    category: null,
+    description: null,
+    type: null,
+    rate: null,
+    maxDeductibleAmount: null,
+    includeTags: [],
+    excludeTags: [],
+    taxTableId: taxTableId.value,
+  });
+  taxDeductiblesEditable.value.push(true);
+  taxDeductiblesValidationErrors.value.push({});
+}
+
+function formatDeductibleForSave(deductible) {
+  const deductibleForSave = updatableTaxDeductibleKeys.value.reduce((o, key) => {
+    o[key] = deductible[key];
+    return o;
+  }, {});
+  return taxDeductibleHelper.formatDataForSave(deductibleForSave);
+}
+
+function formatDeductibleFieldErrorMessage(index, field) {
+  const errorMessage = (taxDeductiblesValidationErrors.value[index][field] || []).map((error) => {
+    return errorsMap[error.name](error.params);
+  }).join(', ');
+  return errorMessage;
+}
+
+async function saveTaxDeductible(row, index) {
+  const formattedDeductible = formatDeductibleForSave(row);
+  taxDeductiblesValidationErrors.value[index] = {};
+  const validationErrors = taxDeductibleHelper.validateParams(taxDeductibleValidations, formattedDeductible);
+
+  if (Object.keys(validationErrors).length > 0) {
+    taxDeductiblesValidationErrors.value[index] = validationErrors;
+    return;
+  }
+
+  if (row.id) {
+    await dataAccess
+      .update('tax_deductibles', row.id, Object.assign({}, formattedDeductible, { taxTableId: taxTableId.value }))
+      .then((result) => {
+        loadTaxDeductibles();
+        taxDeductiblesEditable.value[index] = false;
+        flashMessage(`Saved tax deductible ${row.id} successfully!`);
+      })
+      .catch((error) => {
+        logger.error(`Error saving tax deductible ${row.id}`, error);
+        flashMessage(`Error saving tax deductible ${row.id}!`);
+      });
+  } else {
+    await dataAccess
+      .create('tax_deductibles', Object.assign({}, formattedDeductible, { taxTableId: taxTableId.value }))
+      .then((result) => {
+        loadTaxDeductibles();
+        taxDeductiblesEditable.value[index] = false;
+        flashMessage(`Saved tax deductible successfully!`);
+      })
+      .catch((error) => {
+        logger.error(`Error saving tax deductible`, error);
+        flashMessage(`Error saving tax deductible!`);
+      });
+  }
+}
+
+async function openDeleteDeductibleDialog(row, index) {
+  currentDeductibleForDelete.value = index;
+  deleteDeductibleDialog.value = true;
+  deleteDeductibleDialogPrimaryText.value = `Are you sure you want to delete deductible row ${index + 1}?`;
+}
+
+async function deleteDeductibleAndCloseDialog() {
+  const index = currentDeductibleForDelete.value;
+  const deductible = currentTaxDeductibles.value[index];
+  if (deductible.id) {
+    await dataAccess
+      .remove('tax_deductibles', deductible.id)
+      .then((result) => {
+        loadTaxDeductibles();
+        flashMessage(`Deleted tax deductible successfully!`);
+      })
+      .catch((error) => {
+        logger.error(`Error deleting tax deductible`, error);
+        flashMessage(`Error deleting tax deductible!`);
+      });
+  } else {
+    currentTaxDeductibles.value.splice(index, 1);
+  }
+
+  closeDeleteDeductibleDialog();
+}
+
+function closeDeleteDeductibleDialog() {
+  deleteDeductibleDialog.value = false;
+  currentDeductibleForDelete.value = null;
+}
+/** section:taxDeductibles **/
 
 /** section:estimateTax **/
 const estimatedTax = ref();
@@ -339,6 +624,15 @@ const taxTierFieldStyles = computed(() => {
 onMounted(async() => {
   await loadTaxTable();
   await loadTaxTiers();
+  await loadTaxDeductibles();
+  await loadDeductibleSchemas();
+  await taxDeductibleHelper.initOptionsData()
+    .then((result) => {
+      deductibleInputOptionsData.value = result;
+    })
+    .catch((error) => {
+      logger.error(error);
+    });
 });
 </script>
 
@@ -472,6 +766,181 @@ onMounted(async() => {
           {{ formatRate(row.rate) }}%
         </div>
       </template> <!-- rate -->
+
+      <template #data-actions="{ row, actions, i }">
+        <div class="actions">
+          <div
+            v-for="(action, j) in actions"
+            :key="j"
+          >
+            <div
+              v-if="action.show(row, i)"
+              class="action tooltipable"
+              @click="action.click(row, i)"
+            >
+              <i :class="action.icon" />
+              <span
+                class="tooltip"
+              >
+                {{ action.name }}
+              </span>
+            </div> <!-- action -->
+          </div> <!-- v-for -->
+        </div> <!-- actions -->
+      </template> <!-- row-actions -->
+
+      <template #pagination>
+        <div />
+      </template>
+    </TTable>
+
+    <TTable
+      v-if="currentTaxTable"
+      :name="taxDeductiblesTableName"
+      :headers="taxDeductibleDataFields"
+      :data="currentTaxDeductibles"
+      :table-actions="taxDeductiblesTableActions"
+      :actions="taxDeductiblesRowActions"
+      :loading="taxDeductiblesLoading"
+      :pagination="{ offset: 0, limit: currentTaxDeductibles.length, client: true }"
+    >
+      <template #[`data-col.category`]="{ row, i }">
+        <div
+          v-if="taxDeductiblesEditable[i]"
+        >
+          <TInput
+            v-model="row.category"
+            type="text"
+            label=""
+            size="md"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'category')"
+          />
+        </div>
+
+        <div
+          v-if="!taxDeductiblesEditable[i]"
+          class="row-field"
+        >
+          {{ row.category }}
+        </div>
+      </template> <!-- category -->
+
+      <template #[`data-col.description`]="{ row, i }">
+        <div
+          v-if="taxDeductiblesEditable[i]"
+        >
+          <TInput
+            v-model="row.description"
+            type="text"
+            label=""
+            size="md"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'description')"
+          />
+        </div>
+
+        <div
+          v-if="!taxDeductiblesEditable[i]"
+          class="row-field"
+        >
+          {{ row.description }}
+        </div>
+      </template> <!-- description -->
+
+      <template #[`data-col.type`]="{ row, i }">
+        <div
+          v-if="taxDeductiblesEditable[i]"
+        >
+          <TSelect
+            v-model="row.type"
+            label=""
+            :options="taxDeductibleOptions"
+            size="md"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'type')"
+          />
+        </div>
+
+        <div
+          v-if="!taxDeductiblesEditable[i]"
+          class="row-field"
+        >
+          {{ taxDeductibleType(row) }}
+        </div>
+      </template> <!-- type -->
+
+      <template #[`data-col.rate`]="{ row, i }">
+        <div
+          v-if="taxDeductiblesEditable[i]"
+        >
+          <TInput
+            v-model="row.rate"
+            type="number"
+            label=""
+            size="md"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'rate')"
+          />
+        </div>
+
+        <div
+          v-if="!taxDeductiblesEditable[i]"
+          class="row-field"
+        >
+          {{ formatRate(row.rate) }}%
+        </div>
+      </template> <!-- rate -->
+
+      <template #[`data-col.maxDeductibleAmount`]="{ row, i }">
+        <div
+          v-if="taxDeductiblesEditable[i]"
+        >
+          <TInput
+            v-model="row.maxDeductibleAmount"
+            type="number"
+            label=""
+            size="md"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'maxDeductibleAmount')"
+          />
+        </div>
+
+        <div
+          v-if="!taxDeductiblesEditable[i] && row.maxDeductibleAmount"
+          class="row-field"
+        >
+          {{ row.maxDeductibleAmount.toFixed(2) }}
+        </div>
+      </template> <!-- maxDeductibleAmount -->
+
+      <template #[`data-col.includeTags`]="{ row, i }">
+        <div
+          v-if="taxDeductiblesEditable[i]"
+        >
+          <TSelectTable
+            v-model="row.includeTags"
+            label=""
+            :multiple="false"
+            :options="deductibleInputOptionsData.includeTags.data"
+            :options-length="deductibleInputOptionsData.includeTags.total"
+            :options-loading="deductibleInputOptionsData.includeTags.loading"
+            :pagination="deductibleInputOptionsData.includeTags.pagination"
+            size="md"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'includeTags')"
+            @offset-change="deductibleFieldOffsetChange.includeTags"
+          />
+        </div>
+
+        <div
+          v-if="!taxDeductiblesEditable[i]"
+          class="row-field"
+        >
+          <div
+            v-for="(tag, t) in row.includeTags"
+            :key="t"
+            class="tag"
+            :style="tagStyle(row, tag, 'includeTags')"
+          >
+            {{ formatTag(row, tag, 'includeTags') }}
+          </div>
+        </div>
+      </template> <!-- includeTags -->
 
       <template #data-actions="{ row, actions, i }">
         <div class="actions">

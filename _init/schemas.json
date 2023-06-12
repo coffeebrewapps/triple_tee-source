@@ -940,6 +940,84 @@
       }
     }
   },
+  "tax_deductibles": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "category": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "type": {
+        "type": "enum",
+        "default": "fixed",
+        "enums": {
+          "percentage": "Percentage",
+          "fixed": "Fixed"
+        }
+      },
+      "rate": {
+        "type": "number"
+      },
+      "maxDeductibleAmount": {
+        "type": "number"
+      },
+      "includeTags": {
+        "type": "array",
+        "default": []
+      },
+      "excludeTags": {
+        "type": "array",
+        "default": []
+      },
+      "taxTableId": {
+        "type": "text"
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "includeTags": {
+          "reference": "tags",
+          "primary": "id"
+        },
+        "excludeTags": {
+          "reference": "tags",
+          "primary": "id"
+        },
+        "taxTableId": {
+          "reference": "tax_tables",
+          "primary": "id"
+        }
+      },
+      "unique": [],
+      "required": [
+        "category",
+        "description",
+        "type",
+        "rate",
+        "includeTags",
+        "excludeTags",
+        "taxTableId"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "includeTags": {},
+        "excludeTags": {},
+        "taxTableId": {}
+      }
+    }
+  },
   "tax_tables": {
     "fields": {
       "id": {

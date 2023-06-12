@@ -33,7 +33,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
     const { effectiveStart, effectiveEnd } = taxTable;
     /** tax table **/
 
-    /** transactions **/
+    /** incomeTransactions **/
     const transactionsFilters = {};
 
     if (taxTable.includeTags.length > 0) {
@@ -45,6 +45,8 @@ module.exports = ({ dataAccess, logger, utils }) => {
       endDate: effectiveEnd,
     };
 
+    transactionsFilters.type = ['income', 'incomeReversal'];
+
     const transactionsResult = dataAccess.list('transactions', { filters: transactionsFilters });
 
     if (transactionsResult.total === 0) {
@@ -54,13 +56,15 @@ module.exports = ({ dataAccess, logger, utils }) => {
           incomeBracket: null,
           payable: 0,
           nettIncome: 0,
+          totalDeductible: 0,
         },
       };
     }
-    /** transactions **/
+
+    const transactions = transactionsResult.data;
+    /** incomeTransactions **/
 
     /** calculate income **/
-    const transactions = transactionsResult.data;
     const incomeTransactions = transactions.filter(t => t.type === 'income');
     const incomeReversalTransactions = transactions.filter(t => t.type === 'incomeReversal');
 
@@ -71,20 +75,64 @@ module.exports = ({ dataAccess, logger, utils }) => {
     const totalIncomeReversal = incomeReversalTransactions.reduce((sum, txn) => {
       return sum + txn.homeCurrencyAmount;
     }, 0);
-
-    const nettIncome = totalIncome - totalIncomeReversal;
-
-    if (nettIncome < 0) {
-      return {
-        success: true,
-        record: {
-          incomeBracket: null,
-          payable: 0,
-          nettIncome,
-        },
-      };
-    }
     /** calculate income **/
+
+    /** calculate deductions **/
+    const deductiblesResult = dataAccess.list('tax_deductibles', { filters: { taxTableId: id } });
+    const deductibles = deductiblesResult.data;
+    const deductiblesTags = deductibles.map(d => d.includeTags).flat();
+
+    const expensesFilters = {};
+    if (deductiblesTags.length > 0) {
+      expensesFilters.tags = deductiblesTags;
+    }
+
+    expensesFilters.transactionDate = {
+      startDate: effectiveStart,
+      endDate: effectiveEnd,
+    }
+
+    expensesFilters.type = ['expense', 'expenseReversal'];
+
+    const expensesResult = dataAccess.list('transactions', { filters: expensesFilters });
+    const expenses = expensesResult.data;
+
+    const expenseTransactions = expenses.filter(t => t.type === 'expense');
+    const expenseReversalTransactions = expenses.filter(t => t.type === 'expenseReversal');
+
+    const totalDeductible = deductibles.reduce((deductibleAmount, deductible) => {
+      function calculateDeductible(deductible, amount) {
+        if (deductible.type === 'fixed') {
+          return deductible.rate;
+        } else {
+          const calculated = deductible.rate * amount;
+          if (utils.notEmpty(deductible.maxDeductibleAmount)) {
+            return calculated > deductible.maxDeductibleAmount ? deductible.maxDeductibleAmount : calculated;
+          } else {
+            return calculated;
+          }
+        }
+      }
+
+      deductibleAmount = deductibleAmount + expenseTransactions.reduce((sum, expense) => {
+        if (expense.tags.some(t => deductible.includeTags.includes(t))) {
+          sum = sum + calculateDeductible(deductible, expense.amount);
+        };
+        return sum;
+      }, 0);
+
+      deductibleAmount = deductibleAmount - expenseReversalTransactions.reduce((sum, reversal) => {
+        if (reversal.tags.some(t => deductible.includeTags.includes(t))) {
+          sum = sum + calculateDeductible(deductible, reversal.amount);
+        };
+        return sum;
+      }, 0);
+
+      return deductibleAmount;
+    }, 0);
+    /** calculate deductions **/
+
+    const nettIncome = totalIncome - totalIncomeReversal - totalDeductible;
 
     /** calculate tax **/
     const taxTiersResult = dataAccess.list(
@@ -102,11 +150,24 @@ module.exports = ({ dataAccess, logger, utils }) => {
           incomeBracket: null,
           payable: 0,
           nettIncome,
+          totalDeductible,
         },
       };
     }
 
     const taxTiers = taxTiersResult.data;
+
+    if (nettIncome < 0) {
+      return {
+        success: true,
+        record: {
+          incomeBracket: taxTiers[0],
+          payable: 0,
+          nettIncome,
+          totalDeductible,
+        },
+      };
+    }
 
     const lastBracketIndex = taxTiers.findIndex(t => t.minIncome <= nettIncome && nettIncome <= t.maxIncome);
 
@@ -133,6 +194,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
           incomeBracket,
           payable,
           nettIncome,
+          totalDeductible,
         },
       };
     } else {
@@ -144,6 +206,7 @@ module.exports = ({ dataAccess, logger, utils }) => {
           incomeBracket,
           payable,
           nettIncome,
+          totalDeductible,
         },
       };
     }
