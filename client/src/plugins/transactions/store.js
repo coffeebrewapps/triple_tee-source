@@ -1,4 +1,37 @@
 export function useStore({ dataStore }) {
+  function isEmpty(value) {
+    return Object.is(value, undefined) || Object.is(value, null);
+  }
+
+  function create(modelClass, params) {
+    if (isEmpty(params.homeCurrencyAmount)) {
+      params.homeCurrencyAmount = convertToHomeCurrencyAmount(params.currencyId, params.amount);
+    }
+    return dataStore.create(modelClass, params);
+  }
+
+  function convertToHomeCurrencyAmount(sourceCurrencyId, sourceAmount) {
+    const latestSystemConfigs = dataStore.list(
+      'system_configs',
+      {
+        sort: { field: 'effectiveStart', order: 'desc' },
+        include: ['baseCurrencyId'],
+        offset: 0,
+        limit: 1,
+      }
+    ).data[0];
+
+    const homeCurrency = latestSystemConfigs.includes.baseCurrencyId[latestSystemConfigs.baseCurrencyId];
+
+    const sourceCurrency = dataStore.view('currencies', sourceCurrencyId, {}).record;
+
+    if (sourceCurrency.code === homeCurrency.code) {
+      return sourceAmount;
+    } else {
+      return (sourceAmount / sourceCurrency.exchangeRate).toFixed(2);
+    }
+  }
+
   function reverseTransaction(modelClass, id, params) {
     const result = dataStore.view('transactions', id, {});
 
@@ -76,6 +109,7 @@ export function useStore({ dataStore }) {
   }
 
   return {
+    create,
     reverseTransaction,
   };
 }

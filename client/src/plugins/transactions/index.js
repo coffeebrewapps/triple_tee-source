@@ -11,6 +11,7 @@ const usePlugin = ({ router, dataStore }) => {
 
   router.addRoute(route);
 
+  dataStore.registerFunction('transactions', 'create', 'create', store.create);
   dataStore.registerFunction('transactions', 'update', 'reverse', store.reverseTransaction);
 };
 
