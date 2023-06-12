@@ -378,6 +378,8 @@ const computedTableStyle = computed(() => {
   return Object.assign({}, defaultTableStyle, props.tableStyle);
 });
 
+const rowAction = ref();
+
 const tableActions = computed(() => {
   const defaultCreateAction = {
     name: 'Create',
@@ -449,6 +451,7 @@ const rowActions = computed(() => {
   };
   const viewOverride = props.actions.view || {};
   const viewAction = Object.assign({}, defaultViewAction, viewOverride);
+  rowAction.value = viewAction.click;
 
   const defaultUpdateAction = {
     name: 'Update',
@@ -471,7 +474,6 @@ const rowActions = computed(() => {
   const removeAction = Object.assign({}, defaultRemoveAction, removeOverride);
 
   const initialActions = [
-    viewAction,
     updateAction,
     removeAction,
   ];
@@ -1004,10 +1006,12 @@ onMounted(async() => {
 
     <TTable
       name=""
+      class="data-table"
       :headers="listableFields"
       :data="listedData"
       :table-actions="tableActions"
       :actions="rowActions"
+      :row-action="rowAction"
       :loading="dataLoading"
       :pagination="{ offset, limit, client: false }"
       :total-data="totalData"
@@ -1302,6 +1306,11 @@ onMounted(async() => {
 
 a.hidden {
   display: none;
+}
+
+.data-table {
+  margin: 0 auto;
+  width: 80%;
 }
 
 .header.oneline {
