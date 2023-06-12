@@ -42,7 +42,7 @@ module.exports = ({ dataAccess, utils, logger }) => {
     if (sourceCurrency.code === homeCurrency.code) {
       return sourceAmount;
     } else {
-      return (sourceAmount / sourceCurrency.exchangeRate).toFixed(2);
+      return parseFloat((sourceAmount / sourceCurrency.exchangeRate).toFixed(2));
     }
   }
 
