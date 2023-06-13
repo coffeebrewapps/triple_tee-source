@@ -576,6 +576,16 @@ events.registerListener(
     },
   }
 );
+
+function handleEsc(event) {
+  event.preventDefault();
+
+  if (filtersState.value) {
+    closeFilters();
+  } else if (sortSectionState.value) {
+    toggleSortSection();
+  }
+}
 /** section:events **/
 
 /** section:dataAccess **/
@@ -931,7 +941,10 @@ onMounted(async() => {
 </script>
 
 <template>
-  <div class="page-container">
+  <div
+    class="page-container"
+    @keydown.esc="handleEsc($event)"
+  >
     <h2
       v-if="showHeading"
       class="heading"
