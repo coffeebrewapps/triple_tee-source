@@ -1074,6 +1074,7 @@ onMounted(async() => {
         >
           <td
             class="col oneline"
+            @click="rowAction(row, i)"
           >
             <div class="content-row">
               <div class="highlight">
