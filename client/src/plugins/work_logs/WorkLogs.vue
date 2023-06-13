@@ -1,6 +1,8 @@
 <script setup>
 import { ref } from 'vue';
+import { useFormatter } from '@/utils/formatter';
 import { useEventsStore } from '@/stores/events';
+import { useSystemConfigsStore } from '@/stores/systemConfigs';
 
 import { useWorkLogUtils } from './utils';
 
@@ -11,6 +13,13 @@ import TodayLog from './TodayLog.vue';
 import WeekLog from './WeekLog.vue';
 
 const events = useEventsStore();
+
+const {
+  formatTagSync,
+  tagStyle,
+} = useFormatter();
+const systemConfigsStore = useSystemConfigsStore();
+const systemConfigs = systemConfigsStore.getSystemConfigs();
 
 const {
   dataFields,
@@ -84,6 +93,17 @@ async function triggerTabEvent(i) {
       >
         <template #[`data-col.startTime`]="{ row }">
           Total duration <strong>{{ formatDuration(calculateDuration(row)) }}</strong>
+        </template>
+
+        <template #[`data-col.tags`]="{ row, key, rawValue }">
+          <span
+            v-for="(tag, t) in rawValue"
+            :key="t"
+            class="tag inline"
+            :style="tagStyle(row, tag, key)"
+          >
+            {{ formatTagSync(row, tag, key, systemConfigs.tagFormat) }}
+          </span>
         </template>
       </DataPage>
     </template>
