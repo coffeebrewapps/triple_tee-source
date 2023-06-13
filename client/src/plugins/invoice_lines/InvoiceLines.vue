@@ -46,7 +46,7 @@ const dataFields = computed(() => {
       key: 'unit',
       type: 'enum',
       label: 'Unit',
-      listable: false,
+      listable: true,
       viewable: true,
       creatable: true,
       updatable: true,
@@ -55,7 +55,7 @@ const dataFields = computed(() => {
       key: 'unitCost',
       type: 'number',
       label: 'Unit Cost',
-      listable: false,
+      listable: true,
       viewable: true,
       creatable: true,
       updatable: true,
@@ -133,6 +133,12 @@ const filters = computed(() => {
     ],
   };
 });
+
+const tableStyle = {
+  oneline: true,
+  showHeader: false,
+  highlightField: 'description',
+};
 </script>
 
 <template>
@@ -143,5 +149,17 @@ const filters = computed(() => {
     :data-fields="dataFields"
     :validations="validations"
     :filters="filters"
-  />
+    :table-style="tableStyle"
+  >
+    <template #[`data-col.unitCost`]="{ row, formattedValue, inputValue }">
+      Charging
+      <strong>{{ formattedValue }}</strong>
+      per
+      <strong>{{ inputValue('unit', row) }}</strong>
+    </template>
+
+    <template #[`data-col.subtotal`]="{ formattedValue }">
+      Subtotal <strong>{{ formattedValue.toFixed(2) }}</strong>
+    </template>
+  </DataPage>
 </template>
