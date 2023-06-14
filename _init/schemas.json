@@ -116,6 +116,116 @@
       }
     }
   },
+  "chart_configs": {
+    "fields": {
+      "id": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "chartType": {
+        "type": "enum",
+        "default": "hbar",
+        "enums": {
+          "hbar": "Horizontal Bar",
+          "vbar": "Vertical Bar"
+        }
+      },
+      "dataSource": {
+        "type": "enum",
+        "enums": {
+          "work_logs": "Work Logs",
+          "transactions": "Transactions"
+        }
+      },
+      "scaleUnit": {
+        "type": "enum",
+        "enums": {
+          "hour": "Hour",
+          "minute": "Minute",
+          "second": "Second",
+          "dollar": "Dollar"
+        }
+      },
+      "scaleValue": {
+        "type": "number"
+      },
+      "groupBy": {
+        "type": "enum",
+        "default": "category",
+        "enums": {
+          "category": "Category",
+          "year": "Year",
+          "month": "Month",
+          "day": "Day"
+        }
+      },
+      "includeTags": {
+        "type": "array",
+        "default": []
+      },
+      "excludeTags": {
+        "type": "array",
+        "default": []
+      },
+      "startDate": {
+        "type": "date"
+      },
+      "endDate": {
+        "type": "date"
+      },
+      "displayOrder": {
+        "type": "number",
+        "default": 1
+      },
+      "active": {
+        "type": "boolean",
+        "default": true
+      },
+      "createdAt": {
+        "type": "datetime"
+      },
+      "updatedAt": {
+        "type": "datetime"
+      }
+    },
+    "constraints": {
+      "primary": ["id"],
+      "foreign": {
+        "includeTags": {
+          "reference": "tags",
+          "primary": "id"
+        },
+        "excludeTags": {
+          "reference": "tags",
+          "primary": "id"
+        }
+      },
+      "unique": [],
+      "required": [
+        "description",
+        "chartType",
+        "dataSource",
+        "scaleUnit",
+        "scaleValue",
+        "groupBy",
+        "includeTags",
+        "excludeTags",
+        "startDate",
+        "endDate",
+        "displayOrder"
+      ]
+    },
+    "indexes": {
+      "filter": {
+        "description": { "match": true },
+        "active": {},
+        "includeTags": {},
+        "excludeTags": {}
+      }
+    }
+  },
   "contacts": {
     "fields": {
       "id": {

@@ -40,10 +40,17 @@ export function useErrors() {
     },
   };
 
+  const enumErrors = {
+    invalidEnum: ({ validValues }) => {
+      return `Must be one of: ${validValues.join(', ')}`;
+    },
+  };
+
   return Object.assign(
     {},
     serverErrors,
     dateErrors,
-    numberErrors
+    numberErrors,
+    enumErrors
   );
 }

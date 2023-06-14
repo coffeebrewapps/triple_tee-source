@@ -14,6 +14,9 @@ router.addRoute({
   component: () => import('@/views/HomeView.vue'),
   meta: {
     hidden: true,
+    displayName: (route) => {
+      return 'Charts';
+    },
   },
 });
 

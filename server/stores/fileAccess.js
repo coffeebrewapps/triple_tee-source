@@ -4,11 +4,13 @@ module.exports = ({ config, logger, utils }) => {
   const dataDir = config.dataDir;
 
   const schemasData = require('../../_init/schemas.json');
+  const chartConfigsData = require('../../_init/chart_configs.json');
   const contactsData = require('../../_init/contacts.json');
   const countriesData = require('../../_init/countries.json');
   const currenciesData = require('../../_init/currencies.json');
   const systemConfigsData = require('../../_init/system_configs.json');
   const bootstrapData = {
+    chart_configs: chartConfigsData,
     contacts: contactsData,
     countries: countriesData,
     currencies: currenciesData,

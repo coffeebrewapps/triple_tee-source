@@ -1,0 +1,1 @@
+{"1":{"id":"1","description":"Hours by Company","chartType":"vbar","dataSource":"work_logs","scaleUnit":"hour","scaleValue":10,"groupBy":"category","includeTags":[],"excludeTags":[],"startDate":"2022-12-31T16:00:00.000Z","endDate":"2023-12-30T16:00:00.000Z","displayOrder":1,"active":true,"createdAt":"2023-01-01T00:00:00.000Z","updatedAt":"2023-01-01T00:00:00.000Z"}}

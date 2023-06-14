@@ -44,6 +44,15 @@ const route = {
         hidden: true,
       },
     },
+    {
+      path: 'chart_configs',
+      name: 'Configure Charts',
+      component: () => import('@/plugins/chart_configs/ChartConfigs.vue'),
+      meta: {
+        parentRoute: { name: 'Configure' },
+        hidden: true,
+      },
+    },
   ],
 };
 

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAlertsStore } from '@/stores/alerts';
 import { useValidations } from '@/utils/validations';
+import { useEventsStore } from '@/stores/events';
 
 import {
   TButton
@@ -11,6 +12,7 @@ import {
 const router = useRouter();
 const currentRoute = useRoute();
 const alerts = useAlertsStore();
+const events = useEventsStore();
 const { isEmpty, notEmpty } = useValidations();
 
 const theme = ref(true); // true: dark, false: light
@@ -32,6 +34,12 @@ function toggleTheme() {
 
   document.body.classList.toggle('dark', theme.value);
   document.body.classList.toggle('light', !theme.value);
+
+  events.emitEvent('themeChange', { newVal: theme.value });
+}
+
+function goToHome() {
+  router.push({ name: 'Home' });
 }
 
 function openSystemAdmin() {
@@ -95,6 +103,15 @@ function goBackToParent() {
     </div>
 
     <div class="toggles">
+      <div class="tooltipable">
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-house"
+          @click="goToHome"
+        />
+        <span class="tooltip align-right">Home</span>
+      </div>
+
       <div class="theme-toggle tooltipable">
         <TButton
           button-type="icon"

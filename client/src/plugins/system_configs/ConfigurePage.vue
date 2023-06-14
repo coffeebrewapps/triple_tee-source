@@ -6,6 +6,7 @@ const views = [
   { name: 'Configure Sequences', params: {} },
   { name: 'Configure Tags', params: {} },
   { name: 'Configure System', params: {} },
+  { name: 'Configure Charts', params: {} },
 ];
 </script>
 

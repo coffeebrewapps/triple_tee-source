@@ -338,7 +338,7 @@ const taxDeductibleOptions = ref([]);
 function taxDeductibleType(row) {
   const found = taxDeductibleOptions.value.find((option) => {
     return row.type === option.value;
-  })
+  });
   if (found) {
     return found.label;
   } else {
