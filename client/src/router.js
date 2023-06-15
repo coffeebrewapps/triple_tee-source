@@ -15,7 +15,7 @@ router.addRoute({
   meta: {
     hidden: true,
     displayName: (route) => {
-      return 'Charts';
+      return 'Dashboard';
     },
   },
 });

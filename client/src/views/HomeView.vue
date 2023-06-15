@@ -13,8 +13,8 @@ const events = useEventsStore();
 
 const chartData = ref([]);
 
-const highlightColor = ref(getComputedStyle(document.documentElement).getPropertyValue('--vt-c-brown-bright'));
-const lineColor = ref(getComputedStyle(document.documentElement).getPropertyValue('--vt-c-brown-dark'));
+const highlightColor = ref(getComputedStyle(document.documentElement).getPropertyValue('--color-text'));
+const lineColor = ref(getComputedStyle(document.documentElement).getPropertyValue('--color-border'));
 
 const chartColors = computed(() => {
   return {
@@ -26,14 +26,6 @@ const chartColors = computed(() => {
 events.registerListener('themeChange', {
   id: 'RefreshChartColors',
   invoke: ({ newVal }) => {
-    if (newVal) { // dark
-      highlightColor.value = getComputedStyle(document.documentElement).getPropertyValue('--vt-c-brown-bright');
-      lineColor.value = getComputedStyle(document.documentElement).getPropertyValue('--vt-c-brown-bright-less');
-    } else { // light
-      highlightColor.value = getComputedStyle(document.documentElement).getPropertyValue('--vt-c-brown-bright');
-      lineColor.value = getComputedStyle(document.documentElement).getPropertyValue('--vt-c-brown-dark');
-    }
-
     refreshChartColors();
   },
 });
@@ -42,6 +34,10 @@ function refreshChartColors() {
   chartData.value.forEach((chart) => {
     chart.config.colors = chartColors.value;
   });
+}
+
+function titleize(val) {
+  return `${val[0].toUpperCase()}${val.slice(1)}`;
 }
 
 async function loadChartConfigs() {
@@ -85,8 +81,8 @@ async function loadChartConfigs() {
 
             if (config.chartType === 'vbar') {
               chartConfig.yScale = config.scaleValue;
-              chartConfig.yAxisLabel = config.scaleUnit;
-              chartConfig.xAxisLabel = config.groupBy;
+              chartConfig.yAxisLabel = titleize(config.scaleUnit);
+              chartConfig.xAxisLabel = titleize(config.groupBy);
 
               result.forEach((record) => {
                 data.push({
@@ -96,8 +92,8 @@ async function loadChartConfigs() {
               });
             } else {
               chartConfig.xScale = config.scaleValue;
-              chartConfig.xAxisLabel = config.scaleUnit;
-              chartConfig.yAxisLabel = config.groupBy;
+              chartConfig.xAxisLabel = titleize(config.scaleUnit);
+              chartConfig.yAxisLabel = titleize(config.groupBy);
 
               result.forEach((record) => {
                 data.push({
@@ -161,10 +157,13 @@ onMounted(async() => {
 <style scoped>
 .page-container {
   margin: 1rem 0;
+  width: 100%;
 }
 
 .charts {
-  display: grid;
-  grid-template-columns: repeat(1fr, 2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
 }
 </style>

@@ -45,6 +45,22 @@ module.exports = ({ dataAccess, logger, utils }) => {
     return dataFilters;
   }
 
+  function formatSortFilters({ dataSource, groupBy }) {
+    const sort = { order: 'asc' };
+
+    if (groupBy === 'category') {
+      sort.field = 'tags';
+    } else {
+      if (dataSource === 'transactions') {
+        sort.field = 'transactionDate'
+      } else {
+        sort.field = 'startTime'
+      }
+    }
+
+    return sort;
+  }
+
   function groupChartData({ dataSource, data, groupBy, includeTags }) {
     if (dataSource === 'transactions') {
       return groupDataBy({ data, groupBy, includeTags, dateField: 'transactionDate' });
@@ -144,7 +160,8 @@ module.exports = ({ dataAccess, logger, utils }) => {
     const { dataSource, scaleUnit, groupBy, startDate, endDate, includeTags } = chartResult.record;
 
     const dataFilters = formatDataFilters({ dataSource, startDate, endDate, includeTags });
-    const dataResult = dataAccess.list(dataSource, { filters: dataFilters, include: ['tags'] });
+    const sortFilters = formatSortFilters({ dataSource, groupBy });
+    const dataResult = dataAccess.list(dataSource, { sort: sortFilters, filters: dataFilters, include: ['tags'] });
 
     if (dataResult.total === 0) {
       return {

@@ -103,15 +103,6 @@ function goBackToParent() {
     </div>
 
     <div class="toggles">
-      <div class="tooltipable">
-        <TButton
-          button-type="icon"
-          icon="fa-solid fa-house"
-          @click="goToHome"
-        />
-        <span class="tooltip align-right">Home</span>
-      </div>
-
       <div class="theme-toggle tooltipable">
         <TButton
           button-type="icon"
@@ -119,6 +110,15 @@ function goBackToParent() {
           @click="toggleTheme"
         />
         <span class="tooltip">Theme</span>
+      </div>
+
+      <div class="tooltipable">
+        <TButton
+          button-type="icon"
+          icon="fa-solid fa-chart-line"
+          @click="goToHome"
+        />
+        <span class="tooltip align-right">Dashboard</span>
       </div>
 
       <div class="tooltipable">
