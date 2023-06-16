@@ -14,7 +14,7 @@
     "client-test:unit": "vitest client",
     "server-dev": "DEBUG=express:* PORT=4001 node dev/server.js",
     "server-build": "esbuild server/index.js server/modules/**/index.js --platform=node --bundle --minify --outdir=dist",
-    "server-test:unit": "jest --watch server/__tests__",
+    "server-test:unit": "jest --watch --randomize --config server/jest.config.js server/__tests__",
     "build": "bin/build",
     "package": "electron-forge package",
     "make": "electron-forge make"

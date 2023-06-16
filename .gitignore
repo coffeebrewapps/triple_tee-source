@@ -31,3 +31,4 @@ client/*.sw?
 out/
 /uploads/*.*
 /data/*.json
+/server/__tests__/data/
