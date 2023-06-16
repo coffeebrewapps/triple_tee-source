@@ -32,7 +32,7 @@ async function loadPlugins(app, modulesDir, dependencies) {
 async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
   const utils = require('./utils.js');
   const { readConfigFile } = require('./config.js');
-  const config = readConfigFile({ appConfigPath, appRootDir, logsRootDir });
+  const config = readConfigFile({ utils, appConfigPath, appRootDir, logsRootDir });
 
   const { uploader } = require('./uploader.js')({ config });
 
