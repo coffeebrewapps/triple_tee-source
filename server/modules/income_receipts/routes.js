@@ -29,9 +29,9 @@ module.exports = ({ routes, stores, logger, utils }) => {
 
   function viewTemplateData(stores) {
     return function(req, res) {
-      const params = req.params;
+      const id = req.params.id;
 
-      const result = stores.viewTemplateData(params);
+      const result = stores.viewTemplateData(id);
 
       if (result.success) {
         res.status(200).send(result);

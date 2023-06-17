@@ -1,4 +1,5 @@
 import { useStore } from './store';
+import { useValidations } from '@/utils/validations';
 
 const route = {
   path: '/contacts',
@@ -196,8 +197,9 @@ const viewContactRoute = {
   ],
 };
 
-const usePlugin = ({ router, dataStore, uploader }) => {
-  const store = useStore({ dataStore, uploader });
+const usePlugin = ({ router, dataStore, uploader, logger }) => {
+  const utils = useValidations();
+  const store = useStore({ dataStore, uploader, utils, logger });
 
   router.addRoute(route);
   router.addRoute(viewContactRoute);

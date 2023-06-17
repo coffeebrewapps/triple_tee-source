@@ -1,4 +1,5 @@
 import { useStore } from './store';
+import { useValidations } from '@/utils/validations';
 
 const route = {
   path: '/tax_tables',
@@ -16,8 +17,9 @@ const viewTaxTableRoute = {
   },
 };
 
-const usePlugin = ({ router, dataStore }) => {
-  const store = useStore({ dataStore });
+const usePlugin = ({ router, dataStore, logger }) => {
+  const utils = useValidations();
+  const store = useStore({ dataStore, utils, logger });
 
   router.addRoute(route);
   router.addRoute(viewTaxTableRoute);

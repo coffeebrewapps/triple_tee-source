@@ -15,6 +15,7 @@
     "server-dev": "DEBUG=express:* PORT=4001 node dev/server.js",
     "server-build": "esbuild server/index.js server/modules/**/index.js --platform=node --bundle --minify --outdir=dist",
     "server-test:unit": "jest --watch --randomize --config server/jest.config.js server/__tests__",
+    "lib-build": "esbuild lib/src/**/*.js --platform=node --minify --format=esm --outdir=lib/dist",
     "build": "bin/build",
     "package": "electron-forge package",
     "make": "electron-forge make"

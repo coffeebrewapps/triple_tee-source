@@ -1,44 +1,14 @@
-export function useStore({ dataStore }) {
-  function deactivateLatestConfig(modelClass, id, effectiveEnd) {
-    const found = dataStore.view(modelClass, id, {}).record;
-    if (!found) {
-      return {
-        success: false,
-        errors: ['not exists'],
-      };
-    }
+import { default as initStore } from '#/system_configs/stores.js';
 
-    const updated = Object.assign({}, found, { effectiveEnd });
-    return dataStore.update(modelClass, id, updated);
-  }
+export function useStore({ dataStore, logger, utils }) {
+  const store = initStore({ dataAccess: dataStore, logger, utils });
 
   function viewLatestConfig(modelClass, params) {
-    const filters = {
-      sort: {
-        field: 'effectiveStart',
-        order: 'desc',
-      },
-      include: ['baseCurrencyId', 'baseContactId'],
-      offset: 0,
-      limit: 1,
-    };
-    const latest = dataStore.list(modelClass, filters).data[0];
-    return {
-      success: true,
-      record: latest,
-    };
+    return store.viewLatest();
   }
 
   function replaceLatestConfig(modelClass, params) {
-    const latest = viewLatestConfig(modelClass, {}).record;
-    const effectiveEnd = new Date();
-    if (latest) {
-      deactivateLatestConfig(modelClass, latest.id, effectiveEnd);
-    }
-
-    const effectiveStart = new Date(effectiveEnd);
-    effectiveStart.setSeconds(effectiveStart.getSeconds() + 1);
-    return dataStore.create(modelClass, Object.assign({}, params, { effectiveStart }));
+    return store.replaceLatest(params);
   }
 
   return {

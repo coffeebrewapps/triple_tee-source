@@ -1,4 +1,4 @@
-const name = 'receipts';
+const name = 'income_receipts';
 
 module.exports = ({ dataAccess, routes, logger, utils }) => {
   const stores = require('./stores')({ dataAccess, logger, utils });

@@ -1,4 +1,5 @@
 import { useStore } from './store';
+import { useValidations } from '@/utils/validations';
 
 const route = {
   path: '/transactions',
@@ -6,8 +7,9 @@ const route = {
   component: () => import('./TransactionsPage.vue'),
 };
 
-const usePlugin = ({ router, dataStore }) => {
-  const store = useStore({ dataStore });
+const usePlugin = ({ router, dataStore, logger }) => {
+  const utils = useValidations();
+  const store = useStore({ dataStore, utils, logger });
 
   router.addRoute(route);
 
