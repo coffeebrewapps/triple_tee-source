@@ -17,7 +17,7 @@ module.exports = ({ config, logger, utils }) => {
     if (dataStore === 'fs') {
       logger.log(`Init data start`);
       if (!init || force) {
-        fileAccess.initData(schemas, indexes)
+        await fileAccess.initData(schemas, indexes)
           .then((result) => {
             schemaCache = result.schemas;
             indexCache = result.indexes;
@@ -229,14 +229,12 @@ module.exports = ({ config, logger, utils }) => {
   function remove(modelClass, id) {
     const data = dataCache[modelClass];
     const existing = view(modelClass, id);
-    const record = existing.record;
-    if (!record) {
-      return {
-        success: false,
-        errors: {},
-      };
+
+    if (!existing.success) {
+      return existing;
     }
 
+    const record = existing.record;
     const used = validator.isUsed(modelClass, record, schemaCache, indexCache, dataCache);
 
     if (!used) {
