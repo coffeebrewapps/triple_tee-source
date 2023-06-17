@@ -256,6 +256,11 @@ const tableStyle = {
   showHeader: false,
   highlightField: 'description',
 };
+
+const chartTypeIcons = {
+  hbar: 'fa-solid fa-chart-bar fa-lg',
+  vbar: 'fa-solid fa-chart-column fa-lg',
+};
 </script>
 
 <template>
@@ -268,16 +273,21 @@ const tableStyle = {
     :table-style="tableStyle"
   >
     <template #[`highlight.description`]="{ row, formattedValue }">
-      {{ formattedValue }}
-      <span
-        v-if="row.active"
-        class="tag inline"
-      >active</span>
+      <div class="highlight">
+        <i :class="chartTypeIcons[row.chartType]" />
 
-      <span
-        v-if="!row.active"
-        class="tag inline"
-      >inactive</span>
+        {{ formattedValue }}
+
+        <span
+          v-if="row.active"
+          class="tag inline"
+        >active</span>
+
+        <span
+          v-if="!row.active"
+          class="tag inline"
+        >inactive</span>
+      </div>
     </template>
 
     <template #[`data-col.dataSource`]="{ formattedValue }">
@@ -307,3 +317,12 @@ const tableStyle = {
     </template>
   </DataPage>
 </template>
+
+<style scoped>
+.highlight {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-weight: 900;
+}
+</style>
