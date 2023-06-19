@@ -1118,6 +1118,7 @@ onMounted(async() => {
             v-for="(header, h) in headers"
             :key="h"
             class="col"
+            @click="rowAction(row, i)"
           >
             <slot
               :name="`data-col.${header.key}`"

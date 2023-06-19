@@ -54,7 +54,7 @@ const tableStyle = {
 async function openViewPage(row) {
   router.push({
     name: 'Contact View Receipt',
-    params: { receiptId: row.id, invoiceId: row.invoiceId, contactId: row.contactId },
+    params: { receiptId: row.id, contactId: row.contactId },
   });
 }
 
