@@ -21,9 +21,9 @@ const utils = require('../../utils.js');
 const initDir = path.join(__dirname, '../../../_init');
 const initSchemas = require(path.join(initDir, 'schemas.json'));
 
-describe('validator', () => {
-  const validator = require('../../stores/validator.js')({ config, logger, utils });
+const validator = require('../../stores/validator.js')({ config, logger, utils });
 
+describe('validator', () => {
   test('validate - no error', () => {
     const { modelClass, record, indexes, data } = validateNoError();
 
