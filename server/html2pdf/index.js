@@ -7,15 +7,11 @@ const { Liquid } = require('liquidjs');
 const liquidEngine = new Liquid();
 
 module.exports = (logger) => {
-  async function convertToPdf(htmlString, options, launchArgs) {
-    if (options) {
-      delete options.path;
-    }
-
+  async function convertToPdf(htmlString) {
     logger.log(`Launching puppeteer browser...`);
     const browser = await puppeteer.launch({
-      headless: true,
-      args: launchArgs || [
+      headless: 'new',
+      args: [
         '--disable-file-system',
         '--no-sandbox',
       ],
@@ -31,7 +27,7 @@ module.exports = (logger) => {
     await page.emulateMediaType('print');
 
     logger.log(`Converting page pdf...`);
-    const buffer = await page.pdf(options);
+    const buffer = await page.pdf({});
     logger.log(`Created pdf page`);
 
     logger.log(`Closing browser...`);
