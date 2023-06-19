@@ -1,2 +1,2 @@
 #!/bin/bash
-yarn client-build && yarn server-build
+yarn lib-build && yarn client-build && yarn server-build
