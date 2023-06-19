@@ -1,31 +1,10 @@
 const path = require('path');
 const fs = require('fs');
 
-const {
-  transactionsData,
-} = require('../__fixtures__/dataAccess.js');
-const transactionsFixtures = transactionsData();
-
-beforeEach(() => {
-  initFiles(transactionsFixtures.indexes, transactionsFixtures.data);
-});
-
-afterEach(() => {
-  jest.resetAllMocks();
-});
-
-afterAll(() => {
-  if (fs.existsSync(testDataDir)) {
-    fs.rmSync(testDataDir, { force: true, recursive: true });
-  }
-});
-
-const testDataDir = path.join(__dirname, '../data/dataAccess');
 const config = {
   dataStore: 'fs',
   schemas: '_schemas',
   indexes: '_indexes',
-  dataDir: testDataDir,
 };
 const logger = {
   log: () => {},
@@ -33,30 +12,49 @@ const logger = {
 };
 const utils = require('../../utils.js');
 
-function initFiles(indexes, data) {
-  if (!fs.existsSync(testDataDir)) {
-    fs.mkdirSync(testDataDir, { recursive: true });
-  }
+const dataAccess = require('../../stores/dataAccess.js')({ config, logger, utils });
 
-  initDataFile(data);
-  initIndexesFile(indexes);
-}
+jest.mock('../../stores/fileAccess', () => {
+  const path = require('path');
+  const initDir = path.join(__dirname, '../../../_init');
+  const initSchemas = require(path.join(initDir, 'schemas.json'));
 
-function initDataFile(data) {
-  Object.entries(data).forEach(([modelClass, records]) => {
-    fs.writeFileSync(path.join(testDataDir, `${modelClass}.json`), JSON.stringify(records));
-  });
-}
+  const {
+    transactionsData,
+  } = require('../__fixtures__/dataAccess.js');
 
-function initIndexesFile(indexes) {
-  fs.writeFileSync(path.join(testDataDir, `_indexes.json`), JSON.stringify(indexes));
-}
+  return ({ config, logger, utils }) => {
+    return {
+      initData: () => {
+        const transactionsFixtures = transactionsData();
+        return new Promise((resolve, reject) => {
+          resolve({
+            schemas: initSchemas,
+            indexes: transactionsFixtures.indexes,
+            data: Object.entries(transactionsFixtures.data).map(([key, val]) => {
+              return {
+                modelClass: key,
+                data: val,
+              };
+            }),
+          });
+        });
+      },
+      writeToFile: () => {},
+    };
+  };
+});
+
+afterEach(async () => {
+  jest.resetAllMocks();
+});
+
+beforeEach(async () => {
+  await dataAccess.initData(true);
+});
 
 describe('dataAccess', () => {
-  const dataAccess = require('../../stores/dataAccess.js')({ config, logger, utils });
-
   test('list - no filter no includes', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.list('transactions', {});
 
     expect(result.total).toBe(5);
@@ -70,7 +68,6 @@ describe('dataAccess', () => {
   });
 
   test('list - with filters no includes', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.list('transactions', {
       filters: {
         currencyId: ['1'],
@@ -86,7 +83,6 @@ describe('dataAccess', () => {
   });
 
   test('list - with filters with includes', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.list('transactions', {
       filters: {
         currencyId: ['1'],
@@ -103,7 +99,6 @@ describe('dataAccess', () => {
   });
 
   test('list - no filter with sort', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.list('transactions', {
       sort: {
         field: 'amount',
@@ -122,7 +117,6 @@ describe('dataAccess', () => {
   });
 
   test('view - found no includes', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.view('transactions', '1', {});
 
     expect(result.success).toBeTruthy();
@@ -132,7 +126,6 @@ describe('dataAccess', () => {
   });
 
   test('view - found with includes', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.view('transactions', '1', {
       include: ['currencyId'],
     });
@@ -144,7 +137,6 @@ describe('dataAccess', () => {
   });
 
   test('view - not found', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.view('transactions', '6', {});
 
     expect(result.success).toBeFalsy();
@@ -154,7 +146,6 @@ describe('dataAccess', () => {
   });
 
   test('create - valid', async() => {
-    await dataAccess.initData(true);
 
     const indexesBefore = dataAccess.downloadIndexes().data;
     expect(indexesBefore.filter.transactions).toEqual(
@@ -212,7 +203,6 @@ describe('dataAccess', () => {
   });
 
   test('create - invalid', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.create('transactions', {});
 
     expect(result.success).toBeFalsy();
@@ -229,8 +219,6 @@ describe('dataAccess', () => {
   });
 
   test('update - existing', async() => {
-    await dataAccess.initData(true);
-
     const resultBefore = dataAccess.view('transactions', '1', {});
 
     expect(resultBefore.success).toBeTruthy();
@@ -299,7 +287,6 @@ describe('dataAccess', () => {
   });
 
   test('update - not found', async() => {
-    await dataAccess.initData(true);
     const result = dataAccess.view('transactions', '6', {
       description: 'Payment from Company ABC',
     });
@@ -311,8 +298,6 @@ describe('dataAccess', () => {
   });
 
   test('remove - existing', async() => {
-    await dataAccess.initData(true);
-
     const resultBefore = dataAccess.list('transactions', {});
 
     expect(resultBefore.total).toBe(5);
@@ -399,8 +384,6 @@ describe('dataAccess', () => {
   });
 
   test('remove - not found', async() => {
-    await dataAccess.initData(true);
-
     const resultBefore = dataAccess.list('transactions', {});
 
     expect(resultBefore.total).toBe(5);
@@ -414,29 +397,21 @@ describe('dataAccess', () => {
   });
 
   test('isUsed - not used', async() => {
-    await dataAccess.initData(true);
-
     const result = dataAccess.isUsed('tags', '4');
     expect(result).toBeFalsy();
   });
 
   test('isUsed - is used', async() => {
-    await dataAccess.initData(true);
-
     const result = dataAccess.isUsed('tags', '1');
     expect(result).toBeTruthy();
   });
 
   test('isUsed - not found', async() => {
-    await dataAccess.initData(true);
-
     const result = dataAccess.isUsed('tags', '6');
     expect(result).toBeFalsy();
   });
 
   test('atomic - no error', async() => {
-    await dataAccess.initData(true);
-
     const transactionsBefore = dataAccess.list('transactions', {});
     expect(transactionsBefore.total).toBe(5);
 
@@ -527,8 +502,6 @@ describe('dataAccess', () => {
   });
 
   test('atomic - with error', async() => {
-    await dataAccess.initData(true);
-
     const tagsBefore = dataAccess.list('tags', {});
     expect(tagsBefore.total).toBe(5);
 
