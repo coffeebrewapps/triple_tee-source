@@ -11,8 +11,6 @@ const {
   downloadPdf,
 } = require('../../routes/pdf.js')(templateType, store, logger);
 
-const html2pdf = require('../../html2pdf/index')(logger);
-
 const send = jest.fn((result) => { return result; });
 const status = jest.fn();
 const header = jest.fn((name, value) => {});
@@ -40,7 +38,7 @@ const createHtmlString = (template, params) => {
     if (template.id === '1') {
       resolve('<div>124.23</div>');
     } else {
-      reject('invalid template');
+      reject(new Error('invalid template'));
     }
   });
 };
@@ -65,8 +63,8 @@ describe('downloadPdf', () => {
     body: { totalAmount: 124.23 },
   };
 
-  test('success result', async () => {
-    const storeSpy = jest.spyOn(store, 'view').mockImplementation((id, params) => {
+  test('success result', async() => {
+    jest.spyOn(store, 'view').mockImplementation((id, params) => {
       return {
         success: true,
         record: {
@@ -85,8 +83,8 @@ describe('downloadPdf', () => {
     expect(res.body).toBe('<div>124.23</div>');
   });
 
-  test('template not found', async () => {
-    const storeSpy = jest.spyOn(store, 'view').mockImplementation((id, params) => {
+  test('template not found', async() => {
+    jest.spyOn(store, 'view').mockImplementation((id, params) => {
       return {
         success: false,
         errors: { id: ['notFound'] },
@@ -103,8 +101,8 @@ describe('downloadPdf', () => {
     expect(resStatusSpy).toHaveBeenCalledWith(400);
   });
 
-  test('parse html failure', async () => {
-    const storeSpy = jest.spyOn(store, 'view').mockImplementation((id, params) => {
+  test('parse html failure', async() => {
+    jest.spyOn(store, 'view').mockImplementation((id, params) => {
       return {
         success: true,
         record: {

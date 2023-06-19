@@ -75,7 +75,7 @@ describe('shared routes implemented', () => {
       const storeSpy = jest.spyOn(store, 'list').mockImplementation((params) => {
         return {
           total: 3,
-          data: [1, 2, 3]
+          data: [1, 2, 3],
         };
       });
       const resSendSpy = jest.spyOn(res, 'send');
@@ -90,6 +90,63 @@ describe('shared routes implemented', () => {
     });
   });
 
+  describe('view', () => {
+    const req = {
+      params: { id: '1' },
+      query: { include: ['tags'] },
+    };
+
+    const route = view(store);
+
+    test('success result', () => {
+      const storeSpy = jest.spyOn(store, 'view').mockImplementation((id, params) => {
+        return {
+          success: true,
+          record: {
+            id: '1',
+            description: 'New task',
+            tags: ['1'],
+            includes: { tags: { 1: { category: 'company', name: 'company-abc', description: 'ABC' } } },
+          },
+        };
+      });
+
+      const resStatusSpy = jest.spyOn(res, 'status').mockReturnValue({ send });
+
+      route(req, res);
+      expect(storeSpy).toHaveBeenCalledWith('1', { include: ['tags'] });
+      expect(send).toHaveBeenCalledWith({
+        success: true,
+        record: {
+          id: '1',
+          description: 'New task',
+          tags: ['1'],
+          includes: { tags: { 1: { category: 'company', name: 'company-abc', description: 'ABC' } } },
+        },
+      });
+      expect(resStatusSpy).toHaveBeenCalledWith(200);
+    });
+
+    test('failure result', () => {
+      const storeSpy = jest.spyOn(store, 'view').mockImplementation((id, params) => {
+        return {
+          success: false,
+          errors: { id: ['notFound'] },
+        };
+      });
+
+      const resStatusSpy = jest.spyOn(res, 'status').mockReturnValue({ send });
+
+      route(req, res);
+      expect(storeSpy).toHaveBeenCalledWith('1', { include: ['tags'] });
+      expect(send).toHaveBeenCalledWith({
+        success: false,
+        errors: { id: ['notFound'] },
+      });
+      expect(resStatusSpy).toHaveBeenCalledWith(400);
+    });
+  });
+
   describe('create', () => {
     const req = {
       body: { category: 'company', name: 'company-abc', description: 'Company ABC' },
@@ -101,7 +158,7 @@ describe('shared routes implemented', () => {
       const storeSpy = jest.spyOn(store, 'create').mockImplementation((params) => {
         return {
           success: true,
-          record: { id: '1', category: 'company', name: 'company-abc', description: 'Company ABC' }
+          record: { id: '1', category: 'company', name: 'company-abc', description: 'Company ABC' },
         };
       });
 
@@ -112,7 +169,7 @@ describe('shared routes implemented', () => {
       expect(storeSpy).toHaveBeenCalledWith({ category: 'company', name: 'company-abc', description: 'Company ABC' });
       expect(send).toHaveBeenCalledWith({
         success: true,
-        record: { id: '1', category: 'company', name: 'company-abc', description: 'Company ABC' }
+        record: { id: '1', category: 'company', name: 'company-abc', description: 'Company ABC' },
       });
       expect(resStatusSpy).toHaveBeenCalledWith(201);
     });
@@ -150,17 +207,19 @@ describe('shared routes implemented', () => {
       const storeSpy = jest.spyOn(store, 'update').mockImplementation((params) => {
         return {
           success: true,
-          record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' }
+          record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' },
         };
       });
 
       const resStatusSpy = jest.spyOn(res, 'status').mockReturnValue({ send });
 
       route(req, res);
-      expect(storeSpy).toHaveBeenCalledWith('1', { category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' });
+      expect(storeSpy).toHaveBeenCalledWith('1', {
+        category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation',
+      });
       expect(send).toHaveBeenCalledWith({
         success: true,
-        record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' }
+        record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' },
       });
       expect(resStatusSpy).toHaveBeenCalledWith(200);
     });
@@ -176,7 +235,9 @@ describe('shared routes implemented', () => {
       const resStatusSpy = jest.spyOn(res, 'status').mockReturnValue({ send });
 
       route(req, res);
-      expect(storeSpy).toHaveBeenCalledWith('1', { category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' });
+      expect(storeSpy).toHaveBeenCalledWith('1', {
+        category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation',
+      });
       expect(send).toHaveBeenCalledWith({
         success: false,
         errors: { description: ['required'] },
@@ -196,7 +257,7 @@ describe('shared routes implemented', () => {
       const storeSpy = jest.spyOn(store, 'remove').mockImplementation((id) => {
         return {
           success: true,
-          record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' }
+          record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' },
         };
       });
 
@@ -207,7 +268,7 @@ describe('shared routes implemented', () => {
       expect(storeSpy).toHaveBeenCalledWith('1');
       expect(send).toHaveBeenCalledWith({
         success: true,
-        record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' }
+        record: { id: '1', category: 'company', name: 'company-abc', description: 'Arbitrary Bank Corporation' },
       });
       expect(resStatusSpy).toHaveBeenCalledWith(200);
     });
@@ -244,7 +305,7 @@ describe('shared routes implemented', () => {
       const storeSpy = jest.spyOn(store, 'list').mockImplementation((params) => {
         return {
           total: 3,
-          data: [1, 2, 3]
+          data: [1, 2, 3],
         };
       });
       const resSendSpy = jest.spyOn(res, 'send');
@@ -290,12 +351,12 @@ describe('shared routes implemented', () => {
         success: true,
         record: {
           name: 'Company ABC', logo: 'logo', banner: 'banner',
-        }
+        },
       });
     });
 
     test('success result', () => {
-      const resStatusSpy = jest.spyOn(res, 'status').mockReturnValue({ send });
+      jest.spyOn(res, 'status').mockReturnValue({ send });
 
       routes[0](req, res, () => {
         routes[1](req, res, () => {});
@@ -307,7 +368,7 @@ describe('shared routes implemented', () => {
         success: true,
         record: {
           name: 'Company ABC', logo: 'logo', banner: 'banner',
-        }
+        },
       });
     });
   });

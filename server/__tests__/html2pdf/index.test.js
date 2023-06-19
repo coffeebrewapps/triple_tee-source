@@ -8,9 +8,6 @@ const {
   createHtmlString,
 } = require('../../html2pdf/index')(logger);
 
-const puppeteer = require('puppeteer');
-const { Duplex } = require('stream');
-
 jest.mock('stream', () => {
   function Duplex() {
     this.buffer = [];
@@ -48,7 +45,7 @@ jest.mock('puppeteer', () => {
 
 describe('html2pdf', () => {
   describe('createHtmlString', () => {
-    test('success result', async () => {
+    test('success result', async() => {
       const template = {
         contentStyles: `.tag { font-size: 0.6rem; }`,
         contentMarkup: `<div class="tag">{{ category }}:{{ name }}</div>`,
@@ -83,7 +80,7 @@ describe('html2pdf', () => {
   });
 
   describe('convertToPdf', () => {
-    test('success result', async () => {
+    test('success result', async() => {
       const htmlString = `<div class="tag">company:company-abc</div>`;
 
       const stream = await convertToPdf(htmlString);

@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-
 const config = {
   dataStore: 'fs',
   schemas: '_schemas',
@@ -45,11 +42,11 @@ jest.mock('../../stores/fileAccess', () => {
   };
 });
 
-afterEach(async () => {
+afterEach(async() => {
   jest.resetAllMocks();
 });
 
-beforeEach(async () => {
+beforeEach(async() => {
   await dataAccess.initData(true);
 });
 
@@ -146,7 +143,6 @@ describe('dataAccess', () => {
   });
 
   test('create - valid', async() => {
-
     const indexesBefore = dataAccess.downloadIndexes().data;
     expect(indexesBefore.filter.transactions).toEqual(
       expect.objectContaining({
