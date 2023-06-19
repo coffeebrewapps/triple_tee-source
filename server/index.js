@@ -131,7 +131,9 @@ async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
 
   logger.log(`Server starting at port ${port}`);
 
-  app.listen(port);
+  const server = app.listen(port);
+
+  return server;
 }
 
 module.exports = {
