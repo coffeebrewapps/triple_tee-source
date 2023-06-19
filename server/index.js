@@ -60,7 +60,7 @@ async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
   });
 
   /** * start:Middleware ***/
-  app.use(express.json());
+  app.use(express.json({ limit: '1mb' }));
   app.use(cors(corsConfig));
   app.use(express.static(path.join(__dirname, 'public')));
   /** * end:Middleware ***/
