@@ -18,15 +18,13 @@ module.exports = (templateType, stores, logger) => {
     const params = req.body;
     const id = req.params.id;
     const result = stores.view(id, {});
-    const template = result.record;
 
-    if (Object.keys(template).length === 0) {
-      const errors = {
-        id: ['notFound'],
-      };
-      res.status(400).send({ errors });
+    if (!result.success) {
+      res.status(400).send(result);
       return;
     }
+
+    const template = result.record;
 
     const filename = `${templateType}_${id}.pdf`;
     const htmlString = await html2pdf.createHtmlString(template, params)
@@ -36,10 +34,17 @@ module.exports = (templateType, stores, logger) => {
       })
       .catch((error) => {
         logger.error(`Error parsing template!`, error);
-        return ``;
+        return;
       });
 
-    await createResponse(res, htmlString, filename);
+    if (htmlString) {
+      await createResponse(res, htmlString, filename);
+    } else {
+      res.status(400).send({
+        success: false,
+        errors: { contentMarkup: ['invalid'] },
+      });
+    }
   }
 
   return {
