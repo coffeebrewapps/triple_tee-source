@@ -3,6 +3,25 @@ const request = require('supertest');
 
 const { startServer } = require('../index.js');
 
+const config = {
+  dataDir: './data',
+  logFile: './debug.log',
+  modulesDir: './server/modules',
+  uploadDir: './uploads',
+};
+const logger = require('../logger.js')({ config });
+
+jest.mock('../logger.js', () => {
+  return ({ config }) => {
+    return {
+      log: () => {},
+      error: () => {},
+      warn: () => {},
+      tailLog: () => {},
+    };
+  };
+});
+
 const port = 4999;
 const appConfigPath = path.join(__dirname, '__fixtures__', 'app_config.json');
 const appRootDir = path.join(__dirname, '../../');
