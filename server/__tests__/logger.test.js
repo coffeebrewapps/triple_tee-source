@@ -14,12 +14,19 @@ afterEach(() => {
 
 describe('logger', () => {
   const mockWrite = jest.fn();
+  const mockStdout = jest.fn();
+
   jest.spyOn(fs, 'createWriteStream').mockImplementation(() => {
     return {
       write: mockWrite,
     };
   });
-  const mockStdout = jest.spyOn(process.stdout, 'write').mockImplementation(() => {});
+
+  jest.spyOn(process, 'stdout', 'get').mockImplementation(() => {
+    return {
+      write: mockStdout,
+    };
+  });
 
   const config = { logFile: 'debug.log' };
   const { log, error, warn, tailLog } = require('../logger.js')({ config });
