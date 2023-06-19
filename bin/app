@@ -1,5 +1,5 @@
 #!/bin/bash
-yarn client-build --mode staging --base=/triple_tee_app-demo/
+yarn lib-build && yarn client-build --mode staging --base=/triple_tee_app-demo/
 app_dir="../triple_tee_app-demo"
 pushd $app_dir
   git checkout main
