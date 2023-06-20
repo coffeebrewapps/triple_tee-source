@@ -16,7 +16,7 @@
     "server-build": "esbuild server/index.js server/modules/**/index.js --platform=node --bundle --minify --outdir=dist",
     "server-test:unit": "jest --randomize --config server/jest.config.js server/__tests__/*.test.js server/__tests__/**/*.test.js",
     "server-test:unit-watch": "jest --watch --randomize --config server/jest.config.js server/__tests__/*.test.js server/__tests__/**/*.test.js",
-    "lib-build": "esbuild lib/src/**/*.js --platform=node --minify --format=esm --outdir=lib/dist",
+    "lib-build": "esbuild lib/src/*.js lib/src/**/*.js --platform=node --minify --format=esm --outdir=lib/dist",
     "lib-test:unit": "jest --randomize --config lib/jest.config.js lib/__tests__/*.test.js lib/__tests__/**/*.test.js",
     "lib-test:unit-watch": "jest --watch --randomize --config lib/jest.config.js lib/__tests__/*.test.js lib/__tests__/**/*.test.js",
     "build": "bin/build",
