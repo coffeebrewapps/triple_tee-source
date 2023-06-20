@@ -1,109 +1,40 @@
 const path = require('path');
 
-const {
-  validateNoError,
-  validateWithForeignKeyNoError,
-  validateRequired,
-  validateNotUnique,
-  validateValidForeignKey,
-  validateInvalidForeignKey,
-  recordIsUsed,
-  recordNotUsed,
-} = require('../__fixtures__/validator.js');
-
-const config = {};
-const logger = {
-  log: () => {},
-  error: () => {},
-};
 const utils = require('../../utils.js');
 
-const initDir = path.join(__dirname, '../../../_init');
-const initSchemas = require(path.join(initDir, 'schemas.json'));
+const validator = require('../../stores/validator.js')({ utils });
 
-const validator = require('../../stores/validator.js')({ config, logger, utils });
+const sharedValidator = {
+  validate: () => {},
+  isUsed: () => {},
+}
+;
+jest.mock('../../../lib/src/validator.js', () => {
+  return ({ utils }) => {
+    return sharedValidator;
+  };
+});
 
 describe('validator', () => {
-  test('validate - no error', () => {
-    const { modelClass, record, indexes, data } = validateNoError();
+  const modelClass = 'tags';
+  const record = { category: 'company', name: 'company-abc' };
+  const schemas = {};
+  const indexes = {};
+  const data = {};
 
-    const result = validator.validate(
-      modelClass, record, initSchemas, indexes, data
-    );
+  test('validate', () => {
+    const validatorSpy = jest.spyOn(sharedValidator, 'validate');
 
-    expect(result.valid).toBeTruthy();
+    validator.validate(modelClass, record, schemas, indexes, data);
+
+    expect(validatorSpy).toHaveBeenCalledWith(modelClass, record, schemas, indexes, data);
   });
 
-  test('validate - with foreign keys no error', () => {
-    const { modelClass, record, indexes, data } = validateWithForeignKeyNoError();
+  test('isUsed', () => {
+    const validatorSpy = jest.spyOn(sharedValidator, 'isUsed');
 
-    const result = validator.validate(
-      modelClass, record, initSchemas, indexes, data
-    );
+    validator.isUsed(modelClass, record, schemas, indexes, data);
 
-    expect(result.valid).toBeTruthy();
-  });
-
-  test('validate - valid foreign key', () => {
-    const { modelClass, record, indexes, data } = validateValidForeignKey();
-
-    const result = validator.validate(
-      modelClass, record, initSchemas, indexes, data
-    );
-
-    expect(result.valid).toBeTruthy();
-  });
-
-  test('validate - missing required', () => {
-    const { modelClass, record, indexes, data } = validateRequired();
-
-    const result = validator.validate(
-      modelClass, record, initSchemas, indexes, data
-    );
-
-    expect(result.valid).toBeFalsy();
-    expect(result.errors).toMatchObject({ name: ['required'] });
-  });
-
-  test('validate - not unique', () => {
-    const { modelClass, record, indexes, data } = validateNotUnique();
-
-    const result = validator.validate(
-      modelClass, record, initSchemas, indexes, data
-    );
-
-    expect(result.valid).toBeFalsy();
-    expect(result.errors).toMatchObject({ code: ['unique'] });
-  });
-
-  test('validate - invalid foreign key', () => {
-    const { modelClass, record, indexes, data } = validateInvalidForeignKey();
-
-    const result = validator.validate(
-      modelClass, record, initSchemas, indexes, data
-    );
-
-    expect(result.valid).toBeFalsy();
-    expect(result.errors).toMatchObject({ tags: ['foreign'] });
-  });
-
-  test('isUsed - is used', () => {
-    const { modelClass, record, indexes, data } = recordIsUsed();
-
-    const result = validator.isUsed(
-      modelClass, record, initSchemas, indexes, data
-    );
-
-    expect(result).toBeTruthy();
-  });
-
-  test('isUsed - not used', () => {
-    const { modelClass, record, indexes, data } = recordNotUsed();
-
-    const result = validator.isUsed(
-      modelClass, record, initSchemas, indexes, data
-    );
-
-    expect(result).toBeFalsy();
+    expect(validatorSpy).toHaveBeenCalledWith(modelClass, record, schemas, indexes, data);
   });
 });
