@@ -279,7 +279,7 @@ async function createReceipt() {
     {},
     {
       receipt: receiptHelper.formatDataForSave(updatedReceipt.value),
-      receiptConfigId: receiptConfig.value.id,
+      incomeReceiptConfigId: receiptConfig.value.id,
     }
   );
 
