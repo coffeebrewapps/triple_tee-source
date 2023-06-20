@@ -37,7 +37,12 @@ const persistence = {
   write: () => {},
 };
 
-const dataAccess = require('../../stores/dataAccess.js')({ persistence, config, logger, utils });
+const validator = require('../../../lib/src/validator.js')({ config, logger, utils });
+const downloader = require('../../stores/downloader.js')({ config, logger, utils });
+
+const dataAccess = require('../../stores/dataAccess.js')({
+  persistence, validator, downloader, config, logger, utils
+});
 
 beforeEach(async() => {
   await dataAccess.initData(true);

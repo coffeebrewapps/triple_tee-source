@@ -1,7 +1,4 @@
-module.exports = ({ persistence, config, logger, utils }) => {
-  const validator = require('./validator')({ config, logger, utils });
-  const downloader = require('./downloader')({ config, logger, utils });
-
+module.exports = ({ persistence, validator, downloader, config, logger, utils }) => {
   const schemas = config.schemas;
   const indexes = config.indexes;
 
