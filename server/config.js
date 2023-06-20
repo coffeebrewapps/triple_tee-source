@@ -6,6 +6,15 @@ function readConfigFile({ utils, appConfigPath, appRootDir, logsRootDir }) {
   const parsedResult = JSON.parse(result);
   const dataRootDir = parsedResult.dataRootDir || appRootDir;
 
+  let initDir = null;
+  if (utils.isEmpty(parsedResult.initDir)) {
+    initDir = path.join(appRootDir, '_init');
+  } else if (path.isAbsolute(parsedResult.initDir)) {
+    initDir = parsedResult.initDir;
+  } else {
+    initDir = path.join(appRootDir, parsedResult.initDir);
+  }
+
   let dataDir = null;
   if (utils.isEmpty(parsedResult.dataDir)) {
     dataDir = path.join(dataRootDir, 'data');
@@ -46,6 +55,7 @@ function readConfigFile({ utils, appConfigPath, appRootDir, logsRootDir }) {
     {},
     parsedResult,
     {
+      initDir,
       dataDir,
       logFile,
       modulesDir,

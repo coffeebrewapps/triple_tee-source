@@ -1,5 +1,10 @@
+const path = require('path');
+const initDir = path.join(__dirname, '../../../_init');
+const initSchemas = require(path.join(initDir, 'schemas.json'));
+
 const config = {
   dataStore: 'fs',
+  initDir,
   schemas: '_schemas',
   indexes: '_indexes',
 };
@@ -9,42 +14,30 @@ const logger = {
 };
 const utils = require('../../utils.js');
 
-const dataAccess = require('../../stores/dataAccess.js')({ config, logger, utils });
+const {
+  transactionsData,
+} = require('../__fixtures__/dataAccess.js');
 
-jest.mock('../../stores/fileAccess', () => {
-  const path = require('path');
-  const initDir = path.join(__dirname, '../../../_init');
-  const initSchemas = require(path.join(initDir, 'schemas.json'));
+const persistence = {
+  initData: () => {
+    const transactionsFixtures = transactionsData();
+    return new Promise((resolve, reject) => {
+      resolve({
+        schemas: initSchemas,
+        indexes: transactionsFixtures.indexes,
+        data: Object.entries(transactionsFixtures.data).map(([key, val]) => {
+          return {
+            modelClass: key,
+            data: val,
+          };
+        }),
+      });
+    });
+  },
+  write: () => {},
+};
 
-  const {
-    transactionsData,
-  } = require('../__fixtures__/dataAccess.js');
-
-  return ({ config, logger, utils }) => {
-    return {
-      initData: () => {
-        const transactionsFixtures = transactionsData();
-        return new Promise((resolve, reject) => {
-          resolve({
-            schemas: initSchemas,
-            indexes: transactionsFixtures.indexes,
-            data: Object.entries(transactionsFixtures.data).map(([key, val]) => {
-              return {
-                modelClass: key,
-                data: val,
-              };
-            }),
-          });
-        });
-      },
-      writeToFile: () => {},
-    };
-  };
-});
-
-afterEach(async() => {
-  jest.resetAllMocks();
-});
+const dataAccess = require('../../stores/dataAccess.js')({ persistence, config, logger, utils });
 
 beforeEach(async() => {
   await dataAccess.initData(true);

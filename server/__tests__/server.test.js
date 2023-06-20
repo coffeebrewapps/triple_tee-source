@@ -4,6 +4,8 @@ const request = require('supertest');
 const { startServer } = require('../index.js');
 
 const config = {
+  dataStore: 'fs',
+  initDir: './_init',
   dataDir: './data',
   logFile: './debug.log',
   modulesDir: './server/modules',

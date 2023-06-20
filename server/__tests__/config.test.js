@@ -19,6 +19,7 @@ describe('config', () => {
   test('readConfigFile() - relative paths', () => {
     const mockFileContent = JSON.stringify({
       dataRootDir: 'documents/',
+      initDir: '_init',
       dataDir: 'data',
       logFile: 'debug.log',
       modulesDir: 'modules',
@@ -32,6 +33,7 @@ describe('config', () => {
     const result = readConfigFile({ utils, appConfigPath, appRootDir, logsRootDir });
     expect(result).toStrictEqual({
       dataRootDir: 'documents/',
+      initDir: 'apps/_init',
       dataDir: 'documents/data',
       logFile: 'configs/logs/debug.log',
       modulesDir: 'apps/modules',
@@ -42,6 +44,7 @@ describe('config', () => {
   test('readConfigFile() - absolute paths', () => {
     const mockFileContent = JSON.stringify({
       dataRootDir: '/users/me/documents/',
+      initDir: '/users/me/_init',
       dataDir: '/users/me/data',
       logFile: '/users/me/debug.log',
       modulesDir: '/users/me/modules',
@@ -55,6 +58,7 @@ describe('config', () => {
     const result = readConfigFile({ utils, appConfigPath, appRootDir, logsRootDir });
     expect(result).toStrictEqual({
       dataRootDir: '/users/me/documents/',
+      initDir: '/users/me/_init',
       dataDir: '/users/me/data',
       logFile: '/users/me/debug.log',
       modulesDir: '/users/me/modules',
@@ -71,6 +75,7 @@ describe('config', () => {
 
     const result = readConfigFile({ utils, appConfigPath, appRootDir, logsRootDir });
     expect(result).toStrictEqual({
+      initDir: 'apps/_init',
       dataDir: 'apps/data',
       logFile: 'configs/logs/debug.log',
       modulesDir: 'apps/modules',

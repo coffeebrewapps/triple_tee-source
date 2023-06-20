@@ -2,6 +2,7 @@
   "port":"4999",
   "dataStore":"fs",
   "dataRootDir":"./server/__tests__/data",
+  "initDir": "./_init",
   "dataDir":"./data",
   "logFile":"./debug.log",
   "uploadDir":"./uploads",

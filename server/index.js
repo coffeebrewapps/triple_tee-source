@@ -38,7 +38,8 @@ async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
   const { uploader } = require('./uploader.js')({ config });
 
   const logger = require('./logger.js')({ config });
-  const dataAccess = require('./stores/dataAccess')({ config, logger, utils });
+  const persistence = require('./persistence/index.js')({ config, logger, utils });
+  const dataAccess = require('./stores/dataAccess')({ persistence, config, logger, utils });
   const routes = require('./routes/shared')({ config, logger, utils, uploader });
 
   logger.log(`Loaded configs`, config);

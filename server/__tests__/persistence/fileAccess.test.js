@@ -8,15 +8,15 @@ const {
   initDataHasExisting,
 } = require('../__fixtures__/fileAccess.js');
 
+const initDir = path.join(__dirname, '../../../_init');
 const testDataDir = path.join(__dirname, '../data/fileAccess');
-const config = { dataDir: testDataDir };
+const config = { initDir, dataDir: testDataDir };
 const logger = {
   log: () => {},
   error: () => {},
 };
 const utils = {};
 
-const initDir = path.join(__dirname, '../../../_init');
 const initSchemas = require(path.join(initDir, 'schemas.json'));
 
 beforeAll(() => {
@@ -32,7 +32,7 @@ afterAll(() => {
 });
 
 describe('fileAccess', () => {
-  const fileAccess = require('../../stores/fileAccess.js')({ config, logger, utils });
+  const fileAccess = require('../../persistence/fileAccess.js')({ config, logger, utils });
 
   const allModels = emptyModels.concat(prefilledModels);
 

@@ -1,9 +1,7 @@
-module.exports = ({ config, logger, utils }) => {
-  const fileAccess = require('./fileAccess')({ config, logger, utils });
+module.exports = ({ persistence, config, logger, utils }) => {
   const validator = require('./validator')({ config, logger, utils });
   const downloader = require('./downloader')({ config, logger, utils });
 
-  const dataStore = config.dataStore;
   const schemas = config.schemas;
   const indexes = config.indexes;
 
@@ -14,39 +12,29 @@ module.exports = ({ config, logger, utils }) => {
   let indexTypes = [];
 
   async function initData(force = false) {
-    if (dataStore === 'fs') {
-      logger.log(`Init data start`);
-      if (!init || force) {
-        await fileAccess.initData(schemas, indexes)
-          .then((result) => {
-            schemaCache = result.schemas;
-            indexCache = result.indexes;
-            indexTypes = Object.keys(indexCache);
-            logger.log(`Init schema from file complete`);
-            result.data.forEach((dataResult) => {
-              dataCache[dataResult.modelClass] = dataResult.data;
-              logger.log(`Init data from file complete`, { modelClass: dataResult.modelClass });
-            });
-            init = true;
-            logger.log(`Init data complete`);
-          })
-          .catch((error) => {
-            logger.error(`Error initializing data`, { error });
+    logger.log(`Init data start`);
+    if (!init || force) {
+      await persistence.initData(schemas, indexes)
+        .then((result) => {
+          schemaCache = result.schemas;
+          indexCache = result.indexes;
+          indexTypes = Object.keys(indexCache);
+          logger.log(`Init schema from file complete`);
+          result.data.forEach((dataResult) => {
+            dataCache[dataResult.modelClass] = dataResult.data;
+            logger.log(`Init data from file complete`, { modelClass: dataResult.modelClass });
           });
-      }
-    } else {
-      schemaCache = {};
-      indexCache = {};
-      dataCache = {};
-      init = true;
-      logger.log(`Init data complete`);
+          init = true;
+          logger.log(`Init data complete`);
+        })
+        .catch((error) => {
+          logger.error(`Error initializing data`, { error });
+        });
     }
   }
 
   function writeData(modelClass, data) {
-    if (dataStore === 'fs') {
-      fileAccess.writeToFile(modelClass, data);
-    }
+    persistence.write(modelClass, data);
   }
 
   function cacheRecord(modelClass, record) {
