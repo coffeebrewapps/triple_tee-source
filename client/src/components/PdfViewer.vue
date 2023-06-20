@@ -13,7 +13,7 @@ import {
 /** section:props **/
 defineProps({
   templatePdfData: {
-    type: Object,
+    type: String,
     default: null,
   },
   downloadLink: {
