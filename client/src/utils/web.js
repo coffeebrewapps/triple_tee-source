@@ -12,8 +12,8 @@ export function useWebAccess(dataStore) {
     }
   }
 
-  async function initData(force = false) {
-    await dataStore.initData(force);
+  async function initData() {
+    await dataStore.init();
   }
 
   async function schemas(modelClass = null) {
