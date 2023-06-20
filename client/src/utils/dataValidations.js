@@ -1,12 +1,7 @@
+import { useValidations } from './validations';
+const { isEmpty, notEmpty } = useValidations();
+
 export function useDataValidations() {
-  function notEmpty(value) {
-    return !isEmpty(value);
-  }
-
-  function isEmpty(value) {
-    return Object.is(value, undefined) || Object.is(value, null);
-  }
-
   function validateUnique(modelClass, indexes, record, constraint, data, errors) {
     const uniqueIndexes = indexes[modelClass];
     if (!uniqueIndexes) { return []; }

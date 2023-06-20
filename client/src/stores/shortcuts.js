@@ -1,12 +1,10 @@
 import { ref } from 'vue';
 import { defineStore } from 'pinia';
+import { useValidations } from '@/utils/validations';
+const { isEmpty } = useValidations();
 
 export const useShortcutsStore = defineStore('shortcuts', () => {
   const listeners = ref({});
-
-  function isEmpty(value) {
-    return (Object.is(value, undefined) || Object.is(value, null));
-  }
 
   function registerListener({ route, eventType }, listener) {
     if (isEmpty(listeners.value[route])) {

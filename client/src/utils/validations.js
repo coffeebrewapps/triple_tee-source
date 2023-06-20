@@ -1,17 +1,11 @@
+import { default as utils } from '#/utils.js';
+
 export function useValidations() {
-  function notEmpty(value) {
-    return !isEmpty(value);
-  }
-
-  function isEmpty(value) {
-    return Object.is(value, undefined) || Object.is(value, null);
-  }
-
   function notEarlierThan(record, dateToCheckField, compareDateField) {
     const dateToCheck = record[dateToCheckField];
     const compareDate = record[compareDateField];
 
-    if (!dateToCheck || !compareDate) { return; }
+    if (utils.isEmpty(dateToCheck) || utils.isEmpty(compareDate)) { return; }
 
     if (dateToCheck < compareDate) {
       return {
@@ -26,7 +20,7 @@ export function useValidations() {
   function futureDate(record, dateToCheckField) {
     const dateToCheck = record[dateToCheckField];
 
-    if (!dateToCheck) { return; }
+    if (utils.isEmpty(dateToCheck)) { return; }
 
     const now = new Date();
     if (dateToCheck > now) {
@@ -40,7 +34,7 @@ export function useValidations() {
   function pastDate(record, dateToCheckField) {
     const dateToCheck = record[dateToCheckField];
 
-    if (!dateToCheck) { return; }
+    if (utils.isEmpty(dateToCheck)) { return; }
 
     const now = new Date();
     if (dateToCheck < now) {
@@ -54,7 +48,7 @@ export function useValidations() {
   function greaterThan(record, numberToCheckField, compareValue) {
     const numberToCheck = record[numberToCheckField];
 
-    if (isEmpty(numberToCheck)) { return; }
+    if (utils.isEmpty(numberToCheck)) { return; }
     if (numberToCheck > compareValue) { return; }
 
     return {
@@ -66,7 +60,7 @@ export function useValidations() {
   function greaterThanOrEqual(record, numberToCheckField, compareValue) {
     const numberToCheck = record[numberToCheckField];
 
-    if (isEmpty(numberToCheck)) { return; }
+    if (utils.isEmpty(numberToCheck)) { return; }
     if (numberToCheck >= compareValue) { return; }
 
     return {
@@ -78,7 +72,7 @@ export function useValidations() {
   function lessThan(record, numberToCheckField, compareValue) {
     const numberToCheck = record[numberToCheckField];
 
-    if (isEmpty(numberToCheck)) { return; }
+    if (utils.isEmpty(numberToCheck)) { return; }
     if (numberToCheck < compareValue) { return; }
 
     return {
@@ -90,7 +84,7 @@ export function useValidations() {
   function lessThanOrEqual(record, numberToCheckField, compareValue) {
     const numberToCheck = record[numberToCheckField];
 
-    if (isEmpty(numberToCheck)) { return; }
+    if (utils.isEmpty(numberToCheck)) { return; }
     if (numberToCheck <= compareValue) { return; }
 
     return {
@@ -103,7 +97,7 @@ export function useValidations() {
     const numberToCheck = record[numberToCheckField];
     const compareNumber = record[compareNumberField];
 
-    if (isEmpty(numberToCheck) || isEmpty(compareNumber)) { return; }
+    if (utils.isEmpty(numberToCheck) || utils.isEmpty(compareNumber)) { return; }
 
     if (numberToCheck > compareNumber) {
       return {
@@ -119,7 +113,7 @@ export function useValidations() {
     const numberToCheck = record[numberToCheckField];
     const compareNumber = record[compareNumberField];
 
-    if (isEmpty(numberToCheck) || isEmpty(compareNumber)) { return; }
+    if (utils.isEmpty(numberToCheck) || utils.isEmpty(compareNumber)) { return; }
 
     if (numberToCheck < compareNumber) {
       return {
@@ -148,7 +142,7 @@ export function useValidations() {
 
   return Object.assign(
     {},
-    { notEmpty, isEmpty },
+    utils,
     dateValidations,
     numberValidations
   );
