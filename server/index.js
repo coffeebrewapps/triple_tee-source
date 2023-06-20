@@ -42,7 +42,7 @@ async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
   const persistence = require('./persistence/index.js')({ config, logger, utils });
   const downloader = require('./stores/downloader')({ config, logger, utils });
 
-  const dataAccess = require('./stores/dataAccess')({ persistence, validator, downloader, config, logger, utils });
+  const dataAccess = require('../lib/src/dataAccess')({ persistence, validator, downloader, config, logger, utils });
   const routes = require('./routes/shared')({ config, logger, utils, uploader });
 
   logger.log(`Loaded configs`, config);
