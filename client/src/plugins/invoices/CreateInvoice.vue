@@ -62,10 +62,6 @@ const filtersData = ref({
     startTime: null,
     endTime: null,
   },
-  endTime: {
-    startTime: null,
-    endTime: null,
-  },
 });
 
 const filtersDataFields = computed(() => {
@@ -134,17 +130,6 @@ const filtersDataFields = computed(() => {
       filterable: true,
       sortable: true,
     },
-    {
-      key: 'endTime',
-      type: 'datetimerange',
-      label: 'End Time',
-      listable: true,
-      viewable: true,
-      creatable: true,
-      updatable: true,
-      filterable: true,
-      sortable: true,
-    },
   ];
 });
 
@@ -155,7 +140,6 @@ const filtersLayout = computed(() => {
     { contactId: 'lg', invoiceConfigId: 'lg' },
     { tags: 'lg' },
     { startTime: 'md' },
-    { endTime: 'md' },
   ];
 });
 
@@ -232,10 +216,6 @@ function resetFilters() {
     tags: [],
     invoiceConfigId: [],
     startTime: {
-      startTime: null,
-      endTime: null,
-    },
-    endTime: {
       startTime: null,
       endTime: null,
     },
@@ -371,15 +351,6 @@ const invoiceFieldsLayout = [
   { currencyId: 'lg' },
 ];
 
-const invoiceFieldKeys = computed(() => {
-  return invoiceFieldsLayout.reduce((keys, fields) => {
-    Object.keys(fields).forEach((key) => {
-      keys.push(key);
-    });
-    return keys;
-  }, []);
-});
-
 const invoiceDataFields = computed(() => {
   return generateDataFields(props.contactId);
 });
@@ -389,6 +360,10 @@ const invoiceKeys = computed(() => {
 });
 
 const invoiceHelper = useInputHelper(invoiceDataFields.value);
+
+const invoiceFieldKeys = computed(() => {
+  return invoiceHelper.updatableKeys.value;
+});
 
 const invoiceTotalAmount = computed(() => {
   const total = updatedInvoiceLines.value.reduce((sum, line) => {

@@ -82,7 +82,7 @@ export function useInvoiceUtils() {
         listable: false,
         viewable: true,
         creatable: true,
-        updatable: true,
+        updatable: false,
         options: {
           server: true,
           pagination: true,
@@ -99,7 +99,7 @@ export function useInvoiceUtils() {
         listable: false,
         viewable: true,
         creatable: true,
-        updatable: true,
+        updatable: false,
         options: {
           server: true,
           pagination: true,
