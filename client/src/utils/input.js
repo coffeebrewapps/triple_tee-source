@@ -477,9 +477,9 @@ export function useInputHelper(schemas) {
   function formatFilters(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
       if (notEmpty(value) && value !== '') {
-        if (singleSelectableField(field)) {
+        if (singleSelectableField(field) && value.length > 0) {
           o[field] = value[0].value;
-        } else if (multiSelectableField(field)) {
+        } else if (multiSelectableField(field) && value.length > 0) {
           o[field] = value.map(v => v.value);
         } else {
           o[field] = value;

@@ -260,10 +260,6 @@ async function offsetChange(field, newOffset) {
 /** section:data **/
 const data = ref({});
 
-watch(props.modelValue, (newVal, oldVal) => {
-  data.value = Object.assign({}, newVal);
-});
-
 watch(data, (newVal, oldVal) => {
   const sanitized = sanitizeFileFields(newVal);
   emit('update:modelValue', sanitized);
