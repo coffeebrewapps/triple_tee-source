@@ -1061,7 +1061,7 @@
       "description": {
         "type": "text"
       },
-      "type": {
+      "rateType": {
         "type": "enum",
         "default": "fixed",
         "enums": {
@@ -1074,6 +1074,10 @@
       },
       "maxDeductibleAmount": {
         "type": "number"
+      },
+      "transactionTypes": {
+        "type": "array",
+        "default": []
       },
       "includeTags": {
         "type": "array",
@@ -1113,8 +1117,9 @@
       "required": [
         "category",
         "description",
-        "type",
+        "rateType",
         "rate",
+        "transactionTypes",
         "includeTags",
         "excludeTags",
         "taxTableId"
