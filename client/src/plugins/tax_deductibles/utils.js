@@ -54,7 +54,7 @@ export function useTaxDeductibleUtils() {
         updatable: true,
       },
       {
-        key: 'type',
+        key: 'rateType',
         type: 'enum',
         label: 'Rate Type',
         listable: true,
@@ -79,6 +79,21 @@ export function useTaxDeductibleUtils() {
         viewable: true,
         creatable: true,
         updatable: true,
+      },
+      {
+        key: 'transactionTypes',
+        type: 'multiSelect',
+        label: 'Transaction Types',
+        listable: false,
+        viewable: true,
+        creatable: true,
+        updatable: true,
+        options: [
+          { value: 'income', label: 'Income' },
+          { value: 'incomeReversal', label: 'Income Reversal' },
+          { value: 'expense', label: 'Expense' },
+          { value: 'expenseReversal', label: 'Expense Reversal' },
+        ],
       },
       {
         key: 'includeTags',

@@ -337,12 +337,12 @@ const deductibleInputOptionsData = ref({});
 const taxDeductibleOptions = ref([]);
 function taxDeductibleType(row) {
   const found = taxDeductibleOptions.value.find((option) => {
-    return row.type === option.value;
+    return row.rateType === option.value;
   });
   if (found) {
     return found.label;
   } else {
-    return row.type;
+    return row.rateType;
   }
 }
 
@@ -362,7 +362,7 @@ async function deductibleOffsetChange(field, newOffset) {
 }
 
 function formatDeductibleRateOptions(fields) {
-  const enums = fields.type.enums;
+  const enums = fields.rateType.enums;
   return Object.keys(enums).map((e) => {
     return { value: e, label: enums[e] };
   });
@@ -374,6 +374,16 @@ function tagStyle(row, tag, field) {
 
 function formatTag(row, tag, field) {
   return formatter.formatTagSync(row, tag, field, systemConfigs.tagFormat);
+}
+
+function formatTransactionType(type) {
+  const options = taxDeductibleSchemasMap.value.transactionTypes.options;
+  const found = options.find(o => o.value === type)
+  if (found) {
+    return found.label;
+  } else {
+    return type;
+  }
 }
 
 async function loadDeductibleSchemas() {
@@ -458,6 +468,7 @@ const taxDeductiblesRowActions = [
     icon: 'fa-solid fa-xmark',
     click: async function(row, index) {
       taxDeductiblesEditable.value[index] = false;
+      await loadTaxDeductibles();
     },
     show: function(row, index) {
       return taxDeductiblesEditable.value[index];
@@ -604,6 +615,7 @@ async function estimateTax() {
 function tierPayable(tier) {
   return (
     notEmpty(estimatedTax.value) &&
+    notEmpty(estimatedTax.value.incomeBracket) &&
     estimatedTax.value.incomeBracket.id === tier.id
   );
 }
@@ -846,16 +858,16 @@ onMounted(async() => {
         </div>
       </template> <!-- description -->
 
-      <template #[`data-col.type`]="{ row, i }">
+      <template #[`data-col.rateType`]="{ row, i }">
         <div
           v-if="taxDeductiblesEditable[i]"
         >
           <TSelect
-            v-model="row.type"
+            v-model="row.rateType"
             label=""
             :options="taxDeductibleOptions"
             size="md"
-            :error-message="formatDeductibleFieldErrorMessage(i, 'type')"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'rateType')"
           />
         </div>
 
@@ -865,7 +877,7 @@ onMounted(async() => {
         >
           {{ taxDeductibleType(row) }}
         </div>
-      </template> <!-- type -->
+      </template> <!-- rateType -->
 
       <template #[`data-col.rate`]="{ row, i }">
         <div
@@ -908,6 +920,37 @@ onMounted(async() => {
           {{ row.maxDeductibleAmount.toFixed(2) }}
         </div>
       </template> <!-- maxDeductibleAmount -->
+
+      <template #[`data-col.transactionTypes`]="{ row, i }">
+        <div
+          v-if="taxDeductiblesEditable[i]"
+        >
+          <TSelectTable
+            v-if="taxDeductibleSchemasMap.transactionTypes"
+            v-model="row.transactionTypes"
+            label=""
+            :options="taxDeductibleSchemasMap.transactionTypes.options"
+            :options-length="taxDeductibleSchemasMap.transactionTypes.options.length"
+            :options-loading="false"
+            :pagination="{ client: true, offset: 0, limit: taxDeductibleSchemasMap.transactionTypes.options.length }"
+            :error-message="formatDeductibleFieldErrorMessage(i, 'transactionTypes')"
+            @offset-change=""
+          />
+        </div>
+
+        <div
+          v-if="!taxDeductiblesEditable[i] && row.transactionTypes"
+          class="row-field"
+        >
+          <div
+            v-for="(type, t) in row.transactionTypes"
+            :key="t"
+            class="tag"
+          >
+            {{ formatTransactionType(type) }}
+          </div>
+        </div>
+      </template> <!-- transactionTypes -->
 
       <template #[`data-col.includeTags`]="{ row, i }">
         <div

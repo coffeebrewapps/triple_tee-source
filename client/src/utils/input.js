@@ -386,6 +386,19 @@ export function useInputHelper(schemas) {
       const fieldIncludeValues = [fieldValue].flat();
 
       if (
+        (singleSelectableField(field) || multiSelectableField(field)) &&
+        Array.isArray(schemasMap.value[field].options)
+      ) {
+        const options = schemasMap.value[field].options;
+        const formattedOptions = fieldIncludeValues.map((v) => {
+          const matched = options.find(o => o.value === v);
+          return { value: matched.value, label: matched.label };
+        });
+        resolve(formattedOptions);
+        return;
+      }
+
+      if (
         notEmpty(record.includes) &&
         notEmpty(record.includes[field]) &&
         Object.keys(record.includes[field]).length > 0
