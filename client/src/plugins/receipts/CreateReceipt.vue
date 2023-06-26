@@ -166,7 +166,7 @@ async function updateReceiptData(result) {
 async function submitFilters() {
   resetReceiptData();
 
-  const params = filtersInputHelper.formatFilters(filtersData.value);
+  const params = filtersInputHelper.formatFiltersForLoad(filtersData.value);
   dataAccess
     .create('income_receipts', params, { path: 'preview_receipt' })
     .then((result) => {

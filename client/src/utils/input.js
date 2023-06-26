@@ -487,13 +487,50 @@ export function useInputHelper(schemas) {
     }, {});
   }
 
-  function formatFilters(filters = {}) {
+  function formatFiltersForShow(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
       if (notEmpty(value) && value !== '') {
         if (singleSelectableField(field) && value.length > 0) {
           o[field] = value[0].value;
         } else if (multiSelectableField(field) && value.length > 0) {
           o[field] = value.map(v => v.value);
+        } else {
+          o[field] = value;
+        }
+      }
+      return o;
+    }, {});
+  }
+
+  function formatFiltersForLoad(filters = {}) {
+    return Object.entries(filters).reduce((o, [field, value]) => {
+      if (notEmpty(value) && value !== '') {
+        if (singleSelectableField(field) && value.length > 0) {
+          o[field] = value[0].value;
+        } else if (multiSelectableField(field) && value.length > 0) {
+          o[field] = value.map(v => v.value);
+        } else if (inputType(field) === 'date') {
+          if (notEmpty(value.startDate)) {
+            o[field] = {};
+            o[field].startDate = value.startDate;
+          }
+          if (notEmpty(value.endDate)) {
+            if (isEmpty(o[field])) {
+              o[field] = {};
+            }
+            o[field].endDate = value.endDate;
+          }
+        } else if (inputType(field) === 'datetime') {
+          if (notEmpty(value.startTime)) {
+            o[field] = {};
+            o[field].startTime = value.startTime;
+          }
+          if (notEmpty(value.endTime)) {
+            if (isEmpty(o[field])) {
+              o[field] = {};
+            }
+            o[field].endTime = value.endTime;
+          }
         } else {
           o[field] = value;
         }
@@ -603,7 +640,8 @@ export function useInputHelper(schemas) {
     formatDataForShow,
     formatDataForSave,
     formatErrorsForDisplay,
-    formatFilters,
+    formatFiltersForShow,
+    formatFiltersForLoad,
     validateParams,
     fetchOptions,
     initOptionsData,

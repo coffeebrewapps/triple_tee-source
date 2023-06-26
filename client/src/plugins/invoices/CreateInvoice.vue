@@ -194,7 +194,7 @@ async function submitFilters() {
   resetInvoiceData();
   invoiceLinesLoading.value = true;
 
-  const params = filtersInputHelper.formatFilters(filtersData.value);
+  const params = filtersInputHelper.formatFiltersForLoad(filtersData.value);
   dataAccess
     .create('invoices', params, { path: 'preview_invoice' })
     .then((result) => {

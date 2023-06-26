@@ -145,7 +145,8 @@ const {
   formatDataForShow,
   formatDataForSave,
   formatErrorsForDisplay,
-  formatFilters,
+  formatFiltersForShow,
+  formatFiltersForLoad,
   validateParams,
   initOptionsData,
 } = useInputHelper(props.dataFields);
@@ -262,7 +263,7 @@ async function submitFilters(updatedFilters) {
 
 async function resetFilters() {
   filtersLoaded.value = false;
-  filtersData.value = formatFilters(Object.assign({}, props.filters.initData));
+  filtersData.value = formatFiltersForShow(Object.assign({}, props.filters.initData));
 
   const promises = filterableKeys.value.map((key) => {
     return formatDataForShow(key, filtersData.value);
@@ -609,7 +610,7 @@ async function loadData() {
     include: includeKeys.value,
     offset: offset.value,
     limit: limit.value,
-    filters: formatFilters(filtersData.value),
+    filters: formatFiltersForLoad(filtersData.value),
     sort: sortFilters.value,
   };
 
