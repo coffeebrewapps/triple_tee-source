@@ -595,6 +595,7 @@ onBeforeUnmount(() => {
     />
 
     <FormDialog
+      v-if="endTaskDialog"
       v-model="endTaskDialog"
       :schemas="combinedDataFields"
       :fields-layout="fieldsLayout"
