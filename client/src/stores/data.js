@@ -32,7 +32,7 @@ export const useDataStore = defineStore('data', () => {
 
     await dataAccess.initData(true);
 
-    isInit.value = true
+    isInit.value = true;
   }
 
   function registerFunction(modelClass, fnType, fnName, fn) {

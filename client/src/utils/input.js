@@ -489,10 +489,10 @@ export function useInputHelper(schemas) {
 
   function formatFiltersForShow(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
-      if (notEmpty(value) && value !== '') {
-        if (singleSelectableField(field) && value.length > 0) {
+      if (notEmpty(value) && value.length > 0) {
+        if (singleSelectableField(field)) {
           o[field] = value[0].value;
-        } else if (multiSelectableField(field) && value.length > 0) {
+        } else if (multiSelectableField(field)) {
           o[field] = value.map(v => v.value);
         } else {
           o[field] = value;
@@ -504,10 +504,10 @@ export function useInputHelper(schemas) {
 
   function formatFiltersForLoad(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
-      if (notEmpty(value) && value !== '') {
-        if (singleSelectableField(field) && value.length > 0) {
+      if (notEmpty(value) && value.length > 0) {
+        if (singleSelectableField(field)) {
           o[field] = value[0].value;
-        } else if (multiSelectableField(field) && value.length > 0) {
+        } else if (multiSelectableField(field)) {
           o[field] = value.map(v => v.value);
         } else if (inputType(field) === 'date') {
           if (notEmpty(value.startDate)) {

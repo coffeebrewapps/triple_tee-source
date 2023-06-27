@@ -379,7 +379,9 @@ const computedTableStyle = computed(() => {
   return Object.assign({}, defaultTableStyle, props.tableStyle);
 });
 
-const rowAction = ref();
+const rowAction = computed(() => {
+  return viewAction.value.click;
+});
 
 const tableActions = computed(() => {
   const defaultCreateAction = {
@@ -442,7 +444,7 @@ const tableActions = computed(() => {
   return initialActions;
 });
 
-const rowActions = computed(() => {
+const viewAction = computed(() => {
   const defaultViewAction = {
     name: 'View',
     icon: 'fa-solid fa-magnifying-glass',
@@ -451,9 +453,10 @@ const rowActions = computed(() => {
     },
   };
   const viewOverride = props.actions.view || {};
-  const viewAction = Object.assign({}, defaultViewAction, viewOverride);
-  rowAction.value = viewAction.click;
+  return Object.assign({}, defaultViewAction, viewOverride);
+});
 
+const updateAction = computed(() => {
   const defaultUpdateAction = {
     name: 'Update',
     icon: 'fa-solid fa-pen-to-square',
@@ -462,8 +465,10 @@ const rowActions = computed(() => {
     },
   };
   const updateOverride = props.actions.update || {};
-  const updateAction = Object.assign({}, defaultUpdateAction, updateOverride);
+  return Object.assign({}, defaultUpdateAction, updateOverride);
+});
 
+const removeAction = computed(() => {
   const defaultRemoveAction = {
     name: 'Delete',
     icon: 'fa-solid fa-trash-can',
@@ -472,11 +477,13 @@ const rowActions = computed(() => {
     },
   };
   const removeOverride = props.actions.remove || {};
-  const removeAction = Object.assign({}, defaultRemoveAction, removeOverride);
+  return Object.assign({}, defaultRemoveAction, removeOverride);
+});
 
+const rowActions = computed(() => {
   const initialActions = [
-    updateAction,
-    removeAction,
+    updateAction.value,
+    removeAction.value,
   ];
 
   Object.values(props.actions.row || {}).forEach((action) => {
@@ -1196,7 +1203,7 @@ onMounted(async() => {
       v-bind="{ row: currentRowForUpdate }"
     >
       <FormDialog
-        v-if="currentRowForUpdate"
+        v-if="currentRowForUpdate && Object.keys(currentRowForUpdate).length > 0"
         v-model="updateDialog"
         :schemas="combinedDataFields"
         :fields-layout="fieldsLayout"
