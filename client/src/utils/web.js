@@ -119,18 +119,27 @@ export function useWebAccess(dataStore) {
     logger.debug(`web:download`, { request: 'download', modelClass });
     await initData();
     return new Promise((resolve, reject) => {
-      const result = dataStore.download(modelClass);
-      const data = Object.values(result.data);
-      const total = data.length;
-      const content = {
-        total,
-        data,
-      };
+      if (modelClass === 'indexes') {
+        const { data } = dataStore.downloadIndexes();
 
-      resolve({
-        filename: `${modelClass}.json`,
-        data: JSON.stringify(content),
-      });
+        resolve({
+          filename: `${modelClass}.json`,
+          data: JSON.stringify(data),
+        });
+      } else {
+        const result = dataStore.download(modelClass);
+        const data = Object.values(result.data);
+        const total = data.length;
+        const content = {
+          total,
+          data,
+        };
+
+        resolve({
+          filename: `${modelClass}.json`,
+          data: JSON.stringify(content),
+        });
+      }
     });
   }
 
