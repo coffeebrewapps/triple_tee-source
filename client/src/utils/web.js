@@ -120,7 +120,17 @@ export function useWebAccess(dataStore) {
     await initData();
     return new Promise((resolve, reject) => {
       const result = dataStore.download(modelClass);
-      resolve(result.data);
+      const data = Object.values(result.data);
+      const total = data.length;
+      const content = {
+        total,
+        data,
+      };
+
+      resolve({
+        filename: `${modelClass}.json`,
+        data: JSON.stringify(content),
+      });
     });
   }
 
