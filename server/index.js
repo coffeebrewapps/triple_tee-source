@@ -86,11 +86,6 @@ async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
     res.send(dataAccess.viewSchemas(modelClass));
   });
 
-  app.get('/api/schemas/:schema/download', function(req, res) {
-    const modelClass = req.params.schema;
-    res.send(dataAccess.download(modelClass));
-  });
-
   app.put('/api/schemas/:schema/upload', function(req, res) {
     const modelClass = req.params.schema;
     const data = req.body;
