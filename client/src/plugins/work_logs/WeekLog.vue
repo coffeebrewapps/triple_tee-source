@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 /** import:global **/
 
 /** import:utils **/
@@ -148,6 +148,10 @@ events.registerListener(
     },
   }
 );
+
+function unregisterEvents() {
+  events.unregisterListener('loadWeeklyLogs', { id: 'WeekLog' });
+}
 /** section:events **/
 
 /** section:styles **/
@@ -227,6 +231,10 @@ async function loadWeekly() {
 
 onMounted(async() => {
   await loadWeekly();
+});
+
+onBeforeUnmount(() => {
+  unregisterEvents();
 });
 </script>
 

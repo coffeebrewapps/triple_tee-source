@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useDataAccess } from '@/utils/dataAccess';
 import { useEventsStore } from '@/stores/events';
 
@@ -118,6 +118,10 @@ async function loadChartConfigs() {
 
 onMounted(async() => {
   await loadChartConfigs();
+});
+
+onBeforeUnmount(() => {
+  events.unregisterListener('themeChange', { id: 'RefreshChartColors' });
 });
 </script>
 

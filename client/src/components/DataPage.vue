@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 /** import:global **/
 
 /** import:utils **/
@@ -585,6 +585,10 @@ events.registerListener(
   }
 );
 
+function unregisterEvents() {
+  events.unregisterListener('loadData', { id: `DataPage-${props.dataType}` });
+}
+
 function handleEsc(event) {
   event.preventDefault();
 
@@ -945,6 +949,10 @@ onMounted(async() => {
       errorContent.value = JSON.stringify(error, false, 4);
     });
   await resetFilters();
+});
+
+onBeforeUnmount(() => {
+  unregisterEvents();
 });
 </script>
 

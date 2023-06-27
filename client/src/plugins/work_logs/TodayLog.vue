@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 /** import:global **/
 
 /** import:utils **/
@@ -336,6 +336,56 @@ shortcuts.registerListener(
     },
   }
 );
+
+function unregisterShortcuts() {
+  shortcuts.unregisterListener(
+    {
+      route: '/work_logs',
+      eventType: 'ctrl-n',
+    },
+    { id: 'TodayStartTask' }
+  );
+
+  shortcuts.unregisterListener(
+    {
+      route: '/work_logs',
+      eventType: 'ctrl-q',
+    },
+    { id: 'TodayQuickStartTask' }
+  );
+
+  shortcuts.unregisterListener(
+    {
+      route: '/work_logs',
+      eventType: 'ctrl-e',
+    },
+    { id: 'TodayEndTask' }
+  );
+
+  shortcuts.unregisterListener(
+    {
+      route: '/work_logs',
+      eventType: 'ctrl-g',
+    },
+    { id: 'TodayEndTaskAndStartTask' }
+  );
+
+  shortcuts.unregisterListener(
+    {
+      route: '/work_logs',
+      eventType: 'ctrl-f',
+    },
+    { id: 'TodayEndTaskAndQuickStartTask' }
+  );
+
+  shortcuts.unregisterListener(
+    {
+      route: '/work_logs',
+      eventType: 'keydown-Escape',
+    },
+    { id: 'CloseTodayLogDialogs' }
+  );
+}
 /** section:shortcuts **/
 
 /** section:events **/
@@ -358,6 +408,11 @@ events.registerListener(
     },
   }
 );
+
+function unregisterEvents() {
+  events.unregisterListener('loadTodayLogs', { id: 'TodayLog' });
+  events.unregisterListener('toggleShortcut', { id: 'ToggleTodayLogShortcut' });
+}
 /** section:events **/
 
 async function loadSchemas() {
@@ -404,6 +459,11 @@ async function loadToday() {
 onMounted(async() => {
   await loadToday();
   await loadSchemas();
+});
+
+onBeforeUnmount(() => {
+  unregisterEvents();
+  unregisterShortcuts();
 });
 </script>
 
