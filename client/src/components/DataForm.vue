@@ -97,7 +97,7 @@ const emit = defineEmits(['update:modelValue', 'submit', 'cancel']);
 /** section:inputUtils **/
 const {
   schemasMap,
-  serverOptionsFields,
+  serverOptionsKeys,
   inputType,
   inputLabel,
   inputableField,
@@ -105,9 +105,9 @@ const {
   multiSelectableField,
   singleSelectableField,
   nullToggleableField,
-  nullToggleableFields,
+  nullToggleableKeys,
   objectField,
-  fileFields,
+  fileKeys,
   fileField,
   formatInputOptionsData,
   fetchOptions,
@@ -122,7 +122,7 @@ const logger = useLogger();
 
 const errorsMap = useErrors();
 
-const fieldToggles = ref(nullToggleableFields.value.reduce((o, f) => {
+const fieldToggles = ref(nullToggleableKeys.value.reduce((o, f) => {
   o[f] = false;
   return o;
 }, {}));
@@ -196,7 +196,7 @@ const {
 
 function sanitizeFileFields(formData) {
   const sanitized = Object.assign({}, formData);
-  fileFields.value.forEach((field) => {
+  fileKeys.value.forEach((field) => {
     if (notEmpty(sanitized[field]) && notEmpty(props.modelValue[field])) {
       compareFiles(sanitized[field], props.modelValue[field])
         .then((result) => {
@@ -242,7 +242,7 @@ function showMultiSelect(field) {
 }
 
 const fieldOffsetChange = computed(() => {
-  return serverOptionsFields.value.reduce((o, k) => {
+  return serverOptionsKeys.value.reduce((o, k) => {
     o[k] = (offset) => { offsetChange(k, offset); };
     return o;
   }, {});
@@ -259,11 +259,6 @@ async function offsetChange(field, newOffset) {
 
 /** section:data **/
 const data = ref({});
-
-watch(data, (newVal, oldVal) => {
-  const sanitized = sanitizeFileFields(newVal);
-  emit('update:modelValue', sanitized);
-}, { deep: true });
 /** section:data **/
 
 /** section:styles **/

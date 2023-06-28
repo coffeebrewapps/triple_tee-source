@@ -142,6 +142,7 @@ const {
   inputLabel,
   inputValue,
   tagsField,
+  formatDataFields,
   formatDataForShow,
   formatDataForSave,
   formatErrorsForDisplay,
@@ -164,27 +165,10 @@ const { flashMessage } = useBannerStore();
 const events = useEventsStore();
 const logger = useLogger();
 
-const inputOptionsData = ref({});
-
 const combinedDataFields = ref(Array.from(props.dataFields));
 
 const schemasLoaded = ref(false);
 const filtersLoaded = ref(false);
-
-function formatDataFields(fields) {
-  combinedDataFields.value = combinedDataFields.value.map((field) => {
-    if (field.type === 'enum') {
-      const enums = fields[field.key].enums;
-      const options = Object.keys(enums).map((e) => {
-        return { value: e, label: enums[e] };
-      });
-      const combined = Object.assign({}, field, { options });
-      return combined;
-    } else {
-      return field;
-    }
-  });
-}
 
 function formatInputValueForField(field, row) {
   return inputValue(field, row, includeKeys.value, combinedDataFields.value, systemConfigs);
@@ -606,7 +590,7 @@ async function loadSchemas() {
     .schemas(props.modelClass)
     .then((result) => {
       const fields = result.fields;
-      formatDataFields(fields);
+      combinedDataFields.value = formatDataFields(fields);
       formatFiltersFields();
       schemasLoaded.value = true;
     })
@@ -940,14 +924,6 @@ function closeDownloadDialog() {
 
 onMounted(async() => {
   await loadSchemas();
-  await initOptionsData()
-    .then((result) => {
-      inputOptionsData.value = result;
-    })
-    .catch((error) => {
-      errorAlert.value = true;
-      errorContent.value = JSON.stringify(error, false, 4);
-    });
   await resetFilters();
 });
 

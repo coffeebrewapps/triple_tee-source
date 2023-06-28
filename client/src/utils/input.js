@@ -6,20 +6,20 @@ import { useValidations } from '@/utils/validations';
 import { useFileUtils } from '@/utils/file';
 import { useLogger } from '@/utils/logger';
 
-const dataAccess = useDataAccess();
-const {
-  formatDate,
-  formatTimestamp,
-} = useFormatter();
-const { isEmpty, notEmpty } = useValidations();
-
-const {
-  base64ToFile,
-} = useFileUtils();
-
-const logger = useLogger();
-
 export function useInputHelper(schemas) {
+  const dataAccess = useDataAccess();
+  const {
+    formatDate,
+    formatTimestamp,
+  } = useFormatter();
+  const { isEmpty, notEmpty } = useValidations();
+
+  const {
+    base64ToFile,
+  } = useFileUtils();
+
+  const logger = useLogger();
+
   const schemasMap = computed(() => {
     return schemas.reduce((o, s) => {
       o[s.key] = s;
@@ -71,11 +71,11 @@ export function useInputHelper(schemas) {
     return Object.values(schemasMap.value).some(f => f.type === 'file');
   });
 
-  const clientOptionsFields = computed(() => {
+  const clientOptionsKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => clientOptionsField(f));
   });
 
-  const serverOptionsFields = computed(() => {
+  const serverOptionsKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => serverOptionsField(f));
   });
 
@@ -83,31 +83,31 @@ export function useInputHelper(schemas) {
     return Object.keys(schemasMap.value).filter(f => selectableField(f));
   });
 
-  const multiSelectableFields = computed(() => {
+  const multiSelectableKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => multiSelectableField(f));
   });
 
-  const singleSelectableFields = computed(() => {
+  const singleSelectableKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => singleSelectableField(f));
   });
 
-  const nullToggleableFields = computed(() => {
+  const nullToggleableKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => nullToggleableField(f));
   });
 
-  const tagsFields = computed(() => {
+  const tagsKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => tagsField(f));
   });
 
-  const objectFields = computed(() => {
+  const objectKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => objectField(f));
   });
 
-  const numberFields = computed(() => {
+  const numberKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => numberField(f));
   });
 
-  const fileFields = computed(() => {
+  const fileKeys = computed(() => {
     return Object.keys(schemasMap.value).filter(f => fileField(f));
   });
 
@@ -137,7 +137,11 @@ export function useInputHelper(schemas) {
       const rawValue = [fieldValue].flat().filter(v => !!v);
 
       const mapped = rawValue.map((value) => {
+        if (isEmpty(includes[field])) { return value; }
+
         const foreignValue = includes[field][value];
+        if (isEmpty(foreignValue)) { return value; }
+
         return schemasMap.value[field].reference.label(foreignValue);
       });
 
@@ -156,7 +160,11 @@ export function useInputHelper(schemas) {
       return formatDate(fieldValue, systemConfigs.timezone);
     } else if (fileField(field)) {
       const includes = record.includes || {};
-      const foreignValue = (includes[field][fieldValue] || {});
+      if (isEmpty(includes[field])) { return; }
+
+      const foreignValue = includes[field][fieldValue];
+      if (isEmpty(foreignValue)) { return; }
+
       return foreignValue.rawData;
     } else {
       return fieldValue;
@@ -330,28 +338,32 @@ export function useInputHelper(schemas) {
               resolve(file);
             })
             .catch((error) => {
-              reject(error);
+              resolve(null);
             });
         } else {
           dataAccess
             .view(fileOptions.modelClass, fieldValue, {})
             .then((result) => {
-              if (isEmpty(record.includes[field])) {
-                record.includes[field] = {};
-              }
-
-              record.includes[field][fieldValue] = result;
               base64ToFile(result.rawData, result.filename, result.mimeType)
                 .then((file) => {
+                  if (isEmpty(record.includes)) {
+                    record.includes = {};
+                  }
+
+                  if (isEmpty(record.includes[field])) {
+                    record.includes[field] = {};
+                  }
+
+                  record.includes[field][fieldValue] = result;
                   resolve(file);
                 })
                 .catch((error) => {
-                  reject(error);
+                  resolve(null);
                 });
             })
             .catch((error) => {
               logger.error(`Error formatting data for show`, error);
-              resolve(fieldValue);
+              resolve(null);
             });
         }
         return;
@@ -434,32 +446,28 @@ export function useInputHelper(schemas) {
   function formatDataForSave(params) {
     const data = Object.assign({}, params);
 
-    multiSelectableFields.value.forEach((field) => {
+    multiSelectableKeys.value.forEach((field) => {
       const values = (data[field] || []);
       data[field] = values.map(v => v.value);
     });
 
-    singleSelectableFields.value.forEach((field) => {
+    singleSelectableKeys.value.forEach((field) => {
       const values = (data[field] || []);
       data[field] = (values[0] || {}).value;
     });
 
-    clientOptionsFields.value.forEach((field) => {
+    clientOptionsKeys.value.forEach((field) => {
       const value = data[field];
       if (isEmpty(value) || value.length === 0) {
         data[field] = null;
       }
     });
 
-    objectFields.value.forEach((field) => {
+    objectKeys.value.forEach((field) => {
       if (notEmpty(data[field]) && data[field].length > 0) {
         data[field] = JSON.parse(data[field]);
-      }
-    });
-
-    numberFields.value.forEach((field) => {
-      if (notEmpty(data[field])) {
-        data[field] = parseFloat(data[field]);
+      } else {
+        data[field] = {};
       }
     });
 
@@ -489,51 +497,53 @@ export function useInputHelper(schemas) {
 
   function formatFiltersForShow(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
-      if (notEmpty(value) && value.length > 0) {
-        if (singleSelectableField(field)) {
-          o[field] = value[0].value;
-        } else if (multiSelectableField(field)) {
-          o[field] = value.map(v => v.value);
-        } else {
-          o[field] = value;
-        }
+      if (isEmpty(value)) {
+        o[field] = value;
+      } else if (clientOptionsField(field) && value.length > 0) {
+        o[field] = value[0].value;
+      } else if ((multiSelectableField(field) || singleSelectableField(field)) && value.length > 0) {
+        o[field] = value.map(v => v.value);
+      } else {
+        o[field] = value;
       }
+
       return o;
     }, {});
   }
 
   function formatFiltersForLoad(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
-      if (notEmpty(value) && value.length > 0) {
-        if (singleSelectableField(field)) {
-          o[field] = value[0].value;
-        } else if (multiSelectableField(field)) {
-          o[field] = value.map(v => v.value);
-        } else if (inputType(field) === 'date') {
-          if (notEmpty(value.startDate)) {
-            o[field] = {};
-            o[field].startDate = value.startDate;
-          }
-          if (notEmpty(value.endDate)) {
-            if (isEmpty(o[field])) {
-              o[field] = {};
-            }
-            o[field].endDate = value.endDate;
-          }
-        } else if (inputType(field) === 'datetime') {
-          if (notEmpty(value.startTime)) {
-            o[field] = {};
-            o[field].startTime = value.startTime;
-          }
-          if (notEmpty(value.endTime)) {
-            if (isEmpty(o[field])) {
-              o[field] = {};
-            }
-            o[field].endTime = value.endTime;
-          }
-        } else {
-          o[field] = value;
+      if (isEmpty(value)) { return o; }
+      if (selectableField(field) && value.length === 0) { return o; }
+
+      if ((clientOptionsField(field) || singleSelectableField(field)) && value.length > 0) {
+        o[field] = value[0].value;
+      } else if (multiSelectableField(field) && value.length > 0) {
+        o[field] = value.map(v => v.value);
+      } else if (inputType(field) === 'date') {
+        if (notEmpty(value.startDate)) {
+          o[field] = {};
+          o[field].startDate = value.startDate;
         }
+        if (notEmpty(value.endDate)) {
+          if (isEmpty(o[field])) {
+            o[field] = {};
+          }
+          o[field].endDate = value.endDate;
+        }
+      } else if (inputType(field) === 'datetime') {
+        if (notEmpty(value.startTime)) {
+          o[field] = {};
+          o[field].startTime = value.startTime;
+        }
+        if (notEmpty(value.endTime)) {
+          if (isEmpty(o[field])) {
+            o[field] = {};
+          }
+          o[field].endTime = value.endTime;
+        }
+      } else {
+        o[field] = value;
       }
       return o;
     }, {});
@@ -578,14 +588,14 @@ export function useInputHelper(schemas) {
 
   async function initOptionsData() {
     return new Promise((resolve, reject) => {
-      Promise.all(serverOptionsFields.value.map((field) => {
+      Promise.all(serverOptionsKeys.value.map((field) => {
         const offset = schemasMap.value[field].offset || 0;
         return fetchOptions(field, offset);
       }))
         .then((values) => {
           const data = {};
           values.forEach((value, i) => {
-            const field = serverOptionsFields.value[i];
+            const field = serverOptionsKeys.value[i];
             data[field] = value;
           });
           resolve(data);
@@ -609,13 +619,13 @@ export function useInputHelper(schemas) {
     sortableFields,
     sortableKeys,
     multipartData,
-    clientOptionsFields,
+    clientOptionsKeys,
     clientOptionsField,
-    serverOptionsFields,
+    serverOptionsKeys,
     serverOptionsField,
     selectableKeys,
-    multiSelectableFields,
-    singleSelectableFields,
+    multiSelectableKeys,
+    singleSelectableKeys,
     inputType,
     inputLabel,
     inputValue,
@@ -625,15 +635,15 @@ export function useInputHelper(schemas) {
     singleSelectableField,
     selectableField,
     nullToggleableField,
-    nullToggleableFields,
+    nullToggleableKeys,
     tagsField,
-    tagsFields,
+    tagsKeys,
     objectField,
-    objectFields,
+    objectKeys,
     numberField,
-    numberFields,
+    numberKeys,
     fileField,
-    fileFields,
+    fileKeys,
     includeKeys,
     formatInputOptionsData,
     formatDataFields,

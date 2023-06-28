@@ -72,7 +72,7 @@ const props = defineProps({
 
 /** section:utils **/
 const {
-  tagsFields,
+  tagsKeys,
   tagsField,
 } = useInputHelper(props.dataFields);
 
@@ -141,7 +141,7 @@ function formattedTag(record, field, i) {
 }
 
 onMounted(async() => {
-  const promises = tagsFields.value.map((key) => {
+  const promises = tagsKeys.value.map((key) => {
     const value = props.record[key];
     return asyncFormatTag(props.record, value, key);
   });
