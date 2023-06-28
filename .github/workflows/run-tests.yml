@@ -25,5 +25,6 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - run: yarn install
       - run: yarn build
+      - run: yarn lib-test:unit
       - run: yarn server-test:unit
-
+      - run: yarn client-test:unit
