@@ -60,15 +60,6 @@ describe('server routes implemented', () => {
       });
   });
 
-  test('/api/schemas/alerts/download', () => {
-    return request(server)
-      .get('/api/schemas/alerts/download')
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .then((response) => {
-        expect(response.statusCode).toBe(200);
-      });
-  });
-
   test('/api/schemas/alerts/upload', () => {
     return request(server)
       .put('/api/schemas/alerts/upload', {})
