@@ -7,7 +7,7 @@ export function useValidations() {
 
     if (utils.isEmpty(dateToCheck) || utils.isEmpty(compareDate)) { return; }
 
-    if (dateToCheck < compareDate) {
+    if ((new Date(dateToCheck)) < (new Date(compareDate))) {
       return {
         name: 'earlierThan',
         params: {
@@ -23,7 +23,7 @@ export function useValidations() {
     if (utils.isEmpty(dateToCheck)) { return; }
 
     const now = new Date();
-    if (dateToCheck > now) {
+    if ((new Date(dateToCheck)) < now) {
       return {
         name: 'futureDate',
         params: {},
@@ -37,9 +37,9 @@ export function useValidations() {
     if (utils.isEmpty(dateToCheck)) { return; }
 
     const now = new Date();
-    if (dateToCheck < now) {
+    if ((new Date(dateToCheck)) > now) {
       return {
-        name: 'futureDate',
+        name: 'pastDate',
         params: {},
       };
     }
@@ -98,15 +98,14 @@ export function useValidations() {
     const compareNumber = record[compareNumberField];
 
     if (utils.isEmpty(numberToCheck) || utils.isEmpty(compareNumber)) { return; }
+    if (numberToCheck < compareNumber) { return; }
 
-    if (numberToCheck > compareNumber) {
-      return {
-        name: 'compareLessThan',
-        params: {
-          compareNumber: compareNumberField,
-        },
-      };
-    }
+    return {
+      name: 'compareLessThan',
+      params: {
+        compareNumber: compareNumberField,
+      },
+    };
   }
 
   function compareMoreThan(record, numberToCheckField, compareNumberField) {
@@ -114,15 +113,14 @@ export function useValidations() {
     const compareNumber = record[compareNumberField];
 
     if (utils.isEmpty(numberToCheck) || utils.isEmpty(compareNumber)) { return; }
+    if (numberToCheck > compareNumber) { return; }
 
-    if (numberToCheck < compareNumber) {
-      return {
-        name: 'compareMoreThan',
-        params: {
-          compareNumber: compareNumberField,
-        },
-      };
-    }
+    return {
+      name: 'compareMoreThan',
+      params: {
+        compareNumber: compareNumberField,
+      },
+    };
   }
 
   const dateValidations = {
