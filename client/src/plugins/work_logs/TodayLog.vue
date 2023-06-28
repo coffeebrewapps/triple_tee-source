@@ -143,22 +143,22 @@ function startTask() {
 async function quickStartTask() {
   currentTask.value = formatNewTask();
   startNew.value = '';
-  await submitNewTask();
+  await submitNewTask(currentTask.value);
 }
 
 function closeStartTaskDialog() {
   startTaskDialog.value = false;
 }
 
-async function submitNewTask() {
-  const errors = validateParams(validations.create, currentTask.value);
+async function submitNewTask(data) {
+  const errors = validateParams(validations.create, data);
 
   if (Object.keys(errors).length > 0) {
     flashMessage(`Error submitting task!`);
     return;
   }
 
-  const params = formatDataForSave(currentTask.value);
+  const params = formatDataForSave(data);
 
   await dataAccess
     .create('work_logs', params)
@@ -185,18 +185,18 @@ watch(endTaskDialog, (newVal, oldVal) => {
   }
 });
 
-async function updateTask() {
-  const errors = validateParams(validations.update, currentTaskForUpdate.value);
+async function updateTask(data) {
+  const errors = validateParams(validations.update, data);
 
   if (Object.keys(errors).length > 0) {
     flashMessage(`Error submitting task!`);
     return;
   }
 
-  const params = formatDataForSave(currentTaskForUpdate.value);
+  const params = formatDataForSave(data);
 
   await dataAccess
-    .update('work_logs', currentTaskForUpdate.value.id, params)
+    .update('work_logs', data.id, params)
     .then((result) => {
       flashMessage(`Ended task successfully!`);
       loadToday();
@@ -584,6 +584,7 @@ onBeforeUnmount(() => {
     </div>
 
     <FormDialog
+      v-if="startTaskDialog"
       v-model="startTaskDialog"
       :schemas="combinedDataFields"
       :fields-layout="fieldsLayout"
