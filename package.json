@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
-    "@vue/test-utils": "^2.3.0",
+    "@vue/test-utils": "^2.4.0",
     "axios": "^1.4.0",
     "coffeebrew-vue-components": "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#feature/v0.1.0",
     "cors": "^2.8.5",
