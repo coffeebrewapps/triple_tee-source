@@ -79,6 +79,10 @@ beforeEach(async() => {
   await router.isReady();
 });
 
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
 describe('App.vue', () => {
   test('should render main app', async() => {
     const wrapper = mount(App, {
