@@ -3,7 +3,7 @@ import { defineStore } from 'pinia';
 
 export const useBannerStore = defineStore('banner', () => {
   const banner = ref(false);
-  const bannerMessage = ref();
+  const bannerMessage = ref(null);
 
   function show(message = null) {
     banner.value = true;
