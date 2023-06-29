@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute, RouterView } from 'vue-router';
 import { useDataAccess } from '@/utils/dataAccess';
 /** import:global **/
@@ -22,13 +22,11 @@ import { useSystemConfigsStore } from '@/stores/systemConfigs';
 /** section:nav **/
 const router = useRouter();
 const currentRoute = useRoute();
-const transitionName = ref('default');
 
 const navigator = useNavStore();
 
-watch(router.currentRoute, (to, from) => {
-  transitionName.value = 'fade';
-  loadSystemConfigs();
+router.beforeEach(async(to, from) => {
+  await loadSystemConfigs();
   navigator.hide();
 });
 
@@ -48,7 +46,7 @@ const modifier = ref(false);
 
 function registerShortcutListener() {
   document.addEventListener('keydown', (event) => {
-    const route = router.currentRoute.value.path;
+    const route = currentRoute.path;
     if (modifier.value) {
       if (event.key !== 'Control') {
         shortcuts.emitShortcut(
@@ -93,8 +91,9 @@ async function loadSystemConfigs() {
 }
 /** section:systemConfigs **/
 
-onMounted(() => {
+onMounted(async() => {
   registerShortcutListener();
+  await loadSystemConfigs();
 });
 </script>
 
@@ -105,15 +104,15 @@ onMounted(() => {
     <div class="content-container">
       <SystemBanner />
 
+      <TopNav />
+
+      <div class="divider" />
+
+      <div class="page-heading">
+        {{ currentRouteName }}
+      </div>
+
       <RouterView v-slot="{ Component }">
-        <TopNav />
-
-        <div class="divider" />
-
-        <div class="page-heading">
-          {{ currentRouteName }}
-        </div>
-
         <Transition mode="out-in">
           <component :is="Component" />
         </Transition>
