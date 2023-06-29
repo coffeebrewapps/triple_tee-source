@@ -1,7 +1,5 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useInputHelper } from '../../src/utils/input.js';
-import { useDataAccess } from '../../src/utils/dataAccess.js';
-import { useFileUtils } from '../../src/utils/file.js';
 
 vi.mock('../../src/utils/dataAccess.js', () => {
   return {
@@ -751,12 +749,32 @@ describe('clientOptionsField', () => {
     expect(helper.clientOptionsField('transactionType')).toBeTruthy();
   });
 
+  test('when text field should return false', () => {
+    expect(helper.clientOptionsField('category')).toBeFalsy();
+  });
+
+  test('when number field should return false', () => {
+    expect(helper.clientOptionsField('startingNumber')).toBeFalsy();
+  });
+
+  test('when textarea field should return false', () => {
+    expect(helper.clientOptionsField('description')).toBeFalsy();
+  });
+
+  test('when object field should return false', () => {
+    expect(helper.clientOptionsField('customFields')).toBeFalsy();
+  });
+
   test('when singleSelect field should return false', () => {
     expect(helper.clientOptionsField('currencyId')).toBeFalsy();
   });
 
   test('when multiSelect field should return false', () => {
     expect(helper.clientOptionsField('includeTags')).toBeFalsy();
+  });
+
+  test('when file field should return false', () => {
+    expect(helper.clientOptionsField('image')).toBeFalsy();
   });
 });
 
@@ -771,6 +789,14 @@ describe('serverOptionsKeys', () => {
 });
 
 describe('serverOptionsField', () => {
+  test('when singleSelect field should return true', () => {
+    expect(helper.serverOptionsField('currencyId')).toBeTruthy();
+  });
+
+  test('when multiSelect field should return true', () => {
+    expect(helper.serverOptionsField('includeTags')).toBeTruthy();
+  });
+
   test('when enum field should return false', () => {
     expect(helper.serverOptionsField('scale')).toBeFalsy();
   });
@@ -779,12 +805,24 @@ describe('serverOptionsField', () => {
     expect(helper.serverOptionsField('transactionType')).toBeFalsy();
   });
 
-  test('when singleSelect field should return true', () => {
-    expect(helper.serverOptionsField('currencyId')).toBeTruthy();
+  test('when text field should return false', () => {
+    expect(helper.serverOptionsField('category')).toBeFalsy();
   });
 
-  test('when multiSelect field should return true', () => {
-    expect(helper.serverOptionsField('includeTags')).toBeTruthy();
+  test('when number field should return false', () => {
+    expect(helper.serverOptionsField('startingNumber')).toBeFalsy();
+  });
+
+  test('when textarea field should return false', () => {
+    expect(helper.serverOptionsField('description')).toBeFalsy();
+  });
+
+  test('when object field should return false', () => {
+    expect(helper.serverOptionsField('customFields')).toBeFalsy();
+  });
+
+  test('when file field should return false', () => {
+    expect(helper.serverOptionsField('image')).toBeFalsy();
   });
 });
 
@@ -819,7 +857,7 @@ describe('singleSelectableKeys', () => {
 
 describe('inputType', () => {
   test('when key found should return type', () => {
-    expect(helper.inputType('scale')).toEqual('enum');
+    expect(helper.inputType('scale')).toBe('enum');
   });
 
   test('when key not found should return undefined', () => {
@@ -829,7 +867,7 @@ describe('inputType', () => {
 
 describe('inputLabel', () => {
   test('when key found should return label', () => {
-    expect(helper.inputLabel('scale')).toEqual('Scale');
+    expect(helper.inputLabel('scale')).toBe('Scale');
   });
 
   test('when key not found should return undefined', () => {
@@ -853,7 +891,7 @@ describe('inputValue', () => {
     const systemConfigs = {};
 
     const result = helper.inputValue(field, record, includeKeys, schemas, systemConfigs);
-    expect(result).toEqual('USD');
+    expect(result).toBe('USD');
   });
 
   test('when multi selectable reference field should return formatted label', () => {
@@ -918,7 +956,7 @@ describe('inputValue', () => {
     });
 
     const result = helper.inputValue(field, record, includeKeys, combinedSchemas, systemConfigs);
-    expect(result).toEqual('Hour');
+    expect(result).toBe('Hour');
   });
 
   test('when select field should return formatted label', () => {
@@ -928,7 +966,7 @@ describe('inputValue', () => {
     const systemConfigs = {};
 
     const result = helper.inputValue(field, record, includeKeys, schemas, systemConfigs);
-    expect(result).toEqual('Income');
+    expect(result).toBe('Income');
   });
 
   test('when datetime field should return formatted timestamp', () => {
@@ -938,7 +976,7 @@ describe('inputValue', () => {
     const systemConfigs = { timezone: 'Asia/Singapore' };
 
     const result = helper.inputValue(field, record, includeKeys, schemas, systemConfigs);
-    expect(result).toEqual('21/05/2023, 8:34:56 pm');
+    expect(result).toBe('21/05/2023, 8:34:56 pm');
   });
 
   test('when date field should return formatted date', () => {
@@ -948,7 +986,7 @@ describe('inputValue', () => {
     const systemConfigs = { timezone: 'Asia/Singapore' };
 
     const result = helper.inputValue(field, record, includeKeys, schemas, systemConfigs);
-    expect(result).toEqual('21/05/2023');
+    expect(result).toBe('21/05/2023');
   });
 
   test('when file field should return file raw data', () => {
@@ -966,7 +1004,7 @@ describe('inputValue', () => {
     const systemConfigs = {};
 
     const result = helper.inputValue(field, record, includeKeys, schemas, systemConfigs);
-    expect(result).toEqual('data:image/png;base64,asdfasfafsadf');
+    expect(result).toBe('data:image/png;base64,asdfasfafsadf');
   });
 
   test('when file field but no includes should return undefined', () => {
@@ -1005,7 +1043,7 @@ describe('inputValue', () => {
     const systemConfigs = {};
 
     const result = helper.inputValue(field, record, includeKeys, schemas, systemConfigs);
-    expect(result).toEqual('Implementation');
+    expect(result).toBe('Implementation');
   });
 
   test('when field value is empty should return undefined', () => {
@@ -1168,82 +1206,6 @@ describe('singleSelectableField', () => {
 
   test('when file field should return false', () => {
     expect(helper.singleSelectableField('image')).toBeFalsy();
-  });
-});
-
-describe('clientOptionsField', () => {
-  test('when enum field should return true', () => {
-    expect(helper.clientOptionsField('scale')).toBeTruthy();
-  });
-
-  test('when select field should return true', () => {
-    expect(helper.clientOptionsField('transactionType')).toBeTruthy();
-  });
-
-  test('when text field should return false', () => {
-    expect(helper.clientOptionsField('category')).toBeFalsy();
-  });
-
-  test('when number field should return false', () => {
-    expect(helper.clientOptionsField('startingNumber')).toBeFalsy();
-  });
-
-  test('when textarea field should return false', () => {
-    expect(helper.clientOptionsField('description')).toBeFalsy();
-  });
-
-  test('when object field should return false', () => {
-    expect(helper.clientOptionsField('customFields')).toBeFalsy();
-  });
-
-  test('when singleSelect field should return false', () => {
-    expect(helper.clientOptionsField('currencyId')).toBeFalsy();
-  });
-
-  test('when multiSelect field should return false', () => {
-    expect(helper.clientOptionsField('includeTags')).toBeFalsy();
-  });
-
-  test('when file field should return false', () => {
-    expect(helper.clientOptionsField('image')).toBeFalsy();
-  });
-});
-
-describe('serverOptionsField', () => {
-  test('when singleSelect field should return true', () => {
-    expect(helper.serverOptionsField('currencyId')).toBeTruthy();
-  });
-
-  test('when multiSelect field should return true', () => {
-    expect(helper.serverOptionsField('includeTags')).toBeTruthy();
-  });
-
-  test('when enum field should return false', () => {
-    expect(helper.serverOptionsField('scale')).toBeFalsy();
-  });
-
-  test('when select field should return false', () => {
-    expect(helper.serverOptionsField('transactionType')).toBeFalsy();
-  });
-
-  test('when text field should return false', () => {
-    expect(helper.serverOptionsField('category')).toBeFalsy();
-  });
-
-  test('when number field should return false', () => {
-    expect(helper.serverOptionsField('startingNumber')).toBeFalsy();
-  });
-
-  test('when textarea field should return false', () => {
-    expect(helper.serverOptionsField('description')).toBeFalsy();
-  });
-
-  test('when object field should return false', () => {
-    expect(helper.serverOptionsField('customFields')).toBeFalsy();
-  });
-
-  test('when file field should return false', () => {
-    expect(helper.serverOptionsField('image')).toBeFalsy();
   });
 });
 
@@ -1712,7 +1674,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual('company');
+        expect(result).toBe('company');
       });
   });
 
@@ -1722,7 +1684,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual(1);
+        expect(result).toBe(1);
       });
   });
 
@@ -1742,7 +1704,7 @@ describe('formatDataForShow', () => {
       customFields: {
         foo: 'bar',
         alice: 'bob',
-      }
+      },
     };
 
     helper.formatDataForShow(field, record)
@@ -1783,7 +1745,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual('fakeFile-logo.png-asdfasdfasdf-image/png');
+        expect(result).toBe('fakeFile-logo.png-asdfasdfasdf-image/png');
       });
   });
 
@@ -1793,7 +1755,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual('fakeFile-logo.png-asdfasdfasdf-image/png');
+        expect(result).toBe('fakeFile-logo.png-asdfasdfasdf-image/png');
         expect(record.includes).toEqual({
           image: {
             1: {
@@ -1856,7 +1818,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual('1');
+        expect(result).toBe('1');
       });
   });
 
@@ -1866,7 +1828,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual('Implementation');
+        expect(result).toBe('Implementation');
       });
   });
 
@@ -1876,7 +1838,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual(2);
+        expect(result).toBe(2);
       });
   });
 
@@ -1952,7 +1914,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual('hour');
+        expect(result).toBe('hour');
       });
   });
 
@@ -1962,7 +1924,7 @@ describe('formatDataForShow', () => {
 
     helper.formatDataForShow(field, record)
       .then((result) => {
-        expect(result).toEqual('income');
+        expect(result).toBe('income');
       });
   });
 
@@ -2369,7 +2331,7 @@ describe('validateParams', () => {
         (record) => {
           if (record.startingNumber > 0) { return; }
           return 'Must be greater than 0';
-        }
+        },
       ],
     };
 
@@ -2395,7 +2357,7 @@ describe('validateParams', () => {
           if (record.startingNumber <= 0) {
             return 'Must be greater than 0';
           }
-        }
+        },
       ],
     };
 

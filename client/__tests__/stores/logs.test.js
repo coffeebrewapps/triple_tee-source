@@ -10,15 +10,15 @@ beforeEach(() => {
 
 describe('saveLog', () => {
   test('should store new log message', () => {
-    expect(logsStore.tailLog()).toEqual('');
+    expect(logsStore.tailLog()).toBe('');
     logsStore.saveLog('[LOG] message 1');
-    expect(logsStore.tailLog()).toEqual('[LOG] message 1');
+    expect(logsStore.tailLog()).toBe('[LOG] message 1');
   });
 });
 
 describe('tailLog', () => {
   test('when less than 20 messages should return all in desc order', () => {
-    expect(logsStore.tailLog()).toEqual('');
+    expect(logsStore.tailLog()).toBe('');
     for (let i = 0; i < 10; i++) {
       logsStore.saveLog(`[LOG] message ${i}`);
     }
@@ -37,7 +37,7 @@ describe('tailLog', () => {
   });
 
   test('when more than 20 messages should return last 20 messages in desc order', () => {
-    expect(logsStore.tailLog()).toEqual('');
+    expect(logsStore.tailLog()).toBe('');
     for (let i = 0; i < 25; i++) {
       logsStore.saveLog(`[LOG] message ${i}`);
     }

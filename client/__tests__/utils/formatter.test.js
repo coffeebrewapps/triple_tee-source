@@ -36,7 +36,7 @@ describe('useFormatter', () => {
 describe('formatDate', () => {
   test('when given date should format date', () => {
     const result = formatter.formatDate('2023-04-03T12:34:56.123Z', timezone);
-    expect(result).toEqual('03/04/2023');
+    expect(result).toBe('03/04/2023');
   });
 
   test('when not given date should return null', () => {
@@ -48,7 +48,7 @@ describe('formatDate', () => {
 describe('formatLongDate', () => {
   test('when given date should format date', () => {
     const result = formatter.formatLongDate('2023-04-03T12:34:56.123Z', timezone);
-    expect(result).toEqual('Monday, 3 April 2023');
+    expect(result).toBe('Monday, 3 April 2023');
   });
 
   test('when not given date should return null', () => {
@@ -60,7 +60,7 @@ describe('formatLongDate', () => {
 describe('formatTimestamp', () => {
   test('when given date should format date', () => {
     const result = formatter.formatTimestamp('2023-04-03T12:34:56.123Z', timezone);
-    expect(result).toEqual('03/04/2023, 8:34:56 pm');
+    expect(result).toBe('03/04/2023, 8:34:56 pm');
   });
 
   test('when not given date should return null', () => {
@@ -72,7 +72,7 @@ describe('formatTimestamp', () => {
 describe('formatShortTime', () => {
   test('when given date should format date', () => {
     const result = formatter.formatShortTime('2023-04-03T12:34:56.123Z', timezone);
-    expect(result).toEqual('8:34:56 pm');
+    expect(result).toBe('8:34:56 pm');
   });
 
   test('when not given date should return null', () => {
@@ -84,19 +84,19 @@ describe('formatShortTime', () => {
 describe('formatNumber', () => {
   test('when given number should format number', () => {
     const result = formatter.formatNumber(124.21462, 2);
-    expect(result).toEqual('124.21');
+    expect(result).toBe('124.21');
   });
 
   test('when not given number should return 0', () => {
     const result = formatter.formatNumber(null, 2);
-    expect(result).toEqual('0.00');
+    expect(result).toBe('0.00');
   });
 });
 
 describe('parseTagFormat', () => {
   test('when given format string should format tag', async() => {
     const result = await formatter.parseTagFormat('{{ category }}:{{ name }}', { category: 'company', name: 'abc' });
-    expect(result).toEqual('company:abc');
+    expect(result).toBe('company:abc');
   });
 
   test('when not given format string should return tag as-is', async() => {
@@ -108,7 +108,7 @@ describe('parseTagFormat', () => {
 describe('parseTagFormatSync', () => {
   test('when given format string should format tag', () => {
     const result = formatter.parseTagFormatSync('{{ category }}:{{ name }}', { category: 'company', name: 'abc' });
-    expect(result).toEqual('company:abc');
+    expect(result).toBe('company:abc');
   });
 
   test('when not given format string should return tag as-is', () => {
@@ -125,7 +125,7 @@ describe('formatTag', () => {
       'tags',
       '{{ category }}:{{ name }}'
     );
-    expect(result).toEqual('company:abc');
+    expect(result).toBe('company:abc');
   });
 
   test('when not given includes should return tag as-is', async() => {
@@ -135,7 +135,7 @@ describe('formatTag', () => {
       'tags',
       '{{ category }}:{{ name }}'
     );
-    expect(result).toEqual('1');
+    expect(result).toBe('1');
   });
 });
 
@@ -147,7 +147,7 @@ describe('formatTagSync', () => {
       'tags',
       '{{ category }}:{{ name }}'
     );
-    expect(result).toEqual('company:abc');
+    expect(result).toBe('company:abc');
   });
 
   test('when not given includes should return tag as-is', () => {
@@ -157,7 +157,7 @@ describe('formatTagSync', () => {
       'tags',
       '{{ category }}:{{ name }}'
     );
-    expect(result).toEqual('1');
+    expect(result).toBe('1');
   });
 });
 
@@ -168,7 +168,7 @@ describe('tagStyle', () => {
       '1',
       'tags'
     );
-    expect(result).toEqual('color: #fff !important;background-color: #000 !important;');
+    expect(result).toBe('color: #fff !important;background-color: #000 !important;');
   });
 
   test('when not given includes should return empty string', () => {
@@ -177,6 +177,6 @@ describe('tagStyle', () => {
       '1',
       'tags'
     );
-    expect(result).toEqual('');
+    expect(result).toBe('');
   });
 });

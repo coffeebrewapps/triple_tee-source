@@ -14,7 +14,6 @@ describe('nav', () => {
   });
 });
 
-
 describe('show', () => {
   test('should set nav menu state to true', () => {
     expect(navStore.nav).toBeFalsy();
@@ -22,7 +21,6 @@ describe('show', () => {
     expect(navStore.nav).toBeTruthy();
   });
 });
-
 
 describe('hide', () => {
   test('should set nav menu state to false', () => {

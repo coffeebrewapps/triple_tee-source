@@ -1,7 +1,19 @@
 module.exports = {
+  globals: {
+    'vi': true,
+    'expect': true,
+    'beforeEach': true,
+    'afterEach': true,
+    'test': true,
+    'describe': true
+  },
   extends: [
     'standard',
-    'plugin:vue/vue3-recommended'
+    'plugin:vue/vue3-recommended',
+    'plugin:vitest/recommended'
+  ],
+  plugins: [
+    'vitest'
   ],
   rules: {
     'comma-dangle': ['error', { 'arrays': 'always-multiline', 'objects': 'always-multiline' }],

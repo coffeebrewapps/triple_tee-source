@@ -573,7 +573,7 @@ describe('downloadStream', () => {
 
     apiAccess.downloadStream('logs', null, {})
       .then((result) => {
-        expect(result).toEqual('line1\nline2\n');
+        expect(result).toBe('line1\nline2\n');
       });
 
     expect(axios).toHaveBeenCalledWith({
@@ -589,7 +589,7 @@ describe('downloadStream', () => {
 
     apiAccess.downloadStream('invoice_templates', '1', {}, { path: 'pdf' })
       .then((result) => {
-        expect(result).toEqual('line1\nline2\n');
+        expect(result).toBe('line1\nline2\n');
       });
 
     expect(axios).toHaveBeenCalledWith({

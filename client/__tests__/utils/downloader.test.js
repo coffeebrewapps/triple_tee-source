@@ -22,7 +22,7 @@ describe('downloadRawFile', () => {
     localStorage.setItem('files', JSON.stringify(files));
 
     const rawFile = downloader.downloadRawFile('image/png', 'logo.png');
-    expect(rawFile).toEqual('data:image/png;base64,fake-file-string');
+    expect(rawFile).toBe('data:image/png;base64,fake-file-string');
   });
 
   test('when not exists should return undefined', () => {

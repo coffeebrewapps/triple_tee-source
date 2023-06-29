@@ -1,9 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia';
 import { useWebAccess } from '../../src/utils/web.js';
-import axios from 'axios';
 import { useDataStore } from '../../src/stores/data.js';
 
-vi.mock('axios');
 vi.mock('../../src/stores/data.js', () => {
   return {
     useDataStore: () => {
@@ -422,7 +420,7 @@ describe('downloadStream', () => {
 
     webAccess.downloadStream('logs', null, {}, { path: 'downloadStream' })
       .then((result) => {
-        expect(result).toEqual('line1\nline2\n');
+        expect(result).toBe('line1\nline2\n');
       });
   });
 
@@ -442,7 +440,7 @@ describe('downloadStream', () => {
     webAccess.downloadStream('invoice_templates', '1', {}, { path: 'pdf' })
       .then((result) => {
         expect(result).toEqual({
-          data: 'line1\nline2\n'
+          data: 'line1\nline2\n',
         });
       });
   });
