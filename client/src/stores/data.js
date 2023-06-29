@@ -36,11 +36,11 @@ export const useDataStore = defineStore('data', () => {
   }
 
   function registerFunction(modelClass, fnType, fnName, fn) {
-    if (!customFunctions.value[modelClass]) {
+    if (utils.isEmpty(customFunctions.value[modelClass])) {
       customFunctions.value[modelClass] = {};
     }
 
-    if (!customFunctions.value[modelClass][fnType]) {
+    if (utils.isEmpty(customFunctions.value[modelClass][fnType])) {
       customFunctions.value[modelClass][fnType] = {};
     }
 
