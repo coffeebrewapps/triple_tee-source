@@ -73,10 +73,10 @@ beforeEach(async() => {
         ],
       },
     ],
-  })
+  });
 
-  router.push('/')
-  await router.isReady()
+  router.push('/');
+  await router.isReady();
 });
 
 describe('App.vue', () => {
@@ -127,7 +127,7 @@ describe('App.vue', () => {
   test('should load system configs on mount', async() => {
     const configsStoreSpy = vi.spyOn(systemConfigsStore, 'updateSystemConfigs');
 
-    const wrapper = await mount(App, {
+    await mount(App, {
       global: {
         plugins: [router],
         stubs: ['router-link', 'router-view'],
@@ -164,7 +164,7 @@ describe('App.vue', () => {
   test('should hide nav menu on route change', async() => {
     const navigatorSpy = vi.spyOn(navigator, 'hide');
 
-    const wrapper = await mount(App, {
+    await mount(App, {
       global: {
         plugins: [router],
         stubs: ['router-link', 'router-view'],
