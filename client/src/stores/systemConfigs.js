@@ -16,5 +16,5 @@ export const useSystemConfigsStore = defineStore('systemConfigs', () => {
     systemConfigs.value = {};
   }
 
-  return { systemConfigs, getSystemConfigs, updateSystemConfigs, clearSystemConfigs };
+  return { getSystemConfigs, updateSystemConfigs, clearSystemConfigs };
 });
