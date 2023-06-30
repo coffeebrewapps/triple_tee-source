@@ -32,16 +32,25 @@ const displayableViews = computed(() => {
 });
 
 function selectView(view) {
+  if (!viewRefs.value[view]) { return; }
+
   viewRefs.value[view].blur();
   selectedView.value = view;
-  router.push({ name: props.views[view].name });
+  router.push({ name: displayableViews.value[view].name });
 }
 
 function navigateView(view) {
   if (view < 0) { return; }
-  if (view > props.views.length - 1) { return; }
+  if (view > displayableViews.value.length - 1) { return; }
 
+  selectView(view);
   viewRefs.value[view].focus();
+}
+
+function blurView(view) {
+  if (!viewRefs.value[view]) { return; }
+
+  viewRefs.value[view].blur();
 }
 /** section:global **/
 
@@ -80,6 +89,7 @@ onMounted(() => {
         :class="viewStyle(i)"
         tabindex="0"
         @click="selectView(i)"
+        @keydown.esc="blurView(i)"
         @keydown.enter="selectView(i)"
         @keydown.arrow-left="navigateView(i-1)"
         @keydown.arrow-right="navigateView(i+1)"
