@@ -15,11 +15,12 @@ const app = createApp(App);
 const pinia = createPinia();
 
 app.use(pinia);
-app.use(router);
 
 const dataStore = useDataStore();
 const uploader = useUploader();
 const logger = useLogger();
 initPlugins(router, dataStore, uploader, logger);
+
+app.use(router);
 
 app.mount('#app');
