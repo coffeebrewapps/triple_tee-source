@@ -1,13 +1,11 @@
 <script setup>
 /** import:global **/
-import { onMounted, ref, computed, watch } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 /** import:global **/
 
 /** import:utils **/
 import { useInputHelper } from '@/utils/input';
 import { useErrors } from '@/utils/errors';
-import { useValidations } from '@/utils/validations';
-import { useFileUtils } from '@/utils/file';
 import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
@@ -48,9 +46,9 @@ const props = defineProps({
     },
   },
   schemas: {
-    type: Object,
+    type: Array,
     default() {
-      return {};
+      return [];
     },
   },
   errorMessages: {
@@ -107,16 +105,11 @@ const {
   nullToggleableField,
   nullToggleableKeys,
   objectField,
-  fileKeys,
   fileField,
   formatInputOptionsData,
   fetchOptions,
   initOptionsData,
 } = useInputHelper(props.schemas);
-
-const {
-  notEmpty,
-} = useValidations();
 
 const logger = useLogger();
 
@@ -189,43 +182,6 @@ function fieldErrorMessage(field) {
 }
 /** section:inputUtils **/
 
-/** section:fileUtils **/
-const {
-  fileToBase64,
-} = useFileUtils();
-
-function sanitizeFileFields(formData) {
-  const sanitized = Object.assign({}, formData);
-  fileKeys.value.forEach((field) => {
-    if (notEmpty(sanitized[field]) && notEmpty(props.modelValue[field])) {
-      compareFiles(sanitized[field], props.modelValue[field])
-        .then((result) => {
-          if (result) {
-            sanitized[field] = null;
-          }
-        })
-        .catch((error) => {
-          logger.error(`Error sanitizing file fields`, error);
-        });
-    }
-  });
-  return sanitized;
-}
-
-async function compareFiles(file1, file2) {
-  return new Promise((resolve, reject) => {
-    const promises = [fileToBase64(file1), fileToBase64(file2)];
-    Promise.all(promises)
-      .then((results) => {
-        resolve(results[0] === results[1]);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  });
-}
-/** section:fileUtils **/
-
 /** section:selectTableUtils **/
 const inputOptionsData = ref({});
 
@@ -281,8 +237,7 @@ function dataFieldClass(field) {
 
 /** section:action **/
 function submitData() {
-  const sanitized = sanitizeFileFields(data.value);
-  emit('submit', sanitized);
+  emit('submit', data.value);
 }
 
 function cancel() {
@@ -387,8 +342,8 @@ onMounted(async() => {
                 v-if="showSingleSelect(field)"
                 v-model="data[field]"
                 :label="inputLabel(field)"
-                :name="inputLabel(field)"
-                :multiple="false"
+                :name="field"
+                :multiple="multiSelectableField(field)"
                 :options="inputOptions(field).data"
                 :options-length="inputOptions(field).total"
                 :options-loading="inputOptions(field).loading"
@@ -403,7 +358,8 @@ onMounted(async() => {
                 v-if="showMultiSelect(field)"
                 v-model="data[field]"
                 :label="inputLabel(field)"
-                :name="inputLabel(field)"
+                :name="field"
+                :multiple="multiSelectableField(field)"
                 :options="inputOptions(field).data"
                 :options-length="inputOptions(field).total"
                 :options-loading="inputOptions(field).loading"
@@ -489,9 +445,6 @@ onMounted(async() => {
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
-}
-
-.form .body {
 }
 
 .data-row {
