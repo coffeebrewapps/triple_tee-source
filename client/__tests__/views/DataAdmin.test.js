@@ -6,63 +6,62 @@ import {
   TSelect,
   TButton
 } from 'coffeebrew-vue-components';
+import { useDataAccess } from '../../src/utils/dataAccess.js';
 import App from '../../src/views/DataAdmin.vue';
 
-vi.mock('../../src/utils/dataAccess.js', () => {
-  return {
-    useDataAccess: () => {
-      return {
-        schemas: vi.fn(() => {
-          return new Promise((resolve, reject) => {
-            resolve([
-              'alerts',
-              'contacts',
-              'tags',
-            ]);
-          });
-        }),
-        list: vi.fn((modelClass) => {
-          return new Promise((resolve, reject) => {
-            if (modelClass === 'contacts') {
-              resolve({
-                data: [
-                  {
-                    id: '1',
-                    name: 'Your Company',
-                  },
-                ],
-              });
-            } else if (modelClass === 'indexes') {
-              resolve({
-                data: {
-                  unique: {},
-                  foreign: {},
-                  filter: {},
-                },
-              });
-            } else if (modelClass === 'tags') {
-              reject({
-                root: ['unknown'],
-              });
-            } else {
-              resolve({ data: [] });
-            }
-          });
-        }),
-        upload: vi.fn((modelClass, data) => {
-          return new Promise((resolve, reject) => {
-            resolve({
-              data,
-            });
-          });
-        }),
-      };
-    },
-  };
-});
+vi.mock('../../src/utils/dataAccess.js');
 
 beforeEach(async() => {
   setActivePinia(createPinia());
+
+  useDataAccess.mockImplementation(() => {
+    return {
+      schemas: vi.fn(() => {
+        return new Promise((resolve, reject) => {
+          resolve([
+            'alerts',
+            'contacts',
+            'tags',
+          ]);
+        });
+      }),
+      list: vi.fn((modelClass) => {
+        return new Promise((resolve, reject) => {
+          if (modelClass === 'contacts') {
+            resolve({
+              data: [
+                {
+                  id: '1',
+                  name: 'Your Company',
+                },
+              ],
+            });
+          } else if (modelClass === 'indexes') {
+            resolve({
+              data: {
+                unique: {},
+                foreign: {},
+                filter: {},
+              },
+            });
+          } else if (modelClass === 'tags') {
+            reject({
+              root: ['unknown'],
+            });
+          } else {
+            resolve({ data: [] });
+          }
+        });
+      }),
+      upload: vi.fn((modelClass, data) => {
+        return new Promise((resolve, reject) => {
+          resolve({
+            data,
+          });
+        });
+      }),
+    };
+  });
 });
 
 afterEach(() => {
