@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { useAlertsStore } from '@/stores/alerts';
 import { useValidations } from '@/utils/validations';
 import { useEventsStore } from '@/stores/events';
@@ -10,7 +10,9 @@ import {
 } from 'coffeebrew-vue-components';
 
 const router = useRouter();
-const currentRoute = useRoute();
+const currentRoute = computed(() => {
+  return router.currentRoute.value;
+});
 const alerts = useAlertsStore();
 const events = useEventsStore();
 const { isEmpty, notEmpty } = useValidations();
@@ -59,30 +61,26 @@ function openInbox() {
 }
 
 const hasParentRoute = computed(() => {
-  return notEmpty(currentRoute.meta) && notEmpty(currentRoute.meta.parentRoute);
+  return notEmpty(currentRoute.value.meta) && notEmpty(currentRoute.value.meta.parentRoute);
 });
 
 function findParentRoute() {
   return router.getRoutes().find((route) => {
-    if (isEmpty(currentRoute.meta)) { return false; }
-    if (isEmpty(currentRoute.meta.parentRoute)) { return false; }
+    if (isEmpty(currentRoute.value.meta)) { return false; }
+    if (isEmpty(currentRoute.value.meta.parentRoute)) { return false; }
 
-    return route.name === currentRoute.meta.parentRoute.name;
+    return route.name === currentRoute.value.meta.parentRoute.name;
   });
 }
 
 function goBackToParent() {
-  if (isEmpty(currentRoute.meta)) { return; }
-  if (isEmpty(currentRoute.meta.parentRoute)) { return; }
+  if (isEmpty(currentRoute.value.meta)) { return; }
+  if (isEmpty(currentRoute.value.meta.parentRoute)) { return; }
 
   const parentRoute = findParentRoute();
   if (isEmpty(parentRoute)) { return; }
 
-  if (notEmpty(parentRoute.meta) && notEmpty(parentRoute.meta.buildParams)) {
-    router.push({ name: parentRoute.name, ...parentRoute.meta.buildParams(currentRoute) });
-  } else {
-    router.push({ name: parentRoute.name });
-  }
+  router.push({ name: parentRoute.name });
 }
 </script>
 
