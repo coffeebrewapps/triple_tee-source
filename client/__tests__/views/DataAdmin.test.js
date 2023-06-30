@@ -7,7 +7,7 @@ import {
   TButton
 } from 'coffeebrew-vue-components';
 import { useDataAccess } from '../../src/utils/dataAccess.js';
-import App from '../../src/views/DataAdmin.vue';
+import DataAdmin from '../../src/views/DataAdmin.vue';
 
 vi.mock('../../src/utils/dataAccess.js');
 
@@ -70,7 +70,7 @@ afterEach(() => {
 
 describe('DataAdmin.vue', () => {
   test('should init form with schemas', async() => {
-    const wrapper = await mount(App);
+    const wrapper = await mount(DataAdmin);
 
     await flushPromises();
 
@@ -90,7 +90,7 @@ describe('DataAdmin.vue', () => {
   });
 
   test('when schema selected has data should load data', async() => {
-    const wrapper = await mount(App);
+    const wrapper = await mount(DataAdmin);
 
     await flushPromises();
 
@@ -117,7 +117,7 @@ describe('DataAdmin.vue', () => {
   });
 
   test('when schema selected has no data should load empty data', async() => {
-    const wrapper = await mount(App);
+    const wrapper = await mount(DataAdmin);
 
     await flushPromises();
 
@@ -137,7 +137,7 @@ describe('DataAdmin.vue', () => {
   });
 
   test('when schema selected return failure should render error message', async() => {
-    const wrapper = await mount(App);
+    const wrapper = await mount(DataAdmin);
     expect(wrapper.vm.errorAlert).toBeFalsy();
     expect(wrapper.vm.errorContent).toBe('');
 
@@ -180,7 +180,7 @@ describe('DataAdmin.vue', () => {
   });
 
   test('when upload indexes should re-render updated indexes', async() => {
-    const wrapper = await mount(App);
+    const wrapper = await mount(DataAdmin);
 
     await flushPromises();
 
