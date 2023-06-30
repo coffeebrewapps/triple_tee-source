@@ -26,6 +26,8 @@ const emit = defineEmits(['tabChange']);
 const tabRefs = ref([]);
 
 function selectTab(tab) {
+  if (!tabRefs.value[tab]) { return; }
+
   tabRefs.value[tab].blur();
   emit('tabChange', tab);
 }
@@ -34,7 +36,14 @@ function navigateTab(tab) {
   if (tab < 0) { return; }
   if (tab > props.tabs.length - 1) { return; }
 
+  emit('tabChange', tab);
   tabRefs.value[tab].focus();
+}
+
+function blurTab(tab) {
+  if (!tabRefs.value[tab]) { return; }
+
+  tabRefs.value[tab].blur();
 }
 /** section:global **/
 
@@ -68,6 +77,7 @@ function tabContentStyle(i) {
         tabindex="0"
         @click="selectTab(i)"
         @keydown.enter="selectTab(i)"
+        @keydown.esc="blurTab(i)"
         @keydown.arrow-left="navigateTab(i-1)"
         @keydown.arrow-right="navigateTab(i+1)"
       >
