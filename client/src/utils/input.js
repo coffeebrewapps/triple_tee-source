@@ -338,6 +338,7 @@ export function useInputHelper(schemas) {
               resolve(file);
             })
             .catch((error) => {
+              logger.error(`Error converting base64 to file`, { error });
               resolve(null);
             });
         } else {
@@ -358,6 +359,7 @@ export function useInputHelper(schemas) {
                   resolve(file);
                 })
                 .catch((error) => {
+                  logger.error(`Error converting base64 to file`, { error });
                   resolve(null);
                 });
             })
@@ -475,6 +477,13 @@ export function useInputHelper(schemas) {
       const value = data[field];
       if (isEmpty(value)) {
         data[field] = '';
+      }
+    });
+
+    numberKeys.value.forEach((field) => {
+      const value = data[field];
+      if (notEmpty(value)) {
+        data[field] = parseFloat(value);
       }
     });
 

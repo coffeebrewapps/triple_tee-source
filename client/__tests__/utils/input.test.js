@@ -2063,7 +2063,7 @@ describe('formatDataForSave', () => {
       category: 'company',
       startDate: '2023-01-01',
       createdAt: '2023-01-01T00:00:00.000Z',
-      startingNumber: 123.23,
+      startingNumber: '123.23',
       scale: 'hour',
       transactionType: 'income',
       tags: [

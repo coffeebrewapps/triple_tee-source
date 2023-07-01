@@ -357,7 +357,9 @@ async function deductibleOffsetChange(field, newOffset) {
   const limit = taxDeductibleSchemasMap.value[field].limit || 5;
   await taxDeductibleHelper.fetchOptions(field, newOffset)
     .then((result) => {
-      deductibleInputOptionsData.value[field] = taxDeductibleHelper.formatInputOptionsData(field, newOffset, limit, result);
+      deductibleInputOptionsData.value[field] = taxDeductibleHelper.formatInputOptionsData(
+        field, newOffset, limit, result
+      );
     });
 }
 
@@ -378,7 +380,7 @@ function formatTag(row, tag, field) {
 
 function formatTransactionType(type) {
   const options = taxDeductibleSchemasMap.value.transactionTypes.options;
-  const found = options.find(o => o.value === type)
+  const found = options.find(o => o.value === type);
   if (found) {
     return found.label;
   } else {
@@ -702,7 +704,7 @@ onMounted(async() => {
           v-if="!taxTiersEditable[i]"
           :class="taxTierFieldStyles[i]"
         >
-          {{ row.minIncome.toFixed(2) }}
+          {{ parseFloat(row.minIncome).toFixed(2) }}
         </div>
       </template> <!-- minIncome -->
 
@@ -723,7 +725,7 @@ onMounted(async() => {
           v-if="!taxTiersEditable[i]"
           :class="taxTierFieldStyles[i]"
         >
-          {{ row.maxIncome.toFixed(2) }}
+          {{ parseFloat(row.maxIncome).toFixed(2) }}
           <span
             v-if="tierPayable(row)"
           >
@@ -749,11 +751,11 @@ onMounted(async() => {
           v-if="!taxTiersEditable[i]"
           :class="taxTierFieldStyles[i]"
         >
-          {{ row.maxPayableAmount.toFixed(2) }}
+          {{ parseFloat(row.maxPayableAmount).toFixed(2) }}
           <span
             v-if="tierPayable(row)"
           >
-            (Payable: {{ estimatedTax.payable.toFixed(2) }})
+            (Payable: {{ parseFloat(estimatedTax.payable).toFixed(2) }})
           </span>
         </div>
       </template> <!-- maxPayableAmount -->
@@ -896,7 +898,13 @@ onMounted(async() => {
           v-if="!taxDeductiblesEditable[i]"
           class="row-field"
         >
-          {{ formatRate(row.rate) }}%
+          <span v-if="row.rateType === 'percentage'">
+            {{ formatRate(row.rate) }}%
+          </span>
+
+          <span v-else>
+            {{ parseFloat(row.rate).toFixed(2) }}
+          </span>
         </div>
       </template> <!-- rate -->
 
@@ -917,7 +925,7 @@ onMounted(async() => {
           v-if="!taxDeductiblesEditable[i] && row.maxDeductibleAmount"
           class="row-field"
         >
-          {{ row.maxDeductibleAmount.toFixed(2) }}
+          {{ parseFloat(row.maxDeductibleAmount).toFixed(2) }}
         </div>
       </template> <!-- maxDeductibleAmount -->
 
@@ -934,7 +942,6 @@ onMounted(async() => {
             :options-loading="false"
             :pagination="{ client: true, offset: 0, limit: taxDeductibleSchemasMap.transactionTypes.options.length }"
             :error-message="formatDeductibleFieldErrorMessage(i, 'transactionTypes')"
-            @offset-change=""
           />
         </div>
 
@@ -1013,7 +1020,7 @@ onMounted(async() => {
     </TTable>
 
     <TConfirmDialog
-      v-if="currentTierForDelete"
+      v-if="deleteTierDialog"
       v-model="deleteTierDialog"
       title="Delete Tier"
       :primary-text="deleteTierDialogPrimaryText"
@@ -1023,6 +1030,19 @@ onMounted(async() => {
       class="delete-dialog"
       @confirm="deleteTierAndCloseDialog"
       @cancel="closeDeleteTierDialog"
+    />
+
+    <TConfirmDialog
+      v-if="deleteDeductibleDialog"
+      v-model="deleteDeductibleDialog"
+      title="Delete Deductible"
+      :primary-text="deleteDeductibleDialogPrimaryText"
+      secondary-text=""
+      :width="500"
+      :height="250"
+      class="delete-dialog"
+      @confirm="deleteDeductibleAndCloseDialog"
+      @cancel="closeDeleteDeductibleDialog"
     />
   </div> <!-- page-container -->
 </template>
