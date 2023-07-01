@@ -1,0 +1,1 @@
+{"port":"5001","dataStore":"fs","dataRootDir":"./","dataDir":"./data","logFile":"./debug.log","uploadDir":"./uploads","modulesDir":"./dist/modules","schemas":"_schemas","indexes":"_indexes"}
