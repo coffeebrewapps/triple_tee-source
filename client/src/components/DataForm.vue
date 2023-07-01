@@ -214,7 +214,9 @@ async function offsetChange(field, newOffset) {
 /** section:selectTableUtils **/
 
 /** section:data **/
-const data = ref({});
+const data = computed(() => {
+  return props.modelValue;
+});
 /** section:data **/
 
 /** section:styles **/
@@ -236,6 +238,14 @@ function dataFieldClass(field) {
 /** section:styles **/
 
 /** section:action **/
+const showConfirmButton = computed(() => {
+  return props.confirmButton;
+});
+
+const showCancelButton = computed(() => {
+  return props.cancelButton;
+});
+
 function submitData() {
   emit('submit', data.value);
 }
@@ -246,7 +256,6 @@ function cancel() {
 /** section:action **/
 
 onMounted(async() => {
-  data.value = Object.assign({}, props.modelValue);
   await initOptionsData()
     .then((result) => {
       inputOptionsData.value = result;
@@ -416,6 +425,7 @@ onMounted(async() => {
       class="actions"
     >
       <TButton
+        v-if="showConfirmButton"
         class="button"
         :button-type="confirmButton.type"
         :value="confirmButton.value"
@@ -423,6 +433,7 @@ onMounted(async() => {
         @click="submitData()"
       />
       <TButton
+        v-if="showCancelButton"
         class="button"
         :button-type="cancelButton.type"
         :value="cancelButton.value"

@@ -819,6 +819,8 @@ describe('DataForm.vue', () => {
       {
         id: '1',
         name: 'Your Company',
+        bizType: null,
+        country: null,
       },
     ]);
   });
@@ -878,6 +880,13 @@ describe('DataForm.vue', () => {
 
     const submitEvents = wrapper.emitted().submit;
     expect(submitEvents.length).toBe(1);
+    expect(submitEvents[0]).toEqual([
+      expect.objectContaining({
+        logo: expect.anything(),
+        bizType: null,
+        country: null,
+      }),
+    ]);
     expect(submitEvents[0][0].logo).toBeInstanceOf(File);
     expect(submitEvents[0][0].logo.name).toBe('logo.png');
   });
@@ -939,6 +948,13 @@ describe('DataForm.vue', () => {
 
     const submitEvents = wrapper.emitted().submit;
     expect(submitEvents.length).toBe(1);
+    expect(submitEvents[0]).toEqual([
+      expect.objectContaining({
+        logo: expect.anything(),
+        bizType: null,
+        country: null,
+      }),
+    ]);
     expect(submitEvents[0][0].logo).toBeInstanceOf(File);
     expect(submitEvents[0][0].logo.name).toBe('banner.png');
   });
@@ -984,6 +1000,13 @@ describe('DataForm.vue', () => {
 
     const submitEvents = wrapper.emitted().submit;
     expect(submitEvents.length).toBe(1);
+    expect(submitEvents[0]).toEqual([
+      expect.objectContaining({
+        logo: expect.anything(),
+        bizType: null,
+        country: null,
+      }),
+    ]);
     expect(submitEvents[0][0].logo).toBeInstanceOf(File);
     expect(submitEvents[0][0].logo.name).toBe('logo.png');
   });
@@ -1081,6 +1104,45 @@ describe('DataForm.vue', () => {
       buttonType: 'icon',
       icon: 'fa-solid fa-moon',
       value: 'Dark',
+    }));
+  });
+
+  test('when given null button should not render button', async() => {
+    const wrapper = await mount(DataForm, {
+      global: {
+        stubs,
+      },
+      props: {
+        modelValue,
+        schemas,
+        fieldsLayout,
+        dataFields,
+        errorMessages: {},
+        confirmButton: {
+          type: 'icon',
+          icon: 'fa-solid fa-check',
+          value: 'Update',
+        },
+        cancelButton: null,
+      },
+    });
+
+    await flushPromises();
+
+    const formContainer = wrapper.get('.form');
+    expect(formContainer.exists()).toBeTruthy();
+
+    const actionsContainer = formContainer.find('.actions');
+    expect(actionsContainer.exists()).toBeTruthy();
+
+    const buttons = actionsContainer.findAllComponents(TButton);
+    expect(buttons.length).toBe(1);
+
+    const submitButton = buttons[0];
+    expect(submitButton.props()).toEqual(expect.objectContaining({
+      buttonType: 'icon',
+      icon: 'fa-solid fa-check',
+      value: 'Update',
     }));
   });
 });

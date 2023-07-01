@@ -67,6 +67,14 @@ async function startServer({ port, appConfigPath, appRootDir, logsRootDir }) {
   app.use(express.json({ limit: '1mb' }));
   app.use(cors(corsConfig));
   app.use(express.static(path.join(__dirname, 'public')));
+  app.use((req, res, next) => {
+    Object.entries(req.body).forEach(([key, val]) => {
+      if (val === '') {
+        req.body[key] = null;
+      }
+    });
+    next();
+  });
   /** * end:Middleware ***/
 
   /** * start:Routes ***/

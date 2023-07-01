@@ -1,7 +1,14 @@
 module.exports = ({ routes, stores, logger }) => {
   function create(stores) {
     return routes.withFileUpload(['logo'], (req, res) => {
-      const params = Object.assign({}, req.body);
+      const params = Object.entries(req.body).reduce((o, [key, val]) => {
+        if (val === '') {
+          o[key] = null;
+        } else {
+          o[key] = val;
+        }
+        return o;
+      }, {});
 
       if (req.files.logo) {
         params.logo = req.files.logo;
@@ -19,7 +26,14 @@ module.exports = ({ routes, stores, logger }) => {
   function update(stores) {
     return routes.withFileUpload(['logo'], (req, res) => {
       const id = req.params.id;
-      const params = Object.assign({}, req.body);
+      const params = Object.entries(req.body).reduce((o, [key, val]) => {
+        if (val === '') {
+          o[key] = null;
+        } else {
+          o[key] = val;
+        }
+        return o;
+      }, {});
 
       if (req.files.logo) {
         params.logo = req.files.logo;

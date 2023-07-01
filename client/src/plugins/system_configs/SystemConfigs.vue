@@ -141,14 +141,18 @@ function initFormData() {
   };
 }
 
-async function updateConfig() {
-  const params = formatDataForSave(Object.assign({}, formData.value));
+async function updateConfig(data) {
+  const params = formatDataForSave(Object.assign({}, data));
 
   await dataAccess
     .create('system_configs', params, { path: 'replace' })
     .then((result) => {
       flashMessage(`Updated config successfully!`);
       systemConfigsStore.updateSystemConfigs(result);
+      formatFormDataForShow(result)
+        .then((formattedResult) => {
+          formData.value = formattedResult;
+        });
     })
     .catch((error) => {
       console.error(error);
@@ -189,6 +193,16 @@ async function loadSystemConfigs() {
   });
 }
 
+const submitButton = computed(() => {
+  return {
+    type: 'text',
+    icon: 'fa-solid fa-check',
+    value: 'Update',
+  };
+});
+
+const cancelButton = null;
+
 onMounted(async() => {
   await loadSystemConfigs()
     .then((result) => {
@@ -217,17 +231,10 @@ onMounted(async() => {
       :data-fields="fieldKeys"
       :schemas="dataFields"
       :error-messages="errorMessages"
-      :submittable="false"
+      :confirm-button="submitButton"
+      :cancel-button="cancelButton"
+      @submit="updateConfig"
     />
-
-    <div class="actions">
-      <TButton
-        class="button"
-        value="Update"
-        icon="fa-solid fa-check"
-        @click="updateConfig()"
-      />
-    </div>
   </div>
 </template>
 

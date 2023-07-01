@@ -453,13 +453,13 @@ export function useInputHelper(schemas) {
 
     singleSelectableKeys.value.forEach((field) => {
       const values = (data[field] || []);
-      data[field] = (values[0] || {}).value;
+      data[field] = (values[0] || {}).value || '';
     });
 
     clientOptionsKeys.value.forEach((field) => {
       const value = data[field];
       if (isEmpty(value) || value.length === 0) {
-        data[field] = null;
+        data[field] = '';
       }
     });
 
@@ -468,6 +468,13 @@ export function useInputHelper(schemas) {
         data[field] = JSON.parse(data[field]);
       } else {
         data[field] = {};
+      }
+    });
+
+    fileKeys.value.forEach((field) => {
+      const value = data[field];
+      if (isEmpty(value)) {
+        data[field] = '';
       }
     });
 
