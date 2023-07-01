@@ -5,9 +5,6 @@ import { ref, computed, onMounted } from 'vue';
 
 /** import:components **/
 import DataForm from '@/components/DataForm.vue';
-import {
-  TButton
-} from 'coffeebrew-vue-components';
 /** import:components **/
 
 /** import:utils **/

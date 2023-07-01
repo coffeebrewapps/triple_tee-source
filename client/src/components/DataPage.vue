@@ -149,7 +149,6 @@ const {
   formatFiltersForShow,
   formatFiltersForLoad,
   validateParams,
-  initOptionsData,
 } = useInputHelper(props.dataFields);
 const systemConfigsStore = useSystemConfigsStore();
 const systemConfigs = systemConfigsStore.getSystemConfigs();
