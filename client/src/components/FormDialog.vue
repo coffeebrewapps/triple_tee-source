@@ -5,7 +5,6 @@ import { ref, computed } from 'vue';
 
 /** import:components **/
 import {
-  TAlert,
   TDialog
 } from 'coffeebrew-vue-components';
 
@@ -63,11 +62,6 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'submit']);
 /** section:emit **/
 
-/** section:error **/
-const errorAlert = ref(false);
-const errorContent = ref('');
-/** section:error **/
-
 /** section:dialog **/
 const dialog = computed({
   get: () => {
@@ -90,7 +84,6 @@ function submitData(data) {
 
 function closeDialog() {
   dialog.value = false;
-  emit('update:modelValue', false);
 }
 /** section:action **/
 </script>
@@ -114,12 +107,4 @@ function closeDialog() {
       />
     </template>
   </TDialog>
-
-  <TAlert
-    v-model="errorAlert"
-    title="Error"
-    :content="errorContent"
-    :width="400"
-    :height="250"
-  />
 </template>
