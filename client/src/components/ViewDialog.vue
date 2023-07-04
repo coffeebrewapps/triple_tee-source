@@ -102,7 +102,7 @@ const dialog = computed({
 });
 
 function closeDialog() {
-  emit('update:modelValue', false);
+  dialog.value = false;
 }
 /** section:dialog **/
 
