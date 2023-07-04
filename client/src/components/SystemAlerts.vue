@@ -56,7 +56,7 @@ function toggle() {
         {{ message }}
       </div>
       <div class="timestamp">
-        {{ formatTimestamp(timestamp, systemConfigs) }}
+        {{ formatTimestamp(timestamp, systemConfigs.timezone) }}
       </div>
     </div>
   </div>
