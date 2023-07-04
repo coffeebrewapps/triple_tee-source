@@ -239,8 +239,9 @@ const filtersStyleClass = computed(() => {
 });
 
 async function submitFilters(updatedFilters) {
-  toggleFilters();
+  closeFilters();
   offset.value = 0;
+  filtersData.value = updatedFilters;
   await loadData();
 }
 
@@ -258,18 +259,20 @@ async function resetFilters() {
         filtersData.value[key] = results[i];
       });
       filtersLoaded.value = true;
-      closeFilters();
+      if (filtersState.value) {
+        closeFilters();
+      }
       offset.value = 0;
       loadData();
     });
 }
 
-function closeFilters() {
-  filtersState.value = false;
+function openFilters() {
+  filtersState.value = true;
 }
 
-function toggleFilters() {
-  filtersState.value = !filtersState.value;
+function closeFilters() {
+  filtersState.value = false;
 }
 
 function formatFiltersFields() {
@@ -391,7 +394,7 @@ const tableActions = computed(() => {
     name: 'Filter',
     icon: 'fa-solid fa-filter',
     click: async function() {
-      toggleFilters();
+      openFilters();
     },
   };
   const filterOverride = props.actions.filter || {};
@@ -692,7 +695,7 @@ watch(createDialog, (newVal, oldVal) => {
   if (!newVal) { createErrors.value = {}; }
 });
 
-async function openCreateDialog(id) {
+async function openCreateDialog() {
   newRow.value = {};
   const promises = creatableKeys.value.map((key) => {
     return formatDataForShow(key, {});
@@ -967,7 +970,7 @@ onBeforeUnmount(() => {
 
       <div
         class="toggle tooltipable"
-        @click="toggleFilters"
+        @click="closeFilters"
       >
         <i class="fa-sharp fa-solid fa-xmark" />
         <span class="tooltip align-right">Close</span>
@@ -1169,7 +1172,7 @@ onBeforeUnmount(() => {
     />
 
     <FormDialog
-      v-if="newRow"
+      v-if="createDialog"
       v-model="createDialog"
       :schemas="combinedDataFields"
       :fields-layout="fieldsLayout"
@@ -1186,7 +1189,7 @@ onBeforeUnmount(() => {
       v-bind="{ row: currentRowForUpdate }"
     >
       <FormDialog
-        v-if="currentRowForUpdate && Object.keys(currentRowForUpdate).length > 0"
+        v-if="updateDialog"
         v-model="updateDialog"
         :schemas="combinedDataFields"
         :fields-layout="fieldsLayout"
@@ -1200,7 +1203,7 @@ onBeforeUnmount(() => {
     </slot>
 
     <ViewDialog
-      v-if="currentRow"
+      v-if="viewDialog"
       v-model="viewDialog"
       :keys="viewableKeys"
       :include-keys="includeKeys"
@@ -1213,7 +1216,7 @@ onBeforeUnmount(() => {
     />
 
     <TConfirmDialog
-      v-if="currentRowForDelete"
+      v-if="deleteDialog"
       v-model="deleteDialog"
       :title="deleteDialogTitle(dataType, currentRowForDelete)"
       :primary-text="deleteDialogPrimaryText(dataType, currentRowForDelete)"
