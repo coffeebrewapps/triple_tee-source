@@ -230,6 +230,8 @@ function updateData() {
 
   if (notEmpty(sampleDataEditorContent)) {
     emit('dataChange', JSON.parse(sampleDataEditorContent));
+  } else {
+    emit('dataChange', {});
   }
 }
 
