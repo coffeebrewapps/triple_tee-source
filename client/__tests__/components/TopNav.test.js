@@ -156,7 +156,7 @@ describe('TopNav.vue', () => {
 
     expect(wrapper.vm.theme).toBeTruthy();
     expect(wrapper.vm.themeIcon).toBe('fa-solid fa-moon');
-    themeToggle.trigger('click');
+    await themeToggle.trigger('click');
 
     expect(wrapper.vm.theme).toBeFalsy();
     expect(wrapper.vm.themeIcon).toBe('fa-solid fa-sun');
@@ -174,7 +174,7 @@ describe('TopNav.vue', () => {
 
     const dashboardToggle = toggles[1];
     expect(dashboardToggle.exists()).toBeTruthy();
-    dashboardToggle.trigger('click');
+    await dashboardToggle.trigger('click');
     expect(push).toHaveBeenCalledWith({ name: 'Home' });
   });
 
@@ -189,7 +189,7 @@ describe('TopNav.vue', () => {
 
     const configureToggle = toggles[2];
     expect(configureToggle.exists()).toBeTruthy();
-    configureToggle.trigger('click');
+    await configureToggle.trigger('click');
     expect(push).toHaveBeenCalledWith({ name: 'Configure' });
   });
 
@@ -204,7 +204,7 @@ describe('TopNav.vue', () => {
 
     const logsToggle = toggles[3];
     expect(logsToggle.exists()).toBeTruthy();
-    logsToggle.trigger('click');
+    await logsToggle.trigger('click');
     expect(push).toHaveBeenCalledWith({ name: 'System Logs' });
   });
 
@@ -219,7 +219,7 @@ describe('TopNav.vue', () => {
 
     const dataAdminToggle = toggles[4];
     expect(dataAdminToggle.exists()).toBeTruthy();
-    dataAdminToggle.trigger('click');
+    await dataAdminToggle.trigger('click');
     expect(push).toHaveBeenCalledWith({ name: 'Data Admin' });
   });
 
@@ -234,7 +234,7 @@ describe('TopNav.vue', () => {
 
     const inboxToggle = toggles[5];
     expect(inboxToggle.exists()).toBeTruthy();
-    inboxToggle.trigger('click');
+    await inboxToggle.trigger('click');
     expect(push).toHaveBeenCalledWith({ name: 'Inbox' });
   });
 
@@ -250,7 +250,7 @@ describe('TopNav.vue', () => {
 
     const alertsToggle = toggles[6];
     expect(alertsToggle.exists()).toBeTruthy();
-    alertsToggle.trigger('click');
+    await alertsToggle.trigger('click');
     expect(alertsSpy).toHaveBeenCalled();
   });
 });

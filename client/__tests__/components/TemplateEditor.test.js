@@ -238,14 +238,14 @@ describe('TemplateEditor.vue', () => {
     expect(contentMarkupContent.attributes('contenteditable')).toBe('false');
 
     const markupEditButton = contentMarkupButtons[1];
-    markupEditButton.trigger('click');
+    await markupEditButton.trigger('click');
 
     await flushPromises();
 
     expect(contentMarkupContent.attributes('contenteditable')).toBe('true');
 
     const markupCancelButton = contentMarkupButtons[0];
-    markupCancelButton.trigger('click');
+    await markupCancelButton.trigger('click');
 
     await flushPromises();
 
@@ -253,14 +253,14 @@ describe('TemplateEditor.vue', () => {
 
     expect(wrapper.emitted().contentMarkupChange).toBeUndefined();
 
-    markupEditButton.trigger('click');
+    await markupEditButton.trigger('click');
 
     await flushPromises();
 
     expect(contentMarkupContent.attributes('contenteditable')).toBe('true');
 
     const markupConfirmButton = contentMarkupButtons[2];
-    markupConfirmButton.trigger('click');
+    await markupConfirmButton.trigger('click');
 
     await flushPromises();
 
@@ -298,14 +298,14 @@ describe('TemplateEditor.vue', () => {
     expect(contentStylesContent.attributes('contenteditable')).toBe('false');
 
     const stylesEditButton = contentStylesButtons[1];
-    stylesEditButton.trigger('click');
+    await stylesEditButton.trigger('click');
 
     await flushPromises();
 
     expect(contentStylesContent.attributes('contenteditable')).toBe('true');
 
     const stylesCancelButton = contentStylesButtons[0];
-    stylesCancelButton.trigger('click');
+    await stylesCancelButton.trigger('click');
 
     await flushPromises();
 
@@ -313,14 +313,14 @@ describe('TemplateEditor.vue', () => {
 
     expect(wrapper.emitted().contentStylesChange).toBeUndefined();
 
-    stylesEditButton.trigger('click');
+    await stylesEditButton.trigger('click');
 
     await flushPromises();
 
     expect(contentStylesContent.attributes('contenteditable')).toBe('true');
 
     const stylesConfirmButton = contentStylesButtons[2];
-    stylesConfirmButton.trigger('click');
+    await stylesConfirmButton.trigger('click');
 
     await flushPromises();
 
@@ -358,14 +358,14 @@ describe('TemplateEditor.vue', () => {
     expect(sampleDataContent.attributes('contenteditable')).toBe('false');
 
     const dataEditButton = sampleDataButtons[1];
-    dataEditButton.trigger('click');
+    await dataEditButton.trigger('click');
 
     await flushPromises();
 
     expect(sampleDataContent.attributes('contenteditable')).toBe('true');
 
     const dataCancelButton = sampleDataButtons[0];
-    dataCancelButton.trigger('click');
+    await dataCancelButton.trigger('click');
 
     await flushPromises();
 
@@ -373,14 +373,14 @@ describe('TemplateEditor.vue', () => {
 
     expect(wrapper.emitted().sampleDataChange).toBeUndefined();
 
-    dataEditButton.trigger('click');
+    await dataEditButton.trigger('click');
 
     await flushPromises();
 
     expect(sampleDataContent.attributes('contenteditable')).toBe('true');
 
     const dataConfirmButton = sampleDataButtons[2];
-    dataConfirmButton.trigger('click');
+    await dataConfirmButton.trigger('click');
 
     await flushPromises();
 

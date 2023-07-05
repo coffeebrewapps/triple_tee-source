@@ -54,7 +54,7 @@ describe('Breadcrumbs.vue', () => {
     expect(navs.length).toBe(1);
     expect(navs[0].html()).toContain('Data Admin');
 
-    navs[0].trigger('click');
+    await navs[0].trigger('click');
     expect(push).toHaveBeenCalledWith({ name: 'Data Admin' });
   });
 
@@ -114,7 +114,7 @@ describe('Breadcrumbs.vue', () => {
     expect(navs[0].html()).toContain('Contacts');
     expect(navs[1].html()).toContain('Contact Details');
 
-    navs[0].trigger('click');
+    await navs[0].trigger('click');
     expect(push).toHaveBeenCalledWith({ name: 'Contacts' });
   });
 });

@@ -204,7 +204,7 @@ describe('DataAdmin.vue', () => {
 
     const submitButton = pageContainer.getComponent(TButton);
     expect(submitButton.exists()).toBeTruthy();
-    submitButton.trigger('click');
+    await submitButton.trigger('click');
 
     await flushPromises();
 

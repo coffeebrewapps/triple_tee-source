@@ -90,13 +90,13 @@ describe('SystemAlerts.vue', () => {
     const toggle = alertsContainer.get('.toggle');
     expect(toggle.exists()).toBeTruthy();
 
-    toggle.trigger('click');
+    await toggle.trigger('click');
 
     await flushPromises();
 
     expect(alertsContainer.classes()).toContain('show');
 
-    toggle.trigger('click');
+    await toggle.trigger('click');
 
     await flushPromises();
 
