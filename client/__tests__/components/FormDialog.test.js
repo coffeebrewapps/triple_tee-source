@@ -159,7 +159,7 @@ describe('FormDialog.vue', () => {
     const formDialog = wrapper.get('.form-dialog');
     const dataFormComp = formDialog.findComponent(DataForm);
 
-    dataFormComp.vm.$emit('submit', Object.assign({}, formData, { name: 'Coffee Brew Apps' }));
+    await dataFormComp.vm.$emit('submit', Object.assign({}, formData, { name: 'Coffee Brew Apps' }));
 
     await flushPromises();
 
@@ -193,7 +193,7 @@ describe('FormDialog.vue', () => {
     const formDialog = wrapper.get('.form-dialog');
     const dataFormComp = formDialog.findComponent(DataForm);
 
-    dataFormComp.vm.$emit('cancel');
+    await dataFormComp.vm.$emit('cancel');
 
     await flushPromises();
 
@@ -222,7 +222,7 @@ describe('FormDialog.vue', () => {
     const formDialog = wrapper.get('.form-dialog');
     const dataFormComp = formDialog.findComponent(DataForm);
 
-    dataFormComp.vm.$emit('cancel');
+    await dataFormComp.vm.$emit('cancel');
 
     await flushPromises();
 

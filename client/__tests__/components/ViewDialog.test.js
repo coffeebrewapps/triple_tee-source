@@ -207,7 +207,7 @@ describe('ViewDialog.vue', () => {
     const buttonComp = viewDialogComp.getComponent(TButton);
     expect(buttonComp.exists()).toBeTruthy();
 
-    buttonComp.vm.$emit('click');
+    await buttonComp.vm.$emit('click');
 
     await flushPromises();
 

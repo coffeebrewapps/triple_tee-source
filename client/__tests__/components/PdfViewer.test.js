@@ -73,7 +73,7 @@ describe('PdfViewer.vue', () => {
     expect(downloadAnchor.attributes('download')).toEqual(downloadFile);
     expect(downloadAnchor.attributes('href')).toEqual(downloadLink);
 
-    downloadButtonComp.vm.$emit('click');
+    await downloadButtonComp.vm.$emit('click');
 
     await flushPromises();
 

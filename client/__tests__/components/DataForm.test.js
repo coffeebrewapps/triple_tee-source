@@ -749,7 +749,7 @@ describe('DataForm.vue', () => {
       errorMessage: '',
     }));
 
-    row2Field3Comp.vm.$emit('offsetChange', 5);
+    await row2Field3Comp.vm.$emit('offsetChange', 5);
 
     await flushPromises();
 
@@ -852,7 +852,7 @@ describe('DataForm.vue', () => {
     const row3Field1Input = dataRow3Fields[0].get('.field-input');
     const row3Field1Comp = row3Field1Input.findComponent(TFilePicker);
 
-    row3Field1Comp.vm.$emit(
+    await row3Field1Comp.vm.$emit(
       'update:modelValue',
       new File(['logo'], 'logo.png', {
         type: 'image/png',
@@ -920,7 +920,7 @@ describe('DataForm.vue', () => {
     const row3Field1Input = dataRow3Fields[0].get('.field-input');
     const row3Field1Comp = row3Field1Input.findComponent(TFilePicker);
 
-    row3Field1Comp.vm.$emit(
+    await row3Field1Comp.vm.$emit(
       'update:modelValue',
       new File(['banner'], 'banner.png', {
         type: 'image/png',

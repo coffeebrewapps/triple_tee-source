@@ -180,7 +180,7 @@ describe('TemplateEditor.vue', () => {
     const generateButton = buttons.getComponent(TButton);
     expect(generateButton.exists()).toBeTruthy();
 
-    generateButton.vm.$emit('click');
+    await generateButton.vm.$emit('click');
 
     await flushPromises();
 
