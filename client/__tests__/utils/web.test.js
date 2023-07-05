@@ -94,6 +94,33 @@ describe('list', () => {
       });
   });
 
+  test('when listing indexes and store returns success should return indexes', async() => {
+    vi.spyOn(dataStore, 'downloadIndexes').mockImplementation((modelClass, params) => {
+      return { unique: {}, foreign: {}, filter: {} };
+    });
+
+    webAccess.list('indexes', {})
+      .then((result) => {
+        expect(result).toEqual({ unique: {}, foreign: {}, filter: {} });
+      });
+  });
+
+  test('when using default function with suffix and store returns success should return data', async() => {
+    vi.spyOn(dataStore, 'list').mockImplementation((modelClass, params) => {
+      return { data: { total: 1, data: [{ id: '1' }] } };
+    });
+
+    webAccess.list('chart_configs', {}, { path: 'data' })
+      .then((result) => {
+        expect(result).toEqual({
+          data: {
+            total: 1,
+            data: [{ id: '1' }],
+          },
+        });
+      });
+  });
+
   test('when args have suffix and store returns success should return data', async() => {
     const customList = vi.fn((modelClass, params) => {
       return { data: { total: 1, data: [{ id: '1' }] } };

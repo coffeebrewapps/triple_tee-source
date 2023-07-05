@@ -315,11 +315,7 @@ export function useInputHelper(schemas) {
       }
 
       if (objectField(field)) {
-        if (notEmpty(fieldValue)) {
-          resolve(JSON.stringify(fieldValue, false, 4));
-        } else {
-          resolve(fieldValue);
-        }
+        resolve(JSON.stringify(fieldValue, false, 4));
         return;
       }
 
@@ -566,7 +562,7 @@ export function useInputHelper(schemas) {
   }
 
   async function fetchOptions(field, offset) {
-    const options = schemasMap.value[field].options || {};
+    const options = schemasMap.value[field].options;
     if (options.server) {
       const limit = options.limit || 5;
       return new Promise((resolve, reject) => {
@@ -585,6 +581,15 @@ export function useInputHelper(schemas) {
               }),
             };
             resolve(formatInputOptionsData(field, offset, limit, dataFromServer));
+          })
+          .catch((error) => {
+            logger.error(`Error fetching options for field ${field}`, error);
+            resolve({
+              data: [],
+              total: 0,
+              loading: false,
+              pagination: { offset: 0, limit: 5, client: false },
+            });
           });
       });
     } else {
@@ -615,9 +620,6 @@ export function useInputHelper(schemas) {
             data[field] = value;
           });
           resolve(data);
-        })
-        .catch((err) => {
-          reject(err);
         });
     });
   }

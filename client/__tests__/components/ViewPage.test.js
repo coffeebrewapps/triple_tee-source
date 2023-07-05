@@ -23,6 +23,8 @@ const data = {
   accountNumber: null,
   country: 'SGP',
   tags: ['1'],
+  includeTags: [],
+  excludeTags: null,
   includes: {
     country: {
       1: {
@@ -92,6 +94,44 @@ const dataFields = [
       label: (record) => `${record.category}:${record.name}`,
     },
   },
+  {
+    key: 'includeTags',
+    type: 'multiSelect',
+    label: 'Include Tags',
+    reference: { label: (record) => `${record.category}:${record.name}` },
+    isTags: true,
+    listable: true,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+    filterable: true,
+    options: {
+      server: true,
+      pagination: true,
+      modelClass: 'tags',
+      value: (record) => record.id,
+      label: (record) => `${record.category}:${record.name}`,
+    },
+  },
+  {
+    key: 'excludeTags',
+    type: 'multiSelect',
+    label: 'Exclude Tags',
+    reference: { label: (record) => `${record.category}:${record.name}` },
+    isTags: true,
+    listable: true,
+    viewable: true,
+    creatable: true,
+    updatable: true,
+    filterable: true,
+    options: {
+      server: true,
+      pagination: true,
+      modelClass: 'tags',
+      value: (record) => record.id,
+      label: (record) => `${record.category}:${record.name}`,
+    },
+  },
 ];
 
 const fieldsLayout = [
@@ -99,6 +139,7 @@ const fieldsLayout = [
   { accountNumber: 'md' },
   { country: 'lg' },
   { tags: 'lg' },
+  { includeTags: 'md', excludeTags: 'md' },
 ];
 
 describe('ViewPage.vue', () => {
@@ -125,7 +166,7 @@ describe('ViewPage.vue', () => {
     expect(detailsContainer.exists()).toBeTruthy();
 
     const dataRows = detailsContainer.findAll('.data-row');
-    expect(dataRows.length).toBe(4);
+    expect(dataRows.length).toBe(5);
 
     const row1DataFields = dataRows[0].findAll('.data-field');
     expect(row1DataFields.length).toBe(2);
@@ -173,5 +214,22 @@ describe('ViewPage.vue', () => {
     expect(tagsFieldLabel.text()).toBe('Tags');
     const tagsFieldValue = tagsField.get('.field-value');
     expect(tagsFieldValue.text()).toBe('company:abc');
+
+    const row5DataFields = dataRows[4].findAll('.data-field');
+    expect(row5DataFields.length).toBe(2);
+
+    const includeTagsField = row5DataFields[0];
+    expect(includeTagsField.exists()).toBeTruthy();
+    const includeTagsFieldLabel = includeTagsField.get('.field-label');
+    expect(includeTagsFieldLabel.text()).toBe('Include Tags');
+    const includeTagsFieldValue = includeTagsField.get('.field-value');
+    expect(includeTagsFieldValue.text()).toBe('--- no value ---');
+
+    const excludeTagsField = row5DataFields[1];
+    expect(excludeTagsField.exists()).toBeTruthy();
+    const excludeTagsFieldLabel = excludeTagsField.get('.field-label');
+    expect(excludeTagsFieldLabel.text()).toBe('Exclude Tags');
+    const excludeTagsFieldValue = excludeTagsField.get('.field-value');
+    expect(excludeTagsFieldValue.text()).toBe('--- no value ---');
   });
 });

@@ -1,69 +1,8 @@
 import { setActivePinia, createPinia } from 'pinia';
+import { useDataAccess } from '../../src/utils/dataAccess.js';
 import { useInputHelper } from '../../src/utils/input.js';
 
-vi.mock('../../src/utils/dataAccess.js', () => {
-  return {
-    useDataAccess: () => {
-      return {
-        view: (modelClass, id, params) => {
-          return new Promise((resolve, reject) => {
-            if (modelClass === 'tags') {
-              if (id === '1') {
-                resolve({ id: '1', category: 'company', name: 'abc' });
-              } else {
-                resolve({ id: '2', category: 'company', name: 'xyz' });
-              }
-            } else if (modelClass === 'currencies') {
-              if (id === '1') {
-                resolve({ id: '1', code: 'USD' });
-              } else {
-                resolve({ id: '2', code: 'SGD' });
-              }
-            } else if (modelClass === 'documents') {
-              if (id === '1') {
-                resolve({
-                  id: '1',
-                  rawData: 'asdfasdfasdf',
-                  filename: 'logo.png',
-                  mimeType: 'image/png',
-                });
-              } else if (id === '2') {
-                resolve({
-                  id: '2',
-                  rawData: 'asdfasdfasdf',
-                  filename: 'invalid.png',
-                  mimeType: 'image/png',
-                });
-              } else {
-                reject(new Error('notFound'));
-              }
-            } else {
-              resolve({});
-            }
-          });
-        },
-        list: (modelClass, pagination) => {
-          return new Promise((resolve, reject) => {
-            if (modelClass === 'tags') {
-              resolve({
-                total: 2,
-                data: [
-                  { id: '1', category: 'company', name: 'abc' },
-                  { id: '2', category: 'company', name: 'xyz' },
-                ],
-              });
-            } else {
-              resolve({
-                total: 0,
-                data: [],
-              });
-            }
-          });
-        },
-      };
-    },
-  };
-});
+vi.mock('../../src/utils/dataAccess.js');
 
 vi.mock('../../src/utils/file.js', () => {
   return {
@@ -82,6 +21,80 @@ vi.mock('../../src/utils/file.js', () => {
     },
   };
 });
+
+const tags = {
+  1: { id: '1', category: 'company', name: 'abc' },
+  2: { id: '2', category: 'company', name: 'xyz' },
+};
+
+const currencies = {
+  1: { id: '1', code: 'USD' },
+  2: { id: '2', code: 'SGD' },
+};
+
+const documents = {
+  1: {
+    id: '1',
+    rawData: 'asdfasdfasdf',
+    filename: 'logo.png',
+    mimeType: 'image/png',
+  },
+  2: {
+    id: '2',
+    rawData: 'asdfasdfasdf',
+    filename: 'invalid.png',
+    mimeType: 'image/png',
+  },
+};
+
+const listRecords = vi.fn((modelClass, pagination) => {
+  return new Promise((resolve, reject) => {
+    if (modelClass === 'tags') {
+      resolve({
+        total: Object.keys(tags).length,
+        data: Object.values(tags),
+      });
+    } else if (modelClass === 'currencies') {
+      resolve({
+        total: 0,
+        data: [],
+      });
+    } else {
+      reject(new Error('notFound'));
+    }
+  });
+});
+
+const viewRecord = vi.fn((modelClass, id, params) => {
+  return new Promise((resolve, reject) => {
+    if (modelClass === 'tags') {
+      if (tags[id]) {
+        resolve(tags[id]);
+      } else {
+        reject(new Error('notFound'));
+      }
+    } else if (modelClass === 'currencies') {
+      if (currencies[id]) {
+        resolve(currencies[id]);
+      } else {
+        reject(new Error('notFound'));
+      }
+    } else if (modelClass === 'documents') {
+      if (documents[id]) {
+        resolve(documents[id]);
+      } else {
+        reject(new Error('notFound'));
+      }
+    } else {
+      resolve({});
+    }
+  });
+});
+
+const mockDataAccess = {
+  list: listRecords,
+  view: viewRecord,
+};
 
 function recordValue(record) {
   return record.id;
@@ -292,6 +305,10 @@ beforeEach(() => {
       locale: 'en-SG',
     }),
   }));
+
+  useDataAccess.mockImplementation(() => {
+    return mockDataAccess;
+  });
 
   helper = useInputHelper(schemas);
 });
@@ -1672,30 +1689,21 @@ describe('formatDataForShow', () => {
     const field = 'category';
     const record = { category: 'company' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe('company');
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe('company');
   });
 
   test('when field value is empty but has default value should return default value', async() => {
     const field = 'startingNumber';
     const record = {};
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe(1);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe(1);
   });
 
   test('when field value is empty and has no default value should return undefined', async() => {
     const field = 'category';
     const record = {};
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBeUndefined();
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBeUndefined();
   });
 
   test('when object field value is not empty should return string', async() => {
@@ -1707,25 +1715,19 @@ describe('formatDataForShow', () => {
       },
     };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual(
-          `{\n` +
-          `    "foo": "bar",\n` +
-          `    "alice": "bob"\n` +
-          `}`
-        );
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual(
+      `{\n` +
+      `    "foo": "bar",\n` +
+      `    "alice": "bob"\n` +
+      `}`
+    );
   });
 
   test('when object field value is empty should return undefined', async() => {
     const field = 'customFields';
     const record = {};
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBeUndefined();
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBeUndefined();
   });
 
   test('when file field and has includes should return foreign value in File', async() => {
@@ -1743,41 +1745,32 @@ describe('formatDataForShow', () => {
       },
     };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe('fakeFile-logo.png-asdfasdfasdf-image/png');
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe('fakeFile-logo.png-asdfasdfasdf-image/png');
   });
 
   test('when file field and has no includes should fetch from server and set as includes', async() => {
     const field = 'image';
     const record = { image: '1' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe('fakeFile-logo.png-asdfasdfasdf-image/png');
-        expect(record.includes).toEqual({
-          image: {
-            1: {
-              id: '1',
-              rawData: 'asdfasdfasdf',
-              filename: 'logo.png',
-              mimeType: 'image/png',
-            },
-          },
-        });
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe('fakeFile-logo.png-asdfasdfasdf-image/png');
+    expect(record.includes).toEqual({
+      image: {
+        1: {
+          id: '1',
+          rawData: 'asdfasdfasdf',
+          filename: 'logo.png',
+          mimeType: 'image/png',
+        },
+      },
+    });
   });
 
   test('when file field and has no includes and fetch fail should return null', async() => {
     const field = 'image';
     const record = { image: '3' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBeNull();
-        expect(record.includes).toBeUndefined();
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBeNull();
+    expect(record.includes).toBeUndefined();
   });
 
   test('when file field and has includes but convert to File fail should return null', async() => {
@@ -1795,71 +1788,50 @@ describe('formatDataForShow', () => {
       },
     };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBeNull();
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBeNull();
   });
 
   test('when file field and has no includes but convert fetched data from server fail should return null', async() => {
     const field = 'image';
     const record = { image: '2' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBeNull();
-        expect(record.includes).toBeUndefined();
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBeNull();
+    expect(record.includes).toBeUndefined();
   });
 
   test('when text field should return value as-is', async() => {
     const field = 'id';
     const record = { id: '1' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe('1');
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe('1');
   });
 
   test('when textarea field should return value as-is', async() => {
     const field = 'description';
     const record = { description: 'Implementation' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe('Implementation');
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe('Implementation');
   });
 
   test('when number field should return value as-is', async() => {
     const field = 'startingNumber';
     const record = { startingNumber: 2 };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe(2);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe(2);
   });
 
   test('when date field with date value should return value as-is', async() => {
     const field = 'startDate';
     const record = { startDate: new Date('2023-04-11') };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual(new Date('2023-04-11'));
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual(new Date('2023-04-11'));
   });
 
   test('when date field with string value should return date', async() => {
     const field = 'startDate';
     const record = { startDate: '2023-04-11' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual(new Date('2023-04-11'));
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual(new Date('2023-04-11'));
   });
 
   test('when date field with range value should return date range', async() => {
@@ -1871,23 +1843,32 @@ describe('formatDataForShow', () => {
       },
     };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual({
-          startDate: new Date('2023-04-11'),
-          endDate: new Date('2023-04-15'),
-        });
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual({
+      startDate: new Date('2023-04-11'),
+      endDate: new Date('2023-04-15'),
+    });
+  });
+
+  test('when date field with half range value should return date range', async() => {
+    const field = 'startDate';
+    const record = {
+      startDate: {
+        startDate: '2023-04-11',
+        endDate: null,
+      },
+    };
+
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual({
+      startDate: new Date('2023-04-11'),
+      endDate: null,
+    });
   });
 
   test('when datetime field with string value should return datetime', async() => {
     const field = 'createdAt';
     const record = { createdAt: '2023-04-11T12:34:56.234Z' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual(new Date('2023-04-11T12:34:56.234Z'));
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual(new Date('2023-04-11T12:34:56.234Z'));
   });
 
   test('when datetime field with range value should return datetime range', async() => {
@@ -1899,33 +1880,39 @@ describe('formatDataForShow', () => {
       },
     };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual({
-          startTime: new Date('2023-04-11T00:00:00.000Z'),
-          endTime: new Date('2023-04-15T23:59:59.999Z'),
-        });
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual({
+      startTime: new Date('2023-04-11T00:00:00.000Z'),
+      endTime: new Date('2023-04-15T23:59:59.999Z'),
+    });
+  });
+
+  test('when datetime field with half range value should return datetime range', async() => {
+    const field = 'createdAt';
+    const record = {
+      createdAt: {
+        startTime: '2023-04-11T00:00:00.000Z',
+        endTime: null,
+      },
+    };
+
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual({
+      startTime: new Date('2023-04-11T00:00:00.000Z'),
+      endTime: null,
+    });
   });
 
   test('when enum field should return field value as-is', async() => {
     const field = 'scale';
     const record = { scale: 'hour' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe('hour');
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe('hour');
   });
 
   test('when select field should return field value as-is', async() => {
     const field = 'transactionType';
     const record = { transactionType: 'income' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toBe('income');
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toBe('income');
   });
 
   test('when singleSelect field and has fetched options should return formatted options', async() => {
@@ -1953,10 +1940,9 @@ describe('formatDataForShow', () => {
     ];
 
     helper = useInputHelper(combinedSchemas);
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual([{ value: '1', label: 'USD' }]);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '1', label: 'USD' },
+    ]);
   });
 
   test('when multiSelect field and has fetched options should return formatted options', async() => {
@@ -1985,13 +1971,10 @@ describe('formatDataForShow', () => {
     ];
 
     helper = useInputHelper(combinedSchemas);
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual([
-          { value: '1', label: 'company:abc' },
-          { value: '2', label: 'company:xyz' },
-        ]);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '1', label: 'company:abc' },
+      { value: '2', label: 'company:xyz' },
+    ]);
   });
 
   test('when singleSelect field and has includes should return formatted options', async() => {
@@ -2006,10 +1989,9 @@ describe('formatDataForShow', () => {
       },
     };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual([{ value: '1', label: 'USD' }]);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '1', label: 'USD' },
+    ]);
   });
 
   test('when multiSelect field and has includes should return formatted options', async() => {
@@ -2024,36 +2006,48 @@ describe('formatDataForShow', () => {
       },
     };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual([
-          { value: '1', label: 'company:abc' },
-          { value: '2', label: 'company:xyz' },
-        ]);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '1', label: 'company:abc' },
+      { value: '2', label: 'company:xyz' },
+    ]);
   });
 
   test('when singleSelect field and has no includes nor fetched options should fetch from server', async() => {
     const field = 'currencyId';
     const record = { currencyId: '1' };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual([{ value: '1', label: 'USD' }]);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '1', label: 'USD' },
+    ]);
+  });
+
+  test('when singleSelect field and has options but fetch from server fail should return raw values', async() => {
+    const field = 'currencyId';
+    const record = { currencyId: '4' };
+
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '4', label: '4' },
+    ]);
   });
 
   test('when multiSelect field and has no includes nor fetched options should fetch from server', async() => {
     const field = 'tags';
     const record = { tags: ['1', '2'] };
 
-    helper.formatDataForShow(field, record)
-      .then((result) => {
-        expect(result).toEqual([
-          { value: '1', label: 'company:abc' },
-          { value: '2', label: 'company:xyz' },
-        ]);
-      });
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '1', label: 'company:abc' },
+      { value: '2', label: 'company:xyz' },
+    ]);
+  });
+
+  test('when multiSelect field and has options but fetch from server fail should return raw values', async() => {
+    const field = 'tags';
+    const record = { tags: ['4', '5'] };
+
+    await expect(helper.formatDataForShow(field, record)).resolves.toEqual([
+      { value: '4', label: '4' },
+      { value: '5', label: '5' },
+    ]);
   });
 });
 
@@ -2108,12 +2102,12 @@ describe('formatDataForSave', () => {
       category: null,
       startDate: null,
       createdAt: null,
-      startingNumber: null,
+      startingNumber: undefined,
       scale: null,
       transactionType: null,
-      tags: [],
-      includeTags: [],
-      currencyId: [],
+      tags: null,
+      includeTags: null,
+      currencyId: null,
       customFields: '',
     };
 
@@ -2248,6 +2242,12 @@ describe('formatFiltersForShow', () => {
       currencyId: [],
     });
   });
+
+  test('when not given filters should return empty filters', () => {
+    const result = helper.formatFiltersForShow();
+
+    expect(result).toEqual({});
+  });
 });
 
 describe('formatFiltersForLoad', () => {
@@ -2301,13 +2301,32 @@ describe('formatFiltersForLoad', () => {
     });
   });
 
-  test('when no values should return formatted filters', () => {
+  test('when date/datetime filters have half range should return formatted filters', () => {
+    const filters = {
+      startDate: {
+        endDate: '2023-01-01',
+      },
+      createdAt: {
+        endTime: '2023-12-31T23:59:59.999Z',
+      },
+    };
+
+    const result = helper.formatFiltersForLoad(filters);
+
+    expect(result).toEqual({
+      startDate: {
+        endDate: '2023-01-01',
+      },
+      createdAt: {
+        endTime: '2023-12-31T23:59:59.999Z',
+      },
+    });
+  });
+
+  test('when no values should return empty filters', () => {
     const filters = {
       category: null,
-      startDate: {
-        startDate: null,
-        endDate: null,
-      },
+      startDate: null,
       createdAt: null,
       scale: [],
       transactionType: [],
@@ -2317,6 +2336,12 @@ describe('formatFiltersForLoad', () => {
     };
 
     const result = helper.formatFiltersForLoad(filters);
+
+    expect(result).toEqual({});
+  });
+
+  test('when not given filters should return empty filters', () => {
+    const result = helper.formatFiltersForLoad();
 
     expect(result).toEqual({});
   });
@@ -2370,80 +2395,128 @@ describe('validateParams', () => {
 
 describe('fetchOptions', () => {
   test('when server options field has data should return options from server', async() => {
-    helper.fetchOptions('tags', 0)
-      .then((result) => {
-        expect(result).toEqual({
-          loading: false,
-          pagination: { offset: 0, limit: 5, client: false },
-          total: 2,
-          data: [
-            { value: '1', label: 'company:abc' },
-            { value: '2', label: 'company:xyz' },
-          ],
-        });
-      });
+    await expect(helper.fetchOptions('tags', 0)).resolves.toEqual({
+      loading: false,
+      pagination: { offset: 0, limit: 5, client: false },
+      total: 2,
+      data: [
+        { value: '1', label: 'company:abc' },
+        { value: '2', label: 'company:xyz' },
+      ],
+    });
   });
 
   test('when server options field has no data should return options from server', async() => {
-    helper.fetchOptions('currencyId', 0)
-      .then((result) => {
-        expect(result).toEqual({
-          loading: false,
-          pagination: { offset: 0, limit: 5, client: false },
-          total: 0,
-          data: [],
-        });
-      });
+    await expect(helper.fetchOptions('currencyId', 0)).resolves.toEqual({
+      loading: false,
+      pagination: { offset: 0, limit: 5, client: false },
+      total: 0,
+      data: [],
+    });
   });
 
   test('when client options field has data should return options as-is', async() => {
-    helper.fetchOptions('transactionType', 0)
-      .then((result) => {
-        expect(result).toEqual({
-          loading: false,
-          pagination: { offset: 0, limit: 5, client: true },
-          total: 4,
-          data: [
-            { value: 'income', label: 'Income' },
-            { value: 'incomeReversal', label: 'Income Reversal' },
-            { value: 'expense', label: 'Income' },
-            { value: 'expenseReversal', label: 'Income Reversal' },
-          ],
-        });
-      });
+    await expect(helper.fetchOptions('transactionType', 0)).resolves.toEqual({
+      loading: false,
+      pagination: { offset: 0, limit: 5, client: true },
+      total: 4,
+      data: [
+        { value: 'income', label: 'Income' },
+        { value: 'incomeReversal', label: 'Income Reversal' },
+        { value: 'expense', label: 'Income' },
+        { value: 'expenseReversal', label: 'Income Reversal' },
+      ],
+    });
   });
 });
 
 describe('initOptionsData', () => {
   test('should fetch all server-side options', async() => {
-    helper.initOptionsData()
-      .then((result) => {
-        expect(result).toEqual({
-          tags: {
-            loading: false,
-            pagination: { offset: 0, limit: 5, client: false },
-            total: 2,
-            data: [
-              { value: '1', label: 'company:abc' },
-              { value: '2', label: 'company:xyz' },
-            ],
-          },
-          includeTags: {
-            loading: false,
-            pagination: { offset: 0, limit: 5, client: false },
-            total: 2,
-            data: [
-              { value: '1', label: 'company:abc' },
-              { value: '2', label: 'company:xyz' },
-            ],
-          },
-          currencyId: {
-            loading: false,
-            pagination: { offset: 0, limit: 5, client: false },
-            total: 0,
-            data: [],
-          },
-        });
-      });
+    await expect(helper.initOptionsData()).resolves.toEqual(expect.objectContaining({
+      tags: {
+        loading: false,
+        pagination: { offset: 0, limit: 5, client: false },
+        total: 2,
+        data: [
+          { value: '1', label: 'company:abc' },
+          { value: '2', label: 'company:xyz' },
+        ],
+      },
+      includeTags: {
+        loading: false,
+        pagination: { offset: 0, limit: 5, client: false },
+        total: 2,
+        data: [
+          { value: '1', label: 'company:abc' },
+          { value: '2', label: 'company:xyz' },
+        ],
+      },
+      currencyId: {
+        loading: false,
+        pagination: { offset: 0, limit: 5, client: false },
+        total: 0,
+        data: [],
+      },
+    }));
+  });
+
+  test('when fetch fail should return empty options data', async() => {
+    helper = useInputHelper([
+      {
+        key: 'tags',
+        type: 'multiSelect',
+        label: 'Tags',
+        isTags: true,
+        reference: { label: tagLabel },
+        listable: true,
+        viewable: true,
+        creatable: true,
+        updatable: true,
+        filterable: true,
+        options: {
+          server: true,
+          pagination: true,
+          modelClass: 'tags',
+          value: recordValue,
+          label: tagLabel,
+        },
+      },
+      {
+        key: 'country',
+        type: 'singleSelect',
+        label: 'Country',
+        reference: { label: (record) => record.countryName },
+        listable: true,
+        viewable: true,
+        creatable: true,
+        updatable: true,
+        filterable: true,
+        options: {
+          server: true,
+          pagination: true,
+          modelClass: 'countries',
+          value: (record) => record.id,
+          label: (record) => record.countryName,
+        },
+      },
+    ]);
+
+    await expect(helper.initOptionsData()).resolves.toEqual({
+      tags: {
+        data: [
+          { value: '1', label: 'company:abc' },
+          { value: '2', label: 'company:xyz' },
+        ],
+        total: 2,
+        loading: false,
+        pagination: { offset: 0, limit: 5, client: false },
+      },
+      country: {
+        data: [],
+        total: 0,
+        loading: false,
+        pagination: { offset: 0, limit: 5, client: false },
+      },
+    });
   });
 });

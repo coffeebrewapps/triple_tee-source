@@ -213,6 +213,51 @@ describe('unregisterListener', () => {
       },
     });
   });
+
+  test('when has existing listener for route but event type to unregister not exists should do nothing', () => {
+    shortcutsStore.registerListener(
+      {
+        route: '/work_logs',
+        eventType: 'keydown-Escape',
+      },
+      {
+        id: 'CloseDialog-StartTask',
+        invoke: (payload) => {},
+      }
+    );
+
+    expect(shortcutsStore.listeners).toEqual({
+      '/work_logs': {
+        'keydown-Escape': [
+          {
+            id: 'CloseDialog-StartTask',
+            invoke: expect.anything(),
+          },
+        ],
+      },
+    });
+
+    shortcutsStore.unregisterListener(
+      {
+        route: '/work_logs',
+        eventType: 'keydown-Enter',
+      },
+      {
+        id: 'CloseDialog-StartTask',
+      }
+    );
+
+    expect(shortcutsStore.listeners).toEqual({
+      '/work_logs': {
+        'keydown-Escape': [
+          {
+            id: 'CloseDialog-StartTask',
+            invoke: expect.anything(),
+          },
+        ],
+      },
+    });
+  });
 });
 
 describe('emitShortcut', () => {
@@ -295,6 +340,39 @@ describe('emitShortcut', () => {
       {
         route: '/tags',
         eventType: 'keydown-Escape',
+      },
+      payload
+    );
+    expect(startTaskSpy).not.toHaveBeenCalled();
+    expect(payload.invoked).toBeUndefined();
+  });
+
+  test('when event type not found for route should do nothing', () => {
+    const startTaskListener = {
+      id: 'CloseDialog-StartTask',
+      invoke: (payload) => {
+        if (payload.target === 'StartTask') {
+          payload.invoked = 'StartTask';
+        }
+      },
+    };
+
+    shortcutsStore.registerListener(
+      {
+        route: '/work_logs',
+        eventType: 'keydown-Escape',
+      },
+      startTaskListener
+    );
+
+    const startTaskSpy = vi.spyOn(startTaskListener, 'invoke');
+    const payload = { target: 'StartTask' };
+
+    expect(payload.invoked).toBeFalsy();
+    shortcutsStore.emitShortcut(
+      {
+        route: '/work_logs',
+        eventType: 'keydown-Enter',
       },
       payload
     );

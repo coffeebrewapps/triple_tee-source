@@ -266,4 +266,30 @@ describe('WorkflowContainer.vue', () => {
     const buttons = actions.findAllComponents(TButton);
     expect(buttons.length).toBe(0);
   });
+
+  test('when there is only one step should not render button', async() => {
+    const wrapper = await mount(WorkflowContainer, {
+      props: {
+        steps: [
+          { title: 'Only Step' },
+        ],
+        currentStepNumber: 0,
+      },
+    });
+
+    await flushPromises();
+
+    const workflowContainer = wrapper.get('.workflow-container');
+    expect(workflowContainer.exists()).toBeTruthy();
+
+    const breadcrumbsContainer = workflowContainer.get('.step-breadcrumbs');
+    expect(breadcrumbsContainer.exists()).toBeTruthy();
+
+    const breadcrumbs = breadcrumbsContainer.findAll('.step-breadcrumb');
+    expect(breadcrumbs.length).toBe(1);
+
+    const onlyStep = breadcrumbs[0].html();
+    expect(onlyStep).toContain('Only Step');
+    expect(onlyStep).toContain('active');
+  });
 });

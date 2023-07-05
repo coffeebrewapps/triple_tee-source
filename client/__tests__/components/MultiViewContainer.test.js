@@ -272,4 +272,68 @@ describe('MultiViewContainer.vue', () => {
     expect(push).not.toHaveBeenCalledWith();
     expect(wrapper.vm.selectedView).toBe(2);
   });
+
+  test('when trigger route with view should change route', async() => {
+    const updateRoute = vi.fn();
+
+    onBeforeRouteUpdate.mockImplementation((cb) => {
+      const to = {
+        name: 'View 2',
+      };
+
+      const from = {
+      };
+
+      if (cb(to, from)) {
+        updateRoute();
+      }
+    });
+
+    await mount(MultiViewContainer, {
+      props: {
+        heading: 'Test View Container',
+        views,
+      },
+      global: {
+        stubs: ['router-view'],
+      },
+    });
+
+    await flushPromises();
+
+    expect(updateRoute).toHaveBeenCalled();
+  });
+
+  test('when trigger route without view should do nothing', async() => {
+    const updateRoute = vi.fn();
+
+    onBeforeRouteUpdate.mockImplementation((cb) => {
+      const to = {
+        name: 'Invalid',
+      };
+
+      const from = {
+      };
+
+      if (cb(to, from)) {
+        updateRoute();
+      }
+    });
+
+    const wrapper = await mount(MultiViewContainer, {
+      props: {
+        heading: 'Test View Container',
+        views,
+      },
+      global: {
+        stubs: ['router-view'],
+      },
+    });
+
+    await flushPromises();
+
+    expect(wrapper.vm.selectedView).toBe(0);
+
+    expect(updateRoute).not.toHaveBeenCalled();
+  });
 });

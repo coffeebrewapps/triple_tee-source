@@ -7,7 +7,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useFormatter } from '@/utils/formatter';
 import { useValidations } from '@/utils/validations';
 import { useInputHelper } from '@/utils/input';
-import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
 /** import:stores **/
@@ -84,7 +83,6 @@ const {
 const systemConfigsStore = useSystemConfigsStore();
 const systemConfigs = systemConfigsStore.getSystemConfigs();
 const { isEmpty, notEmpty } = useValidations();
-const logger = useLogger();
 /** section:utils **/
 
 /** section:emit **/
@@ -109,14 +107,11 @@ function closeDialog() {
 const formattedRecord = ref();
 
 async function asyncFormatTag(row, tags, key) {
-  const promises = tags.map((tag) => {
+  const promises = (tags || []).map((tag) => {
     return new Promise((resolve, reject) => {
       formatTag(row, tag, key, systemConfigs.tagFormat)
         .then((result) => {
           resolve(result);
-        })
-        .catch((error) => {
-          reject(error);
         });
     });
   });
@@ -125,22 +120,17 @@ async function asyncFormatTag(row, tags, key) {
     Promise.all(promises)
       .then((results) => {
         resolve({ key, formattedValue: results });
-      })
-      .catch((error) => {
-        reject(error);
       });
   });
 }
 
 function formattedTag(record, field, i) {
-  if (formattedRecord.value[field]) {
-    return formattedRecord.value[field][i];
-  } else {
-    return record[field][i];
-  }
+  return formattedRecord.value[field][i];
 }
 
-onMounted(async() => {
+const isFormatted = ref(false);
+
+async function formatData() {
   const promises = tagsKeys.value.map((key) => {
     const value = props.record[key];
     return asyncFormatTag(props.record, value, key);
@@ -153,16 +143,19 @@ onMounted(async() => {
       results.forEach((result) => {
         formattedRecord.value[result.key] = result.formattedValue;
       });
-    })
-    .catch((error) => {
-      logger.error(`Error initializing page`, error);
+
+      isFormatted.value = true;
     });
+}
+
+onMounted(async() => {
+  await formatData();
 });
 </script>
 
 <template>
   <TDialog
-    v-if="formattedRecord"
+    v-if="isFormatted"
     v-model="dialog"
     :title="title"
   >
@@ -196,7 +189,7 @@ onMounted(async() => {
 
           <!-- hardcode format for tags because it is standard through the app --->
           <div
-            v-if="tagsField(field)"
+            v-if="tagsField(field) && notEmpty(record[field])"
             class="data-value tags"
           >
             <div
@@ -214,7 +207,18 @@ onMounted(async() => {
             >
               --- no value ---
             </div>
-          </div>
+          </div> <!-- tags:notNull -->
+
+          <div
+            v-if="tagsField(field) && isEmpty(record[field])"
+            class="data-value tags"
+          >
+            <div
+              class="no-value"
+            >
+              --- no value ---
+            </div>
+          </div> <!-- tags:null -->
         </div>
       </div>
     </template>

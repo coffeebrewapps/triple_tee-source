@@ -140,6 +140,39 @@ describe('TopNav.vue', () => {
     expect(push).toHaveBeenCalledWith({ name: 'Contacts' });
   });
 
+  test('when parent route does not exist should do nothing on back button click', async() => {
+    useRouter.mockImplementation(() => {
+      return {
+        getRoutes: () => {
+          return routes;
+        },
+        currentRoute: {
+          value: {
+            path: '/contacts/1',
+            name: 'Contacts Details',
+            meta: {
+              parentRoute: { name: 'Unknown' },
+            },
+          },
+        },
+        push,
+      };
+    });
+
+    const wrapper = await mount(TopNav);
+
+    await flushPromises();
+
+    const navContainer = wrapper.get('.nav-container');
+    const routesContainer = navContainer.get('.routes');
+    const routeContainer = routesContainer.find('.route');
+    const routeButton = routeContainer.findComponent(TButton);
+    expect(routeButton.exists()).toBeTruthy();
+
+    await routeButton.trigger('click');
+    expect(push).not.toHaveBeenCalled();
+  });
+
   test('should toggle theme', async() => {
     const eventsSpy = vi.spyOn(events, 'emitEvent');
 

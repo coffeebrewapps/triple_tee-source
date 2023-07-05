@@ -1,7 +1,7 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useDataAccess } from '@/utils/dataAccess';
-import { useEventsStore } from '@/stores/events';
+import { useLogger } from '@/utils/logger';
 
 import {
   TBar,
@@ -9,12 +9,17 @@ import {
 } from 'coffeebrew-vue-components';
 
 const dataAccess = useDataAccess();
-const events = useEventsStore();
+const logger = useLogger();
 
 const chartData = ref([]);
 
-const highlightColor = ref(getComputedStyle(document.documentElement).getPropertyValue('--color-text'));
-const lineColor = ref(getComputedStyle(document.documentElement).getPropertyValue('--color-border'));
+const highlightColor = computed(() => {
+  return window.getComputedStyle(document.documentElement).getPropertyValue('--color-text');
+});
+
+const lineColor = computed(() => {
+  return window.getComputedStyle(document.documentElement).getPropertyValue('--color-border');
+});
 
 const chartColors = computed(() => {
   return {
@@ -22,19 +27,6 @@ const chartColors = computed(() => {
     lineColor: lineColor.value,
   };
 });
-
-events.registerListener('themeChange', {
-  id: 'RefreshChartColors',
-  invoke: ({ newVal }) => {
-    refreshChartColors();
-  },
-});
-
-function refreshChartColors() {
-  chartData.value.forEach((chart) => {
-    chart.config.colors = chartColors.value;
-  });
-}
 
 function titleize(val) {
   return `${val[0].toUpperCase()}${val.slice(1)}`;
@@ -62,7 +54,8 @@ async function loadChartConfigs() {
               resolve({ config, result: chartResult });
             })
             .catch((error) => {
-              reject(error);
+              logger.error(`Error loading chart configs`, error);
+              resolve({ config: {}, result: [] });
             });
         });
       });
@@ -75,6 +68,7 @@ async function loadChartConfigs() {
 
             const chartConfig = {
               title: config.description,
+              colors: chartColors.value,
             };
 
             const data = [];
@@ -112,16 +106,12 @@ async function loadChartConfigs() {
         });
     })
     .catch((error) => {
-      console.error(error);
+      logger.error(`Error listing charts`, error);
     });
 }
 
 onMounted(async() => {
   await loadChartConfigs();
-});
-
-onBeforeUnmount(() => {
-  events.unregisterListener('themeChange', { id: 'RefreshChartColors' });
 });
 </script>
 

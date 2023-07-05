@@ -82,6 +82,34 @@ const contacts = {
   },
 };
 
+const schemas = vi.fn((modelClass) => {
+  return new Promise((resolve, reject) => {
+    resolve({
+      fields: {
+        id: {
+          type: 'text',
+        },
+        name: {
+          type: 'text',
+        },
+        accountNumber: {
+          type: 'text',
+        },
+        contactNumber1: {
+          type: 'text',
+        },
+        tags: {
+          type: 'array',
+          default: [],
+        },
+        establishedSince: {
+          type: 'date',
+        },
+      },
+    });
+  });
+});
+
 const listRecords = vi.fn((modelClass, params) => {
   return new Promise((resolve, reject) => {
     if (modelClass === 'contacts') {
@@ -103,10 +131,42 @@ const listRecords = vi.fn((modelClass, params) => {
   });
 });
 
+const viewRecord = vi.fn((modelClass, id, params) => {
+  return new Promise((resolve, reject) => {
+    if (modelClass === 'contacts') {
+      resolve(contacts[id]);
+    } else {
+      resolve({});
+    }
+  });
+});
+
+const createRecord = vi.fn((modelClass, params, multipart) => {
+  return new Promise((resolve, reject) => {
+    if (modelClass === 'contacts') {
+      if (params.name) {
+        resolve(Object.assign({}, params, { id: 3 }));
+      } else {
+        reject({
+          name: ['required'],
+        });
+      }
+    } else {
+      resolve({});
+    }
+  });
+});
+
 const updateRecord = vi.fn((modelClass, id, params, suffix, multipart) => {
   return new Promise((resolve, reject) => {
     if (modelClass === 'contacts') {
-      resolve(Object.assign({}, contacts[id], params));
+      if (params.name) {
+        resolve(Object.assign({}, contacts[id], params));
+      } else {
+        reject({
+          name: ['required'],
+        });
+      }
     } else {
       resolve({});
     }
@@ -145,6 +205,16 @@ const downloadModel = vi.fn((modelClass) => {
   });
 });
 
+const mockDataAccess = {
+  schemas,
+  list: listRecords,
+  view: viewRecord,
+  create: createRecord,
+  update: updateRecord,
+  remove: removeRecord,
+  download: downloadModel,
+};
+
 const createUrl = vi.fn((blob) => {
   return 'http://localhost/json';
 });
@@ -173,48 +243,7 @@ beforeEach(async() => {
   vi.setSystemTime(new Date('2023-04-12T12:34:56.123Z'));
 
   useDataAccess.mockImplementation(() => {
-    return {
-      schemas: vi.fn((modelClass) => {
-        return new Promise((resolve, reject) => {
-          resolve({
-            fields: {
-              id: {
-                type: 'text',
-              },
-              name: {
-                type: 'text',
-              },
-              accountNumber: {
-                type: 'text',
-              },
-              contactNumber1: {
-                type: 'text',
-              },
-              tags: {
-                type: 'array',
-                default: [],
-              },
-              establishedSince: {
-                type: 'date',
-              },
-            },
-          });
-        });
-      }),
-      list: listRecords,
-      view: vi.fn((modelClass, id, params) => {
-        return new Promise((resolve, reject) => {
-          if (modelClass === 'contacts') {
-            resolve(contacts[id]);
-          } else {
-            resolve({});
-          }
-        });
-      }),
-      update: updateRecord,
-      remove: removeRecord,
-      download: downloadModel,
-    };
+    return mockDataAccess;
   });
 });
 
@@ -290,6 +319,7 @@ const dataFields = [
     viewable: true,
     creatable: true,
     updatable: true,
+    filterable: true,
   },
 ];
 
@@ -300,6 +330,39 @@ const fieldsLayout = [
   { tags: 'lg' },
   { establishedSince: 'md' },
 ];
+
+const validations = {
+  create: {
+    establishedSince: [
+      (record) => {
+        if (!record.establishedSince) { return; }
+
+        const now = new Date();
+        if ((new Date(record.establishedSince)) > now) {
+          return {
+            name: 'pastDate',
+            params: {},
+          };
+        }
+      },
+    ],
+  },
+  update: {
+    establishedSince: [
+      (record) => {
+        if (!record.establishedSince) { return; }
+
+        const now = new Date();
+        if ((new Date(record.establishedSince)) > now) {
+          return {
+            name: 'pastDate',
+            params: {},
+          };
+        }
+      },
+    ],
+  },
+};
 
 const stubs = {
   TDatePicker: MockDatePicker,
@@ -395,6 +458,7 @@ describe('DataPage.vue', () => {
           viewable: true,
           creatable: true,
           updatable: true,
+          filterable: true,
         },
       ],
       data: [
@@ -548,6 +612,30 @@ describe('DataPage.vue', () => {
     expect(row2Established.text()).toBe('--- no value ---');
   });
 
+  test('when show heading true should render page heading', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+        showHeading: true,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    expect(pageContainer.exists()).toBeTruthy();
+
+    const heading = pageContainer.find('.heading');
+    expect(heading.exists()).toBeTruthy();
+    expect(heading.text()).toBe('Contacts');
+  });
+
   test('when click row should render view dialog', async() => {
     const wrapper = await mount(DataPage, {
       global: {
@@ -659,6 +747,7 @@ describe('DataPage.vue', () => {
           viewable: true,
           creatable: true,
           updatable: true,
+          filterable: true,
         },
       ],
       record: {
@@ -680,6 +769,56 @@ describe('DataPage.vue', () => {
     }));
   });
 
+  test('when click row view data access returns failure should render error alert', async() => {
+    useDataAccess.mockImplementation(() => {
+      return Object.assign({}, mockDataAccess, {
+        view: vi.fn((modelClass, id, params) => {
+          return new Promise((resolve, reject) => {
+            reject({
+              id: ['notFound'],
+            });
+          });
+        }),
+      });
+    });
+
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableBody = tableComp.get('tbody');
+    const bodyRows = tableBody.findAll('tr');
+
+    const row2Cols = bodyRows[1].findAll('td');
+    const row2Id = row2Cols[0];
+
+    await row2Id.trigger('click');
+
+    await flushPromises();
+
+    const errorAlertComp = pageContainer.findComponent(TAlert);
+    expect(errorAlertComp.exists()).toBeTruthy();
+    expect(errorAlertComp.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'Error',
+      content: `{\n    "id": [\n        "notFound"\n    ]\n}`,
+      width: 800,
+      height: 400,
+    }));
+  });
+
   test('when click create action should render form dialog', async() => {
     const wrapper = await mount(DataPage, {
       global: {
@@ -690,6 +829,7 @@ describe('DataPage.vue', () => {
         modelClass: 'contacts',
         dataFields,
         fieldsLayout,
+        validations,
       },
     });
 
@@ -783,6 +923,7 @@ describe('DataPage.vue', () => {
           viewable: true,
           creatable: true,
           updatable: true,
+          filterable: true,
         },
       ],
       fieldsLayout,
@@ -804,6 +945,137 @@ describe('DataPage.vue', () => {
       dialogTitle: 'Create Contacts',
       fullscreen: false,
       errorMessages: {},
+    }));
+
+    await createFormDialogComp.vm.$emit('submit', {
+      name: 'Company XYZ',
+      accountNumber: null,
+      contactNumber1: null,
+      tags: [],
+      establishedSince: new Date('2023-03-31'),
+    });
+
+    await flushPromises();
+
+    expect(createRecord).toHaveBeenCalledWith('contacts', expect.objectContaining({
+      name: 'Company XYZ',
+      accountNumber: null,
+      contactNumber1: null,
+      tags: [],
+      establishedSince: new Date('2023-03-31T00:00:00Z'),
+    }), false);
+  });
+
+  test('when create action validations fail should render error messages', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+        validations,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableActions = tableComp.get('.table-actions');
+    const actions = tableActions.findAll('.action');
+    const createAction = actions[0];
+
+    expect(pageContainer.findComponent(FormDialog).exists()).toBeFalsy();
+
+    await createAction.trigger('click', []);
+
+    await flushPromises();
+
+    const createFormDialogComp = pageContainer.findComponent(FormDialog);
+
+    await createFormDialogComp.vm.$emit('submit', {
+      name: 'Company XYZ',
+      accountNumber: null,
+      contactNumber1: null,
+      tags: [],
+      establishedSince: new Date('2023-05-31'),
+    });
+
+    await flushPromises();
+
+    expect(createRecord).not.toHaveBeenCalledWith();
+
+    expect(createFormDialogComp.props()).toEqual(expect.objectContaining({
+      errorMessages: {
+        establishedSince: [
+          {
+            name: 'pastDate',
+            params: {},
+          },
+        ],
+      },
+    }));
+  });
+
+  test('when create data access returns failure should render error messages', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableActions = tableComp.get('.table-actions');
+    const actions = tableActions.findAll('.action');
+    const createAction = actions[0];
+
+    expect(pageContainer.findComponent(FormDialog).exists()).toBeFalsy();
+
+    await createAction.trigger('click', []);
+
+    await flushPromises();
+
+    const createFormDialogComp = pageContainer.findComponent(FormDialog);
+
+    await createFormDialogComp.vm.$emit('submit', {
+      name: null,
+      accountNumber: null,
+      contactNumber1: null,
+      tags: [],
+      establishedSince: new Date('2023-05-31'),
+    });
+
+    await flushPromises();
+
+    expect(createRecord).toHaveBeenCalledWith('contacts', expect.objectContaining({
+      name: null,
+      accountNumber: null,
+      contactNumber1: null,
+      tags: [],
+      establishedSince: new Date('2023-05-31'),
+    }), false);
+
+    expect(createFormDialogComp.props()).toEqual(expect.objectContaining({
+      errorMessages: {
+        name: [
+          {
+            name: 'required',
+            params: {},
+          },
+        ],
+      },
     }));
   });
 
@@ -870,6 +1142,54 @@ describe('DataPage.vue', () => {
     expect(anchorClick).toHaveBeenCalled();
 
     expect(pageContainer.findComponent(TDialog).exists()).toBeFalsy();
+  });
+
+  test('when export action download data access returns falure should render error alert', async() => {
+    useDataAccess.mockImplementation(() => {
+      return Object.assign({}, mockDataAccess, {
+        download: vi.fn((modelClass, id, params) => {
+          return new Promise((resolve, reject) => {
+            reject({
+              root: ['unknown'],
+            });
+          });
+        }),
+      });
+    });
+
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableActions = tableComp.get('.table-actions');
+    const actions = tableActions.findAll('.action');
+    const exportAction = actions[1];
+
+    await exportAction.trigger('click', []);
+
+    await flushPromises();
+
+    const errorAlertComp = pageContainer.findComponent(TAlert);
+    expect(errorAlertComp.exists()).toBeTruthy();
+    expect(errorAlertComp.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'Error',
+      content: `{\n    "root": [\n        "unknown"\n    ]\n}`,
+      width: 800,
+      height: 400,
+    }));
   });
 
   test('when click export action should render download dialog and click cancel link to close', async() => {
@@ -1019,6 +1339,7 @@ describe('DataPage.vue', () => {
           viewable: true,
           creatable: true,
           updatable: true,
+          filterable: true,
         },
       ],
       fieldsLayout,
@@ -1059,6 +1380,184 @@ describe('DataPage.vue', () => {
       tags: ['1'],
       establishedSince: new Date('2023-03-12'),
     }, {}, false);
+  });
+
+  test('when click update action view data access returns failure should render error alert', async() => {
+    useDataAccess.mockImplementation(() => {
+      return Object.assign({}, mockDataAccess, {
+        view: vi.fn((modelClass, id, params) => {
+          return new Promise((resolve, reject) => {
+            reject({
+              id: ['notFound'],
+            });
+          });
+        }),
+      });
+    });
+
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableBody = tableComp.get('tbody');
+    const bodyRows = tableBody.findAll('tr');
+
+    const row2Cols = bodyRows[1].findAll('td');
+    const row2Actions = row2Cols[5];
+    const row2ActionIcons = row2Actions.findAll('i');
+    const row2Update = row2ActionIcons[0];
+
+    await row2Update.trigger('click');
+
+    await flushPromises();
+
+    const errorAlertComp = pageContainer.findComponent(TAlert);
+    expect(errorAlertComp.exists()).toBeTruthy();
+    expect(errorAlertComp.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'Error',
+      content: `{\n    "id": [\n        "notFound"\n    ]\n}`,
+      width: 800,
+      height: 400,
+    }));
+  });
+
+  test('when update action validations fail should render error messages', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+        validations,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableBody = tableComp.get('tbody');
+    const bodyRows = tableBody.findAll('tr');
+
+    const row2Cols = bodyRows[1].findAll('td');
+    const row2Actions = row2Cols[5];
+    const row2ActionIcons = row2Actions.findAll('i');
+    const row2Update = row2ActionIcons[0];
+
+    expect(pageContainer.findComponent(FormDialog).exists()).toBeFalsy();
+
+    await row2Update.trigger('click');
+
+    await flushPromises();
+
+    const row2UpdateFormDialogComp = pageContainer.findComponent(FormDialog);
+    expect(row2UpdateFormDialogComp.exists()).toBeTruthy();
+
+    await row2UpdateFormDialogComp.vm.$emit('submit', {
+      id: '2',
+      name: 'Company ABC',
+      accountNumber: '342-63462-742',
+      contactNumber1: null,
+      tags: [{ value: '1', label: 'company:abc' }],
+      establishedSince: new Date('2023-05-12'),
+    });
+
+    await flushPromises();
+
+    expect(updateRecord).not.toHaveBeenCalled();
+
+    expect(row2UpdateFormDialogComp.props()).toEqual(expect.objectContaining({
+      errorMessages: {
+        establishedSince: [
+          {
+            name: 'pastDate',
+            params: {},
+          },
+        ],
+      },
+    }));
+  });
+
+  test('when update data access returns failure should render error messages', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableBody = tableComp.get('tbody');
+    const bodyRows = tableBody.findAll('tr');
+
+    const row2Cols = bodyRows[1].findAll('td');
+    const row2Actions = row2Cols[5];
+    const row2ActionIcons = row2Actions.findAll('i');
+    const row2Update = row2ActionIcons[0];
+
+    expect(pageContainer.findComponent(FormDialog).exists()).toBeFalsy();
+
+    await row2Update.trigger('click');
+
+    await flushPromises();
+
+    const row2UpdateFormDialogComp = pageContainer.findComponent(FormDialog);
+    expect(row2UpdateFormDialogComp.exists()).toBeTruthy();
+
+    await row2UpdateFormDialogComp.vm.$emit('submit', {
+      id: '2',
+      name: null,
+      accountNumber: '342-63462-742',
+      contactNumber1: null,
+      tags: [{ value: '1', label: 'company:abc' }],
+      establishedSince: new Date('2023-05-12'),
+    });
+
+    await flushPromises();
+
+    expect(updateRecord).toHaveBeenCalled('contacts', '2', expect.objectContaining({
+      id: '2',
+      name: null,
+      accountNumber: '342-63462-742',
+      contactNumber1: null,
+      tags: [{ value: '1', label: 'company:abc' }],
+      establishedSince: new Date('2023-05-12'),
+    }), false);
+
+    expect(row2UpdateFormDialogComp.props()).toEqual(expect.objectContaining({
+      errorMessages: {
+        name: [
+          {
+            name: 'required',
+            params: {},
+          },
+        ],
+      },
+    }));
   });
 
   test('when click delete action should render delete confirmation dialog', async() => {
@@ -1161,6 +1660,58 @@ describe('DataPage.vue', () => {
     }));
   });
 
+  test('when delete action view data access returns failure should render error alert', async() => {
+    useDataAccess.mockImplementation(() => {
+      return Object.assign({}, mockDataAccess, {
+        view: vi.fn((modelClass, id, params) => {
+          return new Promise((resolve, reject) => {
+            reject({
+              id: ['notFound'],
+            });
+          });
+        }),
+      });
+    });
+
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableBody = tableComp.get('tbody');
+    const bodyRows = tableBody.findAll('tr');
+
+    const row1Cols = bodyRows[0].findAll('td');
+    const row1Actions = row1Cols[5];
+    const row1ActionIcons = row1Actions.findAll('i');
+    const row1Delete = row1ActionIcons[1];
+
+    await row1Delete.trigger('click');
+
+    await flushPromises();
+
+    const errorAlertComp = pageContainer.findComponent(TAlert);
+    expect(errorAlertComp.exists()).toBeTruthy();
+    expect(errorAlertComp.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'Error',
+      content: `{\n    "id": [\n        "notFound"\n    ]\n}`,
+      width: 800,
+      height: 400,
+    }));
+  });
+
   test('with filters should render filters', async() => {
     const wrapper = await mount(DataPage, {
       global: {
@@ -1175,10 +1726,15 @@ describe('DataPage.vue', () => {
           initData: {
             name: null,
             tags: [],
+            establishedSince: {
+              startDate: null,
+              endDate: null,
+            },
           },
           layout: [
             { name: 'md' },
             { tags: 'lg' },
+            { establishedSince: 'lg' },
           ],
         },
       },
@@ -1204,14 +1760,20 @@ describe('DataPage.vue', () => {
       modelValue: {
         name: null,
         tags: [],
+        establishedSince: {
+          startDate: null,
+          endDate: null,
+        },
       },
       fieldsLayout: [
         { name: 'md' },
         { tags: 'lg' },
+        { establishedSince: 'lg' },
       ],
       dataFields: [
         'name',
         'tags',
+        'establishedSince',
       ],
       schemas: [
         {
@@ -1243,6 +1805,17 @@ describe('DataPage.vue', () => {
             label: expect.anything(),
           },
         },
+        {
+          key: 'establishedSince',
+          type: 'daterange',
+          label: 'Est. Since',
+          defaultValue: expect.anything(),
+          listable: true,
+          viewable: true,
+          creatable: true,
+          updatable: true,
+          filterable: true,
+        },
       ],
       errorMessages: {},
       confirmButton: {
@@ -1268,6 +1841,10 @@ describe('DataPage.vue', () => {
     await filtersForm.vm.$emit('submit', {
       name: null,
       tags: [{ value: '1', label: 'company:abc' }],
+      establishedSince: {
+        startDate: null,
+        endDate: null,
+      },
     });
 
     await flushPromises();
@@ -1324,6 +1901,53 @@ describe('DataPage.vue', () => {
     expect(closeToggle.exists()).toBeTruthy();
 
     await closeToggle.trigger('click');
+
+    await flushPromises();
+
+    expect(filters.classes('collapsed')).toBeTruthy();
+  });
+
+  test('when keydown esc should collapse filters', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+        filters: {
+          initData: {
+            name: null,
+            tags: [],
+          },
+          layout: [
+            { name: 'md' },
+            { tags: 'lg' },
+          ],
+        },
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableActions = tableComp.get('.table-actions');
+    const actions = tableActions.findAll('.action');
+    const filterAction = actions[0];
+    const filters = pageContainer.get('.filters');
+
+    expect(filters.classes('collapsed')).toBeTruthy();
+
+    await filterAction.trigger('click');
+
+    await flushPromises();
+
+    expect(filters.classes('expanded')).toBeTruthy();
+
+    await pageContainer.trigger('keydown.esc');
 
     await flushPromises();
 

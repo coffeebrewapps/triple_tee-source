@@ -64,18 +64,14 @@ const systemConfigs = systemConfigsStore.getSystemConfigs();
 async function formatData() {
   const promises = [];
 
-  if (props.dataFields.length > 0) {
-    formattedData.value = props.dataFields.reduce((o, field) => {
-      const key = field.key;
-      o[key] = props.data[key];
-      if (tagsField(key)) {
-        promises.push(asyncFormatTag(props.data, key));
-      }
-      return o;
-    }, {});
-  } else {
-    formattedData.value = {};
-  }
+  formattedData.value = props.dataFields.reduce((o, field) => {
+    const key = field.key;
+    o[key] = props.data[key];
+    if (tagsField(key)) {
+      promises.push(asyncFormatTag(props.data, key));
+    }
+    return o;
+  }, {});
 
   Promise.all(promises)
     .then((results) => {
@@ -97,9 +93,6 @@ async function asyncFormatTag(record, key) {
       formatTag(record, tag, key, systemConfigs.tagFormat)
         .then((result) => {
           resolve(result);
-        })
-        .catch((error) => {
-          reject(error);
         });
     });
   });
@@ -108,9 +101,6 @@ async function asyncFormatTag(record, key) {
     Promise.all(promises)
       .then((results) => {
         resolve({ key, tags: results });
-      })
-      .catch((error) => {
-        reject(error);
       });
   });
 }
@@ -169,7 +159,7 @@ onMounted(async() => {
           </div> <!-- field-value:notTags -->
 
           <div
-            v-if="tagsField(field)"
+            v-if="tagsField(field) && notEmpty(data[field])"
             class="field-value"
           >
             <div
@@ -187,7 +177,18 @@ onMounted(async() => {
             >
               --- no value ---
             </div>
-          </div> <!-- field-value:tags -->
+          </div> <!-- field-value:tags:notNull -->
+
+          <div
+            v-if="tagsField(field) && isEmpty(data[field])"
+            class="field-value"
+          >
+            <div
+              class="no-value"
+            >
+              --- no value ---
+            </div>
+          </div> <!-- field-value:tags:null -->
         </div> <!-- data-field -->
       </div> <!-- data-row -->
     </div> <!-- details-container -->

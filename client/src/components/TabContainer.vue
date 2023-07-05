@@ -26,8 +26,6 @@ const emit = defineEmits(['tabChange']);
 const tabRefs = ref([]);
 
 function selectTab(tab) {
-  if (!tabRefs.value[tab]) { return; }
-
   tabRefs.value[tab].blur();
   emit('tabChange', tab);
 }
@@ -41,8 +39,6 @@ function navigateTab(tab) {
 }
 
 function blurTab(tab) {
-  if (!tabRefs.value[tab]) { return; }
-
   tabRefs.value[tab].blur();
 }
 /** section:global **/

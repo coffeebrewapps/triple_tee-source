@@ -66,17 +66,11 @@ const hasParentRoute = computed(() => {
 
 function findParentRoute() {
   return router.getRoutes().find((route) => {
-    if (isEmpty(currentRoute.value.meta)) { return false; }
-    if (isEmpty(currentRoute.value.meta.parentRoute)) { return false; }
-
     return route.name === currentRoute.value.meta.parentRoute.name;
   });
 }
 
 function goBackToParent() {
-  if (isEmpty(currentRoute.value.meta)) { return; }
-  if (isEmpty(currentRoute.value.meta.parentRoute)) { return; }
-
   const parentRoute = findParentRoute();
   if (isEmpty(parentRoute)) { return; }
 
