@@ -530,9 +530,9 @@ export function useInputHelper(schemas) {
   function formatFiltersForLoad(filters = {}) {
     return Object.entries(filters).reduce((o, [field, value]) => {
       if (isEmpty(value)) { return o; }
-      if (selectableField(field) && value.length === 0) { return o; }
+      if ((clientOptionsField(field) || selectableField(field)) && value.length === 0) { return o; }
 
-      if ((clientOptionsField(field) || singleSelectableField(field)) && value.length > 0) {
+      if (singleSelectableField(field) && value.length > 0) {
         o[field] = value[0].value;
       } else if (multiSelectableField(field) && value.length > 0) {
         o[field] = value.map(v => v.value);

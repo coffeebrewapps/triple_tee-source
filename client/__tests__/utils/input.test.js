@@ -2262,12 +2262,8 @@ describe('formatFiltersForLoad', () => {
         startTime: '2023-01-01T00:00:00.000Z',
         endTime: '2023-12-31T23:59:59.999Z',
       },
-      scale: [
-        { value: 'hour', label: 'Hour' },
-      ],
-      transactionType: [
-        { value: 'income', label: 'Income' },
-      ],
+      scale: 'hour',
+      transactionType: 'income',
       tags: [
         { value: '1', label: 'company:company-abc' },
         { value: '2', label: 'company:company-xyz' },
