@@ -317,13 +317,17 @@ describe('TemplateEditor.vue', () => {
       disabled: false,
     }));
 
+    await markupTextareaComp.vm.$emit(
+      'update:modelValue', '<div class="invoice-container">Invoice ID:{{ invoice.id }}</div>'
+    );
+
     const markupConfirmButton = contentMarkupButtons[2];
     await markupConfirmButton.trigger('click');
 
     await flushPromises();
 
     expect(markupTextareaComp.props()).toEqual(expect.objectContaining({
-      modelValue: '<div class="invoice-container"></div>',
+      modelValue: '<div class="invoice-container">Invoice ID:{{ invoice.id }}</div>',
       disabled: true,
     }));
 
@@ -412,13 +416,17 @@ describe('TemplateEditor.vue', () => {
       disabled: false,
     }));
 
+    await stylesTextareaComp.vm.$emit(
+      'update:modelValue', '.invoice-container { width: 100%; } .header { font-weight: 900; }'
+    );
+
     const stylesConfirmButton = contentStylesButtons[2];
     await stylesConfirmButton.trigger('click');
 
     await flushPromises();
 
     expect(stylesTextareaComp.props()).toEqual(expect.objectContaining({
-      modelValue: '.invoice-container { width: 100%; }',
+      modelValue: '.invoice-container { width: 100%; } .header { font-weight: 900; }',
       disabled: true,
     }));
 
@@ -497,12 +505,20 @@ describe('TemplateEditor.vue', () => {
       disabled: false,
     }));
 
+    await sampleDataTextareaComp.vm.$emit(
+      'update:modelValue',
+      `{\n    "invoice": {\n        "id": "1",\n        "dueDate": "2023-10-31",\n` +
+      `        "invoiceDate": "2023-09-01"\n    }\n}`
+    );
+
     const dataConfirmButton = sampleDataButtons[2];
     await dataConfirmButton.trigger('click');
 
     await flushPromises();
 
     expect(sampleDataTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: `{\n    "invoice": {\n        "id": "1",\n        "dueDate": "2023-10-31",\n` +
+      `        "invoiceDate": "2023-09-01"\n    }\n}`,
       disabled: true,
     }));
 
@@ -675,5 +691,13 @@ describe('TemplateEditor.vue', () => {
     const previewMessage = previewDialog.get('.message');
     expect(previewMessage.exists()).toBeTruthy();
     expect(previewMessage.text()).toBe('Error generating template');
+
+    await previewDialog.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(previewDialog.props()).toEqual(expect.objectContaining({
+      modelValue: false,
+    }));
   });
 });
