@@ -170,7 +170,6 @@ function fieldSearchable(field) {
 }
 
 function fieldErrorMessage(field) {
-  if (!props.errorMessages) { return ``; }
   if (!props.errorMessages[field]) { return ``; }
 
   return props.errorMessages[field].map((error) => {

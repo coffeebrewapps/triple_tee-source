@@ -183,6 +183,25 @@ beforeEach(async() => {
               total: paginated.length,
               data: paginated,
             });
+          } else if (modelClass === 'tags') {
+            const data = [
+              {
+                id: '1',
+                category: 'company',
+                name: 'abc',
+              },
+              {
+                id: '2',
+                category: 'activity',
+                name: 'implementation',
+              },
+            ];
+
+            const paginated = data.slice(offset, offset + limit);
+            resolve({
+              total: paginated.length,
+              data: paginated,
+            });
           } else {
             resolve({ total: 0, data: [] });
           }
@@ -288,6 +307,12 @@ const schemas = [
     label: 'Est. Date',
   },
   {
+    key: 'closureDate',
+    type: 'date',
+    label: 'Closure Date',
+    nullToggleable: true,
+  },
+  {
     key: 'holidays',
     type: 'daterange',
     label: 'Holidays',
@@ -326,7 +351,7 @@ const fieldsLayout = [
   { country: 'lg', postcode: 'md', currencyId: 'md' },
   { logo: 'md' },
   { description: 'md' },
-  { establishedDate: 'md', holidays: 'md' },
+  { establishedDate: 'md', holidays: 'md', closureDate: 'md' },
   { registrationValidity: 'md', isActive: 'md' },
   { createdAt: 'md' },
   { tags: 'lg' },
@@ -361,6 +386,7 @@ const modelValue = {
   logo: null,
   description: 'The one stop company that provides all-rounded services.',
   establishedDate: new Date('2023-04-12'),
+  closureDate: null,
   holidays: {
     startDate: new Date('2023-11-20'),
     endDate: new Date('2023-12-13'),
@@ -381,7 +407,7 @@ describe('DataForm.vue', () => {
         stubs,
       },
       props: {
-        modelValue,
+        modelValue: Object.assign({}, modelValue),
         schemas,
         fieldsLayout,
         dataFields,
@@ -434,6 +460,16 @@ describe('DataForm.vue', () => {
       errorMessage: '',
     }));
 
+    await row1Field2Comp.vm.$emit('update:modelValue', 'Coffee Brew Apps');
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        name: 'Coffee Brew Apps',
+      }),
+    }));
+
     const row1Field3Input = dataRow1Fields[2].get('.field-input');
     expect(row1Field3Input.exists()).toBeTruthy();
 
@@ -452,6 +488,16 @@ describe('DataForm.vue', () => {
       label: 'Business Type',
       size: 'md',
       errorMessage: '',
+    }));
+
+    await row1Field3Comp.vm.$emit('update:modelValue', 'private');
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        bizType: 'private',
+      }),
     }));
 
     const dataRow2 = dataRows[1];
@@ -508,6 +554,16 @@ describe('DataForm.vue', () => {
       errorMessage: '',
     }));
 
+    await row2Field1Comp.vm.$emit('update:modelValue', 'USA');
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        country: 'USA',
+      }),
+    }));
+
     const row2Field2Input = dataRow2Fields[1].get('.field-input');
     expect(row2Field2Input.exists()).toBeTruthy();
 
@@ -521,6 +577,16 @@ describe('DataForm.vue', () => {
       label: 'Postcode',
       size: 'md',
       errorMessage: '',
+    }));
+
+    await row2Field2Comp.vm.$emit('update:modelValue', 124345);
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        postcode: 124345,
+      }),
     }));
 
     const row2Field3Input = dataRow2Fields[2].get('.field-input');
@@ -551,6 +617,16 @@ describe('DataForm.vue', () => {
       },
       size: 'md',
       errorMessage: '',
+    }));
+
+    await row2Field3Comp.vm.$emit('update:modelValue', ['2']);
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        currencyId: ['2'],
+      }),
     }));
 
     const dataRow3 = dataRows[2];
@@ -588,9 +664,19 @@ describe('DataForm.vue', () => {
       errorMessage: '',
     }));
 
+    await row4Field1Comp.vm.$emit('update:modelValue', 'The one-stop company that provides a variety of services.');
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        description: 'The one-stop company that provides a variety of services.',
+      }),
+    }));
+
     const dataRow5 = dataRows[4];
     const dataRow5Fields = dataRow5.findAll('.data-field');
-    expect(dataRow5Fields.length).toBe(2);
+    expect(dataRow5Fields.length).toBe(3);
 
     const row5Field1Input = dataRow5Fields[0].get('.field-input');
     expect(row5Field1Input.exists()).toBeTruthy();
@@ -606,6 +692,16 @@ describe('DataForm.vue', () => {
       errorMessage: '',
     }));
 
+    await row5Field1Comp.vm.$emit('update:modelValue', new Date('2023-05-24'));
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        establishedDate: new Date('2023-05-24'),
+      }),
+    }));
+
     const row5Field2Input = dataRow5Fields[1].get('.field-input');
     expect(row5Field2Input.exists()).toBeTruthy();
 
@@ -619,6 +715,65 @@ describe('DataForm.vue', () => {
       label: 'Holidays',
       errorMessage: '',
     }));
+
+    await row5Field2Comp.vm.$emit('update:startDate', new Date('2023-12-23'));
+    await row5Field2Comp.vm.$emit('update:endDate', new Date('2024-03-21'));
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        holidays: {
+          startDate: new Date('2023-12-23'),
+          endDate: new Date('2024-03-21'),
+        },
+      }),
+    }));
+
+    const row5Field3Input = dataRow5Fields[2].get('.field-input');
+    expect(row5Field3Input.exists()).toBeTruthy();
+
+    expect(row5Field3Input.findComponent(TDatePicker).exists()).toBeFalsy();
+
+    const row5Field3NullToggle = dataRow5Fields[2].get('.field-toggle');
+    expect(row5Field3NullToggle.exists()).toBeTruthy();
+
+    const row5Field3NullToggleCheckboxComp = row5Field3NullToggle.getComponent(TCheckbox);
+    expect(row5Field3NullToggleCheckboxComp.exists()).toBeTruthy();
+
+    expect(row5Field3NullToggleCheckboxComp.props()).toEqual(expect.objectContaining({
+      modelValue: false,
+    }));
+
+    await row5Field3NullToggleCheckboxComp.vm.$emit('update:modelValue', true);
+
+    await flushPromises();
+
+    const row5Field3Comp = row5Field3Input.findComponent(TDatePicker);
+    expect(row5Field3Comp.exists()).toBeTruthy();
+    expect(row5Field3Comp.props()).toEqual(expect.objectContaining({
+      modelValue: null,
+      disabled: true,
+      label: 'Closure Date',
+      alignPickers: 'top',
+      errorMessage: '',
+    }));
+
+    await row5Field3Comp.vm.$emit('update:modelValue', new Date('2025-03-24T23:59:59.999Z'));
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        closureDate: new Date('2025-03-24T23:59:59.999Z'),
+      }),
+    }));
+
+    await row5Field3NullToggleCheckboxComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(row5Field3Input.findComponent(TDatePicker).exists()).toBeFalsy();
 
     const dataRow6 = dataRows[5];
     const dataRow6Fields = dataRow6.findAll('.data-field');
@@ -638,6 +793,20 @@ describe('DataForm.vue', () => {
       errorMessage: '',
     }));
 
+    await row6Field1Comp.vm.$emit('update:startTime', new Date('2023-04-27T00:00:00.000Z'));
+    await row6Field1Comp.vm.$emit('update:endTime', new Date('2025-05-26T23:59:59.999Z'));
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        registrationValidity: {
+          startTime: new Date('2023-04-27T00:00:00.000Z'),
+          endTime: new Date('2025-05-26T23:59:59.999Z'),
+        },
+      }),
+    }));
+
     const row6Field2Input = dataRow6Fields[1].get('.field-input');
     expect(row6Field2Input.exists()).toBeTruthy();
 
@@ -649,6 +818,16 @@ describe('DataForm.vue', () => {
       disabled: true,
       label: 'Is Active',
       errorMessage: '',
+    }));
+
+    await row6Field2Comp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        isActive: false,
+      }),
     }));
 
     const dataRow7 = dataRows[6];
@@ -670,6 +849,16 @@ describe('DataForm.vue', () => {
       errorMessage: '',
     }));
 
+    await row7Field1Comp.vm.$emit('update:modelValue', new Date('2023-05-12T23:12:35.352Z'));
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        createdAt: new Date('2023-05-12T23:12:35.352Z'),
+      }),
+    }));
+
     const dataRow8 = dataRows[7];
     const dataRow8Fields = dataRow8.findAll('.data-field');
     expect(dataRow8Fields.length).toBe(1);
@@ -686,8 +875,11 @@ describe('DataForm.vue', () => {
       disabled: false,
       label: 'Tags',
       multiple: true,
-      options: [],
-      optionsLength: 0,
+      options: [
+        { value: '1', label: 'company:abc' },
+        { value: '2', label: 'activity:implementation' },
+      ],
+      optionsLength: 2,
       optionsLoading: false,
       pagination: {
         client: false,
@@ -697,6 +889,67 @@ describe('DataForm.vue', () => {
       size: 'lg',
       errorMessage: '',
     }));
+
+    await row8Field1Comp.vm.$emit('update:modelValue', ['1', '2']);
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      modelValue: expect.objectContaining({
+        tags: ['1', '2'],
+      }),
+    }));
+  });
+
+  test('when given error messages should render in inputs', async() => {
+    const wrapper = await mount(DataForm, {
+      global: {
+        stubs,
+      },
+      props: {
+        modelValue: Object.assign({}, modelValue),
+        schemas,
+        fieldsLayout,
+        dataFields,
+        errorMessages: {
+          name: [{ name: 'required', params: {} }],
+          establishedDate: [{ name: 'pastDate', params: {} }],
+        },
+      },
+    });
+
+    await flushPromises();
+
+    const formContainer = wrapper.get('.form');
+    const formBody = formContainer.get('.body');
+    const dataRows = formBody.findAll('.data-row');
+
+    const dataRow1 = dataRows[0];
+    const dataRow1Fields = dataRow1.findAll('.data-field');
+    const row1Field2Input = dataRow1Fields[1].get('.field-input');
+    const row1Field2Comp = row1Field2Input.findComponent(TInput);
+
+    expect(row1Field2Comp.props()).toEqual(expect.objectContaining({
+      modelValue: 'Your Company',
+      type: 'text',
+      disabled: false,
+      label: 'Name',
+      size: 'md',
+      errorMessage: 'Field is required',
+    }));
+
+    const dataRow5 = dataRows[4];
+    const dataRow5Fields = dataRow5.findAll('.data-field');
+    const row5Field1Input = dataRow5Fields[0].get('.field-input');
+    const row5Field1Comp = row5Field1Input.findComponent(TDatePicker);
+
+    expect(row5Field1Comp.props()).toEqual(expect.objectContaining({
+      modelValue: new Date('2023-04-12'),
+      disabled: true,
+      label: 'Est. Date',
+      alignPickers: 'top',
+      errorMessage: 'Must be past date',
+    }));
   });
 
   test('when select table offset change should fetch new data', async() => {
@@ -705,7 +958,7 @@ describe('DataForm.vue', () => {
         stubs,
       },
       props: {
-        modelValue,
+        modelValue: Object.assign({}, modelValue),
         schemas,
         fieldsLayout,
         dataFields,
@@ -1017,7 +1270,7 @@ describe('DataForm.vue', () => {
         stubs,
       },
       props: {
-        modelValue,
+        modelValue: Object.assign({}, modelValue),
         schemas,
         fieldsLayout,
         dataFields,
@@ -1039,7 +1292,7 @@ describe('DataForm.vue', () => {
         stubs,
       },
       props: {
-        modelValue,
+        modelValue: Object.assign({}, modelValue),
         schemas,
         fieldsLayout,
         dataFields,
@@ -1063,7 +1316,7 @@ describe('DataForm.vue', () => {
         stubs,
       },
       props: {
-        modelValue,
+        modelValue: Object.assign({}, modelValue),
         schemas,
         fieldsLayout,
         dataFields,
@@ -1118,7 +1371,7 @@ describe('DataForm.vue', () => {
         stubs,
       },
       props: {
-        modelValue,
+        modelValue: Object.assign({}, modelValue),
         schemas,
         fieldsLayout,
         dataFields,
