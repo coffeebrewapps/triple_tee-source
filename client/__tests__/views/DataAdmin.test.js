@@ -331,6 +331,14 @@ describe('DataAdmin.vue', () => {
     }));
 
     expect(flashMessage).toHaveBeenCalledWith('Error loading model class options!');
+
+    await errorAlertComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(errorAlertComp.props()).toEqual(expect.objectContaining({
+      modelValue: false,
+    }));
   });
 
   test('when upload indexes returns failure should render error alert', async() => {
