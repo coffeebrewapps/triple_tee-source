@@ -1172,10 +1172,10 @@ onBeforeUnmount(() => {
     <FormDialog
       v-if="createDialog"
       v-model="createDialog"
+      v-model:data="newRow"
       :schemas="combinedDataFields"
       :fields-layout="fieldsLayout"
       :data-fields="creatableKeys"
-      :data="newRow"
       :dialog-title="createDialogTitle(dataType)"
       :fullscreen="fullscreen"
       :error-messages="createErrors"
@@ -1189,10 +1189,10 @@ onBeforeUnmount(() => {
       <FormDialog
         v-if="updateDialog"
         v-model="updateDialog"
+        v-model:data="currentRowForUpdate"
         :schemas="combinedDataFields"
         :fields-layout="fieldsLayout"
         :data-fields="updatableKeys"
-        :data="currentRowForUpdate"
         :dialog-title="updateDialogTitle(dataType, currentRowForUpdate)"
         :fullscreen="fullscreen"
         :error-messages="updateErrors"

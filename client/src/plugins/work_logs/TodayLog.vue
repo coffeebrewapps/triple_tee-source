@@ -586,10 +586,10 @@ onBeforeUnmount(() => {
     <FormDialog
       v-if="startTaskDialog"
       v-model="startTaskDialog"
+      v-model:data="currentTask"
       :schemas="combinedDataFields"
       :fields-layout="fieldsLayout"
       :data-fields="creatableKeys"
-      :data="currentTask"
       :fullscreen="true"
       dialog-title="Start Task"
       @submit="submitNewTask"
@@ -598,10 +598,10 @@ onBeforeUnmount(() => {
     <FormDialog
       v-if="endTaskDialog"
       v-model="endTaskDialog"
+      v-model:data="currentTaskForUpdate"
       :schemas="combinedDataFields"
       :fields-layout="fieldsLayout"
       :data-fields="creatableKeys"
-      :data="currentTaskForUpdate"
       :fullscreen="true"
       dialog-title="End Task"
       @submit="updateTask"

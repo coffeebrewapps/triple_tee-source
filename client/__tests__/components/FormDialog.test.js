@@ -153,6 +153,7 @@ describe('FormDialog.vue', () => {
 
     const updateModelEvents = wrapper.emitted()['update:modelValue'];
     expect(updateModelEvents.length).toBe(1);
+    expect(updateModelEvents[0]).toEqual([false]);
   });
 
   test('when data form emit submit event should propagate event', async() => {

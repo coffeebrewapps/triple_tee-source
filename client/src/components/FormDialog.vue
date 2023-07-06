@@ -59,7 +59,7 @@ const props = defineProps({
 /** section:props **/
 
 /** section:emit **/
-const emit = defineEmits(['update:modelValue', 'submit']);
+const emit = defineEmits(['update:modelValue', 'update:data', 'submit']);
 /** section:emit **/
 
 /** section:dialog **/
@@ -74,8 +74,13 @@ const dialog = computed({
 /** section:dialog **/
 
 /** section:form **/
-const formData = computed(() => {
-  return props.data;
+const formData = computed({
+  get: () => {
+    return props.data;
+  },
+  set: (val) => {
+    emit('update:data', val);
+  },
 });
 /** section:form **/
 
