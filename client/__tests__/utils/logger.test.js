@@ -62,6 +62,17 @@ describe('log', () => {
     expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
     expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
   });
+
+  test('when no params given should save log to store and log to console', () => {
+    const storeSpy = vi.spyOn(logsStore, 'saveLog');
+    const consoleSpy = vi.spyOn(console, 'log');
+
+    logger.log('Created data successfully');
+    const formattedMessage = '[12/04/2023, 8:34:56 pm][LOG] Created data successfully: {}\n';
+
+    expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
+    expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
+  });
 });
 
 describe('error', () => {
@@ -71,6 +82,17 @@ describe('error', () => {
 
     logger.error('Failed to create data', { id: '1' });
     const formattedMessage = '[12/04/2023, 8:34:56 pm][ERROR] Failed to create data: {"id":"1"}\n';
+
+    expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
+    expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
+  });
+
+  test('when no params given should save log to store and log to console', () => {
+    const storeSpy = vi.spyOn(logsStore, 'saveLog');
+    const consoleSpy = vi.spyOn(console, 'error');
+
+    logger.error('Failed to create data');
+    const formattedMessage = '[12/04/2023, 8:34:56 pm][ERROR] Failed to create data: {}\n';
 
     expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
     expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
@@ -88,6 +110,17 @@ describe('warn', () => {
     expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
     expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
   });
+
+  test('when no params given should save log to store and log to console', () => {
+    const storeSpy = vi.spyOn(logsStore, 'saveLog');
+    const consoleSpy = vi.spyOn(console, 'warn');
+
+    logger.warn('Data may not be compatible');
+    const formattedMessage = '[12/04/2023, 8:34:56 pm][WARN] Data may not be compatible: {}\n';
+
+    expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
+    expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
+  });
 });
 
 describe('debug', () => {
@@ -97,6 +130,17 @@ describe('debug', () => {
 
     logger.debug('Converted data from json to string', { id: '1' });
     const formattedMessage = '[12/04/2023, 8:34:56 pm][DEBUG] Converted data from json to string: {"id":"1"}\n';
+
+    expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
+    expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
+  });
+
+  test('when no params given should save log to store and log to console', () => {
+    const storeSpy = vi.spyOn(logsStore, 'saveLog');
+    const consoleSpy = vi.spyOn(console, 'debug');
+
+    logger.debug('Converted data from json to string');
+    const formattedMessage = '[12/04/2023, 8:34:56 pm][DEBUG] Converted data from json to string: {}\n';
 
     expect(storeSpy).toHaveBeenCalledWith(formattedMessage);
     expect(consoleSpy).toHaveBeenCalledWith(formattedMessage);
