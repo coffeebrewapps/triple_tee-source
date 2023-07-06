@@ -32,9 +32,7 @@ const displayableViews = computed(() => {
 });
 
 function selectView(view) {
-  if (!viewRefs.value[view]) { return; }
-
-  viewRefs.value[view].blur();
+  blurView(view);
   selectedView.value = view;
   router.push({ name: displayableViews.value[view].name });
 }
@@ -48,8 +46,6 @@ function navigateView(view) {
 }
 
 function blurView(view) {
-  if (!viewRefs.value[view]) { return; }
-
   viewRefs.value[view].blur();
 }
 /** section:global **/
@@ -66,12 +62,7 @@ function viewStyle(i) {
 
 onBeforeRouteUpdate((to, from) => {
   const currentViewIndex = props.views.findIndex(v => v.name === to.name);
-  if (currentViewIndex > -1) {
-    return true;
-  } else {
-    selectView(0);
-    return false;
-  }
+  return currentViewIndex > -1;
 });
 
 onMounted(() => {
