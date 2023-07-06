@@ -1,6 +1,6 @@
 <script setup>
 /** import:global **/
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 /** import:global **/
 
 /** import:components **/
@@ -74,7 +74,9 @@ const dialog = computed({
 /** section:dialog **/
 
 /** section:form **/
-const formData = ref(props.data);
+const formData = computed(() => {
+  return props.data;
+});
 /** section:form **/
 
 /** section:action **/

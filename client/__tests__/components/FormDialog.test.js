@@ -1,6 +1,9 @@
 import { defineComponent } from 'vue';
 import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
+import {
+  TDialog
+} from 'coffeebrew-vue-components';
 import DataForm from '../../src/components/DataForm.vue';
 import FormDialog from '../../src/components/FormDialog.vue';
 
@@ -124,8 +127,14 @@ describe('FormDialog.vue', () => {
 
     await flushPromises();
 
-    const formDialog = wrapper.get('.form-dialog');
+    const formDialog = wrapper.getComponent(TDialog);
     expect(formDialog.exists()).toBeTruthy();
+
+    expect(formDialog.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: '',
+      fullscreen: false,
+    }));
 
     const dataFormComp = formDialog.findComponent(DataForm);
     expect(dataFormComp.exists()).toBeTruthy();
@@ -137,6 +146,13 @@ describe('FormDialog.vue', () => {
       schemas,
       errorMessages: {},
     }));
+
+    await formDialog.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    const updateModelEvents = wrapper.emitted()['update:modelValue'];
+    expect(updateModelEvents.length).toBe(1);
   });
 
   test('when data form emit submit event should propagate event', async() => {
@@ -158,6 +174,16 @@ describe('FormDialog.vue', () => {
 
     const formDialog = wrapper.get('.form-dialog');
     const dataFormComp = formDialog.findComponent(DataForm);
+
+    await dataFormComp.vm.$emit('update:modelValue', Object.assign({}, formData, { name: 'Coffee Brew Apps' }));
+
+    await flushPromises();
+
+    expect(wrapper.props()).toEqual(expect.objectContaining({
+      data: expect.objectContaining({
+        name: 'Your Company',
+      }),
+    }));
 
     await dataFormComp.vm.$emit('submit', Object.assign({}, formData, { name: 'Coffee Brew Apps' }));
 
