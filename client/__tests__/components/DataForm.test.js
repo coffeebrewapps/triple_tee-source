@@ -1105,6 +1105,11 @@ describe('DataForm.vue', () => {
       icon: 'fa-solid fa-moon',
       value: 'Dark',
     }));
+
+    cancelButton.trigger('click');
+
+    const cancelEvents = wrapper.emitted().cancel;
+    expect(cancelEvents.length).toBe(1);
   });
 
   test('when given null button should not render button', async() => {

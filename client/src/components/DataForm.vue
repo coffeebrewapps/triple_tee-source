@@ -6,7 +6,6 @@ import { onMounted, ref, computed } from 'vue';
 /** import:utils **/
 import { useInputHelper } from '@/utils/input';
 import { useErrors } from '@/utils/errors';
-import { useLogger } from '@/utils/logger';
 /** import:utils **/
 
 /** import:components **/
@@ -110,8 +109,6 @@ const {
   fetchOptions,
   initOptionsData,
 } = useInputHelper(props.schemas);
-
-const logger = useLogger();
 
 const errorsMap = useErrors();
 
@@ -259,9 +256,6 @@ onMounted(async() => {
   await initOptionsData()
     .then((result) => {
       inputOptionsData.value = result;
-    })
-    .catch((error) => {
-      logger.error(`Error initializing options data`, error);
     });
 });
 </script>
