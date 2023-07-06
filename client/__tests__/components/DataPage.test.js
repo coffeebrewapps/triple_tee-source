@@ -3,6 +3,8 @@ import { mount, flushPromises } from '@vue/test-utils';
 import { setActivePinia, createPinia } from 'pinia';
 import { useDataAccess } from '../../src/utils/dataAccess.js';
 import { useSystemConfigsStore } from '../../src/stores/systemConfigs.js';
+import { useBannerStore } from '../../src/stores/banner.js';
+import { useEventsStore } from '../../src/stores/events.js';
 import {
   TTable,
   TAlert,
@@ -16,6 +18,8 @@ import DataForm from '../../src/components/DataForm.vue';
 import DataPage from '../../src/components/DataPage.vue';
 
 vi.mock('../../src/utils/dataAccess.js');
+
+vi.mock('../../src/stores/banner.js');
 
 const MockDatePicker = defineComponent({
   props: {
@@ -43,7 +47,31 @@ const MockDatePicker = defineComponent({
   template: '<div class="date"></div>',
 });
 
-let systemConfigsStore;
+const MockDateTimePicker = defineComponent({
+  props: {
+    modelValue: {
+      type: Date,
+      default: null,
+    },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
+    label: {
+      type: String,
+      default: '',
+    },
+    alignPickers: {
+      type: String,
+      default: 'top',
+    },
+    errorMessage: {
+      type: String,
+      default: '',
+    },
+  },
+  template: '<div class="datetime"></div>',
+});
 
 const tags = {
   1: {
@@ -66,6 +94,7 @@ const contacts = {
     contactNumber1: '60238463',
     tags: [],
     establishedSince: '2023-03-21',
+    createdAt: '2023-02-13T17:42:51.235Z',
   },
   2: {
     id: '2',
@@ -74,6 +103,7 @@ const contacts = {
     contactNumber1: null,
     tags: ['1'],
     establishedSince: null,
+    createdAt: '2023-03-05T06:15:26.206Z',
     includes: {
       tags: {
         1: tags['1'],
@@ -221,11 +251,22 @@ const createUrl = vi.fn((blob) => {
 
 const anchorClick = vi.fn();
 
+const flashMessage = vi.fn();
+
+let systemConfigsStore;
+let eventsStore;
+
 beforeEach(async() => {
   setActivePinia(createPinia());
 
   global.window.URL.createObjectURL = createUrl;
   HTMLAnchorElement.prototype.click = anchorClick;
+
+  useBannerStore.mockImplementation(() => {
+    return {
+      flashMessage,
+    };
+  });
 
   systemConfigsStore = useSystemConfigsStore();
   systemConfigsStore.updateSystemConfigs({
@@ -238,6 +279,8 @@ beforeEach(async() => {
       locale: 'en-SG',
     }),
   }));
+
+  eventsStore = useEventsStore();
 
   vi.useFakeTimers();
   vi.setSystemTime(new Date('2023-04-12T12:34:56.123Z'));
@@ -321,6 +364,17 @@ const dataFields = [
     updatable: true,
     filterable: true,
   },
+  {
+    key: 'createdAt',
+    type: 'datetime',
+    label: 'Created At',
+    defaultValue: () => { return new Date(); },
+    listable: false,
+    viewable: true,
+    creatable: false,
+    updatable: false,
+    filterable: true,
+  },
 ];
 
 const fieldsLayout = [
@@ -366,6 +420,7 @@ const validations = {
 
 const stubs = {
   TDatePicker: MockDatePicker,
+  TDateTimePicker: MockDateTimePicker,
 };
 
 describe('DataPage.vue', () => {
@@ -469,6 +524,7 @@ describe('DataPage.vue', () => {
           contactNumber1: '60238463',
           tags: [],
           establishedSince: '2023-03-21',
+          createdAt: '2023-02-13T17:42:51.235Z',
           tagsFormatted: [],
         },
         {
@@ -478,6 +534,7 @@ describe('DataPage.vue', () => {
           contactNumber1: null,
           tags: ['1'],
           establishedSince: null,
+          createdAt: '2023-03-05T06:15:26.206Z',
           includes: {
             tags: {
               1: {
@@ -636,6 +693,74 @@ describe('DataPage.vue', () => {
     expect(heading.text()).toBe('Contacts');
   });
 
+  test('with addtional actions should render actions', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+        actions: {
+          table: {
+            importData: {
+              name: 'Import',
+              icon: 'fa-solid fa-file-import',
+              click: async function(data) {
+              },
+            },
+          },
+          row: {
+            reverseTransaction: {
+              name: 'Reverse',
+              icon: 'fa-solid fa-rotate-left',
+              click: async function(data) {
+              },
+            },
+          },
+        },
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableActions = tableComp.get('.table-actions');
+    expect(tableActions.exists()).toBeTruthy();
+
+    const actions = tableActions.findAll('.action');
+    expect(actions.length).toBe(3);
+
+    const createAction = actions[0];
+    expect(createAction.html()).toContain('Create');
+
+    const exportAction = actions[1];
+    expect(exportAction.html()).toContain('Export');
+
+    const importAction = actions[2];
+    expect(importAction.html()).toContain('Import');
+
+    const tableBody = tableComp.get('tbody');
+    const bodyRows = tableBody.findAll('tr');
+
+    const row2Cols = bodyRows[1].findAll('td');
+    const row2Actions = row2Cols[5];
+    const row2ActionIcons = row2Actions.findAll('i');
+    expect(row2ActionIcons.length).toBe(3);
+
+    const updateAction = row2ActionIcons[0];
+    expect(updateAction.html()).toContain('fa-pen-to-square');
+
+    const deleteAction = row2ActionIcons[1];
+    expect(deleteAction.html()).toContain('fa-trash-can');
+
+    const reverseAction = row2ActionIcons[2];
+    expect(reverseAction.html()).toContain('fa-rotate-left');
+  });
+
   test('when click row should render view dialog', async() => {
     const wrapper = await mount(DataPage, {
       global: {
@@ -676,6 +801,7 @@ describe('DataPage.vue', () => {
         'contactNumber1',
         'tags',
         'establishedSince',
+        'createdAt',
       ],
       includeKeys: [
         'tags',
@@ -749,6 +875,17 @@ describe('DataPage.vue', () => {
           updatable: true,
           filterable: true,
         },
+        {
+          key: 'createdAt',
+          type: 'datetime',
+          label: 'Created At',
+          defaultValue: expect.anything(),
+          listable: false,
+          viewable: true,
+          creatable: false,
+          updatable: false,
+          filterable: true,
+        },
       ],
       record: {
         id: '2',
@@ -757,6 +894,7 @@ describe('DataPage.vue', () => {
         contactNumber1: null,
         tags: ['1'],
         establishedSince: null,
+        createdAt: '2023-03-05T06:15:26.206Z',
         includes: {
           tags: {
             1: tags['1'],
@@ -767,6 +905,12 @@ describe('DataPage.vue', () => {
       inputLabel: expect.anything(),
       inputValue: expect.anything(),
     }));
+
+    await row2ViewDialogComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(pageContainer.findComponent(ViewDialog).exists()).toBeFalsy();
   });
 
   test('when click row view data access returns failure should render error alert', async() => {
@@ -804,6 +948,8 @@ describe('DataPage.vue', () => {
     const row2Cols = bodyRows[1].findAll('td');
     const row2Id = row2Cols[0];
 
+    expect(pageContainer.findComponent(TAlert).exists()).toBeFalsy();
+
     await row2Id.trigger('click');
 
     await flushPromises();
@@ -817,6 +963,12 @@ describe('DataPage.vue', () => {
       width: 800,
       height: 400,
     }));
+
+    await errorAlertComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(pageContainer.findComponent(TAlert).exists()).toBeFalsy();
   });
 
   test('when click create action should render form dialog', async() => {
@@ -925,6 +1077,17 @@ describe('DataPage.vue', () => {
           updatable: true,
           filterable: true,
         },
+        {
+          key: 'createdAt',
+          type: 'datetime',
+          label: 'Created At',
+          defaultValue: expect.anything(),
+          listable: false,
+          viewable: true,
+          creatable: false,
+          updatable: false,
+          filterable: true,
+        },
       ],
       fieldsLayout,
       dataFields: [
@@ -946,6 +1109,14 @@ describe('DataPage.vue', () => {
       fullscreen: false,
       errorMessages: {},
     }));
+
+    await createFormDialogComp.vm.$emit('update:data', {
+      name: 'Company XYZ',
+      accountNumber: null,
+      contactNumber1: null,
+      tags: [],
+      establishedSince: new Date('2023-03-31'),
+    });
 
     await createFormDialogComp.vm.$emit('submit', {
       name: 'Company XYZ',
@@ -1018,6 +1189,12 @@ describe('DataPage.vue', () => {
         ],
       },
     }));
+
+    await createFormDialogComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(pageContainer.findComponent(FormDialog).exists()).toBeFalsy();
   });
 
   test('when create data access returns failure should render error messages', async() => {
@@ -1144,14 +1321,57 @@ describe('DataPage.vue', () => {
     expect(pageContainer.findComponent(TDialog).exists()).toBeFalsy();
   });
 
-  test('when export action download data access returns falure should render error alert', async() => {
+  test('when click export action should render download dialog and close dialog', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableActions = tableComp.get('.table-actions');
+    const actions = tableActions.findAll('.action');
+    const exportAction = actions[1];
+
+    expect(pageContainer.findComponent(TDialog).exists()).toBeFalsy();
+
+    await exportAction.trigger('click', []);
+
+    await flushPromises();
+
+    expect(downloadModel).toHaveBeenCalledWith('contacts');
+
+    const downloadDialogComp = pageContainer.getComponent(TDialog);
+    expect(downloadDialogComp.exists()).toBeTruthy();
+    expect(downloadDialogComp.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'Download export file',
+    }));
+
+    await downloadDialogComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(downloadDialogComp.props()).toEqual(expect.objectContaining({
+      modelValue: false,
+    }));
+  });
+
+  test('when export action download data access returns failure should render error alert', async() => {
     useDataAccess.mockImplementation(() => {
       return Object.assign({}, mockDataAccess, {
         download: vi.fn((modelClass, id, params) => {
           return new Promise((resolve, reject) => {
-            reject({
-              root: ['unknown'],
-            });
+            reject(new Error('unknown'));
           });
         }),
       });
@@ -1186,7 +1406,7 @@ describe('DataPage.vue', () => {
     expect(errorAlertComp.props()).toEqual(expect.objectContaining({
       modelValue: true,
       title: 'Error',
-      content: `{\n    "root": [\n        "unknown"\n    ]\n}`,
+      content: '',
       width: 800,
       height: 400,
     }));
@@ -1341,6 +1561,17 @@ describe('DataPage.vue', () => {
           updatable: true,
           filterable: true,
         },
+        {
+          key: 'createdAt',
+          type: 'datetime',
+          label: 'Created At',
+          defaultValue: expect.anything(),
+          listable: false,
+          viewable: true,
+          creatable: false,
+          updatable: false,
+          filterable: true,
+        },
       ],
       fieldsLayout,
       dataFields: [
@@ -1357,11 +1588,22 @@ describe('DataPage.vue', () => {
         contactNumber1: null,
         tags: [{ value: '1', label: 'company:abc' }],
         establishedSince: new Date('2023-04-12T12:34:56.123Z'),
+        createdAt: new Date('2023-03-05T06:15:26.206Z'),
       },
       dialogTitle: 'Update Contacts 2',
       fullscreen: false,
       errorMessages: {},
     }));
+
+    await row2UpdateFormDialogComp.vm.$emit('update:data', {
+      id: '2',
+      name: 'Company ABC',
+      accountNumber: '342-63462-742',
+      contactNumber1: null,
+      tags: [{ value: '1', label: 'company:abc' }],
+      establishedSince: new Date('2023-03-12'),
+      createdAt: '2023-03-05T06:15:26.206Z',
+    });
 
     await row2UpdateFormDialogComp.vm.$emit('submit', {
       id: '2',
@@ -1370,7 +1612,10 @@ describe('DataPage.vue', () => {
       contactNumber1: null,
       tags: [{ value: '1', label: 'company:abc' }],
       establishedSince: new Date('2023-03-12'),
+      createdAt: '2023-03-05T06:15:26.206Z',
     });
+
+    await flushPromises();
 
     expect(updateRecord).toHaveBeenCalledWith('contacts', '2', {
       id: '2',
@@ -1379,6 +1624,7 @@ describe('DataPage.vue', () => {
       contactNumber1: null,
       tags: ['1'],
       establishedSince: new Date('2023-03-12'),
+      createdAt: '2023-03-05T06:15:26.206Z',
     }, {}, false);
   });
 
@@ -1476,6 +1722,7 @@ describe('DataPage.vue', () => {
       contactNumber1: null,
       tags: [{ value: '1', label: 'company:abc' }],
       establishedSince: new Date('2023-05-12'),
+      createdAt: '2023-03-05T06:15:26.206Z',
     });
 
     await flushPromises();
@@ -1492,6 +1739,12 @@ describe('DataPage.vue', () => {
         ],
       },
     }));
+
+    await row2UpdateFormDialogComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(pageContainer.findComponent(FormDialog).exists()).toBeFalsy();
   });
 
   test('when update data access returns failure should render error messages', async() => {
@@ -1535,6 +1788,7 @@ describe('DataPage.vue', () => {
       contactNumber1: null,
       tags: [{ value: '1', label: 'company:abc' }],
       establishedSince: new Date('2023-05-12'),
+      createdAt: '2023-03-05T06:15:26.206Z',
     });
 
     await flushPromises();
@@ -1546,6 +1800,7 @@ describe('DataPage.vue', () => {
       contactNumber1: null,
       tags: [{ value: '1', label: 'company:abc' }],
       establishedSince: new Date('2023-05-12'),
+      createdAt: '2023-03-05T06:15:26.206Z',
     }), false);
 
     expect(row2UpdateFormDialogComp.props()).toEqual(expect.objectContaining({
@@ -1599,7 +1854,8 @@ describe('DataPage.vue', () => {
       '  "accountNumber": null,\n' +
       '  "contactNumber1": "60238463",\n' +
       '  "tags": [],\n' +
-      '  "establishedSince": "2023-03-21"\n' +
+      '  "establishedSince": "2023-03-21",\n' +
+      '  "createdAt": "2023-02-13T17:42:51.235Z"\n' +
       '}';
 
     let row1DeleteConfirmDialogComp = pageContainer.findComponent(TConfirmDialog);
@@ -1658,6 +1914,47 @@ describe('DataPage.vue', () => {
       width: 800,
       height: 400,
     }));
+  });
+
+  test('when click delete action should render delete confirmation dialog and close dialog', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableBody = tableComp.get('tbody');
+    const bodyRows = tableBody.findAll('tr');
+
+    const row1Cols = bodyRows[0].findAll('td');
+    const row1Actions = row1Cols[5];
+    const row1ActionIcons = row1Actions.findAll('i');
+    const row1Delete = row1ActionIcons[1];
+
+    expect(pageContainer.findComponent(TConfirmDialog).exists()).toBeFalsy();
+
+    await row1Delete.trigger('click');
+
+    await flushPromises();
+
+    const row1DeleteConfirmDialogComp = pageContainer.findComponent(TConfirmDialog);
+    expect(row1DeleteConfirmDialogComp.exists()).toBeTruthy();
+
+    await row1DeleteConfirmDialogComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    expect(pageContainer.findComponent(TConfirmDialog).exists()).toBeFalsy();
   });
 
   test('when delete action view data access returns failure should render error alert', async() => {
@@ -1730,11 +2027,16 @@ describe('DataPage.vue', () => {
               startDate: null,
               endDate: null,
             },
+            createdAt: {
+              startTime: null,
+              endTime: null,
+            },
           },
           layout: [
             { name: 'md' },
             { tags: 'lg' },
             { establishedSince: 'lg' },
+            { createdAt: 'lg' },
           ],
         },
       },
@@ -1764,16 +2066,22 @@ describe('DataPage.vue', () => {
           startDate: null,
           endDate: null,
         },
+        createdAt: {
+          startTime: null,
+          endTime: null,
+        },
       },
       fieldsLayout: [
         { name: 'md' },
         { tags: 'lg' },
         { establishedSince: 'lg' },
+        { createdAt: 'lg' },
       ],
       dataFields: [
         'name',
         'tags',
         'establishedSince',
+        'createdAt',
       ],
       schemas: [
         {
@@ -1816,6 +2124,17 @@ describe('DataPage.vue', () => {
           updatable: true,
           filterable: true,
         },
+        {
+          key: 'createdAt',
+          type: 'datetimerange',
+          label: 'Created At',
+          defaultValue: expect.anything(),
+          listable: false,
+          viewable: true,
+          creatable: false,
+          updatable: false,
+          filterable: true,
+        },
       ],
       errorMessages: {},
       confirmButton: {
@@ -1838,12 +2157,29 @@ describe('DataPage.vue', () => {
 
     expect(filters.classes('expanded')).toBeTruthy();
 
+    await filtersForm.vm.$emit('update:modelValue', {
+      name: null,
+      tags: [{ value: '1', label: 'company:abc' }],
+      establishedSince: {
+        startDate: null,
+        endDate: null,
+      },
+      createdAt: {
+        startTime: null,
+        endTime: null,
+      },
+    });
+
     await filtersForm.vm.$emit('submit', {
       name: null,
       tags: [{ value: '1', label: 'company:abc' }],
       establishedSince: {
         startDate: null,
         endDate: null,
+      },
+      createdAt: {
+        startTime: null,
+        endTime: null,
       },
     });
 
@@ -1854,6 +2190,78 @@ describe('DataPage.vue', () => {
         tags: ['1'],
       },
     }));
+
+    expect(filters.classes('collapsed')).toBeTruthy();
+
+    await filterAction.trigger('click');
+
+    await flushPromises();
+
+    expect(filters.classes('expanded')).toBeTruthy();
+
+    await filtersForm.vm.$emit('cancel');
+
+    await flushPromises();
+
+    expect(listRecords).toHaveBeenCalledWith('contacts', expect.objectContaining({
+      filters: {},
+    }));
+  });
+
+  test('when load schemas returns failure should flash error message', async() => {
+    useDataAccess.mockImplementation(() => {
+      return Object.assign({}, mockDataAccess, {
+        schemas: vi.fn(() => {
+          return new Promise((resolve, reject) => {
+            reject(new Error('unknown'));
+          });
+        }),
+      });
+    });
+
+    await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    expect(flashMessage).toHaveBeenCalledWith('Error loading schemas!');
+  });
+
+  test('when load data returns failure should flash error message', async() => {
+    useDataAccess.mockImplementation(() => {
+      return Object.assign({}, mockDataAccess, {
+        list: vi.fn((modelClass, params) => {
+          return new Promise((resolve, reject) => {
+            reject(new Error('unknown'));
+          });
+        }),
+      });
+    });
+
+    await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    expect(flashMessage).toHaveBeenCalledWith('Error loading data!');
   });
 
   test('when click close toggle should collapse filters', async() => {
@@ -1954,6 +2362,52 @@ describe('DataPage.vue', () => {
     expect(filters.classes('collapsed')).toBeTruthy();
   });
 
+  test('when keydown esc should collapse sort', async() => {
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+        tableStyle: {
+          oneline: true,
+          showHeader: false,
+          highlightField: 'name',
+        },
+      },
+    });
+
+    await flushPromises();
+
+    const pageContainer = wrapper.get('.page-container');
+    const tableComp = pageContainer.getComponent(TTable);
+    const tableActions = tableComp.get('.table-actions');
+
+    const sortContainer = pageContainer.find('.sort-container');
+    expect(sortContainer.exists()).toBeTruthy();
+    expect(sortContainer.classes('collapsed')).toBeTruthy();
+
+    const actions = tableActions.findAll('.action');
+
+    const sortAction = actions[0];
+    expect(sortAction.html()).toContain('Sort');
+
+    await sortAction.trigger('click');
+
+    await flushPromises();
+
+    expect(sortContainer.classes('expanded')).toBeTruthy();
+
+    await pageContainer.trigger('keydown.esc');
+
+    await flushPromises();
+
+    expect(sortContainer.classes('collapsed')).toBeTruthy();
+  });
+
   test('when toggle sort should refresh data page', async() => {
     const wrapper = await mount(DataPage, {
       global: {
@@ -2005,6 +2459,20 @@ describe('DataPage.vue', () => {
       sort: {
         field: 'name',
         order: 'desc',
+      },
+    }));
+
+    const accountNumberHeader = tableCols[2];
+    const accountNumberHeaderField = accountNumberHeader.get('.header-field');
+
+    await accountNumberHeaderField.trigger('click');
+
+    await flushPromises();
+
+    expect(listRecords).not.toHaveBeenCalledWith('contacts', expect.objectContaining({
+      sort: {
+        field: 'accountNumber',
+        order: 'asc',
       },
     }));
   });
@@ -2163,6 +2631,7 @@ describe('DataPage.vue', () => {
         contactNumber1: null,
         tags: ['1'],
         establishedSince: null,
+        createdAt: '2023-03-05T06:15:26.206Z',
         includes: {
           tags: {
             1: tags['1'],
@@ -2274,5 +2743,77 @@ describe('DataPage.vue', () => {
     await toggle.trigger('click');
 
     expect(sortContainer.classes('collapsed')).toBeTruthy();
+  });
+
+  test('when unmount component should unregister events', async() => {
+    const registerListener = vi.spyOn(eventsStore, 'registerListener');
+    const unregisterListener = vi.spyOn(eventsStore, 'unregisterListener');
+
+    const wrapper = await mount(DataPage, {
+      global: {
+        stubs,
+      },
+      props: {
+        dataType: 'Contacts',
+        modelClass: 'contacts',
+        dataFields,
+        fieldsLayout,
+      },
+    });
+
+    await flushPromises();
+
+    expect(registerListener).toHaveBeenCalledWith('loadData', {
+      id: 'DataPage-Contacts',
+      invoke: expect.anything(),
+    });
+
+    await eventsStore.emitEvent('loadData', {
+      dataType: 'Contacts',
+      filters: {
+        name: 'Coffee Brew Apps',
+      },
+    });
+
+    await flushPromises();
+
+    expect(listRecords).toHaveBeenCalledWith('contacts', expect.objectContaining({
+      filters: expect.objectContaining({
+        name: 'Coffee Brew Apps',
+      }),
+    }));
+
+    await eventsStore.emitEvent('loadData', {
+      dataType: 'Contacts',
+    });
+
+    await flushPromises();
+
+    expect(listRecords).toHaveBeenCalledWith('contacts', expect.objectContaining({
+      filters: {},
+    }));
+
+    await eventsStore.emitEvent('loadData', {
+      dataType: 'Tags',
+      filters: {
+        category: 'company',
+      },
+    });
+
+    await flushPromises();
+
+    expect(listRecords).not.toHaveBeenCalledWith('contacts', expect.objectContaining({
+      filters: expect.objectContaining({
+        category: 'company',
+      }),
+    }));
+
+    await wrapper.unmount();
+
+    await flushPromises();
+
+    expect(unregisterListener).toHaveBeenCalledWith('loadData', {
+      id: 'DataPage-Contacts',
+    });
   });
 });

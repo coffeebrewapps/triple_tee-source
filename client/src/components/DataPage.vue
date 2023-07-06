@@ -421,7 +421,7 @@ const tableActions = computed(() => {
     initialActions.unshift(sortAction);
   }
 
-  Object.entries(props.actions.table || {}).forEach((action) => {
+  Object.values(props.actions.table || {}).forEach((action) => {
     initialActions.push(action);
   });
 
@@ -498,9 +498,6 @@ async function asyncFormatTag(row, tags, key, i) {
       formatTag(row, tag, key, systemConfigs.tagFormat)
         .then((result) => {
           resolve(result);
-        })
-        .catch((error) => {
-          reject(error);
         });
     });
   });
@@ -509,9 +506,6 @@ async function asyncFormatTag(row, tags, key, i) {
     Promise.all(promises)
       .then((results) => {
         resolve({ i, key, formattedValue: results });
-      })
-      .catch((error) => {
-        reject(error);
       });
   });
 }
@@ -546,9 +540,6 @@ async function formatListedData() {
         const formattedKey = `${result.key}Formatted`;
         listedData.value[result.i][formattedKey] = result.formattedValue;
       });
-    })
-    .catch((error) => {
-      logger.error(`Error fetching formatted data`, error);
     });
 }
 /** section:table **/
@@ -645,10 +636,10 @@ const errorAlert = ref(false);
 const errorContent = ref('');
 
 const errorAlertFitContent = computed(() => {
-  if (!!errorContent.value && errorContent.value.length > 0) {
-    return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n');
+  if (errorContent.value === '{}') {
+    return '';
   } else {
-    return ``;
+    return (errorContent.value.match(/.{1,100}/g) ?? []).join('\n');
   }
 });
 
@@ -1160,7 +1151,7 @@ onBeforeUnmount(() => {
     </TTable>
 
     <TAlert
-      v-if="errorContent.length > 0"
+      v-if="errorAlert"
       v-model="errorAlert"
       title="Error"
       class="error-alert"
