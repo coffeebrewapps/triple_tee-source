@@ -3,7 +3,10 @@ import { setActivePinia, createPinia } from 'pinia';
 import { useRouter } from 'vue-router';
 import { Liquid } from 'liquidjs';
 import {
-  TButton
+  TDialog,
+  TButton,
+  TProgressBar,
+  TTextarea
 } from 'coffeebrew-vue-components';
 import { useDataAccess } from '../../src/utils/dataAccess.js';
 import TabContainer from '../../src/components/TabContainer.vue';
@@ -123,29 +126,43 @@ describe('TemplateEditor.vue', () => {
     expect(tabs.length).toBe(3);
 
     const contentMarkupTab = tabs[0];
-    const contentMarkupContent = contentMarkupTab.get('.editor-content');
-    expect(contentMarkupContent.exists()).toBeTruthy();
-    expect(contentMarkupContent.attributes('contenteditable')).toBe('false');
-    expect(contentMarkupContent.text()).toBe(contentMarkup);
+    const markupTextareaComp = contentMarkupTab.getComponent(TTextarea);
+    expect(markupTextareaComp.exists()).toBeTruthy();
+    expect(markupTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '<div class="invoice-container"></div>',
+      label: '',
+      rows: 30,
+      disabled: true,
+      errorMessage: '',
+    }));
 
     const contentStylesTab = tabs[1];
-    const contentStylesContent = contentStylesTab.get('.editor-content');
-    expect(contentStylesContent.exists()).toBeTruthy();
-    expect(contentStylesContent.attributes('contenteditable')).toBe('false');
-    expect(contentStylesContent.text()).toBe(contentStyles);
+    const stylesTextareaComp = contentStylesTab.getComponent(TTextarea);
+    expect(stylesTextareaComp.exists()).toBeTruthy();
+    expect(stylesTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '.invoice-container { width: 100%; }',
+      label: '',
+      rows: 30,
+      disabled: true,
+      errorMessage: '',
+    }));
 
     const sampleDataTab = tabs[2];
-    const sampleDataContent = sampleDataTab.get('.editor-content');
-    expect(sampleDataContent.exists()).toBeTruthy();
-    expect(sampleDataContent.attributes('contenteditable')).toBe('false');
-    expect(sampleDataContent.text()).toBe(
+    const sampleDataTextareaComp = sampleDataTab.getComponent(TTextarea);
+    expect(sampleDataTextareaComp.exists()).toBeTruthy();
+    expect(sampleDataTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '' +
       '{\n' +
-      '  "invoice": {\n' +
-      '    "id": "1",\n' +
-      '    "dueDate": "2023-10-31"\n' +
-      '  }\n' +
-      '}'
-    );
+      '    "invoice": {\n' +
+      '        "id": "1",\n' +
+      '        "dueDate": "2023-10-31"\n' +
+      '    }\n' +
+      '}',
+      label: '',
+      rows: 30,
+      disabled: true,
+      errorMessage: '',
+    }));
 
     const previewContainer = previewTemplate.get('.preview-container');
     expect(previewContainer.exists()).toBeTruthy();
@@ -176,11 +193,30 @@ describe('TemplateEditor.vue', () => {
     const previewTemplate = wrapper.get('.preview-template');
     const previewContainer = previewTemplate.get('.preview-container');
 
+    const previewDialog = previewTemplate.getComponent(TDialog);
+    expect(previewDialog.exists()).toBeTruthy();
+    expect(previewDialog.props()).toEqual(expect.objectContaining({
+      modelValue: false,
+      title: 'Generating PDF',
+    }));
+
     const buttons = previewContainer.get('.buttons');
     const generateButton = buttons.getComponent(TButton);
     expect(generateButton.exists()).toBeTruthy();
 
     await generateButton.vm.$emit('click');
+
+    expect(previewDialog.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'Generating PDF',
+    }));
+
+    const progressBarComp = previewDialog.findComponent(TProgressBar);
+    expect(progressBarComp.exists()).toBeTruthy();
+
+    const previewMessage = previewDialog.get('.message');
+    expect(previewMessage.exists()).toBeTruthy();
+    expect(previewMessage.text()).toBe('Generating PDF...');
 
     await flushPromises();
 
@@ -208,6 +244,11 @@ describe('TemplateEditor.vue', () => {
         id: '1',
       },
     });
+
+    expect(previewDialog.props()).toEqual(expect.objectContaining({
+      modelValue: false,
+      title: 'Generating PDF',
+    }));
   });
 
   test('when not disabled should render markup editor buttons', async() => {
@@ -233,23 +274,37 @@ describe('TemplateEditor.vue', () => {
 
     const contentMarkupTab = tabs[0];
     const contentMarkupButtons = contentMarkupTab.findAll('.editor-button');
+    expect(contentMarkupButtons.length).toBe(3);
 
-    const contentMarkupContent = contentMarkupTab.get('.editor-content');
-    expect(contentMarkupContent.attributes('contenteditable')).toBe('false');
+    const markupTextareaComp = contentMarkupTab.getComponent(TTextarea);
+    expect(markupTextareaComp.exists()).toBeTruthy();
+    expect(markupTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '<div class="invoice-container"></div>',
+      label: '',
+      rows: 30,
+      disabled: true,
+      errorMessage: '',
+    }));
 
     const markupEditButton = contentMarkupButtons[1];
     await markupEditButton.trigger('click');
 
     await flushPromises();
 
-    expect(contentMarkupContent.attributes('contenteditable')).toBe('true');
+    expect(markupTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '<div class="invoice-container"></div>',
+      disabled: false,
+    }));
 
     const markupCancelButton = contentMarkupButtons[0];
     await markupCancelButton.trigger('click');
 
     await flushPromises();
 
-    expect(contentMarkupContent.attributes('contenteditable')).toBe('false');
+    expect(markupTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '<div class="invoice-container"></div>',
+      disabled: true,
+    }));
 
     expect(wrapper.emitted().contentMarkupChange).toBeUndefined();
 
@@ -257,17 +312,39 @@ describe('TemplateEditor.vue', () => {
 
     await flushPromises();
 
-    expect(contentMarkupContent.attributes('contenteditable')).toBe('true');
+    expect(markupTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '<div class="invoice-container"></div>',
+      disabled: false,
+    }));
 
     const markupConfirmButton = contentMarkupButtons[2];
     await markupConfirmButton.trigger('click');
 
     await flushPromises();
 
-    expect(contentMarkupContent.attributes('contenteditable')).toBe('false');
+    expect(markupTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '<div class="invoice-container"></div>',
+      disabled: true,
+    }));
 
     const markupChangeEvents = wrapper.emitted().contentMarkupChange;
     expect(markupChangeEvents.length).toBe(1);
+
+    parseAndRender.mockImplementation(async() => {
+      return new Promise((resolve, reject) => {
+        reject(new Error('invalid template'));
+      });
+    });
+
+    await markupConfirmButton.trigger('click');
+
+    await flushPromises();
+
+    const previewContainer = previewTemplate.get('.preview-container');
+    const previewContent = previewContainer.get('.preview-content');
+    expect(previewContent.exists()).toBeTruthy();
+    expect(previewContent.classes('error')).toBeTruthy();
+    expect(previewContent.text()).toBe('Markup error');
   });
 
   test('when not disabled should render styles editor buttons', async() => {
@@ -294,22 +371,35 @@ describe('TemplateEditor.vue', () => {
     const contentStylesTab = tabs[1];
     const contentStylesButtons = contentStylesTab.findAll('.editor-button');
 
-    const contentStylesContent = contentStylesTab.get('.editor-content');
-    expect(contentStylesContent.attributes('contenteditable')).toBe('false');
+    const stylesTextareaComp = contentStylesTab.getComponent(TTextarea);
+    expect(stylesTextareaComp.exists()).toBeTruthy();
+    expect(stylesTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '.invoice-container { width: 100%; }',
+      label: '',
+      rows: 30,
+      disabled: true,
+      errorMessage: '',
+    }));
 
     const stylesEditButton = contentStylesButtons[1];
     await stylesEditButton.trigger('click');
 
     await flushPromises();
 
-    expect(contentStylesContent.attributes('contenteditable')).toBe('true');
+    expect(stylesTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '.invoice-container { width: 100%; }',
+      disabled: false,
+    }));
 
     const stylesCancelButton = contentStylesButtons[0];
     await stylesCancelButton.trigger('click');
 
     await flushPromises();
 
-    expect(contentStylesContent.attributes('contenteditable')).toBe('false');
+    expect(stylesTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '.invoice-container { width: 100%; }',
+      disabled: true,
+    }));
 
     expect(wrapper.emitted().contentStylesChange).toBeUndefined();
 
@@ -317,14 +407,20 @@ describe('TemplateEditor.vue', () => {
 
     await flushPromises();
 
-    expect(contentStylesContent.attributes('contenteditable')).toBe('true');
+    expect(stylesTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '.invoice-container { width: 100%; }',
+      disabled: false,
+    }));
 
     const stylesConfirmButton = contentStylesButtons[2];
     await stylesConfirmButton.trigger('click');
 
     await flushPromises();
 
-    expect(contentStylesContent.attributes('contenteditable')).toBe('false');
+    expect(stylesTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: '.invoice-container { width: 100%; }',
+      disabled: true,
+    }));
 
     const stylesChangeEvents = wrapper.emitted().contentStylesChange;
     expect(stylesChangeEvents.length).toBe(1);
@@ -348,28 +444,48 @@ describe('TemplateEditor.vue', () => {
 
     const previewTemplate = wrapper.get('.preview-template');
     const templateEditor = previewTemplate.get('.template-editor');
-    const tabContainerComp = templateEditor.getComponent(TabContainer);
-    const tabs = tabContainerComp.findAll('.tab-content');
 
+    const tabContainerComp = templateEditor.getComponent(TabContainer);
+    expect(tabContainerComp.props()).toEqual(expect.objectContaining({
+      selectedTab: 0,
+    }));
+
+    await tabContainerComp.vm.$emit('tabChange', 2);
+    expect(tabContainerComp.props()).toEqual(expect.objectContaining({
+      selectedTab: 2,
+    }));
+
+    const tabs = tabContainerComp.findAll('.tab-content');
     const sampleDataTab = tabs[2];
     const sampleDataButtons = sampleDataTab.findAll('.editor-button');
 
-    const sampleDataContent = sampleDataTab.get('.editor-content');
-    expect(sampleDataContent.attributes('contenteditable')).toBe('false');
+    const sampleDataTextareaComp = sampleDataTab.getComponent(TTextarea);
+    expect(sampleDataTextareaComp.exists()).toBeTruthy();
+    expect(sampleDataTextareaComp.props()).toEqual(expect.objectContaining({
+      modelValue: `{\n    "invoice": {\n        "id": "1",\n        "dueDate": "2023-10-31"\n    }\n}`,
+      label: '',
+      rows: 30,
+      disabled: true,
+      errorMessage: '',
+    }));
 
     const dataEditButton = sampleDataButtons[1];
     await dataEditButton.trigger('click');
 
     await flushPromises();
 
-    expect(sampleDataContent.attributes('contenteditable')).toBe('true');
+    expect(sampleDataTextareaComp.props()).toEqual(expect.objectContaining({
+      disabled: false,
+    }));
 
     const dataCancelButton = sampleDataButtons[0];
     await dataCancelButton.trigger('click');
 
     await flushPromises();
 
-    expect(sampleDataContent.attributes('contenteditable')).toBe('false');
+    expect(sampleDataTextareaComp.props()).toEqual(expect.objectContaining({
+      disabled: true,
+    }));
 
     expect(wrapper.emitted().sampleDataChange).toBeUndefined();
 
@@ -377,16 +493,187 @@ describe('TemplateEditor.vue', () => {
 
     await flushPromises();
 
-    expect(sampleDataContent.attributes('contenteditable')).toBe('true');
+    expect(sampleDataTextareaComp.props()).toEqual(expect.objectContaining({
+      disabled: false,
+    }));
 
     const dataConfirmButton = sampleDataButtons[2];
     await dataConfirmButton.trigger('click');
 
     await flushPromises();
 
-    expect(sampleDataContent.attributes('contenteditable')).toBe('false');
+    expect(sampleDataTextareaComp.props()).toEqual(expect.objectContaining({
+      disabled: true,
+    }));
 
     const dataChangeEvents = wrapper.emitted().dataChange;
     expect(dataChangeEvents.length).toBe(1);
+
+    parseAndRender.mockImplementation(async() => {
+      return new Promise((resolve, reject) => {
+        reject(new Error('invalid template'));
+      });
+    });
+
+    await dataConfirmButton.trigger('click');
+
+    await flushPromises();
+
+    const previewContainer = previewTemplate.get('.preview-container');
+    const previewContent = previewContainer.get('.preview-content');
+    expect(previewContent.exists()).toBeTruthy();
+    expect(previewContent.classes('error')).toBeTruthy();
+    expect(previewContent.text()).toBe('Sample data error');
+  });
+
+  test('when disabled should not render disabled editor', async() => {
+    const wrapper = await mount(TemplateEditor, {
+      props: {
+        id: '1',
+        contentMarkup,
+        contentStyles,
+        disabled: true,
+        data,
+        errorMessages: {},
+        enableGenerate: true,
+        templateType: 'invoice_templates',
+      },
+    });
+
+    await flushPromises();
+
+    const previewTemplate = wrapper.get('.preview-template');
+    const templateEditor = previewTemplate.get('.template-editor');
+    const tabContainerComp = templateEditor.getComponent(TabContainer);
+    const tabs = tabContainerComp.findAll('.tab-content');
+
+    const contentMarkupTab = tabs[0];
+    const contentMarkupEditor = contentMarkupTab.get('.editor');
+    expect(contentMarkupEditor.exists()).toBeTruthy();
+    expect(contentMarkupEditor.classes('disabled')).toBeTruthy();
+  });
+
+  test('when no sample data should render null parsed markup', async() => {
+    const wrapper = await mount(TemplateEditor, {
+      props: {
+        id: '1',
+        contentMarkup,
+        contentStyles,
+        disabled: false,
+        data: null,
+        errorMessages: {},
+        enableGenerate: true,
+        templateType: 'invoice_templates',
+      },
+    });
+
+    await flushPromises();
+
+    const previewTemplate = wrapper.get('.preview-template');
+    expect(previewTemplate.exists()).toBeTruthy();
+
+    const previewContainer = previewTemplate.get('.preview-container');
+    expect(previewContainer.exists()).toBeTruthy();
+
+    const previewContent = previewContainer.get('.preview-content');
+    expect(previewContent.exists()).toBeTruthy();
+    expect(previewContent.classes('error')).toBeFalsy();
+  });
+
+  test('when render preview returns failure should render error message', async() => {
+    parseAndRender.mockImplementation(async() => {
+      return new Promise((resolve, reject) => {
+        reject(new Error('invalid template'));
+      });
+    });
+
+    const wrapper = await mount(TemplateEditor, {
+      props: {
+        id: '1',
+        contentMarkup,
+        contentStyles,
+        disabled: false,
+        data,
+        errorMessages: {},
+        enableGenerate: true,
+        templateType: 'invoice_templates',
+      },
+    });
+
+    await flushPromises();
+
+    const previewTemplate = wrapper.get('.preview-template');
+    expect(previewTemplate.exists()).toBeTruthy();
+
+    const templateEditor = previewTemplate.get('.template-editor');
+    const tabContainerComp = templateEditor.getComponent(TabContainer);
+    const tabs = tabContainerComp.findAll('.tab-content');
+
+    const sampleDataTab = tabs[2];
+    const sampleDataButtons = sampleDataTab.findAll('.editor-button');
+    expect(sampleDataButtons.length).toBe(3);
+
+    const previewContainer = previewTemplate.get('.preview-container');
+    expect(previewContainer.exists()).toBeTruthy();
+
+    const previewContent = previewContainer.get('.preview-content');
+    expect(previewContent.exists()).toBeTruthy();
+    expect(previewContent.classes('error')).toBeTruthy();
+    expect(previewContent.text()).toBe('Render error');
+  });
+
+  test('when generate template returns failure should render error message', async() => {
+    useDataAccess.mockImplementation(() => {
+      return {
+        downloadStream: vi.fn((templateType, id, data, { path }) => {
+          return new Promise((resolve, reject) => {
+            reject(new Error('invalid pdf'));
+          });
+        }),
+      };
+    });
+
+    const wrapper = await mount(TemplateEditor, {
+      props: {
+        id: '1',
+        contentMarkup,
+        contentStyles,
+        disabled: false,
+        data,
+        errorMessages: {},
+        enableGenerate: true,
+        templateType: 'invoice_templates',
+      },
+    });
+
+    await flushPromises();
+
+    const previewTemplate = wrapper.get('.preview-template');
+    const previewContainer = previewTemplate.get('.preview-container');
+
+    const buttons = previewContainer.get('.buttons');
+    const generateButton = buttons.getComponent(TButton);
+
+    await generateButton.vm.$emit('click');
+
+    await flushPromises();
+
+    expect(createUrl).not.toHaveBeenCalledWith();
+    expect(addRoute).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalledWith();
+
+    const previewDialog = previewTemplate.getComponent(TDialog);
+    expect(previewDialog.exists()).toBeTruthy();
+    expect(previewDialog.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'Generating PDF',
+    }));
+
+    const progressBarComp = previewDialog.findComponent(TProgressBar);
+    expect(progressBarComp.exists()).toBeFalsy();
+
+    const previewMessage = previewDialog.get('.message');
+    expect(previewMessage.exists()).toBeTruthy();
+    expect(previewMessage.text()).toBe('Error generating template');
   });
 });

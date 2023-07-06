@@ -15,7 +15,8 @@ import { Liquid } from 'liquidjs';
 import {
   TButton,
   TDialog,
-  TProgressBar
+  TProgressBar,
+  TTextarea
 } from 'coffeebrew-vue-components';
 
 import TabContainer from './TabContainer.vue';
@@ -76,12 +77,8 @@ const liquidEngine = new Liquid();
 
 /** section:global **/
 const styleComponentName = ref('style');
-const template = computed(() => {
-  return {
-    contentMarkup: props.contentMarkup,
-    contentStyles: props.contentStyles,
-  };
-});
+const templateMarkup = ref(props.contentMarkup);
+const templateStyles = ref(props.contentStyles);
 /** section:global **/
 
 /** section:tabs **/
@@ -98,10 +95,6 @@ function triggerTabEvent(i) {
 /** section:tabs **/
 
 /** section:editor **/
-const markupEditor = ref('markupEditor');
-const stylesEditor = ref('stylesEditor');
-const sampleDataEditor = ref('sampleDataEditor');
-
 const markupEditable = ref(false);
 const stylesEditable = ref(false);
 const sampleDataEditable = ref(false);
@@ -218,28 +211,35 @@ function cancelSampleDataEdit() {
 }
 
 function updateMarkup() {
-  emit('contentMarkupChange', markupEditor.value.innerText);
+  emit('contentMarkupChange', templateMarkup.value);
 }
 
 function updateStyles() {
-  emit('contentStylesChange', stylesEditor.value.innerText);
+  emit('contentStylesChange', templateStyles.value);
 }
 
 function updateData() {
-  const sampleDataEditorContent = sampleDataEditor.value.innerText;
-
-  if (notEmpty(sampleDataEditorContent)) {
-    emit('dataChange', JSON.parse(sampleDataEditorContent));
-  } else {
-    emit('dataChange', {});
-  }
+  emit('dataChange', parsedPdfData.value);
 }
-
 /** section:editor **/
 
 /** section:preview **/
-const samplePdfData = computed(() => {
-  return props.data;
+const samplePdfData = ref('');
+
+function populatePdfData() {
+  if (notEmpty(props.data)) {
+    samplePdfData.value = JSON.stringify(props.data, false, 4);
+  } else {
+    samplePdfData.value = '';
+  }
+}
+
+const parsedPdfData = computed(() => {
+  if (notEmpty(samplePdfData.value) && samplePdfData.value !== '') {
+    return JSON.parse(samplePdfData.value);
+  } else {
+    return {};
+  }
 });
 
 const previewContentStyles = computed(() => {
@@ -256,27 +256,25 @@ const previewError = ref(false);
 async function renderPreview() {
   return new Promise((resolve, reject) => {
     parsedMarkup.value = null;
-    const sampleDataEditorContent = sampleDataEditor.value.innerText;
 
-    if (notEmpty(sampleDataEditorContent)) {
-      liquidEngine
-        .parseAndRender(markupEditor.value.innerText, JSON.parse(sampleDataEditorContent))
-        .then((result) => {
-          parsedMarkup.value = result;
-          resolve(result);
-        })
-        .catch((error) => {
-          reject(error);
-        });
-    } else {
-      resolve();
-    }
+    liquidEngine
+      .parseAndRender(templateMarkup.value, parsedPdfData.value)
+      .then((result) => {
+        parsedMarkup.value = result;
+        resolve(result);
+      })
+      .catch((error) => {
+        reject(error);
+      });
   });
 }
 /** section:preview **/
 
 /** section:generate **/
 const previewPdfDialog = ref(false);
+const generatingTemplate = ref(false);
+const previewDialogMessage = ref();
+
 const templatePdfData = ref();
 const downloadLink = ref();
 const downloadFile = ref();
@@ -284,22 +282,24 @@ const downloadFile = ref();
 async function generateTemplate() {
   templatePdfData.value = null;
   previewPdfDialog.value = true;
+  generatingTemplate.value = true;
+  previewDialogMessage.value = 'Generating PDF...';
 
   await dataAccess
-    .downloadStream(props.templateType, props.id, samplePdfData.value, { path: 'pdf' })
+    .downloadStream(props.templateType, props.id, parsedPdfData.value, { path: 'pdf' })
     .then((result) => {
       const blob = new Blob([result.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       downloadLink.value = url;
       downloadFile.value = `${props.templateType}_${props.id}.pdf`;
       templatePdfData.value = url;
+      closePreviewDialog();
       viewPdf();
     })
     .catch((error) => {
+      generatingTemplate.value = false;
+      previewDialogMessage.value = 'Error generating template';
       logger.error(`Error generating template`, error);
-    })
-    .finally(() => {
-      closePreviewDialog();
     });
 }
 
@@ -329,7 +329,16 @@ function closePreviewDialog() {
 /** section:generate **/
 
 onMounted(async() => {
-  await renderPreview();
+  populatePdfData();
+  await renderPreview()
+    .catch((error) => {
+      previewError.value = true;
+      parsedMarkup.value = `Render error`;
+      logger.error(`Error rendering preview`, error);
+    })
+    .finally(() => {
+      markupEditable.value = false;
+    });
 });
 </script>
 
@@ -345,19 +354,19 @@ onMounted(async() => {
           <div
             :class="markupEditorStyleClass"
           >
+            <TTextarea
+              v-model="templateMarkup"
+              label=""
+              :rows="30"
+              :disabled="!markupEditable"
+              :error-message="errorMessages.contentMarkup"
+            />
+
             <div
               class="editor-button cancel"
               @click="cancelMarkupEdit"
             >
               <i class="fa-solid fa-xmark" />
-            </div>
-
-            <div
-              ref="markupEditor"
-              class="editor-content"
-              :contenteditable="markupEditable"
-            >
-              {{ template.contentMarkup }}
             </div>
 
             <div
@@ -374,32 +383,25 @@ onMounted(async() => {
               <i class="fa-solid fa-check" />
             </div>
           </div>
-
-          <div
-            v-if="errorMessages.contentMarkup"
-            class="error-message"
-          >
-            {{ errorMessages.contentMarkup }}
-          </div>
         </template> <!-- template-0 -->
 
         <template #tab-1>
           <div
             :class="stylesEditorStyleClass"
           >
+            <TTextarea
+              v-model="templateStyles"
+              label=""
+              :rows="30"
+              :disabled="!stylesEditable"
+              :error-message="errorMessages.contentStyles"
+            />
+
             <div
               class="editor-button cancel"
               @click="cancelStylesEdit"
             >
               <i class="fa-solid fa-xmark" />
-            </div>
-
-            <div
-              ref="stylesEditor"
-              class="editor-content"
-              :contenteditable="stylesEditable"
-            >
-              {{ template.contentStyles }}
             </div>
 
             <div
@@ -416,32 +418,24 @@ onMounted(async() => {
               <i class="fa-solid fa-check" />
             </div>
           </div>
-
-          <div
-            v-if="errorMessages.contentStyles"
-            class="error-message"
-          >
-            {{ errorMessages.contentStyles }}
-          </div>
         </template> <!-- template-1 -->
 
         <template #tab-2>
           <div
             :class="sampleDataEditorStyleClass"
           >
+            <TTextarea
+              v-model="samplePdfData"
+              label=""
+              :rows="30"
+              :disabled="!sampleDataEditable"
+            />
+
             <div
               class="editor-button cancel"
               @click="cancelSampleDataEdit"
             >
               <i class="fa-solid fa-xmark" />
-            </div>
-
-            <div
-              ref="sampleDataEditor"
-              class="editor-content"
-              :contenteditable="sampleDataEditable"
-            >
-              {{ samplePdfData }}
             </div>
 
             <div
@@ -498,11 +492,11 @@ onMounted(async() => {
     >
       <template #body>
         <TProgressBar
-          v-if="!templatePdfData"
+          v-if="generatingTemplate"
         />
 
         <div class="message">
-          Generating PDF...
+          {{ previewDialogMessage }}
         </div>
       </template>
     </TDialog>
@@ -524,30 +518,9 @@ onMounted(async() => {
   width: 40%;
 }
 
-.editor {
-  padding: 1rem;
-  width: 100%;
-  height: 60vh;
-  border: 1px solid var(--color-border);
-  border-radius: 4px;
-  background-color: var(--color-background-mute);
-  white-space: pre-wrap;
-}
-
-.editor.editable {
-  background-color: var(--color-background);
-}
-
-.editor-content {
-  width: 100%;
-  height: 100%;
-  outline: none;
-  overflow-y: auto;
-}
-
 .editor-button {
   position: absolute;
-  top: -1rem;
+  top: 0.5rem;
   right: -1rem;
   display: grid;
   align-items: center;
