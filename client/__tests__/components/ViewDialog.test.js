@@ -274,6 +274,38 @@ describe('ViewDialog.vue', () => {
     expect(closeEvents[0]).toEqual([false]);
   });
 
+  test('when close dialog should not render view in dialog', async() => {
+    const wrapper = await mount(ViewDialog, {
+      props: {
+        modelValue: true,
+        keys,
+        record,
+        dataFields,
+        title: 'View Contact',
+        inputLabel,
+        inputValue,
+        includeKeys,
+      },
+    });
+
+    await flushPromises();
+
+    const viewDialogComp = wrapper.findComponent(TDialog);
+    expect(viewDialogComp.exists()).toBeTruthy();
+    expect(viewDialogComp.props()).toEqual(expect.objectContaining({
+      modelValue: true,
+      title: 'View Contact',
+    }));
+
+    await viewDialogComp.vm.$emit('update:modelValue', false);
+
+    await flushPromises();
+
+    const closeEvents = wrapper.emitted()['update:modelValue'];
+    expect(closeEvents.length).toBe(1);
+    expect(closeEvents[0]).toEqual([false]);
+  });
+
   test('when dialog is false should not render view in dialog', async() => {
     const wrapper = await mount(ViewDialog, {
       props: {
