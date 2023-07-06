@@ -89,6 +89,8 @@ describe('NavMenu.vue', () => {
     expect(navToggle.exists()).toBeTruthy();
     await navToggle.trigger('click');
 
+    await flushPromises();
+
     expect(navigator.nav).toBeTruthy();
     expect(navContainer.html()).toContain('show');
   });
