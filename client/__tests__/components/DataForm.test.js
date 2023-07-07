@@ -1072,8 +1072,6 @@ describe('DataForm.vue', () => {
       {
         id: '1',
         name: 'Your Company',
-        bizType: null,
-        country: null,
       },
     ]);
   });
@@ -1136,8 +1134,6 @@ describe('DataForm.vue', () => {
     expect(submitEvents[0]).toEqual([
       expect.objectContaining({
         logo: expect.anything(),
-        bizType: null,
-        country: null,
       }),
     ]);
     expect(submitEvents[0][0].logo).toBeInstanceOf(File);
@@ -1204,8 +1200,6 @@ describe('DataForm.vue', () => {
     expect(submitEvents[0]).toEqual([
       expect.objectContaining({
         logo: expect.anything(),
-        bizType: null,
-        country: null,
       }),
     ]);
     expect(submitEvents[0][0].logo).toBeInstanceOf(File);
@@ -1256,8 +1250,6 @@ describe('DataForm.vue', () => {
     expect(submitEvents[0]).toEqual([
       expect.objectContaining({
         logo: expect.anything(),
-        bizType: null,
-        country: null,
       }),
     ]);
     expect(submitEvents[0][0].logo).toBeInstanceOf(File);
