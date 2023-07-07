@@ -3,36 +3,41 @@ import { setActivePinia, createPinia } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 import { useSystemConfigsStore } from '../src/stores/systemConfigs.js';
 import { useNavStore } from '../src/stores/nav.js';
+import { useEventsStore } from '../src/stores/events.js';
+import { useShortcutsStore } from '../src/stores/shortcuts.js';
+import { useDataAccess } from '../src/utils/dataAccess.js';
 import App from '../src/App.vue';
 
-vi.mock('../src/utils/dataAccess.js', () => {
-  return {
-    useDataAccess: () => {
-      return {
-        list: vi.fn((modelClass, params, suffix) => {
-          return new Promise((resolve, reject) => {
-            resolve({
-              record: {
-                id: '1',
-                baseCurrencyId: '1',
-                baseContactId: '1',
-              },
-            });
-          });
-        }),
-      };
-    },
-  };
-});
+vi.mock('../src/utils/dataAccess.js');
 
 let router;
 let systemConfigsStore;
+let eventsStore;
+let shortcutsStore;
 let navigator;
 
 beforeEach(async() => {
   setActivePinia(createPinia());
   systemConfigsStore = useSystemConfigsStore();
   navigator = useNavStore();
+  eventsStore = useEventsStore();
+  shortcutsStore = useShortcutsStore();
+
+  useDataAccess.mockImplementation(() => {
+    return {
+      list: vi.fn((modelClass, params, suffix) => {
+        return new Promise((resolve, reject) => {
+          resolve({
+            record: {
+              id: '1',
+              baseCurrencyId: '1',
+              baseContactId: '1',
+            },
+          });
+        });
+      }),
+    };
+  });
 
   router = createRouter({
     history: createWebHistory(),
@@ -180,5 +185,69 @@ describe('App.vue', () => {
     await router.push({ name: 'Configure' });
 
     expect(navigatorSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('when no system configs should update empty config', async() => {
+    const configsStoreSpy = vi.spyOn(systemConfigsStore, 'updateSystemConfigs');
+
+    useDataAccess.mockImplementation(() => {
+      return {
+        list: vi.fn((modelClass, params, suffix) => {
+          return new Promise((resolve, reject) => {
+            resolve({
+              record: null,
+            });
+          });
+        }),
+      };
+    });
+
+    await mount(App, {
+      global: {
+        plugins: [router],
+        stubs: ['router-link', 'router-view'],
+      },
+    });
+
+    await flushPromises();
+
+    await router.push({ name: 'Configure' });
+
+    expect(configsStoreSpy).toHaveBeenCalledWith({});
+  });
+
+  test('when keydown event should emit shortcuts', async() => {
+    const eventsStoreSpy = vi.spyOn(eventsStore, 'emitEvent');
+    const shortcutsStoreSpy = vi.spyOn(shortcutsStore, 'emitShortcut');
+
+    await mount(App, {
+      global: {
+        plugins: [router],
+        stubs: ['router-link', 'router-view'],
+      },
+    });
+
+    await document.dispatchEvent(new KeyboardEvent('keydown', { key: 'B' }));
+
+    await flushPromises();
+
+    expect(eventsStoreSpy).not.toHaveBeenCalled();
+    expect(shortcutsStoreSpy).toHaveBeenCalledWith({ route: '/', eventType: 'keydown-B' }, expect.anything());
+
+    await flushPromises();
+
+    await document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Control' }));
+
+    await flushPromises();
+
+    expect(eventsStoreSpy).toHaveBeenLastCalledWith('toggleShortcut', expect.anything());
+    expect(shortcutsStoreSpy).toHaveBeenLastCalledWith({ route: '/', eventType: 'keydown-B' }, expect.anything());
+
+    await document.dispatchEvent(new KeyboardEvent('keydown', { key: 'A' }));
+
+    await flushPromises();
+
+    expect(eventsStoreSpy).toHaveBeenLastCalledWith('toggleShortcut', expect.anything());
+    expect(shortcutsStoreSpy).toHaveBeenLastCalledWith({ route: '/', eventType: 'ctrl-A' }, expect.anything());
   });
 });
