@@ -1106,7 +1106,7 @@ describe('DataPage.vue', () => {
         establishedSince: new Date('2023-04-12T12:34:56.123Z'),
       },
       dialogTitle: 'Create Contacts',
-      fullscreen: false,
+      fullscreen: true,
       errorMessages: {},
     }));
 
@@ -1591,7 +1591,7 @@ describe('DataPage.vue', () => {
         createdAt: new Date('2023-03-05T06:15:26.206Z'),
       },
       dialogTitle: 'Update Contacts 2',
-      fullscreen: false,
+      fullscreen: true,
       errorMessages: {},
     }));
 

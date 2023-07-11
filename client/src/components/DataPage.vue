@@ -72,7 +72,7 @@ const props = defineProps({
   },
   fullscreen: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   createDialogTitle: {
     type: Function,
