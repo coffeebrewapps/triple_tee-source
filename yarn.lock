@@ -2329,9 +2329,9 @@ co@^4.6.0:
   resolved "https://registry.yarnpkg.com/co/-/co-4.6.0.tgz#6ea6bdf3d853ae54ccb8e47bfa0bf3f9031fb184"
   integrity sha512-QVb0dM5HvG+uaxitm8wONl7jltx8dqhfU33DcqtOZcLSVIKSDDLDi7+0LbAKiyI8hD9u42m2YxXSkMGWThaecQ==
 
-"coffeebrew-vue-components@https://github.com/coffeebrewapps/coffeebrew_vue_components.git#feature/v0.1.0":
+"coffeebrew-vue-components@https://github.com/coffeebrewapps/coffeebrew_vue_components.git#v0.1.0":
   version "0.1.0"
-  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#99ebc78b75a1260c9b74d88f800770a959c684f0"
+  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#7a8a017e26d6602b658973605d8c30f1d089047c"
 
 collect-v8-coverage@^1.0.0:
   version "1.0.1"
