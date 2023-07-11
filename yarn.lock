@@ -2331,7 +2331,7 @@ co@^4.6.0:
 
 "coffeebrew-vue-components@https://github.com/coffeebrewapps/coffeebrew_vue_components.git#feature/v0.1.0":
   version "0.1.0"
-  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#b01972f66ae3038bd9c71b78aed2cac0c009b0ca"
+  resolved "https://github.com/coffeebrewapps/coffeebrew_vue_components.git#99ebc78b75a1260c9b74d88f800770a959c684f0"
 
 collect-v8-coverage@^1.0.0:
   version "1.0.1"
