@@ -1201,6 +1201,7 @@ onBeforeUnmount(() => {
       :title="viewDialogTitle(dataType, currentRow)"
       :input-label="inputLabel"
       :input-value="inputValue"
+      :fullscreen="fullscreen"
       class="view-dialog"
     />
 

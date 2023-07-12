@@ -66,6 +66,10 @@ const props = defineProps({
       return [];
     },
   },
+  fullscreen: {
+    type: Boolean,
+    default: true,
+  },
 });
 /** section:props **/
 
@@ -158,6 +162,7 @@ onMounted(async() => {
     v-if="isFormatted"
     v-model="dialog"
     :title="title"
+    :fullscreen="fullscreen"
   >
     <template #body>
       <div class="data-row">
