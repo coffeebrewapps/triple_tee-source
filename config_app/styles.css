@@ -1,0 +1,105 @@
+:root {
+  --vt-c-white: #ffffff;
+  --vt-c-text-light-1: #2c3e50;
+  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+  --vt-c-black: #181818;
+  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
+  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
+}
+
+:root {
+  --color-background: var(--vt-c-white);
+  --color-text: var(--vt-c-text-light-1);
+  --color-border: var(--vt-c-divider-light-2);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--vt-c-black);
+    --color-text: var(--vt-c-text-dark-2);
+    --color-border: var(--vt-c-divider-dark-2);
+  }
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-content: space-between;
+  align-items: center;
+  place-items: center;
+  justify-content: center;
+  row-gap: 2rem;
+  margin: 0 auto;
+  height: 100vh;
+  color: var(--color-text);
+  background: var(--color-background);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 80vw;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+}
+
+.input-control {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.input-label {
+  font-weight: 600;
+  width: 20%;
+}
+
+.input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 80%;
+}
+
+.input-value {
+  display: flex;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.input-hint {
+  font-size: 0.6rem;
+  font-style: oblique;
+}
+
+.input-error {
+  color: red;
+  font-size: 0.8rem;
+}
+
+input {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  outline: none;
+  width: 80%;
+}
+
+button {
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  outline: none;
+}
+
+button:hover {
+  cursor: pointer;
+}

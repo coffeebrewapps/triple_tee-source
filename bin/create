@@ -1,0 +1,156 @@
+#!/bin/bash
+action=$1
+model=$2
+
+function model {
+  model=$1
+  file="./data/$model.json"
+  if [[ ! -f $file ]]; then
+    touch $file
+    echo "{}" > $file
+    echo "Created new model: $model"
+  else
+    echo "Model already exists: $model"
+  fi
+}
+
+function module {
+  model=$1
+
+  module_dir="./server/modules/$model"
+  if [[ ! -f $module_dir ]]; then
+    mkdir $module_dir
+  fi
+
+  module_file="$module_dir/index.js"
+  if [[ ! -f $module_file ]]; then
+    touch $module_file
+    echo "const name = '$model';
+
+module.exports = ({ dataAccess, routes, logger, utils }) => {
+  const stores = require('./stores')({ dataAccess, logger, utils });
+  const router = require('./routes')({ routes, stores, logger, utils });
+
+  return {
+    name,
+    stores,
+    router,
+  };
+};" >> $module_file
+  fi
+
+  route_file="$module_dir/routes.js"
+  if [[ ! -f $route_file ]]; then
+    echo "module.exports = ({ routes, stores, logger, utils }) => {
+  return {
+    prefix: '/api/${model}',
+    routes: [
+      { method: 'get', path: '/download', handler: routes.download(stores) },
+      { method: 'get', path: '/', handler: routes.list(stores) },
+      { method: 'get', path: '/:id', handler: routes.view(stores) },
+      { method: 'post', path: '/', handler: routes.create(stores) },
+      { method: 'put', path: '/:id', handler: routes.update(stores) },
+      { method: 'delete', path: '/:id', handler: routes.remove(stores) },
+    ],
+  };
+};" >> $route_file
+  fi
+
+  store_file="$module_dir/stores.js"
+  if [[ ! -f $store_file ]]; then
+    echo "const modelClass = '$model';
+
+module.exports = ({ dataAccess, logger, utils }) => {
+  function list(filters = {}) {
+    return dataAccess.list(modelClass, filters);
+  }
+
+  function view(id, params) {
+    return dataAccess.view(modelClass, id, params);
+  }
+
+  function create(params) {
+    return dataAccess.create(modelClass, params);
+  }
+
+  function update(id, params) {
+    return dataAccess.update(modelClass, id, params);
+  }
+
+  function remove(id) {
+    return dataAccess.remove(modelClass, id);
+  }
+
+  return {
+    modelClass,
+    list,
+    view,
+    create,
+    update,
+    remove,
+  };
+};" >> $store_file
+  fi
+}
+
+function client {
+  model=$1
+  lower_model=$(echo "$model" | tr '[:upper:]' '[:lower:]')
+
+  plugin_dir="./client/src/plugins/${lower_model}"
+  index_file="$plugin_dir/index.js"
+  view_file="$plugin_dir/$model.vue"
+
+  if [[ ! -f $plugin_dir ]]; then
+    mkdir $plugin_dir
+  fi
+
+  if [[ ! -f $index_file ]]; then
+    touch $index_file
+    echo "const route = {
+  path: '/${lower_model}',
+  name: '${model}',
+  component: () => import('./${model}.vue'),
+}
+
+const usePlugin = ({ router, dataStore }) => {
+  router.addRoute(route);
+};
+
+export default usePlugin;" >> $index_file
+  fi
+
+  if [[ ! -f $view_file ]]; then
+    touch $view_file
+    echo "<script setup>
+import DataPage from '@/components/DataPage.vue';
+
+const fieldsLayout = [
+];
+
+const dataFields = [
+];
+
+const validations = {
+};
+</script>
+
+<template>
+  <DataPage
+    model-class=\"${lower_model}\"
+    data-type=\"${model}\"
+    :fields-layout=\"fieldsLayout\"
+    :data-fields=\"dataFields\"
+    :validations=\"validations\"
+  />
+</template>" >> $view_file
+  fi
+}
+
+if [[ $action == 'model' ]]; then
+  model $model
+elif [[ $action == 'module' ]]; then
+  module $model
+elif [[ $action == 'client' ]]; then
+  client $model
+fi

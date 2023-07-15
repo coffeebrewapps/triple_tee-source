@@ -1,0 +1,8 @@
+#!/bin/bash
+yarn lib-build && yarn client-build --mode staging --base=/triple_tee_app-demo/
+app_dir="../triple_tee_app-demo"
+pushd $app_dir
+  git checkout main
+  rm -r ${app_dir}/assets
+  cp -r ../triple_tee-source/dist/public/* ${app_dir}/
+popd

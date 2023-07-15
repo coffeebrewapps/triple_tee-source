@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <title>Configure Your App</title>
+    <link href="./styles.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="app-container">
+      <div class="input-control">
+        <div class="input-label">Port</div>
+        <div class="input-field">
+          <div class="input-value">
+            <input type="number" id="portInput" />
+          </div>
+          <div class="input-error" id="portInputError"></div>
+        </div>
+      </div>
+
+      <div class="input-control">
+        <div class="input-label">App Directory</div>
+        <div class="input-field">
+          <div class="input-value">
+            <input type="text" id="appRootDirInput" readonly /> <button class="button" id="appRootDirShowButton">Show In Finder</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="input-control">
+        <div class="input-label">Logs Directory</div>
+        <div class="input-field">
+          <div class="input-value">
+            <input type="text" id="logsRootDirInput" readonly /> <button class="button" id="logsRootDirShowButton">Show In Finder</button>
+          </div>
+          <div class="input-hint">The App's log files will be stored here.</div>
+        </div>
+      </div>
+
+      <div class="input-control">
+        <div class="input-label">Config File Path</div>
+        <div class="input-field">
+          <div class="input-value">
+            <input type="text" id="userConfigFilePathInput" readonly /> <button class="button" id="userConfigFilePathShowButton">Show In Finder</button>
+          </div>
+          <div class="input-hint">The App's configurations will be stored here.</div>
+        </div>
+      </div>
+
+      <div class="input-control">
+        <div class="input-label">Data Root Directory</div>
+        <div class="input-field">
+          <div class="input-value">
+            <input type="text" id="dataRootDirInput" /> <button class="button" id="dataRootDirChooseButton">Choose</button>
+          </div>
+          <div class="input-hint">This is the root directory for app data and file uploads.</div>
+          <div class="input-error" id="dataRootDirInputError"></div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="button" id="launchBtn">Launch App</button>
+      </div>
+    </div>
+    <script src="./main.js"></script>
+  </body>
+</html>

@@ -1,0 +1,141 @@
+@import './base.css';
+
+#app {
+  width: 100%;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+
+  font-weight: normal;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  padding: 1rem;
+  max-width: 100vw;
+}
+
+a {
+  text-decoration: none;
+  color: var(--color-text);
+  transition: 0.4s;
+}
+
+strong {
+  font-weight: 600;
+}
+
+.heading {
+  font-weight: 900;
+}
+
+.divider {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  text-align: center;
+  margin: 4px;
+  padding: 4px;
+  border-radius: 4px;
+  background-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.tag.inline {
+  display: inline-block;
+}
+
+.tag.sm {
+  width: 50px;
+}
+
+.tag.md {
+  width: 150px;
+}
+
+.tag.lg {
+  width: 250px;
+}
+
+.hyperlink {
+  margin: 2px 0 8px 0;
+}
+
+.hyperlink a {
+  text-decoration: underline;
+}
+
+.hyperlink a:hover {
+  background-color: var(--color-border-hover);
+  color: var(--color-text);
+}
+
+.tooltipable .tooltip {
+  visibility: hidden;
+  padding: 4px;
+  position: absolute;
+  left: 10px;
+  top: 2rem;
+  z-index: 1;
+  background-color: var(--color-border-hover);
+  color: var(--color-text);
+  font-size: 0.8rem;
+  border-radius: 4px;
+}
+
+.tooltipable .tooltip.align-left {
+  left: initial;
+  right: -3.5rem;
+}
+
+.tooltipable .tooltip.align-right {
+  left: initial;
+  right: 0;
+}
+
+.tooltipable .tooltip.align-middle {
+  top: 1rem;
+}
+
+.tooltipable:hover .tooltip {
+  visibility: visible;
+}
+
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.1s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+
+.dialog-enter-active,
+.dialog-leave-active {
+  transition: opacity 0.3s linear;
+}
+
+.dialog-enter-from,
+.dialog-leave-to {
+  opacity: 0;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: var(--color-border-hover);
+    color: var(--color-text);
+  }
+}

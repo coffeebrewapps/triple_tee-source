@@ -1,0 +1,142 @@
+@import '~/coffeebrew-vue-components/dist/style.css';
+
+/* color palette from <https://github.com/vuejs/theme> */
+:root {
+  --vt-c-white: #f2f2f2;
+  --vt-c-white-soft: #f8f8f8;
+  --vt-c-white-mute: #f2f2f2;
+
+  --vt-c-black: #181818;
+  --vt-c-black-soft: #222222;
+  --vt-c-black-mute: #282828;
+
+  --vt-c-indigo: #2c3e50;
+
+  --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
+  --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
+  --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
+  --vt-c-divider-dark-2: rgba(84, 84, 84, 0.48);
+
+  --vt-c-text-light-1: var(--vt-c-indigo);
+  --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
+  --vt-c-text-dark-1: var(--vt-c-white);
+  --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+
+  --vt-c-red: #ed3c50;
+  --vt-c-red-light: #f43771;
+  --vt-c-red-lighter: #fd1d7c;
+  --vt-c-red-dark: #cd2d3f;
+  --vt-c-red-darker: #ab2131;
+
+  /* new light scheme */
+  --vt-c-brown-brightest: #f3f2eb;
+  --vt-c-brown-brighter: #faeab1;
+  --vt-c-brown-bright: #e5ba73;
+  --vt-c-brown-bright-hover: #eadba7;
+  --vt-c-brown-bright-less: #c58940;
+
+  --vt-c-brown-bright-soft: #faf8f1;
+  --vt-c-brown-bright-mute: #e5e3dc;
+
+  /* new dark scheme */
+  --vt-c-brown-darkest: #24201e;
+  --vt-c-brown-darker: #2d2424;
+  --vt-c-brown-dark: #5c3d2e;
+  --vt-c-brown-light: #b85c38;
+  --vt-c-brown-lighter: #5d4a32;
+  --vt-c-brown-lightest: #e0c097;
+
+  --vt-c-brown-darker-soft: #2e2323;
+  --vt-c-brown-darker-mute: #2b2623;
+  --vt-c-brown-light-1: #5d4a32;
+  --vt-c-brown-light-2: #463723;
+}
+
+/* semantic color variables for this project */
+:root,
+body.light {
+  --color-background: var(--vt-c-brown-brightest);
+  --color-background-soft: var(--vt-c-brown-bright-soft);
+  --color-background-mute: var(--vt-c-brown-bright-mute);
+
+  --color-border: var(--vt-c-brown-bright);
+  --color-border-hover: var(--vt-c-brown-bright-hover);
+
+  --color-heading: var(--vt-c-brown-bright-less);
+  --color-text: var(--vt-c-brown-dark);
+
+  --color-error: var(--vt-c-red);
+  --color-error-hover: var(--vt-c-red-darker);
+
+  --section-gap: 160px;
+}
+
+body.dark {
+  --color-background: var(--vt-c-brown-darkest);
+  --color-background-soft: var(--vt-c-brown-darker-soft);
+  --color-background-mute: var(--vt-c-brown-darker-mute);
+
+  --color-border: var(--vt-c-brown-lighter);
+  --color-border-hover: var(--vt-c-brown-dark);
+
+  --color-heading: var(--vt-c-brown-lightest);
+  --color-text: var(--vt-c-brown-lightest);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background: var(--vt-c-brown-darkest);
+    --color-background-soft: var(--vt-c-brown-darker-soft);
+    --color-background-mute: var(--vt-c-brown-darker-mute);
+
+    --color-border: var(--vt-c-brown-lighter);
+    --color-border-hover: var(--vt-c-brown-dark);
+
+    --color-heading: var(--vt-c-brown-lightest);
+    --color-text: var(--vt-c-brown-lightest);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  position: relative;
+  font-weight: normal;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--color-background-soft); 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--color-text); 
+  border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover); 
+}
+
+body {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: var(--color-background);
+  transition: color 0.5s, background-color 0.5s;
+  line-height: 1.6;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-size: 15px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

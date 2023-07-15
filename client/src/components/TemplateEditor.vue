@@ -1,0 +1,607 @@
+<script setup>
+/** import:global **/
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+/** import:global **/
+
+/** import:utils **/
+import { useDataAccess } from '@/utils/dataAccess';
+import { useValidations } from '@/utils/validations';
+import { useLogger } from '@/utils/logger';
+import { Liquid } from 'liquidjs';
+/** import:utils **/
+
+/** import:components **/
+import {
+  TButton,
+  TDialog,
+  TProgressBar,
+  TTextarea
+} from 'coffeebrew-vue-components';
+
+import TabContainer from './TabContainer.vue';
+/** import:components **/
+
+/** section:props **/
+const props = defineProps({
+  id: {
+    type: String,
+    default: null,
+  },
+  contentMarkup: {
+    type: String,
+    default: '',
+  },
+  contentStyles: {
+    type: String,
+    default: '',
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
+  data: {
+    type: Object,
+    default() {
+      return {};
+    },
+  },
+  errorMessages: {
+    type: Object,
+    default() {
+      return {};
+    },
+  },
+  enableGenerate: {
+    type: Boolean,
+    default: true,
+  },
+  templateType: {
+    type: String,
+    default: null,
+  },
+});
+/** section:props **/
+
+/** section:emit **/
+const emit = defineEmits(['contentMarkupChange', 'contentStylesChange', 'dataChange']);
+/** section:emit **/
+
+/** section:utils **/
+const router = useRouter();
+const dataAccess = useDataAccess();
+const { notEmpty } = useValidations();
+const logger = useLogger();
+const liquidEngine = new Liquid();
+/** section:utils **/
+
+/** section:global **/
+const styleComponentName = ref('style');
+const templateMarkup = ref(props.contentMarkup);
+const templateStyles = ref(props.contentStyles);
+/** section:global **/
+
+/** section:tabs **/
+const selectedTab = ref(0);
+const editorTabs = [
+  { label: 'Markup' },
+  { label: 'Styles' },
+  { label: 'Data' },
+];
+
+function triggerTabEvent(i) {
+  selectedTab.value = i;
+}
+/** section:tabs **/
+
+/** section:editor **/
+const markupEditable = ref(false);
+const stylesEditable = ref(false);
+const sampleDataEditable = ref(false);
+
+const markupEditorStyleClass = computed(() => {
+  const classNames = [];
+
+  classNames.push(`editor`);
+
+  if (markupEditable.value) {
+    classNames.push(`editable`);
+  }
+
+  if (props.disabled) {
+    classNames.push(`disabled`);
+  }
+
+  return classNames.join(' ');
+});
+
+const stylesEditorStyleClass = computed(() => {
+  const classNames = [];
+
+  classNames.push(`editor`);
+
+  if (stylesEditable.value) {
+    classNames.push(`editable`);
+  }
+
+  if (props.disabled) {
+    classNames.push(`disabled`);
+  }
+
+  return classNames.join(' ');
+});
+
+const sampleDataEditorStyleClass = computed(() => {
+  const classNames = [];
+
+  classNames.push(`editor`);
+
+  if (sampleDataEditable.value) {
+    classNames.push(`editable`);
+  }
+
+  if (props.disabled) {
+    classNames.push(`disabled`);
+  }
+
+  return classNames.join(' ');
+});
+
+function toggleMarkupEditor() {
+  markupEditable.value = true;
+}
+
+async function confirmMarkupEdit() {
+  previewError.value = false;
+
+  await renderPreview()
+    .then((result) => {
+      updateMarkup();
+    })
+    .catch((error) => {
+      previewError.value = true;
+      parsedMarkup.value = `Markup error`;
+      logger.error(`Error updating markup`, error);
+    })
+    .finally(() => {
+      markupEditable.value = false;
+    });
+}
+
+function toggleStylesEditor() {
+  stylesEditable.value = true;
+}
+
+function confirmStylesEdit() {
+  updateStyles();
+  stylesEditable.value = false;
+}
+
+function toggleSampleDataEditor() {
+  sampleDataEditable.value = true;
+}
+
+async function confirmSampleDataEdit() {
+  previewError.value = false;
+
+  await renderPreview()
+    .then((result) => {
+      updateData();
+    })
+    .catch((error) => {
+      previewError.value = true;
+      parsedMarkup.value = `Sample data error`;
+      logger.error(`Error updating sample data`, error);
+    })
+    .finally(() => {
+      sampleDataEditable.value = false;
+    });
+}
+
+function cancelMarkupEdit() {
+  markupEditable.value = !markupEditable.value;
+}
+
+function cancelStylesEdit() {
+  stylesEditable.value = !stylesEditable.value;
+}
+
+function cancelSampleDataEdit() {
+  sampleDataEditable.value = !sampleDataEditable.value;
+}
+
+function updateMarkup() {
+  emit('contentMarkupChange', templateMarkup.value);
+}
+
+function updateStyles() {
+  emit('contentStylesChange', templateStyles.value);
+}
+
+function updateData() {
+  emit('dataChange', parsedPdfData.value);
+}
+/** section:editor **/
+
+/** section:preview **/
+const samplePdfData = ref('');
+
+function populatePdfData() {
+  if (notEmpty(props.data)) {
+    samplePdfData.value = JSON.stringify(props.data, false, 4);
+  } else {
+    samplePdfData.value = '';
+  }
+}
+
+const parsedPdfData = computed(() => {
+  if (notEmpty(samplePdfData.value) && samplePdfData.value !== '') {
+    return JSON.parse(samplePdfData.value);
+  } else {
+    return {};
+  }
+});
+
+const previewContentStyles = computed(() => {
+  if (previewError.value) {
+    return `preview-content error`;
+  } else {
+    return `preview-content`;
+  }
+});
+
+const parsedMarkup = ref();
+const previewError = ref(false);
+
+async function renderPreview() {
+  return new Promise((resolve, reject) => {
+    parsedMarkup.value = null;
+
+    liquidEngine
+      .parseAndRender(templateMarkup.value, parsedPdfData.value)
+      .then((result) => {
+        parsedMarkup.value = result;
+        resolve(result);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+/** section:preview **/
+
+/** section:generate **/
+const previewPdfDialog = ref(false);
+const generatingTemplate = ref(false);
+const previewDialogMessage = ref();
+
+const templatePdfData = ref();
+const downloadLink = ref();
+const downloadFile = ref();
+
+async function generateTemplate() {
+  templatePdfData.value = null;
+  previewPdfDialog.value = true;
+  generatingTemplate.value = true;
+  previewDialogMessage.value = 'Generating PDF...';
+
+  await dataAccess
+    .downloadStream(props.templateType, props.id, parsedPdfData.value, { path: 'pdf' })
+    .then((result) => {
+      const blob = new Blob([result.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      downloadLink.value = url;
+      downloadFile.value = `${props.templateType}_${props.id}.pdf`;
+      templatePdfData.value = url;
+      closePreviewDialog();
+      viewPdf();
+    })
+    .catch((error) => {
+      generatingTemplate.value = false;
+      previewDialogMessage.value = 'Error generating template';
+      logger.error(`Error generating template`, error);
+    });
+}
+
+function viewPdf() {
+  const currentRoute = Object.assign({}, router.currentRoute.value);
+  const viewPdfRoute = {
+    path: '/document_templates/:templateType/:id/pdf',
+    name: 'View Pdf',
+    component: () => import('@/components/PdfViewer.vue'),
+    props: {
+      templatePdfData: templatePdfData.value,
+      downloadLink: downloadLink.value,
+      downloadFile: downloadFile.value,
+    },
+    meta: {
+      parentRoute: { name: currentRoute.name },
+      hidden: true,
+    },
+  };
+  router.addRoute(viewPdfRoute);
+  router.push({ name: 'View Pdf', params: { templateType: props.templateType, id: props.id } });
+}
+
+function closePreviewDialog() {
+  previewPdfDialog.value = false;
+}
+/** section:generate **/
+
+onMounted(async() => {
+  populatePdfData();
+  await renderPreview()
+    .catch((error) => {
+      previewError.value = true;
+      parsedMarkup.value = `Render error`;
+      logger.error(`Error rendering preview`, error);
+    })
+    .finally(() => {
+      markupEditable.value = false;
+    });
+});
+</script>
+
+<template>
+  <div class="preview-template">
+    <div class="template-editor">
+      <TabContainer
+        :selected-tab="selectedTab"
+        :tabs="editorTabs"
+        @tab-change="triggerTabEvent"
+      >
+        <template #tab-0>
+          <div
+            :class="markupEditorStyleClass"
+          >
+            <TTextarea
+              v-model="templateMarkup"
+              label=""
+              :rows="30"
+              :disabled="!markupEditable"
+              :error-message="errorMessages.contentMarkup"
+            />
+
+            <div
+              class="editor-button cancel"
+              @click="cancelMarkupEdit"
+            >
+              <i class="fa-solid fa-xmark" />
+            </div>
+
+            <div
+              class="editor-button edit"
+              @click="toggleMarkupEditor"
+            >
+              <i class="fa-solid fa-pencil" />
+            </div>
+
+            <div
+              class="editor-button confirm"
+              @click="confirmMarkupEdit"
+            >
+              <i class="fa-solid fa-check" />
+            </div>
+          </div>
+        </template> <!-- template-0 -->
+
+        <template #tab-1>
+          <div
+            :class="stylesEditorStyleClass"
+          >
+            <TTextarea
+              v-model="templateStyles"
+              label=""
+              :rows="30"
+              :disabled="!stylesEditable"
+              :error-message="errorMessages.contentStyles"
+            />
+
+            <div
+              class="editor-button cancel"
+              @click="cancelStylesEdit"
+            >
+              <i class="fa-solid fa-xmark" />
+            </div>
+
+            <div
+              class="editor-button edit"
+              @click="toggleStylesEditor"
+            >
+              <i class="fa-solid fa-pencil" />
+            </div>
+
+            <div
+              class="editor-button confirm"
+              @click="confirmStylesEdit"
+            >
+              <i class="fa-solid fa-check" />
+            </div>
+          </div>
+        </template> <!-- template-1 -->
+
+        <template #tab-2>
+          <div
+            :class="sampleDataEditorStyleClass"
+          >
+            <TTextarea
+              v-model="samplePdfData"
+              label=""
+              :rows="30"
+              :disabled="!sampleDataEditable"
+            />
+
+            <div
+              class="editor-button cancel"
+              @click="cancelSampleDataEdit"
+            >
+              <i class="fa-solid fa-xmark" />
+            </div>
+
+            <div
+              class="editor-button edit"
+              @click="toggleSampleDataEditor"
+            >
+              <i class="fa-solid fa-pencil" />
+            </div>
+
+            <div
+              class="editor-button confirm"
+              @click="confirmSampleDataEdit"
+            >
+              <i class="fa-solid fa-check" />
+            </div>
+          </div>
+        </template> <!-- template-2 -->
+      </TabContainer>
+    </div> <!-- template-editor -->
+
+    <div class="preview-container">
+      <h3 class="heading">
+        Preview
+      </h3>
+
+      <div
+        :class="previewContentStyles"
+        v-html="parsedMarkup"
+      />
+
+      <component
+        :is="styleComponentName"
+        v-if="contentStyles"
+      >
+        {{ contentStyles }}
+      </component>
+
+      <div class="buttons">
+        <TButton
+          v-if="enableGenerate"
+          value="Generate"
+          icon="fa-solid fa-file-export"
+          @click="generateTemplate"
+        />
+      </div>
+    </div> <!-- preview-container -->
+
+    <TDialog
+      v-model="previewPdfDialog"
+      class="generate-dialog"
+      title="Generating PDF"
+      :width="400"
+      :height="250"
+    >
+      <template #body>
+        <TProgressBar
+          v-if="generatingTemplate"
+        />
+
+        <div class="message">
+          {{ previewDialogMessage }}
+        </div>
+      </template>
+    </TDialog>
+  </div> <!-- preview-template -->
+</template>
+
+<style scoped>
+.heading {
+  font-weight: 900;
+}
+
+.preview-template {
+  display: flex;
+  flex-direction: row;
+  gap: 2rem;
+}
+
+.template-editor {
+  width: 40%;
+}
+
+.editor-button {
+  position: absolute;
+  top: 0.5rem;
+  right: -1rem;
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--color-border);
+}
+
+.editor.disabled .editor-button {
+  display: none !important;
+}
+
+.editor-button.cancel {
+  left: -1rem;
+}
+
+.editor-button:hover {
+  cursor: pointer;
+  background-color: var(--color-border-hover);
+}
+
+.editor.editable .editor-button.confirm {
+  display: grid;
+}
+
+.editor .editor-button.confirm {
+  display: none;
+}
+
+.editor.editable .editor-button.edit {
+  display: none;
+}
+
+.editor .editor-button.edit {
+  display: grid;
+}
+
+.editor.editable .editor-button.cancel {
+  display: grid;
+}
+
+.editor .editor-button.cancel {
+  display: none;
+}
+
+.error-message {
+  margin: 8px 0;
+  font-size: 0.8rem;
+  color: var(--color-error);
+}
+
+.preview-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 60%;
+  height: 100vh;
+  margin-top: 1rem;
+}
+
+.preview-container .buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.preview-content {
+  padding: 1rem;
+  width: 100%;
+  border: 1px solid var(--color-border);
+  background-color: white;
+  border-radius: 4px;
+}
+
+.preview-content.error {
+  color: var(--color-error);
+}
+
+.generate-dialog .message {
+  margin: 1rem 0;
+}
+</style>
